@@ -1,0 +1,17 @@
+{
+  "private": true,
+  "version": "0.0.1",
+  "name": "minikit-monorepo",
+  "scripts": {
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "build": "turbo run build",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "turbo": "^1.11.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
