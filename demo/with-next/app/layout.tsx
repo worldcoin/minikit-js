@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { MiniKitProvider } from "../components/MiniKitProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,7 +17,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <MiniKitProvider app_id="app_123456">
+        <body className={inter.className}>{children}</body>
+      </MiniKitProvider>
     </html>
   );
 }

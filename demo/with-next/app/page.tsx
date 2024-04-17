@@ -1,6 +1,10 @@
 "use client";
 
-import { MiniKit, ResponseEvent, sendWebviewEvent } from "@worldcoin/minikit-js";
+import {
+  MiniKit,
+  ResponseEvent,
+  VerificationLevel,
+} from "@worldcoin/minikit-js";
 import { useEffect, useState } from "react";
 
 const Home = () => {
@@ -10,7 +14,6 @@ const Home = () => {
     if (!MiniKit.isInstalled()) {
       return;
     }
-
     MiniKit.subscribe(ResponseEvent.MiniAppVerifyAction, (payload) => {
       console.log("MiniAppVerifyAction, SUBSCRIBE PAYLOAD", payload);
       setMessageFromApp(JSON.stringify(payload, null, 2));
@@ -28,7 +31,7 @@ const Home = () => {
           onClick={() => MiniKit.commands.closeWebview()}
           className="border border-black p-2 hover:bg-gray-200"
         >
-          Close WebView [X]
+          Close WebdView [X]
         </button>
       </header>
 
@@ -44,7 +47,7 @@ const Home = () => {
                 app_id: "app_...",
                 action: "action identifier",
                 signal: "signal",
-                verification_level: "orb|device",
+                verification_level: VerificationLevel.Device,
                 timestamp: new Date().toISOString(),
               });
             }}
@@ -62,23 +65,11 @@ const Home = () => {
                 network: "optimism",
                 token_address: "0x163f8C2467924be0ae7B5347228CABF260318753",
                 token: "wld",
-                memo: "12312",
                 timestamp: new Date().toISOString(),
               });
             }}
           >
             Send pay
-          </button>
-
-          <button
-            className="bg-black text-white rounded-lg p-4 w-full"
-            onClick={() => {
-              sendWebviewEvent<{ command: string }>({
-                command: "trigger",
-              });
-            }}
-          >
-            Trigger message from the app
           </button>
         </div>
       </div>
@@ -91,6 +82,5 @@ const Home = () => {
     </div>
   );
 };
-
 
 export default Home;

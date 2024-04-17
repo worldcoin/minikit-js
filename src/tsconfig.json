@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "strict": true,
-    "rootDir": "./",
+    "rootDir": ".",
     "outDir": "build",
     "declaration": true,
     "declarationDir": "build",
@@ -16,10 +16,10 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./"]
+      "@/*": ["."]
     }
   },
-  "include": ["./", "global.d.ts"],
+  "include": ["."],
   "exclude": ["node_modules/**", "build"],
   "watchOptions": {
     "watchFile": "useFsEvents",

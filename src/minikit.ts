@@ -1,7 +1,6 @@
 import { IDKitConfig } from "@worldcoin/idkit-core";
 import { sendWebviewEvent } from "./helpers/send-webview-event";
 import {
-  SignInCommandInput,
   VerifyCommandInput,
   PayCommandInput,
   EventPayload,
@@ -12,7 +11,7 @@ import {
 import { ResponseEvent } from "./types/responses";
 
 export const sendMiniKitEvent = <
-  T extends WebViewBasePayload = WebViewBasePayload
+  T extends WebViewBasePayload = WebViewBasePayload,
 >(
   payload: T
 ) => {
@@ -68,25 +67,6 @@ export class MiniKit {
   }
 
   public static commands = {
-    signIn: (payload: SignInCommandInput) => {
-      const url = new URL("/authorize", "https://id.worldcoin.org");
-      url.searchParams.append("response_type", payload.response_type);
-      url.searchParams.append("response_mode", payload.response_mode);
-      url.searchParams.append("client_id", payload.app_id);
-      url.searchParams.append("redirect_uri", payload.redirect_uri);
-      url.searchParams.append("nonce", payload.nonce);
-      url.searchParams.append("ready", "true");
-      url.searchParams.append("scope", payload.scope);
-      url.searchParams.append("state", payload.state);
-
-      sendMiniKitEvent({
-        command: Command.SignIn,
-        payload: {
-          url: url.toString(),
-        },
-      });
-    },
-
     verify: (payload: VerifyCommandInput) => {
       sendMiniKitEvent({ command: Command.Verify, payload });
     },
