@@ -1,1 +1,0 @@
-export { MiniKit } from "./minikit";
