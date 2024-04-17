@@ -5,7 +5,7 @@ export {
   VerifyCommandInput,
   PayCommandInput,
   WebViewBasePayload,
-  Activity,
+  Command,
 } from "./commands";
 
 export {

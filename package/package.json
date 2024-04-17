@@ -1,0 +1,39 @@
+{
+  "name": "@worldcoin/minikit-js",
+  "version": "1.0.0",
+  "homepage": "https://docs.worldcoin.org/id/minikit",
+  "description": "Mini-kit JS is a lightweight sdk for building mini-apps compatible with World ID",
+  "license": "MIT",
+  "private": true,
+  
+  "type": "module",
+  "engines": {
+    "node": ">=12.4"
+  },
+  "files": [
+    "build/**",
+    "README.md"
+  ],
+  "keywords": [
+    "minikit",
+    "miniapps"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "eslint ./ --ext .ts",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@worldcoin/idkit-core": "^1.2.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.7.0",
+    "@typescript-eslint/parser": "^7.7.0",
+    "prettier": "^3.2.5",
+    "prettier-plugin-sort-imports-desc": "^1.0.0",
+    "tsup": "^8.0.2",
+    "turbo": "^1.13.2",
+    "typescript": "^5.4.5"
+  }
+}

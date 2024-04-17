@@ -7,7 +7,7 @@ export enum ResponseEvent {
 }
 
 export type MiniAppVerifyActionPayload = {
-  activity: ResponseEvent.MiniAppVerifyAction;
+  command: ResponseEvent.MiniAppVerifyAction;
 
   payload: {
     status: "success" | "error";

@@ -6,6 +6,6 @@ export default defineConfig({
   outDir: "build",
   format: ["esm", "cjs"],
   external: ["@worldcoin/idkit-core"],
-  entry: ["src/index.ts"],
+  entry: ["index.ts"],
   define: { "process.env.NODE_ENV": '"production"' },
 });

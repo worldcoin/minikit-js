@@ -7,7 +7,7 @@ import {
   EventPayload,
   EventHandler,
   WebViewBasePayload,
-  Activity,
+  Command,
 } from "./types";
 import { ResponseEvent } from "./types/responses";
 
@@ -80,7 +80,7 @@ export class MiniKit {
       url.searchParams.append("state", payload.state);
 
       sendMiniKitEvent({
-        activity: Activity.SignIn,
+        command: Command.SignIn,
         payload: {
           url: url.toString(),
         },
@@ -88,19 +88,19 @@ export class MiniKit {
     },
 
     verify: (payload: VerifyCommandInput) => {
-      sendMiniKitEvent({ activity: Activity.Verify, payload });
+      sendMiniKitEvent({ command: Command.Verify, payload });
     },
 
     pay: (payload: PayCommandInput) => {
       sendMiniKitEvent<WebViewBasePayload & { app_id: IDKitConfig["app_id"] }>({
-        activity: Activity.Pay,
+        command: Command.Pay,
         app_id: this.appId,
         payload,
       });
     },
 
     closeWebview: () => {
-      sendWebviewEvent<{ activity: string }>({ activity: "close" });
+      sendWebviewEvent<{ command: string }>({ command: "close" });
     },
   };
 }

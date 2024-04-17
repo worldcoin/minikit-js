@@ -13,5 +13,5 @@ interface Window {
     };
   };
 
-  MiniKit?: import("./src/minikit").MiniKit;
+  MiniKit?: import("./minikit").MiniKit;
 }

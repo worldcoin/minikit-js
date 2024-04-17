@@ -10,14 +10,14 @@ export enum OIDCResponseType {
   Token = "token",
 }
 
-export enum Activity {
+export enum Command {
   SignIn = "signIn",
   Verify = "verify",
   Pay = "pay",
 }
 
 export type WebViewBasePayload = {
-  activity: Activity;
+  command: Command;
   payload: Record<string, any>;
 };
 
