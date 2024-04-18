@@ -1,19 +1,17 @@
 export { MiniKit } from "./minikit";
 
-export {
-  VerifyCommandInput,
-  PayCommandInput,
-  WebViewBasePayload,
-  Command,
-} from "./types";
+export { VerifyCommandInput, PayCommandInput, Command } from "./types";
 
 export {
   ResponseEvent,
   MiniAppVerifyActionPayload,
-  MiniAppPaymentInitiatedPayload,
-  MiniAppPaymentCompletedPayload,
+  MiniAppPaymentErrorPayload,
+  MiniAppPaymentOkPayload,
+  MiniAppVerifyActionSuccessPayload,
+  MiniAppVerifyActionErrorPayload,
+  MiniAppPaymentPayload,
 } from "./types/responses";
 
-export { Currency, Network } from "./types/payment";
+export { Tokens, Network } from "./types/payment";
 
 export { VerificationLevel } from "@worldcoin/idkit-core";

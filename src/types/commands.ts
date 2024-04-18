@@ -1,3 +1,6 @@
+import { IDKitConfig, VerificationLevel } from "@worldcoin/idkit-core/*";
+import { BaseCurrency, Network, TokenMapping, Tokens } from "./payment";
+
 export enum Command {
   Verify = "verify",
   Pay = "pay",
@@ -10,18 +13,18 @@ export type WebViewBasePayload = {
 
 export type VerifyCommandInput = {
   app_id: `app_${string}`;
-  action: string;
-  signal: string;
-  verification_level: string;
-  timestamp: string;
+  action: IDKitConfig["action"];
+  signal: IDKitConfig["signal"];
+  verification_level: VerificationLevel;
+  timestamp: string; // epoch timestamp
 };
 
 export type PayCommandInput = {
   to: string;
-  from: string;
-  value: number;
-  network: string;
-  token_address: string;
-  token: string;
-  timestamp: string;
+  charge_amount: number;
+  base_currency: BaseCurrency;
+  network?: Network;
+  accepted_payment_token_addresses?: TokenMapping[Tokens];
+  accepted_payment_tokens: Tokens[];
+  reference: string;
 };

@@ -9,6 +9,8 @@ import {
   Command,
 } from "./types";
 import { ResponseEvent } from "./types/responses";
+import { Network } from "types/payment";
+import { createReferenceId, mapTokensToAddresses } from "helpers/payment";
 
 export const sendMiniKitEvent = <
   T extends WebViewBasePayload = WebViewBasePayload,
@@ -20,11 +22,11 @@ export const sendMiniKitEvent = <
 
 export class MiniKit {
   private static appId: `app_${string}`;
+  private static provider;
 
   private static listeners: Record<ResponseEvent, EventHandler> = {
     [ResponseEvent.MiniAppVerifyAction]: () => {},
-    [ResponseEvent.MiniAppPaymentInitiated]: () => {},
-    [ResponseEvent.MiniAppPaymentCompleted]: () => {},
+    [ResponseEvent.MiniAppPayment]: () => {},
   };
 
   public static subscribe<E extends ResponseEvent>(
@@ -46,7 +48,15 @@ export class MiniKit {
     this.listeners[event](payload);
   }
 
-  public static install({ app_id }: { app_id: `app_${string}` }) {
+  public static install({
+    app_id,
+    alchemyKey,
+    provider,
+  }: {
+    app_id: `app_${string}`;
+    alchemyKey?: string;
+    provider?: any;
+  }) {
     this.appId = app_id;
 
     if (typeof window !== "undefined" && !Boolean(window.MiniKit)) {
@@ -56,6 +66,12 @@ export class MiniKit {
         console.error("Failed to install MiniKit", error);
         return { success: false, error };
       }
+    }
+
+    if (provider) {
+      this.provider = provider;
+    } else if (alchemyKey) {
+      // Todo: Create provider
     }
 
     return { success: true };
@@ -71,12 +87,24 @@ export class MiniKit {
       sendMiniKitEvent({ command: Command.Verify, payload });
     },
 
-    pay: (payload: PayCommandInput) => {
+    pay: (payload: PayCommandInput): string => {
+      const reference = createReferenceId(); // We generate a reference ID that the app will sign in the response
+      const accepted_payment_token_addresses = mapTokensToAddresses(
+        payload.accepted_payment_tokens
+      );
+      const network = Network.Optimism; // MiniKit only supports Optimism for now
+
       sendMiniKitEvent<WebViewBasePayload & { app_id: IDKitConfig["app_id"] }>({
         command: Command.Pay,
         app_id: this.appId,
-        payload,
+        payload: {
+          ...payload,
+          accepted_payment_token_addresses,
+          network,
+          reference,
+        },
       });
+      return reference;
     },
 
     closeWebview: () => {

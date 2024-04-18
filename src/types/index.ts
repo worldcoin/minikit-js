@@ -7,10 +7,9 @@ export {
 
 export {
   MiniAppVerifyActionPayload,
-  MiniAppPaymentInitiatedPayload,
-  MiniAppPaymentCompletedPayload,
+  MiniAppPaymentPayload,
   EventPayload,
   EventHandler,
 } from "./responses";
 
-export { Currency, currencyMapping } from "./payment";
+export { Tokens, TokenMapping, BaseCurrency, tokenAddresses } from "./payment";
