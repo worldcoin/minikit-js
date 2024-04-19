@@ -7,17 +7,91 @@ import {
 } from "@worldcoin/minikit-js";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import * as yup from "yup";
+
+const verifyActionPayloadSchema = yup.object({
+  status: yup
+    .string<"success" | "error">()
+    .oneOf(["success", "error"])
+    .required(),
+  error_code: yup.string().required(),
+  error_message: yup.string().required(),
+  proof: yup.string().required(),
+  merkle_root: yup.string().required(),
+  nullifier_hash: yup.string().required(),
+  verification_level: yup
+    .string<VerificationLevel>()
+    .oneOf(Object.values(VerificationLevel))
+    .required(),
+});
+
+const paymentInitiatedPayloadSchema = yup.object({
+  transaction_hash: yup.string().required(),
+  status: yup.string<"completed" | "error">().oneOf(["completed", "error"]),
+  chain: yup.string().required(),
+  nonce: yup.string().optional(),
+  timestamp: yup.string().required(),
+  error_code: yup.string().optional(),
+  error_message: yup.string().optional(),
+});
+
+const paymentCompletedPayloadSchema = yup.object({
+  transaction_hash: yup.string().required(),
+  "status:": yup.string<"completed" | "error">().oneOf(["completed", "error"]),
+  chain: yup.string().required(),
+  nonce: yup.string().optional(),
+  timestamp: yup.string().required(),
+  error_code: yup.string().optional(),
+  error_message: yup.string().optional(),
+});
+
+const validatePayload = async (
+  schema: yup.ObjectSchema<any>,
+  payload: any
+): Promise<string | null> => {
+  let errorMessage: string | null = null;
+
+  try {
+    await schema.validate(payload);
+  } catch (error) {
+    if (!(error instanceof yup.ValidationError)) {
+      errorMessage = "Unknown error";
+      return errorMessage;
+    }
+
+    errorMessage = error.message;
+  }
+
+  return errorMessage;
+};
 
 export const ClientContent = () => {
   const [verifyActionAppPayload, setVerifyActionAppPayload] = useState<
     string | undefined
   >();
+
+  const [
+    verifyActionAppPayloadValidationMessage,
+    setVerifyActionAppPayloadValidationMessage,
+  ] = useState<string | null>(null);
+
   const [paymentInitiatedAppPayload, setPaymentInitiatedAppPayload] = useState<
     string | undefined
   >();
+
+  const [
+    paymentInitiatedAppPayloadValidationMessage,
+    setPaymentInitiatedAppPayloadValidationMessage,
+  ] = useState<string | null>();
+
   const [paymentCompletedAppPayload, setPaymentCompletedAppPayload] = useState<
     string | undefined
   >();
+
+  const [
+    paymentCompletedAppPayloadValidationMessage,
+    setPaymentCompletedAppPayloadValidationMessage,
+  ] = useState<string | null>();
 
   const [sentVerifyPayload, setSentVerifyPayload] = useState<Record<
     string,
@@ -37,20 +111,61 @@ export const ClientContent = () => {
       return;
     }
 
-    MiniKit.subscribe(ResponseEvent.MiniAppVerifyAction, (payload) => {
+    MiniKit.subscribe(ResponseEvent.MiniAppVerifyAction, async (payload) => {
       console.log("MiniAppVerifyAction, SUBSCRIBE PAYLOAD", payload);
+      const errorMessage = await validatePayload(
+        verifyActionPayloadSchema,
+        payload
+      );
+
+      if (!errorMessage) {
+        setVerifyActionAppPayloadValidationMessage("Payload is valid");
+      } else {
+        setVerifyActionAppPayloadValidationMessage(errorMessage);
+      }
+
       setVerifyActionAppPayload(JSON.stringify(payload, null, 2));
     });
 
-    MiniKit.subscribe(ResponseEvent.MiniAppPaymentInitiated, (payload) => {
-      console.log("MiniAppPaymentInitiated, SUBSCRIBE PAYLOAD", payload);
-      setPaymentInitiatedAppPayload(JSON.stringify(payload, null, 2));
-    });
+    MiniKit.subscribe(
+      ResponseEvent.MiniAppPaymentInitiated,
+      async (payload) => {
+        console.log("MiniAppPaymentInitiated, SUBSCRIBE PAYLOAD", payload);
 
-    MiniKit.subscribe(ResponseEvent.MiniAppPaymentCompleted, (payload) => {
-      console.log("MiniAppPaymentCompleted, SUBSCRIBE PAYLOAD", payload);
-      setPaymentCompletedAppPayload(JSON.stringify(payload, null, 2));
-    });
+        const errorMessage = await validatePayload(
+          paymentInitiatedPayloadSchema,
+          payload
+        );
+
+        if (!errorMessage) {
+          setPaymentInitiatedAppPayloadValidationMessage("Payload is valid");
+        } else {
+          setPaymentInitiatedAppPayloadValidationMessage(errorMessage);
+        }
+
+        setPaymentInitiatedAppPayload(JSON.stringify(payload, null, 2));
+      }
+    );
+
+    MiniKit.subscribe(
+      ResponseEvent.MiniAppPaymentCompleted,
+      async (payload) => {
+        console.log("MiniAppPaymentCompleted, SUBSCRIBE PAYLOAD", payload);
+
+        const errorMessage = await validatePayload(
+          paymentCompletedPayloadSchema,
+          payload
+        );
+
+        if (!errorMessage) {
+          setPaymentCompletedAppPayloadValidationMessage("Payload is valid");
+        } else {
+          setPaymentCompletedAppPayloadValidationMessage(errorMessage);
+        }
+
+        setPaymentCompletedAppPayload(JSON.stringify(payload, null, 2));
+      }
+    );
 
     return () => {
       MiniKit.unsubscribe(ResponseEvent.MiniAppVerifyAction);
@@ -174,6 +289,13 @@ export const ClientContent = () => {
                 {verifyActionAppPayload ?? JSON.stringify(null)}
               </pre>
             </div>
+
+            <div className="grid gap-y-2">
+              <p>Validation message:</p>
+              <p className="bg-gray-300 p-2">
+                {verifyActionAppPayloadValidationMessage ?? "No validation"}
+              </p>
+            </div>
           </div>
 
           <hr />
@@ -188,6 +310,13 @@ export const ClientContent = () => {
                 {paymentInitiatedAppPayload ?? JSON.stringify(null)}
               </pre>
             </div>
+
+            <div className="grid gap-y-2">
+              <p>Validation message:</p>
+              <p className="bg-gray-300 p-2">
+                {paymentInitiatedAppPayloadValidationMessage ?? "No validation"}
+              </p>
+            </div>
           </div>
 
           <hr />
@@ -201,6 +330,13 @@ export const ClientContent = () => {
               <pre className="break-all whitespace-break-spaces">
                 {paymentCompletedAppPayload ?? JSON.stringify(null)}
               </pre>
+            </div>
+
+            <div className="grid gap-y-2">
+              <p>Validation message:</p>
+              <p className="bg-gray-300 p-2">
+                {paymentCompletedAppPayloadValidationMessage ?? "No validation"}
+              </p>
             </div>
           </div>
         </div>
