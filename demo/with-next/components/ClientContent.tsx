@@ -9,7 +9,15 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 export const ClientContent = () => {
-  const [messageFromApp, setMessageFromApp] = useState<string | undefined>();
+  const [verifyActionAppPayload, setVerifyActionAppPayload] = useState<
+    string | undefined
+  >();
+  const [paymentInitiatedAppPayload, setPaymentInitiatedAppPayload] = useState<
+    string | undefined
+  >();
+  const [paymentCompletedAppPayload, setPaymentCompletedAppPayload] = useState<
+    string | undefined
+  >();
 
   const [sentVerifyPayload, setSentVerifyPayload] = useState<Record<
     string,
@@ -28,13 +36,26 @@ export const ClientContent = () => {
     if (!MiniKit.isInstalled()) {
       return;
     }
+
     MiniKit.subscribe(ResponseEvent.MiniAppVerifyAction, (payload) => {
       console.log("MiniAppVerifyAction, SUBSCRIBE PAYLOAD", payload);
-      setMessageFromApp(JSON.stringify(payload, null, 2));
+      setVerifyActionAppPayload(JSON.stringify(payload, null, 2));
+    });
+
+    MiniKit.subscribe(ResponseEvent.MiniAppPaymentInitiated, (payload) => {
+      console.log("MiniAppPaymentInitiated, SUBSCRIBE PAYLOAD", payload);
+      setPaymentInitiatedAppPayload(JSON.stringify(payload, null, 2));
+    });
+
+    MiniKit.subscribe(ResponseEvent.MiniAppPaymentCompleted, (payload) => {
+      console.log("MiniAppPaymentCompleted, SUBSCRIBE PAYLOAD", payload);
+      setPaymentCompletedAppPayload(JSON.stringify(payload, null, 2));
     });
 
     return () => {
       MiniKit.unsubscribe(ResponseEvent.MiniAppVerifyAction);
+      MiniKit.unsubscribe(ResponseEvent.MiniAppPaymentInitiated);
+      MiniKit.unsubscribe(ResponseEvent.MiniAppPaymentCompleted);
     };
   }, []);
 
@@ -146,19 +167,41 @@ export const ClientContent = () => {
           <hr />
 
           <div className="w-full grid gap-y-2">
-            <p>Message from the app: </p>
+            <p>Message from &quot;{ResponseEvent.MiniAppVerifyAction}&quot; </p>
 
             <div className="bg-gray-300 min-h-[100px] p-2">
               <pre className="break-all whitespace-break-spaces">
-                {messageFromApp ?? JSON.stringify(null)}
+                {verifyActionAppPayload ?? JSON.stringify(null)}
               </pre>
             </div>
-            <button
-              onClick={() => MiniKit.commands.closeWebview()}
-              className="border border-black p-4 bg-blue-800 rounded-lg text-white"
-            >
-              Trigger Response Payload
-            </button>
+          </div>
+
+          <hr />
+
+          <div className="w-full grid gap-y-2">
+            <p>
+              Message from &quot;{ResponseEvent.MiniAppPaymentInitiated}&quot;{" "}
+            </p>
+
+            <div className="bg-gray-300 min-h-[100px] p-2">
+              <pre className="break-all whitespace-break-spaces">
+                {paymentInitiatedAppPayload ?? JSON.stringify(null)}
+              </pre>
+            </div>
+          </div>
+
+          <hr />
+
+          <div className="w-full grid gap-y-2">
+            <p>
+              Message from &quot;{ResponseEvent.MiniAppPaymentCompleted}&quot;{" "}
+            </p>
+
+            <div className="bg-gray-300 min-h-[100px] p-2">
+              <pre className="break-all whitespace-break-spaces">
+                {paymentCompletedAppPayload ?? JSON.stringify(null)}
+              </pre>
+            </div>
           </div>
         </div>
       </div>
