@@ -4,8 +4,8 @@ const Home = async () => {
   console.log("Server Rendering Works!");
   return (
     <div className="bg-white text-black min-h-full p-5">
-      <p>From the Server Side!</p>
       <ClientContent />
+      <p>From the Server Side!</p>
     </div>
   );
 };
