@@ -19,12 +19,15 @@ export type VerifyCommandInput = {
   timestamp: string; // epoch timestamp
 };
 
+export type PayCommandPayload = PayCommandInput & {
+  network: Network;
+  accepted_payment_token_addresses: string[];
+  reference: string;
+};
+
 export type PayCommandInput = {
   to: string;
   charge_amount: number;
   base_currency: BaseCurrency;
-  network?: Network;
-  accepted_payment_token_addresses?: TokenMapping[Tokens];
   accepted_payment_tokens: Tokens[];
-  reference: string;
 };

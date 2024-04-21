@@ -12,6 +12,6 @@ export {
   MiniAppPaymentPayload,
 } from "./types/responses";
 
-export { Tokens, Network } from "./types/payment";
+export { Tokens, Network, BaseCurrency } from "./types/payment";
 
 export { VerificationLevel } from "@worldcoin/idkit-core";

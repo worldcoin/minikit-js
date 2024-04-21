@@ -11,6 +11,7 @@ import {
 import { ResponseEvent } from "./types/responses";
 import { Network } from "types/payment";
 import { createReferenceId, mapTokensToAddresses } from "helpers/payment";
+import { PayCommandPayload } from "types/commands";
 
 export const sendMiniKitEvent = <
   T extends WebViewBasePayload = WebViewBasePayload,
@@ -94,15 +95,17 @@ export class MiniKit {
       );
       const network = Network.Optimism; // MiniKit only supports Optimism for now
 
+      const eventPayload: PayCommandPayload = {
+        ...payload,
+        accepted_payment_token_addresses,
+        network,
+        reference,
+      };
+
       sendMiniKitEvent<WebViewBasePayload & { app_id: IDKitConfig["app_id"] }>({
         command: Command.Pay,
         app_id: this.appId,
-        payload: {
-          ...payload,
-          accepted_payment_token_addresses,
-          network,
-          reference,
-        },
+        payload: eventPayload,
       });
       return reference;
     },
