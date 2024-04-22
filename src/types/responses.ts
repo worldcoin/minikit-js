@@ -1,18 +1,16 @@
 import { VerificationLevel } from "@worldcoin/idkit-core";
+import { Network } from "./payment";
+import { PaymentErrorCodes, VerificationErrorCodes } from "./errors";
 
 export enum ResponseEvent {
   MiniAppVerifyAction = "miniapp-verify-action",
-  MiniAppPaymentInitiated = "miniapp-payment-initiated",
-  MiniAppPaymentCompleted = "miniapp-payment-completed",
+  MiniAppPayment = "miniapp-payment",
 }
 
-export type MiniAppVerifyActionPayload = {
+export type MiniAppVerifyActionSuccessPayload = {
   command: ResponseEvent.MiniAppVerifyAction;
-
   payload: {
-    status: "success" | "error";
-    error_code: string;
-    error_message: string;
+    status: "success";
     proof: string;
     merkle_root: string;
     nullifier_hash: string;
@@ -20,45 +18,49 @@ export type MiniAppVerifyActionPayload = {
   };
 };
 
-export type MiniAppPaymentInitiatedPayload = {
-  event: ResponseEvent.MiniAppPaymentInitiated;
-
+export type MiniAppVerifyActionErrorPayload = {
+  command: ResponseEvent.MiniAppVerifyAction;
   payload: {
-    transaction_hash: string;
-    status: "completed" | "error";
-    chain: string;
-    nonce?: string;
-    timestamp: string;
-    error_code?: string;
-    error_message?: string;
+    status: "error";
+    error_code: VerificationErrorCodes;
   };
 };
 
-export type MiniAppPaymentCompletedPayload = {
-  event: ResponseEvent.MiniAppPaymentCompleted;
+export type MiniAppVerifyActionPayload =
+  | MiniAppVerifyActionSuccessPayload
+  | MiniAppVerifyActionErrorPayload;
 
+export type MiniAppPaymentOkPayload = {
+  event: ResponseEvent.MiniAppPayment;
   payload: {
+    from: string;
     transaction_hash: string;
-    "status:": "completed" | "error";
-    chain: string;
-    nonce?: string; 
+    status: "completed" | "initiated";
+    chain: Network;
     timestamp: string;
-    error_code?: string;
-    error_message?: string;
+    signature: string;
   };
 };
+
+export type MiniAppPaymentErrorPayload = {
+  event: ResponseEvent.MiniAppPayment;
+  payload: {
+    status: "error";
+    error_code: PaymentErrorCodes;
+  };
+};
+
+export type MiniAppPaymentPayload =
+  | MiniAppPaymentOkPayload
+  | MiniAppPaymentErrorPayload;
 
 export type EventPayload<T extends ResponseEvent = ResponseEvent> =
   T extends ResponseEvent.MiniAppVerifyAction
     ? MiniAppVerifyActionPayload
-    : T extends ResponseEvent.MiniAppPaymentInitiated
-    ? MiniAppPaymentInitiatedPayload
-    : T extends ResponseEvent.MiniAppPaymentCompleted
-    ? MiniAppPaymentCompletedPayload
-    : unknown;
+    : MiniAppPaymentPayload;
 
 export type EventHandler<E extends ResponseEvent = ResponseEvent> = <
-  T extends EventPayload<E>
+  T extends EventPayload<E>,
 >(
   data: T
 ) => void;

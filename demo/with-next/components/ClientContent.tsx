@@ -1,8 +1,11 @@
 "use client";
 
 import {
+  BaseCurrency,
   MiniKit,
+  PayCommandInput,
   ResponseEvent,
+  Tokens,
   VerificationLevel,
 } from "@worldcoin/minikit-js";
 import { signIn, signOut, useSession } from "next-auth/react";
@@ -25,24 +28,20 @@ const verifyActionPayloadSchema = yup.object({
     .required(),
 });
 
-const paymentInitiatedPayloadSchema = yup.object({
+const paymentOkPayloadSchema = yup.object({
   transaction_hash: yup.string().required(),
-  status: yup.string<"completed" | "error">().oneOf(["completed", "error"]),
+  "status": yup
+    .string<"completed" | "initiated">()
+    .oneOf(["completed", "initiated"]),
+  from: yup.string().optional(),
   chain: yup.string().required(),
-  nonce: yup.string().optional(),
   timestamp: yup.string().required(),
-  error_code: yup.string().optional(),
-  error_message: yup.string().optional(),
+  signature: yup.string().required(),
 });
 
-const paymentCompletedPayloadSchema = yup.object({
-  transaction_hash: yup.string().required(),
-  "status:": yup.string<"completed" | "error">().oneOf(["completed", "error"]),
-  chain: yup.string().required(),
-  nonce: yup.string().optional(),
-  timestamp: yup.string().required(),
-  error_code: yup.string().optional(),
-  error_message: yup.string().optional(),
+const paymentErrorPayloadSchema = yup.object({
+  error_code: yup.string().required(),
+  status: yup.string<"error">().equals(["error"]).required(),
 });
 
 const validatePayload = async (
@@ -75,23 +74,12 @@ export const ClientContent = () => {
     setVerifyActionAppPayloadValidationMessage,
   ] = useState<string | null>(null);
 
-  const [paymentInitiatedAppPayload, setPaymentInitiatedAppPayload] = useState<
+  const [paymentAppPayload, setPaymentAppPayload] = useState<
     string | undefined
   >();
 
-  const [
-    paymentInitiatedAppPayloadValidationMessage,
-    setPaymentInitiatedAppPayloadValidationMessage,
-  ] = useState<string | null>();
-
-  const [paymentCompletedAppPayload, setPaymentCompletedAppPayload] = useState<
-    string | undefined
-  >();
-
-  const [
-    paymentCompletedAppPayloadValidationMessage,
-    setPaymentCompletedAppPayloadValidationMessage,
-  ] = useState<string | null>();
+  const [paymentPayloadValidationMessage, setPaymentPayloadValidationMessage] =
+    useState<string | null>();
 
   const [sentVerifyPayload, setSentVerifyPayload] = useState<Record<
     string,
@@ -127,50 +115,39 @@ export const ClientContent = () => {
       setVerifyActionAppPayload(JSON.stringify(payload, null, 2));
     });
 
-    MiniKit.subscribe(
-      ResponseEvent.MiniAppPaymentInitiated,
-      async (payload) => {
-        console.log("MiniAppPaymentInitiated, SUBSCRIBE PAYLOAD", payload);
+    MiniKit.subscribe(ResponseEvent.MiniAppPayment, async (payload) => {
+      console.log("MiniAppPayment, SUBSCRIBE PAYLOAD", payload);
 
+      if (payload.payload.status === "error") {
         const errorMessage = await validatePayload(
-          paymentInitiatedPayloadSchema,
+          paymentErrorPayloadSchema,
           payload
         );
 
         if (!errorMessage) {
-          setPaymentInitiatedAppPayloadValidationMessage("Payload is valid");
+          setPaymentPayloadValidationMessage("Payload is valid");
         } else {
-          setPaymentInitiatedAppPayloadValidationMessage(errorMessage);
+          setPaymentPayloadValidationMessage(errorMessage);
         }
-
-        setPaymentInitiatedAppPayload(JSON.stringify(payload, null, 2));
-      }
-    );
-
-    MiniKit.subscribe(
-      ResponseEvent.MiniAppPaymentCompleted,
-      async (payload) => {
-        console.log("MiniAppPaymentCompleted, SUBSCRIBE PAYLOAD", payload);
-
+      } else {
         const errorMessage = await validatePayload(
-          paymentCompletedPayloadSchema,
+          paymentOkPayloadSchema,
           payload
         );
 
         if (!errorMessage) {
-          setPaymentCompletedAppPayloadValidationMessage("Payload is valid");
+          setPaymentPayloadValidationMessage("Payload is valid");
         } else {
-          setPaymentCompletedAppPayloadValidationMessage(errorMessage);
+          setPaymentPayloadValidationMessage(errorMessage);
         }
-
-        setPaymentCompletedAppPayload(JSON.stringify(payload, null, 2));
       }
-    );
+
+      setPaymentAppPayload(JSON.stringify(payload, null, 2));
+    });
 
     return () => {
       MiniKit.unsubscribe(ResponseEvent.MiniAppVerifyAction);
-      MiniKit.unsubscribe(ResponseEvent.MiniAppPaymentInitiated);
-      MiniKit.unsubscribe(ResponseEvent.MiniAppPaymentCompleted);
+      MiniKit.unsubscribe(ResponseEvent.MiniAppPayment);
     };
   }, []);
 
@@ -188,17 +165,14 @@ export const ClientContent = () => {
   }, []);
 
   const onPayclick = useCallback(() => {
-    const payPayload = {
+    const payPayload: PayCommandInput = {
       to: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-      from: "0x6235379BAf4644cCBd22e9F6C53D35a1CF727D4C",
-      value: 200.13,
-      network: "optimism",
-      token_address: "0x163f8C2467924be0ae7B5347228CABF260318753",
-      token: "wld",
-      timestamp: new Date().toISOString(),
+      charge_amount: 200.13,
+      base_currency: BaseCurrency.USD,
+      accepted_payment_tokens: [Tokens.WLD, Tokens.USDC],
     };
 
-    MiniKit.commands.pay(payPayload);
+    const referenceId = MiniKit.commands.pay(payPayload);
     setSentPayPayload(payPayload);
   }, []);
 
@@ -301,41 +275,18 @@ export const ClientContent = () => {
           <hr />
 
           <div className="w-full grid gap-y-2">
-            <p>
-              Message from &quot;{ResponseEvent.MiniAppPaymentInitiated}&quot;{" "}
-            </p>
+            <p>Message from &quot;{ResponseEvent.MiniAppPayment}&quot; </p>
 
             <div className="bg-gray-300 min-h-[100px] p-2">
               <pre className="break-all whitespace-break-spaces">
-                {paymentInitiatedAppPayload ?? JSON.stringify(null)}
+                {paymentAppPayload ?? JSON.stringify(null)}
               </pre>
             </div>
 
             <div className="grid gap-y-2">
               <p>Validation message:</p>
               <p className="bg-gray-300 p-2">
-                {paymentInitiatedAppPayloadValidationMessage ?? "No validation"}
-              </p>
-            </div>
-          </div>
-
-          <hr />
-
-          <div className="w-full grid gap-y-2">
-            <p>
-              Message from &quot;{ResponseEvent.MiniAppPaymentCompleted}&quot;{" "}
-            </p>
-
-            <div className="bg-gray-300 min-h-[100px] p-2">
-              <pre className="break-all whitespace-break-spaces">
-                {paymentCompletedAppPayload ?? JSON.stringify(null)}
-              </pre>
-            </div>
-
-            <div className="grid gap-y-2">
-              <p>Validation message:</p>
-              <p className="bg-gray-300 p-2">
-                {paymentCompletedAppPayloadValidationMessage ?? "No validation"}
+                {paymentPayloadValidationMessage ?? "No validation"}
               </p>
             </div>
           </div>
