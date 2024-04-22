@@ -1,5 +1,5 @@
 export const sendWebviewEvent = <
-  T extends Record<string, any> = Record<string, any>
+  T extends Record<string, any> = Record<string, any>,
 >(
   payload: T
 ) => {

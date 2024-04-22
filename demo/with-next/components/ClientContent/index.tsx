@@ -1,29 +1,11 @@
 "use client";
 
-import {
-  MiniKit,
-  ResponseEvent,
-  VerificationLevel,
-} from "@worldcoin/minikit-js";
+import { MiniKit, ResponseEvent } from "@worldcoin/minikit-js";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import * as yup from "yup";
-
-const verifyActionPayloadSchema = yup.object({
-  status: yup
-    .string<"success" | "error">()
-    .oneOf(["success", "error"])
-    .required(),
-  error_code: yup.string().required(),
-  error_message: yup.string().required(),
-  proof: yup.string().required(),
-  merkle_root: yup.string().required(),
-  nullifier_hash: yup.string().required(),
-  verification_level: yup
-    .string<VerificationLevel>()
-    .oneOf(Object.values(VerificationLevel))
-    .required(),
-});
+import { VerifyAction } from "./VerifyAction";
+import { validateSchema } from "./helpers/validate-schema";
 
 const paymentInitiatedPayloadSchema = yup.object({
   transaction_hash: yup.string().required(),
@@ -45,36 +27,7 @@ const paymentCompletedPayloadSchema = yup.object({
   error_message: yup.string().optional(),
 });
 
-const validatePayload = async (
-  schema: yup.ObjectSchema<any>,
-  payload: any
-): Promise<string | null> => {
-  let errorMessage: string | null = null;
-
-  try {
-    await schema.validate(payload);
-  } catch (error) {
-    if (!(error instanceof yup.ValidationError)) {
-      errorMessage = "Unknown error";
-      return errorMessage;
-    }
-
-    errorMessage = error.message;
-  }
-
-  return errorMessage;
-};
-
 export const ClientContent = () => {
-  const [verifyActionAppPayload, setVerifyActionAppPayload] = useState<
-    string | undefined
-  >();
-
-  const [
-    verifyActionAppPayloadValidationMessage,
-    setVerifyActionAppPayloadValidationMessage,
-  ] = useState<string | null>(null);
-
   const [paymentInitiatedAppPayload, setPaymentInitiatedAppPayload] = useState<
     string | undefined
   >();
@@ -93,11 +46,6 @@ export const ClientContent = () => {
     setPaymentCompletedAppPayloadValidationMessage,
   ] = useState<string | null>();
 
-  const [sentVerifyPayload, setSentVerifyPayload] = useState<Record<
-    string,
-    any
-  > | null>(null);
-
   const [sentPayPayload, setSentPayPayload] = useState<Record<
     string,
     any
@@ -111,28 +59,12 @@ export const ClientContent = () => {
       return;
     }
 
-    MiniKit.subscribe(ResponseEvent.MiniAppVerifyAction, async (payload) => {
-      console.log("MiniAppVerifyAction, SUBSCRIBE PAYLOAD", payload);
-      const errorMessage = await validatePayload(
-        verifyActionPayloadSchema,
-        payload
-      );
-
-      if (!errorMessage) {
-        setVerifyActionAppPayloadValidationMessage("Payload is valid");
-      } else {
-        setVerifyActionAppPayloadValidationMessage(errorMessage);
-      }
-
-      setVerifyActionAppPayload(JSON.stringify(payload, null, 2));
-    });
-
     MiniKit.subscribe(
       ResponseEvent.MiniAppPaymentInitiated,
       async (payload) => {
         console.log("MiniAppPaymentInitiated, SUBSCRIBE PAYLOAD", payload);
 
-        const errorMessage = await validatePayload(
+        const errorMessage = await validateSchema(
           paymentInitiatedPayloadSchema,
           payload
         );
@@ -152,7 +84,7 @@ export const ClientContent = () => {
       async (payload) => {
         console.log("MiniAppPaymentCompleted, SUBSCRIBE PAYLOAD", payload);
 
-        const errorMessage = await validatePayload(
+        const errorMessage = await validateSchema(
           paymentCompletedPayloadSchema,
           payload
         );
@@ -168,23 +100,9 @@ export const ClientContent = () => {
     );
 
     return () => {
-      MiniKit.unsubscribe(ResponseEvent.MiniAppVerifyAction);
       MiniKit.unsubscribe(ResponseEvent.MiniAppPaymentInitiated);
       MiniKit.unsubscribe(ResponseEvent.MiniAppPaymentCompleted);
     };
-  }, []);
-
-  const onVerifyClick = useCallback(() => {
-    const verifyPayload = {
-      app_id: process.env.NEXT_PUBLIC_VERIFY_APP_ID as `app_${string}`,
-      action: process.env.NEXT_PUBLIC_VERIFY_ACTION as string,
-      signal: "signal",
-      verification_level: VerificationLevel.Device,
-      timestamp: new Date().toISOString(),
-    };
-
-    MiniKit.commands.verify(verifyPayload);
-    setSentVerifyPayload(verifyPayload);
   }, []);
 
   const onPayclick = useCallback(() => {
@@ -235,31 +153,12 @@ export const ClientContent = () => {
         <hr />
 
         <div className="grid gap-y-8">
-          <div className="grid gap-y-2">
-            <h2>Verify action:</h2>
-
-            <div>
-              <p>Sent payload:</p>
-
-              <div className="bg-gray-300 min-h-[100px] p-2">
-                <pre className="break-all whitespace-break-spaces">
-                  {JSON.stringify(sentVerifyPayload, null, 2)}
-                </pre>
-              </div>
-            </div>
-
-            <button
-              className="bg-black text-white rounded-lg p-4 w-full"
-              onClick={onVerifyClick}
-            >
-              Send verify
-            </button>
-          </div>
+          <VerifyAction />
 
           <hr />
 
           <div className="grid gap-y-2">
-            <h2>Pay action:</h2>
+            <h2 className="text-2xl font-bold">Pay</h2>
 
             <div>
               <p>Sent payload:</p>
@@ -277,25 +176,6 @@ export const ClientContent = () => {
             >
               Send pay
             </button>
-          </div>
-
-          <hr />
-
-          <div className="w-full grid gap-y-2">
-            <p>Message from &quot;{ResponseEvent.MiniAppVerifyAction}&quot; </p>
-
-            <div className="bg-gray-300 min-h-[100px] p-2">
-              <pre className="break-all whitespace-break-spaces">
-                {verifyActionAppPayload ?? JSON.stringify(null)}
-              </pre>
-            </div>
-
-            <div className="grid gap-y-2">
-              <p>Validation message:</p>
-              <p className="bg-gray-300 p-2">
-                {verifyActionAppPayloadValidationMessage ?? "No validation"}
-              </p>
-            </div>
           </div>
 
           <hr />

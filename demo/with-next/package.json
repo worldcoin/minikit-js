@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@worldcoin/idkit-core": "^1.2.0",
     "@worldcoin/minikit-js": "workspace:*",
     "next": "14.2.1",
     "next-auth": "^4.24.7",
