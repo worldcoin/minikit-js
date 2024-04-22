@@ -30,7 +30,7 @@ const verifyActionPayloadSchema = yup.object({
 
 const paymentOkPayloadSchema = yup.object({
   transaction_hash: yup.string().required(),
-  "status:": yup
+  "status": yup
     .string<"completed" | "initiated">()
     .oneOf(["completed", "initiated"]),
   from: yup.string().optional(),
@@ -172,7 +172,7 @@ export const ClientContent = () => {
       accepted_payment_tokens: [Tokens.WLD, Tokens.USDC],
     };
 
-    MiniKit.commands.pay(payPayload);
+    const referenceId = MiniKit.commands.pay(payPayload);
     setSentPayPayload(payPayload);
   }, []);
 
