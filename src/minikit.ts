@@ -1,4 +1,3 @@
-import { IDKitConfig } from "@worldcoin/idkit-core";
 import { sendWebviewEvent } from "./helpers/send-webview-event";
 import {
   VerifyCommandInput,
@@ -22,7 +21,6 @@ export const sendMiniKitEvent = <
 };
 
 export class MiniKit {
-  private static appId: `app_${string}`;
   private static provider;
 
   private static listeners: Record<ResponseEvent, EventHandler> = {
@@ -49,16 +47,11 @@ export class MiniKit {
     this.listeners[event](payload);
   }
 
-  public static install({
-    app_id,
-    alchemyKey,
-    provider,
-  }: {
-    app_id: `app_${string}`;
-    alchemyKey?: string;
-    provider?: any;
-  }) {
-    this.appId = app_id;
+  public static install(params?: { alchemyKey?: string; provider?: any }) {
+    const { alchemyKey, provider } = {
+      alchemyKey: params?.alchemyKey,
+      provider: params?.provider,
+    };
 
     if (typeof window !== "undefined" && !Boolean(window.MiniKit)) {
       try {
@@ -90,9 +83,11 @@ export class MiniKit {
 
     pay: (payload: PayCommandInput): string => {
       const reference = createReferenceId(); // We generate a reference ID that the app will sign in the response
+
       const accepted_payment_token_addresses = mapTokensToAddresses(
         payload.accepted_payment_tokens
       );
+
       const network = Network.Optimism; // MiniKit only supports Optimism for now
 
       const eventPayload: PayCommandPayload = {
@@ -102,11 +97,11 @@ export class MiniKit {
         reference,
       };
 
-      sendMiniKitEvent<WebViewBasePayload & { app_id: IDKitConfig["app_id"] }>({
+      sendMiniKitEvent<WebViewBasePayload>({
         command: Command.Pay,
-        app_id: this.appId,
         payload: eventPayload,
       });
+
       return reference;
     },
 
