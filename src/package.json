@@ -31,8 +31,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@worldcoin/idkit-core": "^1.2.0",
-    "react": "^18"
+    "@worldcoin/idkit-core": "^1.2.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.7.0",

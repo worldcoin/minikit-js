@@ -1,6 +1,6 @@
-import { VerificationLevel } from "@worldcoin/idkit-core";
 import { Network } from "./payment";
 import { PaymentErrorCodes, VerificationErrorCodes } from "./errors";
+import { VerificationLevel } from "@worldcoin/idkit-core";
 
 export enum ResponseEvent {
   MiniAppVerifyAction = "miniapp-verify-action",
