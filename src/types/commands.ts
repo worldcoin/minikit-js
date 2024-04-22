@@ -20,12 +20,12 @@ export type VerifyCommandInput = {
 
 export type PayCommandPayload = PayCommandInput & {
   network: Network;
-  accepted_payment_token_addresses: string[];
   reference: string;
 };
 
 export type PayCommandInput = {
   to: string;
+  reference?: string;
   charge_amount: number;
   base_currency: BaseCurrency;
   accepted_payment_tokens: Tokens[];

@@ -1,3 +1,5 @@
+import { verifySignature, getPaymentErrorMessage } from "helpers/payment";
+
 export { MiniKit } from "./minikit";
 
 export { VerifyCommandInput, PayCommandInput, Command } from "./types";

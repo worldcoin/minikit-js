@@ -35,7 +35,7 @@ export type MiniAppPaymentOkPayload = {
   payload: {
     from: string;
     transaction_hash: string;
-    status: "completed" | "initiated";
+    status: "initiated";
     chain: Network;
     timestamp: string;
     signature: string;
