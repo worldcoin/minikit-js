@@ -1,6 +1,10 @@
 import { IDKitConfig, VerificationLevel } from "@worldcoin/idkit-core";
 import { verifyCloudProof } from "@worldcoin/idkit-core/backend";
-import { MiniKit, ResponseEvent } from "@worldcoin/minikit-js";
+import {
+  MiniKit,
+  ResponseEvent,
+  VerifyCommandInput,
+} from "@worldcoin/minikit-js";
 import { useCallback, useEffect, useState } from "react";
 import * as yup from "yup";
 import { validateSchema } from "./helpers/validate-schema";
@@ -101,8 +105,7 @@ export const VerifyAction = () => {
       setLastUsedAppId(params.app_id);
       setLastUsedAction(params.action);
 
-      const verifyPayload = {
-        app_id: params.app_id,
+      const verifyPayload: VerifyCommandInput = {
         action: params.action,
         signal: verifySignal,
         verification_level: VerificationLevel.Device,
@@ -136,6 +139,10 @@ export const VerifyAction = () => {
   return (
     <div className="grid gap-y-4">
       <h2 className="font-bold text-2xl">Verify</h2>
+
+      <p className="border p-1 border-gray-400">
+        <span className="font-bold">App ID:</span> {lastUsedAppId ?? ""}
+      </p>
 
       <div className="grid gap-y-12">
         <div className="grid gap-y-2">
