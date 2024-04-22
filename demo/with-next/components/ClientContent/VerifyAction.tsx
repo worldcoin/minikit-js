@@ -106,7 +106,7 @@ export const VerifyAction = () => {
         action: params.action,
         signal: verifySignal,
         verification_level: VerificationLevel.Device,
-        timestamp: new Date().toISOString(),
+        timestamp: Date.now().toString(),
       };
 
       MiniKit.commands.verify(verifyPayload);
