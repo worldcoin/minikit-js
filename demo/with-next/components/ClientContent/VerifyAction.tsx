@@ -9,8 +9,6 @@ import { useCallback, useEffect, useState } from "react";
 import * as yup from "yup";
 import { validateSchema } from "./helpers/validate-schema";
 
-const verifySignal = "signal";
-
 const verifyActionPayloadSchema = yup.object({
   status: yup
     .string<"success" | "error">()
@@ -107,7 +105,6 @@ export const VerifyAction = () => {
 
       const verifyPayload: VerifyCommandInput = {
         action: params.action,
-        signal: verifySignal,
         verification_level: VerificationLevel.Device,
         timestamp: Date.now().toString(),
       };

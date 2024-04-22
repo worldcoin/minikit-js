@@ -13,7 +13,7 @@ export type WebViewBasePayload = {
 
 export type VerifyCommandInput = {
   action: IDKitConfig["action"];
-  signal: IDKitConfig["signal"];
+  signal?: IDKitConfig["signal"];
   verification_level: VerificationLevel;
   timestamp: string; // epoch timestamp
 };
