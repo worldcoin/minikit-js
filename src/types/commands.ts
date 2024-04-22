@@ -1,5 +1,5 @@
 import { IDKitConfig, VerificationLevel } from "@worldcoin/idkit-core/*";
-import { BaseCurrency, Network, TokenMapping, Tokens } from "./payment";
+import { BaseCurrency, Network, Tokens } from "./payment";
 
 export enum Command {
   Verify = "verify",

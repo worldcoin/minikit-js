@@ -1,6 +1,7 @@
 import {
   BaseCurrency,
   MiniKit,
+  Network,
   PayCommandInput,
   ResponseEvent,
   Tokens,
@@ -44,7 +45,7 @@ export const Pay = () => {
     MiniKit.subscribe(ResponseEvent.MiniAppPayment, async (payload) => {
       console.log("MiniAppPayment, SUBSCRIBE PAYLOAD", payload);
 
-      if (payload.payload.status === "error") {
+      if (payload.status === "error") {
         const errorMessage = await validateSchema(
           paymentErrorPayloadSchema,
           payload
@@ -85,7 +86,11 @@ export const Pay = () => {
     };
 
     const referenceId = MiniKit.commands.pay(payPayload);
-    setSentPayPayload(payPayload);
+    setSentPayPayload({
+      ...payPayload,
+      reference: referenceId,
+      network: Network.Optimism,
+    });
   }, []);
 
   return (

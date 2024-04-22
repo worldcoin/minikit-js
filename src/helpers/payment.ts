@@ -21,7 +21,7 @@ export const verifySignature = async (
   // Verify Signature
 
   // Check date is not more than 2 minutes old
-  const date = new Date(payload.payload.timestamp);
+  const date = new Date(payload.timestamp);
   const now = new Date();
   const diff = now.getTime() - date.getTime();
   if (diff > 120000) {
@@ -34,7 +34,7 @@ export const verifySignature = async (
 export const getPaymentErrorMessage = (
   payload: MiniAppPaymentErrorPayload
 ): void => {
-  return PaymentErrorMessage[payload.payload.error_code];
+  return PaymentErrorMessage[payload.error_code];
 };
 
 export const createReferenceId = (): string => {

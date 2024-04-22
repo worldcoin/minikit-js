@@ -1,4 +1,4 @@
-import { AppErrorCodes } from "@worldcoin/idkit-core/*";
+import { AppErrorCodes } from "@worldcoin/idkit-core";
 
 export enum VerificationErrorCodes {
   VerificationRejected = AppErrorCodes.VerificationRejected,
