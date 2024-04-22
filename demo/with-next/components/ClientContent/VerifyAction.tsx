@@ -55,6 +55,10 @@ export const VerifyAction = () => {
     }
 
     MiniKit.subscribe(ResponseEvent.MiniAppVerifyAction, async (payload) => {
+      if (payload.payload.status === "error") {
+        return console.log("Error payload", payload);
+      }
+
       console.log("MiniAppVerifyAction, SUBSCRIBE PAYLOAD", payload);
 
       const errorMessage = await validateSchema(
