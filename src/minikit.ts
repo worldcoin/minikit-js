@@ -9,7 +9,7 @@ import {
 } from "./types";
 import { ResponseEvent } from "./types/responses";
 import { Network } from "types/payment";
-import { createReferenceId, mapTokensToAddresses } from "helpers/payment";
+import { createReferenceId } from "helpers/payment";
 import { PayCommandPayload } from "types/commands";
 
 export const sendMiniKitEvent = <
@@ -41,6 +41,7 @@ export class MiniKit {
 
   public static trigger(event: ResponseEvent, payload: EventPayload) {
     if (!this.listeners[event]) {
+      console.error(`No handler for event ${event}`);
       return;
     }
 
@@ -82,17 +83,12 @@ export class MiniKit {
     },
 
     pay: (payload: PayCommandInput): string => {
-      const reference = createReferenceId(); // We generate a reference ID that the app will sign in the response
-
-      const accepted_payment_token_addresses = mapTokensToAddresses(
-        payload.accepted_payment_tokens
-      );
+      const reference = payload.reference || createReferenceId(); // Generate a reference if not provided
 
       const network = Network.Optimism; // MiniKit only supports Optimism for now
 
       const eventPayload: PayCommandPayload = {
         ...payload,
-        accepted_payment_token_addresses,
         network,
         reference,
       };

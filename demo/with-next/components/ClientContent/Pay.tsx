@@ -1,6 +1,7 @@
 import {
   BaseCurrency,
   MiniKit,
+  Network,
   PayCommandInput,
   ResponseEvent,
   Tokens,
@@ -11,9 +12,7 @@ import * as yup from "yup";
 
 const paymentOkPayloadSchema = yup.object({
   transaction_hash: yup.string().required(),
-  status: yup
-    .string<"completed" | "initiated">()
-    .oneOf(["completed", "initiated"]),
+  status: yup.string<"initiated">().oneOf(["initiated"]),
   from: yup.string().optional(),
   chain: yup.string().required(),
   timestamp: yup.string().required(),
@@ -46,7 +45,7 @@ export const Pay = () => {
     MiniKit.subscribe(ResponseEvent.MiniAppPayment, async (payload) => {
       console.log("MiniAppPayment, SUBSCRIBE PAYLOAD", payload);
 
-      if (payload.payload.status === "error") {
+      if (payload.status === "error") {
         const errorMessage = await validateSchema(
           paymentErrorPayloadSchema,
           payload
@@ -83,11 +82,15 @@ export const Pay = () => {
       to: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
       charge_amount: 200.13,
       base_currency: BaseCurrency.USD,
-      accepted_payment_tokens: [Tokens.WLD, Tokens.USDC],
+      accepted_payment_tokens: [Tokens.USDC],
     };
 
     const referenceId = MiniKit.commands.pay(payPayload);
-    setSentPayPayload(payPayload);
+    setSentPayPayload({
+      ...payPayload,
+      reference: referenceId,
+      network: Network.Optimism,
+    });
   }, []);
 
   return (

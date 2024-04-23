@@ -1,6 +1,6 @@
-import { VerificationLevel } from "@worldcoin/idkit-core";
 import { Network } from "./payment";
 import { PaymentErrorCodes, VerificationErrorCodes } from "./errors";
+import { VerificationLevel } from "@worldcoin/idkit-core";
 
 export enum ResponseEvent {
   MiniAppVerifyAction = "miniapp-verify-action",
@@ -8,22 +8,16 @@ export enum ResponseEvent {
 }
 
 export type MiniAppVerifyActionSuccessPayload = {
-  command: ResponseEvent.MiniAppVerifyAction;
-  payload: {
-    status: "success";
-    proof: string;
-    merkle_root: string;
-    nullifier_hash: string;
-    verification_level: VerificationLevel;
-  };
+  status: "success";
+  proof: string;
+  merkle_root: string;
+  nullifier_hash: string;
+  verification_level: VerificationLevel;
 };
 
 export type MiniAppVerifyActionErrorPayload = {
-  command: ResponseEvent.MiniAppVerifyAction;
-  payload: {
-    status: "error";
-    error_code: VerificationErrorCodes;
-  };
+  status: "error";
+  error_code: VerificationErrorCodes;
 };
 
 export type MiniAppVerifyActionPayload =
@@ -31,23 +25,17 @@ export type MiniAppVerifyActionPayload =
   | MiniAppVerifyActionErrorPayload;
 
 export type MiniAppPaymentOkPayload = {
-  event: ResponseEvent.MiniAppPayment;
-  payload: {
-    from: string;
-    transaction_hash: string;
-    status: "completed" | "initiated";
-    chain: Network;
-    timestamp: string;
-    signature: string;
-  };
+  from: string;
+  transaction_hash: string;
+  status: "initiated";
+  chain: Network;
+  timestamp: string;
+  signature: string;
 };
 
 export type MiniAppPaymentErrorPayload = {
-  event: ResponseEvent.MiniAppPayment;
-  payload: {
-    status: "error";
-    error_code: PaymentErrorCodes;
-  };
+  status: "error";
+  error_code: PaymentErrorCodes;
 };
 
 export type MiniAppPaymentPayload =

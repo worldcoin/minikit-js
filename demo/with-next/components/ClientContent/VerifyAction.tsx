@@ -9,13 +9,11 @@ import { useCallback, useEffect, useState } from "react";
 import * as yup from "yup";
 import { validateSchema } from "./helpers/validate-schema";
 
-const verifyActionPayloadSchema = yup.object({
+const verifyActionSuccessPayloadSchema = yup.object({
   status: yup
     .string<"success" | "error">()
     .oneOf(["success", "error"])
     .required(),
-  error_code: yup.string().required(),
-  error_message: yup.string().required(),
   proof: yup.string().required(),
   merkle_root: yup.string().required(),
   nullifier_hash: yup.string().required(),
@@ -23,6 +21,11 @@ const verifyActionPayloadSchema = yup.object({
     .string<VerificationLevel>()
     .oneOf(Object.values(VerificationLevel))
     .required(),
+});
+
+const verifyActionErrorPayloadSchema = yup.object({
+  status: yup.string<"success">().oneOf(["success"]).required(),
+  error_code: yup.string().required(),
 });
 
 export const VerifyAction = () => {
@@ -57,22 +60,25 @@ export const VerifyAction = () => {
     }
 
     MiniKit.subscribe(ResponseEvent.MiniAppVerifyAction, async (payload) => {
-      if (payload.payload.status === "error") {
+      console.log("MiniAppVerifyAction, SUBSCRIBE PAYLOAD", payload);
+
+      if (payload.status === "error") {
+        // Todo please add handling for error
         return console.log("Error payload", payload);
       }
 
-      console.log("MiniAppVerifyAction, SUBSCRIBE PAYLOAD", payload);
-
       const errorMessage = await validateSchema(
-        verifyActionPayloadSchema,
+        verifyActionSuccessPayloadSchema,
         payload
       );
+      console.log("errorMessage", payload.verification_level);
 
       if (errorMessage) {
         return setVerifyActionAppPayloadValidationMessage(errorMessage);
       }
 
       setVerifyActionAppPayloadValidationMessage("Payload is valid");
+      setVerifyActionAppPayload(payload);
 
       if (!lastUsedAppId || !lastUsedAction) {
         return console.log("lastUsedAppId or lastUsedAction is not set");
@@ -80,17 +86,16 @@ export const VerifyAction = () => {
 
       const verifyResponse = await verifyCloudProof(
         {
-          proof: payload.payload.proof,
-          merkle_root: payload.payload.merkle_root,
-          nullifier_hash: payload.payload.nullifier_hash,
-          verification_level: payload.payload.verification_level,
+          proof: payload.proof,
+          merkle_root: payload.merkle_root,
+          nullifier_hash: payload.nullifier_hash,
+          verification_level: payload.verification_level,
         },
         lastUsedAppId,
         lastUsedAction
       );
 
       setDevPortalVerifyResponse(verifyResponse);
-      setVerifyActionAppPayload(payload);
     });
 
     return () => {
