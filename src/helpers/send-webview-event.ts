@@ -6,6 +6,6 @@ export const sendWebviewEvent = <
   if (window.webkit) {
     window.webkit?.messageHandlers?.minikit?.postMessage?.(payload);
   } else if (window.Android) {
-    window.Android.minikit?.()?.sendEvent?.(JSON.stringify(payload));
+    window.Android.postMessage?.(JSON.stringify(payload));
   }
 };
