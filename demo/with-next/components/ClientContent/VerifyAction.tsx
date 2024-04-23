@@ -60,7 +60,8 @@ export const VerifyAction = () => {
     }
 
     MiniKit.subscribe(ResponseEvent.MiniAppVerifyAction, async (payload) => {
-      console.log("MiniAppVerifyAction, SUBSCRsIBE PAYLOAD", payload);
+      console.log("MiniAppVerifyAction, SUBSCRIBE PAYLOAD", payload);
+
       if (payload.status === "error") {
         // Todo please add handling for error
         return console.log("Error payload", payload);
