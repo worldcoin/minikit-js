@@ -7,7 +7,8 @@ import {
 } from "@worldcoin/minikit-js";
 import { useCallback, useEffect, useState } from "react";
 import * as yup from "yup";
-import { validateSchema } from "./helpers/validate-schema";
+import { validateSchema } from "../helpers/validate-schema";
+import { verifyProof } from "./verify-cloud-proof";
 
 const verifyActionSuccessPayloadSchema = yup.object({
   status: yup
@@ -84,16 +85,16 @@ export const VerifyAction = () => {
         return console.log("lastUsedAppId or lastUsedAction is not set");
       }
 
-      const verifyResponse = await verifyCloudProof(
-        {
+      const verifyResponse = await verifyProof({
+        payload: {
           proof: payload.proof,
           merkle_root: payload.merkle_root,
           nullifier_hash: payload.nullifier_hash,
           verification_level: payload.verification_level,
         },
-        lastUsedAppId,
-        lastUsedAction
-      );
+        app_id: lastUsedAppId,
+        action: lastUsedAction,
+      });
 
       setDevPortalVerifyResponse(verifyResponse);
     });

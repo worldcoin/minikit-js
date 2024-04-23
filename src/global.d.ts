@@ -8,9 +8,7 @@ interface Window {
   };
 
   Android?: {
-    minikit?: () => {
-      sendEvent: (payload: string) => void;
-    };
+    postMessage?: (payload: string) => void;
   };
 
   MiniKit?: import("./minikit").MiniKit;
