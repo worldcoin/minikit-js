@@ -72,6 +72,7 @@ export const VerifyAction = () => {
         verifyActionSuccessPayloadSchema,
         payload
       );
+
       console.log("errorMessage", payload.verification_level);
 
       if (errorMessage) {
@@ -143,9 +144,10 @@ export const VerifyAction = () => {
     <div className="grid gap-y-4">
       <h2 className="font-bold text-2xl">Verify</h2>
 
-      <p className="border p-1 border-gray-400">
-        <span className="font-bold">App ID:</span> {lastUsedAppId ?? ""}
-      </p>
+      <div className="border p-1 border-gray-400 max-w-full truncate">
+        <p className="font-bold">App ID:</p>
+        <p className="text-[12px]">{lastUsedAppId ?? ""}</p>
+      </div>
 
       <div className="grid gap-y-12">
         <div className="grid gap-y-2">
