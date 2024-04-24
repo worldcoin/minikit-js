@@ -85,11 +85,9 @@ export const Pay = () => {
       accepted_payment_tokens: [Tokens.USDC],
     };
 
-    const referenceId = MiniKit.commands.pay(payPayload);
+    const payload = MiniKit.commands.pay(payPayload);
     setSentPayPayload({
-      ...payPayload,
-      reference: referenceId,
-      network: Network.Optimism,
+      payload,
     });
   }, []);
 
@@ -99,7 +97,7 @@ export const Pay = () => {
         <h2 className="text-2xl font-bold">Pay</h2>
 
         <div>
-          <p>Sent payload:</p>
+          <p>Sent payload: Spec is still WIP</p>
 
           <div className="bg-gray-300 min-h-[100px] p-2">
             <pre className="break-all whitespace-break-spaces">

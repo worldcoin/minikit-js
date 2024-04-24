@@ -15,7 +15,10 @@ export type VerifyCommandInput = {
   action: IDKitConfig["action"];
   signal?: IDKitConfig["signal"];
   verification_level: VerificationLevel;
-  timestamp: string; // epoch timestamp
+};
+
+export type VerifyCommandPayload = VerifyCommandInput & {
+  timestamp: string;
 };
 
 export type PayCommandPayload = PayCommandInput & {

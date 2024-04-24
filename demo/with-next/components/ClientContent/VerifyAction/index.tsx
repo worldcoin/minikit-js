@@ -109,15 +109,13 @@ export const VerifyAction = () => {
     (params: { app_id: IDKitConfig["app_id"]; action: string }) => {
       setLastUsedAppId(params.app_id);
       setLastUsedAction(params.action);
-
       const verifyPayload: VerifyCommandInput = {
         action: params.action,
         verification_level: VerificationLevel.Device,
-        timestamp: Date.now().toString(),
       };
 
-      MiniKit.commands.verify(verifyPayload);
-      setSentVerifyPayload(verifyPayload);
+      const payload = MiniKit.commands.verify(verifyPayload);
+      setSentVerifyPayload(payload);
     },
     []
   );
