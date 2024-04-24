@@ -10,7 +10,7 @@ import {
 import { ResponseEvent } from "./types/responses";
 import { Network } from "types/payment";
 import { createReferenceId } from "helpers/payment";
-import { PayCommandPayload } from "types/commands";
+import { PayCommandPayload, VerifyCommandPayload } from "types/commands";
 
 export const sendMiniKitEvent = <
   T extends WebViewBasePayload = WebViewBasePayload,
@@ -78,11 +78,18 @@ export class MiniKit {
   }
 
   public static commands = {
-    verify: (payload: VerifyCommandInput) => {
-      sendMiniKitEvent({ command: Command.Verify, payload });
+    verify: (payload: VerifyCommandInput): VerifyCommandPayload => {
+      const timestamp = Math.floor(Date.now() / 1000).toString();
+      const eventPayload: VerifyCommandPayload = {
+        ...payload,
+        timestamp,
+      };
+      sendMiniKitEvent({ command: Command.Verify, payload: eventPayload });
+
+      return eventPayload;
     },
 
-    pay: (payload: PayCommandInput): string => {
+    pay: (payload: PayCommandInput): PayCommandPayload => {
       const reference = payload.reference || createReferenceId(); // Generate a reference if not provided
 
       const network = Network.Optimism; // MiniKit only supports Optimism for now
@@ -98,7 +105,7 @@ export class MiniKit {
         payload: eventPayload,
       });
 
-      return reference;
+      return eventPayload;
     },
 
     closeWebview: () => {
