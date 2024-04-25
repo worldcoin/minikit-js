@@ -1,7 +1,6 @@
 import {
   BaseCurrency,
   MiniKit,
-  Network,
   PayCommandInput,
   ResponseEvent,
   Tokens,

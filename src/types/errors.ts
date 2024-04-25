@@ -1,30 +1,31 @@
 import { AppErrorCodes } from "@worldcoin/idkit-core";
 
-export enum VerificationErrorCodes {
-  VerificationRejected = AppErrorCodes.VerificationRejected,
-  MaxVerificationsReached = AppErrorCodes.MaxVerificationsReached,
-  CredentialUnavailable = AppErrorCodes.CredentialUnavailable,
-  MalformedRequest = AppErrorCodes.MalformedRequest,
-  InvalidNetwork = AppErrorCodes.InvalidNetwork,
-  InclusionProofFailed = AppErrorCodes.InclusionProofFailed,
-  InclusionProofPending = AppErrorCodes.InclusionProofPending,
-  UnexpectedResponse = AppErrorCodes.UnexpectedResponse,
-  FailedByHostApp = AppErrorCodes.FailedByHostApp,
-  GenericError = AppErrorCodes.GenericError,
-}
+export { AppErrorCodes as VerificationErrorCodes } from "@worldcoin/idkit-core";
 
-export enum VerificationErrorMessage {
-  VerificationRejected = "You’ve cancelled the request in World App.",
-  MaxVerificationsReached = "You have already verified the maximum number of times for this action.",
-  CredentialUnavailable = "It seems you do not have the verification level required by this app.",
-  MalformedRequest = "There was a problem with this request. Please try again or contact the app owner.",
-  InvalidNetwork = "Invalid network. If you are the app owner, visit docs.worldcoin.org/test for details.",
-  InclusionProofFailed = "There was an issue fetching your credential. Please try again.",
-  InclusionProofPending = "Your identity is still being registered. Please wait a few minutes and try again.",
-  UnexpectedResponse = "Unexpected response from your wallet. Please try again.",
-  FailedByHostApp = "Verification failed by the app. Please contact the app owner for details.",
-  GenericError = "Something unexpected went wrong. Please try again.",
-}
+export const VerificationErrorMessage: Record<AppErrorCodes, string> = {
+  [AppErrorCodes.VerificationRejected]:
+    "You’ve cancelled the request in World App.",
+  [AppErrorCodes.MaxVerificationsReached]:
+    "You have already verified the maximum number of times for this action.",
+  [AppErrorCodes.CredentialUnavailable]:
+    "It seems you do not have the verification level required by this app.",
+  [AppErrorCodes.MalformedRequest]:
+    "There was a problem with this request. Please try again or contact the app owner.",
+  [AppErrorCodes.InvalidNetwork]:
+    "Invalid network. If you are the app owner, visit docs.worldcoin.org/test for details.",
+  [AppErrorCodes.InclusionProofFailed]:
+    "There was an issue fetching your credential. Please try again.",
+  [AppErrorCodes.InclusionProofPending]:
+    "Your identity is still being registered. Please wait a few minutes and try again.",
+  [AppErrorCodes.UnexpectedResponse]:
+    "Unexpected response from your wallet. Please try again.",
+  [AppErrorCodes.FailedByHostApp]:
+    "Verification failed by the app. Please contact the app owner for details.",
+  [AppErrorCodes.GenericError]:
+    "Something unexpected went wrong. Please try again.",
+  [AppErrorCodes.ConnectionFailed]:
+    "Connection to your wallet failed. Please try again.",
+};
 
 export enum PaymentErrorCodes {
   MalformedRequest = "malformed_request",

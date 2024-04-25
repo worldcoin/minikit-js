@@ -16,16 +16,7 @@ export const verifyProof = async (params: {
   let verifyResponse: IVerifyResponse | null = null;
 
   try {
-    verifyResponse = await verifyCloudProof(
-      {
-        proof: payload.proof,
-        merkle_root: payload.merkle_root,
-        nullifier_hash: payload.nullifier_hash,
-        verification_level: payload.verification_level,
-      },
-      app_id,
-      action
-    );
+    verifyResponse = await verifyCloudProof(payload, app_id, action);
   } catch (error) {
     console.log("Error in verifyCloudProof", error);
   }

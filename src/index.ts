@@ -1,4 +1,9 @@
-import { verifySignature, getPaymentErrorMessage } from "helpers/payment";
+export {
+  VerificationErrorCodes,
+  VerificationErrorMessage,
+  PaymentErrorCodes,
+  PaymentErrorMessage,
+} from "types/errors";
 
 export { MiniKit } from "./minikit";
 
