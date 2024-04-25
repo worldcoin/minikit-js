@@ -1,8 +1,8 @@
 import { IDKitConfig, VerificationLevel } from "@worldcoin/idkit-core";
-import { verifyCloudProof } from "@worldcoin/idkit-core/backend";
 import {
   MiniKit,
   ResponseEvent,
+  VerificationErrorCodes,
   VerifyCommandInput,
 } from "@worldcoin/minikit-js";
 import { useCallback, useEffect, useState } from "react";
@@ -25,8 +25,11 @@ const verifyActionSuccessPayloadSchema = yup.object({
 });
 
 const verifyActionErrorPayloadSchema = yup.object({
-  status: yup.string<"success">().oneOf(["success"]).required(),
-  error_code: yup.string().required(),
+  status: yup.string().equals(["error"]).required(),
+  error_code: yup
+    .string<VerificationErrorCodes>()
+    .oneOf(Object.values(VerificationErrorCodes))
+    .required(),
 });
 
 export const VerifyAction = () => {
@@ -64,7 +67,17 @@ export const VerifyAction = () => {
       console.log("MiniAppVerifyAction, SUBSCRIBE PAYLOAD", payload);
 
       if (payload.status === "error") {
-        // Todo please add handling for error
+        const errorMessage = await validateSchema(
+          verifyActionErrorPayloadSchema,
+          payload
+        );
+        if (errorMessage) {
+          return setVerifyActionAppPayloadValidationMessage(errorMessage);
+        }
+        setVerifyActionAppPayloadValidationMessage(`Payload is valid!`);
+
+        setVerifyActionAppPayload(payload);
+
         return console.log("Error payload", payload);
       }
 
@@ -109,6 +122,13 @@ export const VerifyAction = () => {
     (params: { app_id: IDKitConfig["app_id"]; action: string }) => {
       setLastUsedAppId(params.app_id);
       setLastUsedAction(params.action);
+
+      // Anchor Reset Fields
+      setSentVerifyPayload(null);
+      setVerifyActionAppPayload(undefined);
+      setVerifyActionAppPayloadValidationMessage(null);
+      setDevPortalVerifyResponse(null);
+
       const verifyPayload: VerifyCommandInput = {
         action: params.action,
         verification_level: VerificationLevel.Device,
@@ -142,10 +162,9 @@ export const VerifyAction = () => {
     <div className="grid gap-y-4">
       <h2 className="font-bold text-2xl">Verify</h2>
 
-      <div className="border p-1 border-gray-400 max-w-full truncate">
-        <p className="font-bold">App ID:</p>
-        <p className="text-[12px]">{lastUsedAppId ?? ""}</p>
-      </div>
+      <p className="border p-1 border-gray-400">
+        <span className="font-bold">App ID:</span> {lastUsedAppId ?? ""}
+      </p>
 
       <div className="grid gap-y-12">
         <div className="grid gap-y-2">
