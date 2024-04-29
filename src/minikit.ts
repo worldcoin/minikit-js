@@ -20,8 +20,6 @@ export const sendMiniKitEvent = <
 };
 
 export class MiniKit {
-  private static provider;
-
   private static listeners: Record<ResponseEvent, EventHandler> = {
     [ResponseEvent.MiniAppVerifyAction]: () => {},
     [ResponseEvent.MiniAppPayment]: () => {},
@@ -47,12 +45,7 @@ export class MiniKit {
     this.listeners[event](payload);
   }
 
-  public static install(params?: { alchemyKey?: string; provider?: any }) {
-    const { alchemyKey, provider } = {
-      alchemyKey: params?.alchemyKey,
-      provider: params?.provider,
-    };
-
+  public static install() {
     if (typeof window !== "undefined" && !Boolean(window.MiniKit)) {
       try {
         window.MiniKit = MiniKit;
@@ -62,17 +55,11 @@ export class MiniKit {
       }
     }
 
-    if (provider) {
-      this.provider = provider;
-    } else if (alchemyKey) {
-      // Todo: Create provider
-    }
-
     return { success: true };
   }
 
-  public static isInstalled() {
-    console.log("MiniKit is alive!");
+  public static isInstalled(debug?: boolean) {
+    if (debug) console.log("MiniKit is alive!");
     return true;
   }
 
@@ -89,7 +76,7 @@ export class MiniKit {
     },
 
     pay: (payload: PayCommandInput): PayCommandPayload => {
-      const reference = crypto.randomUUID(); // Generate a reference if not provided
+      const reference = crypto.randomUUID();
 
       const network = Network.Optimism; // MiniKit only supports Optimism for now
 
