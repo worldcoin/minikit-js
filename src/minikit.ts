@@ -75,7 +75,13 @@ export class MiniKit {
       return eventPayload;
     },
 
-    pay: (payload: PayCommandInput): PayCommandPayload => {
+    pay: (payload: PayCommandInput): PayCommandPayload | null => {
+      if (typeof window === "undefined") {
+        console.error(
+          "This method is only available in a browser environment."
+        );
+        return null;
+      }
       const reference = crypto.randomUUID();
 
       const network = Network.Optimism; // MiniKit only supports Optimism for now
