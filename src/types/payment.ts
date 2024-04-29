@@ -1,18 +1,14 @@
 export enum Tokens {
   USDC = "usdc",
+  WLD = "wld",
 }
 
-export type TokenMapping = {
-  [key in Tokens]: string;
+export const TokenDecimals: { [key in Tokens]: number } = {
+  [Tokens.USDC]: 6,
+  [Tokens.WLD]: 18,
 };
-
-// We only support conversions from USD for now
-export enum BaseCurrency {
-  USD = "usd",
-}
 
 // We currently only support one network
 export enum Network {
   Optimism = "optimism",
 }
-

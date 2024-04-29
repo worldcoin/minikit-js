@@ -9,7 +9,6 @@ import {
 } from "./types";
 import { ResponseEvent } from "./types/responses";
 import { Network } from "types/payment";
-import { createReferenceId } from "helpers/payment";
 import { PayCommandPayload, VerifyCommandPayload } from "types/commands";
 
 export const sendMiniKitEvent = <
@@ -90,7 +89,7 @@ export class MiniKit {
     },
 
     pay: (payload: PayCommandInput): PayCommandPayload => {
-      const reference = payload.reference || createReferenceId(); // Generate a reference if not provided
+      const reference = crypto.randomUUID(); // Generate a reference if not provided
 
       const network = Network.Optimism; // MiniKit only supports Optimism for now
 

@@ -13,12 +13,13 @@ export {
   ResponseEvent,
   MiniAppVerifyActionPayload,
   MiniAppPaymentErrorPayload,
-  MiniAppPaymentOkPayload,
+  MiniAppPaymentSuccessEventPayload,
   MiniAppVerifyActionSuccessPayload,
   MiniAppVerifyActionErrorPayload,
   MiniAppPaymentPayload,
 } from "./types/responses";
 
-export { Tokens, Network, BaseCurrency } from "./types/payment";
+export { Tokens, Network, TokenDecimals } from "./types/payment";
+export { tokenToDecimals } from "helpers/payment";
 
 export { VerificationLevel } from "@worldcoin/idkit-core";

@@ -24,13 +24,13 @@ export type MiniAppVerifyActionPayload =
   | MiniAppVerifyActionSuccessPayload
   | MiniAppVerifyActionErrorPayload;
 
-export type MiniAppPaymentOkPayload = {
+export type MiniAppPaymentSuccessEventPayload = {
+  status: "success";
+  transaction_status: "submitted";
+  reference: string;
   from: string;
-  transaction_hash: string;
-  status: "initiated";
   chain: Network;
   timestamp: string;
-  signature: string;
 };
 
 export type MiniAppPaymentErrorPayload = {
@@ -39,7 +39,7 @@ export type MiniAppPaymentErrorPayload = {
 };
 
 export type MiniAppPaymentPayload =
-  | MiniAppPaymentOkPayload
+  | MiniAppPaymentSuccessEventPayload
   | MiniAppPaymentErrorPayload;
 
 export type EventPayload<T extends ResponseEvent = ResponseEvent> =

@@ -1,25 +1,29 @@
 import {
-  BaseCurrency,
   MiniKit,
   PayCommandInput,
+  PaymentErrorCodes,
   ResponseEvent,
   Tokens,
+  tokenToDecimals,
 } from "@worldcoin/minikit-js";
 import { useCallback, useEffect, useState } from "react";
 import { validateSchema } from "./helpers/validate-schema";
 import * as yup from "yup";
 
-const paymentOkPayloadSchema = yup.object({
-  transaction_hash: yup.string().required(),
-  status: yup.string<"initiated">().oneOf(["initiated"]),
+const paymentSuccessPayloadSchema = yup.object({
+  status: yup.string<"success">().oneOf(["success"]),
+  transaction_status: yup.string<"submitted">().oneOf(["submitted"]),
+  reference: yup.string().required(),
   from: yup.string().optional(),
   chain: yup.string().required(),
   timestamp: yup.string().required(),
-  signature: yup.string().required(),
 });
 
 const paymentErrorPayloadSchema = yup.object({
-  error_code: yup.string().required(),
+  error_code: yup
+    .string<PaymentErrorCodes>()
+    .oneOf(Object.values(PaymentErrorCodes))
+    .required(),
   status: yup.string<"error">().equals(["error"]).required(),
 });
 
@@ -57,7 +61,7 @@ export const Pay = () => {
         }
       } else {
         const errorMessage = await validateSchema(
-          paymentOkPayloadSchema,
+          paymentSuccessPayloadSchema,
           payload
         );
 
@@ -77,11 +81,12 @@ export const Pay = () => {
   }, []);
 
   const onPayclick = useCallback(() => {
+    const tokenAmount = tokenToDecimals(200.13, Tokens.USDC);
     const payPayload: PayCommandInput = {
       to: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-      charge_amount: 200.13,
-      base_currency: BaseCurrency.USD,
-      accepted_payment_tokens: [Tokens.USDC],
+      token_amount: tokenAmount,
+      token: Tokens.USDC,
+      description: "Test example payment for minikit",
     };
 
     const payload = MiniKit.commands.pay(payPayload);
