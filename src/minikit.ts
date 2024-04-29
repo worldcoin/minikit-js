@@ -65,7 +65,7 @@ export class MiniKit {
 
   public static commands = {
     verify: (payload: VerifyCommandInput): VerifyCommandPayload => {
-      const timestamp = Math.floor(Date.now() / 1000).toString();
+      const timestamp = new Date().toISOString();
       const eventPayload: VerifyCommandPayload = {
         ...payload,
         timestamp,
