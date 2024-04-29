@@ -1,5 +1,5 @@
 import { IDKitConfig, VerificationLevel } from "@worldcoin/idkit-core/*";
-import { BaseCurrency, Network, Tokens } from "./payment";
+import { Network, Tokens } from "./payment";
 
 export enum Command {
   Verify = "verify",
@@ -22,14 +22,13 @@ export type VerifyCommandPayload = VerifyCommandInput & {
 };
 
 export type PayCommandPayload = PayCommandInput & {
-  network: Network;
   reference: string;
 };
 
 export type PayCommandInput = {
   to: string;
-  reference?: string;
-  charge_amount: number;
-  base_currency: BaseCurrency;
-  accepted_payment_tokens: Tokens[];
+  token_amount: number; // In Decimals
+  token: Tokens;
+  network?: Network; // Optional
+  description: string;
 };

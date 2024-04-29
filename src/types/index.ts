@@ -12,4 +12,4 @@ export {
   EventHandler,
 } from "./responses";
 
-export { Tokens, TokenMapping, BaseCurrency } from "./payment";
+export { Tokens } from "./payment";

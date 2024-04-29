@@ -9,7 +9,6 @@ import {
 } from "./types";
 import { ResponseEvent } from "./types/responses";
 import { Network } from "types/payment";
-import { createReferenceId } from "helpers/payment";
 import { PayCommandPayload, VerifyCommandPayload } from "types/commands";
 
 export const sendMiniKitEvent = <
@@ -21,8 +20,6 @@ export const sendMiniKitEvent = <
 };
 
 export class MiniKit {
-  private static provider;
-
   private static listeners: Record<ResponseEvent, EventHandler> = {
     [ResponseEvent.MiniAppVerifyAction]: () => {},
     [ResponseEvent.MiniAppPayment]: () => {},
@@ -48,12 +45,7 @@ export class MiniKit {
     this.listeners[event](payload);
   }
 
-  public static install(params?: { alchemyKey?: string; provider?: any }) {
-    const { alchemyKey, provider } = {
-      alchemyKey: params?.alchemyKey,
-      provider: params?.provider,
-    };
-
+  public static install() {
     if (typeof window !== "undefined" && !Boolean(window.MiniKit)) {
       try {
         window.MiniKit = MiniKit;
@@ -63,23 +55,17 @@ export class MiniKit {
       }
     }
 
-    if (provider) {
-      this.provider = provider;
-    } else if (alchemyKey) {
-      // Todo: Create provider
-    }
-
     return { success: true };
   }
 
-  public static isInstalled() {
-    console.log("MiniKit is alive!");
+  public static isInstalled(debug?: boolean) {
+    if (debug) console.log("MiniKit is alive!");
     return true;
   }
 
   public static commands = {
     verify: (payload: VerifyCommandInput): VerifyCommandPayload => {
-      const timestamp = Math.floor(Date.now() / 1000).toString();
+      const timestamp = new Date().toISOString();
       const eventPayload: VerifyCommandPayload = {
         ...payload,
         timestamp,
@@ -89,8 +75,14 @@ export class MiniKit {
       return eventPayload;
     },
 
-    pay: (payload: PayCommandInput): PayCommandPayload => {
-      const reference = payload.reference || createReferenceId(); // Generate a reference if not provided
+    pay: (payload: PayCommandInput): PayCommandPayload | null => {
+      if (typeof window === "undefined") {
+        console.error(
+          "This method is only available in a browser environment."
+        );
+        return null;
+      }
+      const reference = crypto.randomUUID();
 
       const network = Network.Optimism; // MiniKit only supports Optimism for now
 
