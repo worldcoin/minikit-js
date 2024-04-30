@@ -36,6 +36,7 @@ export enum PaymentErrorCodes {
   InvalidTokenAddress = "invalid_token_address",
   InvalidAppId = "invalid_app_id",
   GenericError = "generic_error",
+  DuplicateReference = "duplicate_reference",
 }
 
 export enum PaymentErrorMessage {
@@ -47,4 +48,5 @@ export enum PaymentErrorMessage {
   InvalidTokenAddress = "The token address is invalid. Please contact the app owner.",
   InvalidAppId = "The app ID is invalid. Please contact the app owner.",
   GenericError = "Something unexpected went wrong. Please try again.",
+  DuplicateReference = "This reference ID already exists please generate a new one and try again.",
 }

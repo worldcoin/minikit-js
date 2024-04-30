@@ -82,14 +82,12 @@ export class MiniKit {
         );
         return null;
       }
-      const reference = crypto.randomUUID();
 
       const network = Network.Optimism; // MiniKit only supports Optimism for now
 
       const eventPayload: PayCommandPayload = {
         ...payload,
         network,
-        reference,
       };
 
       sendMiniKitEvent<WebViewBasePayload>({
