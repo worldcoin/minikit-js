@@ -26,6 +26,7 @@ export type PayCommandPayload = PayCommandInput & {
 };
 
 export type PayCommandInput = {
+  reference: string;
   to: string;
   token_amount: number; // In Decimals
   token: Tokens;
