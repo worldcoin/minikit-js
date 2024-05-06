@@ -68,6 +68,7 @@ export class MiniKit {
       const timestamp = new Date().toISOString();
       const eventPayload: VerifyCommandPayload = {
         ...payload,
+        signal: payload.signal || "",
         timestamp,
       };
       sendMiniKitEvent({ command: Command.Verify, payload: eventPayload });
