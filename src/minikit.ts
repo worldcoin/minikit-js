@@ -10,6 +10,7 @@ import {
 import { ResponseEvent } from "./types/responses";
 import { Network } from "types/payment";
 import { PayCommandPayload, VerifyCommandPayload } from "types/commands";
+import { VerificationLevel } from "@worldcoin/idkit-core";
 
 export const sendMiniKitEvent = <
   T extends WebViewBasePayload = WebViewBasePayload,
@@ -69,6 +70,7 @@ export class MiniKit {
       const eventPayload: VerifyCommandPayload = {
         ...payload,
         signal: payload.signal || "",
+        verification_level: payload.verification_level || VerificationLevel.Orb,
         timestamp,
       };
       sendMiniKitEvent({ command: Command.Verify, payload: eventPayload });

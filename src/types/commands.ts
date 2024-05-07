@@ -14,7 +14,7 @@ export type WebViewBasePayload = {
 export type VerifyCommandInput = {
   action: IDKitConfig["action"];
   signal?: IDKitConfig["signal"];
-  verification_level: VerificationLevel;
+  verification_level?: VerificationLevel;
 };
 
 export type VerifyCommandPayload = VerifyCommandInput & {
