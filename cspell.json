@@ -3,10 +3,23 @@
 	"enabled": true,
 	"language": "en-US",
 	"allowCompoundWords": true,
-	"dictionaries": ["typescript", "node", "npm", "html"],
-	"enabledLanguageIds": ["typescript", "typescriptreact", "javascript", "markdown", "yaml", "json"],
+	"dictionaries": [
+		"typescript",
+		"node",
+		"npm",
+		"html"
+	],
+	"enabledLanguageIds": [
+		"typescript",
+		"typescriptreact",
+		"javascript",
+		"markdown",
+		"yaml",
+		"json"
+	],
 	"words": [
-		"OIDC",
-		"idkit"
+		"idkit",
+		"merkle",
+		"OIDC"
 	]
 }
