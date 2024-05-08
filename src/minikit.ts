@@ -9,13 +9,14 @@ import {
 } from "./types";
 import { ResponseEvent } from "./types/responses";
 import { Network } from "types/payment";
-import { VerificationLevel } from "@worldcoin/idkit-core";
 import {
   PayCommandPayload,
   VerifyCommandPayload,
   WalletAuthInput,
+  WalletAuthPayload,
 } from "types/commands";
-import { generateSiweMessage } from "helpers/generate-siwe-message";
+import { VerificationLevel } from "@worldcoin/idkit-core";
+import { validateWalletAuthCommandInput } from "helpers/validate-wallet-auth-command-input";
 
 export const sendMiniKitEvent = <
   T extends WebViewBasePayload = WebViewBasePayload,
@@ -107,10 +108,21 @@ export class MiniKit {
       return eventPayload;
     },
 
-    walletAuth: (payload: WalletAuthInput) => {
+    walletAuth: (payload: WalletAuthInput): WalletAuthPayload | null => {
       if (typeof window === "undefined") {
         console.error(
           "'walletAuth' method is only available in a browser environment."
+        );
+
+        return null;
+      }
+
+      const validationResult = validateWalletAuthCommandInput(payload);
+
+      if (!validationResult.valid) {
+        console.error(
+          "Failed to validate wallet auth input:\n\n -->",
+          validationResult.message
         );
 
         return null;
@@ -126,7 +138,7 @@ export class MiniKit {
         return null;
       }
 
-      const siweMessageResult = generateSiweMessage({
+      const siweMessage = generateSiweMessage({
         scheme: protocol,
         domain: window.location.host,
         statement: payload.statement ?? undefined,
@@ -138,23 +150,16 @@ export class MiniKit {
         expiration_time: payload.expirationTime?.toISOString() ?? undefined,
         not_before: payload.notBefore?.toISOString() ?? undefined,
         request_id: payload.requestId ?? undefined,
-        // REVIEW: Should we include this field? What should be the fallback?
-        // address: "0x1234567890",
       });
 
-      if (!siweMessageResult.success) {
-        console.error(siweMessageResult.error.message);
-        return siweMessageResult;
-      }
-
-      const { siweMessage } = siweMessageResult;
+      const walletAuthPayload = { message: siweMessage };
 
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.WalletAuth,
-        payload: { message: siweMessage },
+        payload: walletAuthPayload,
       });
 
-      return siweMessageResult;
+      return walletAuthPayload;
     },
 
     closeWebview: () => {

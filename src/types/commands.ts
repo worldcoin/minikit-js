@@ -18,14 +18,6 @@ export type VerifyCommandInput = {
   verification_level?: VerificationLevel;
 };
 
-export type VerifyCommandPayload = VerifyCommandInput & {
-  timestamp: string;
-};
-
-export type PayCommandPayload = PayCommandInput & {
-  reference: string;
-};
-
 export type PayCommandInput = {
   reference: string;
   to: string;
@@ -41,4 +33,16 @@ export type WalletAuthInput = {
   requestId?: string;
   expirationTime?: Date;
   notBefore?: Date;
+};
+
+export type VerifyCommandPayload = VerifyCommandInput & {
+  timestamp: string;
+};
+
+export type PayCommandPayload = PayCommandInput & {
+  reference: string;
+};
+
+export type WalletAuthPayload = {
+  message: string;
 };
