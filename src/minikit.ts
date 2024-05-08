@@ -9,8 +9,13 @@ import {
 } from "./types";
 import { ResponseEvent } from "./types/responses";
 import { Network } from "types/payment";
-import { PayCommandPayload, VerifyCommandPayload } from "types/commands";
 import { VerificationLevel } from "@worldcoin/idkit-core";
+import {
+  PayCommandPayload,
+  VerifyCommandPayload,
+  WalletAuthInput,
+} from "types/commands";
+import { generateSiweMessage } from "helpers/generate-siwe-message";
 
 export const sendMiniKitEvent = <
   T extends WebViewBasePayload = WebViewBasePayload,
@@ -24,6 +29,7 @@ export class MiniKit {
   private static listeners: Record<ResponseEvent, EventHandler> = {
     [ResponseEvent.MiniAppVerifyAction]: () => {},
     [ResponseEvent.MiniAppPayment]: () => {},
+    [ResponseEvent.MiniAppWalletAuth]: () => {},
   };
 
   public static subscribe<E extends ResponseEvent>(
@@ -81,7 +87,7 @@ export class MiniKit {
     pay: (payload: PayCommandInput): PayCommandPayload | null => {
       if (typeof window === "undefined") {
         console.error(
-          "This method is only available in a browser environment."
+          "'pay' method is only available in a browser environment."
         );
         return null;
       }
@@ -99,6 +105,56 @@ export class MiniKit {
       });
 
       return eventPayload;
+    },
+
+    walletAuth: (payload: WalletAuthInput) => {
+      if (typeof window === "undefined") {
+        console.error(
+          "'walletAuth' method is only available in a browser environment."
+        );
+
+        return null;
+      }
+
+      let protocol: string | null = null;
+
+      try {
+        const currentUrl = new URL(window.location.href);
+        protocol = currentUrl.protocol.split(":")[0];
+      } catch (error) {
+        console.error("Failed to get current URL", error);
+        return null;
+      }
+
+      const siweMessageResult = generateSiweMessage({
+        scheme: protocol,
+        domain: window.location.host,
+        statement: payload.statement ?? undefined,
+        uri: window.location.href,
+        version: 1,
+        chain_id: 10,
+        nonce: payload.nonce,
+        issued_at: new Date().toISOString(),
+        expiration_time: payload.expirationTime?.toISOString() ?? undefined,
+        not_before: payload.notBefore?.toISOString() ?? undefined,
+        request_id: payload.requestId ?? undefined,
+        // REVIEW: Should we include this field? What should be the fallback?
+        // address: "0x1234567890",
+      });
+
+      if (!siweMessageResult.success) {
+        console.error(siweMessageResult.error.message);
+        return siweMessageResult;
+      }
+
+      const { siweMessage } = siweMessageResult;
+
+      sendMiniKitEvent<WebViewBasePayload>({
+        command: Command.WalletAuth,
+        payload: { message: siweMessage },
+      });
+
+      return siweMessageResult;
     },
 
     closeWebview: () => {

@@ -50,3 +50,17 @@ export enum PaymentErrorMessage {
   GenericError = "Something unexpected went wrong. Please try again.",
   DuplicateReference = "This reference ID already exists please generate a new one and try again.",
 }
+
+export enum WalletAuthErrorCodes {
+  InvalidAddress = "invalid_address",
+  MalformedRequest = "malformed_request",
+  UserRejected = "user_rejected",
+}
+
+export const WalletAuthErrorMessage = {
+  [WalletAuthErrorCodes.InvalidAddress]:
+    "The specified address is not valid for the connected wallet. Error code is only sent after the user consents (to avoid brute force guessing addresses)",
+  [WalletAuthErrorCodes.MalformedRequest]:
+    "Provided parameters in the request are invalid.",
+  [WalletAuthErrorCodes.UserRejected]: "User rejected the request.",
+};

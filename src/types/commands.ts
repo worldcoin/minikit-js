@@ -4,6 +4,7 @@ import { Network, Tokens } from "./payment";
 export enum Command {
   Verify = "verify",
   Pay = "pay",
+  WalletAuth = "wallet-auth",
 }
 
 export type WebViewBasePayload = {
@@ -32,4 +33,12 @@ export type PayCommandInput = {
   token: Tokens;
   network?: Network; // Optional
   description: string;
+};
+
+export type WalletAuthInput = {
+  nonce: string;
+  statement?: string;
+  requestId?: string;
+  expirationTime?: Date;
+  notBefore?: Date;
 };
