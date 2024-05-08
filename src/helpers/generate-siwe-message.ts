@@ -6,7 +6,7 @@ const generateSiweDataSchema = (parmas: {
   currentUrl: string;
 }) => {
   return yup.object({
-    scheme: yup.string().notRequired().oneOf(["https", "http"]), //FIXME: remove http://
+    scheme: yup.string().notRequired().oneOf(["https"]),
 
     domain: yup
       .string()
