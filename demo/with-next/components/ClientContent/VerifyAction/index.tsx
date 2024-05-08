@@ -163,7 +163,7 @@ export const VerifyAction = () => {
       <h2 className="font-bold text-2xl">Verify</h2>
 
       <p className="border p-1 border-gray-400">
-        <p className="font-bold">App ID:</p>
+        <span className="font-bold block">App ID:</span>
         <span className="text-[12px] break-all">{lastUsedAppId ?? ""}</span>
       </p>
 
