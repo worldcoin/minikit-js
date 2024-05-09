@@ -13,3 +13,5 @@ export {
 } from "./responses";
 
 export { Tokens } from "./payment";
+
+export { GenerateSiweMessageInput as GenerateSIWEMessageInput } from "./wallet-auth";
