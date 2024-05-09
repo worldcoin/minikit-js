@@ -4,6 +4,7 @@ import { VerifyAction } from "./VerifyAction";
 import { Pay } from "./Pay";
 import { User } from "./User";
 import { Nav } from "./Nav";
+import { WalletAuth } from "./WalletAuth";
 
 export const ClientContent = () => {
   return (
@@ -19,6 +20,8 @@ export const ClientContent = () => {
           <VerifyAction />
           <hr />
           <Pay />
+          <hr />
+          <WalletAuth />
         </div>
       </div>
     </div>

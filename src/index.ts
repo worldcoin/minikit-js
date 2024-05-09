@@ -3,6 +3,8 @@ export {
   VerificationErrorMessage,
   PaymentErrorCodes,
   PaymentErrorMessage,
+  WalletAuthErrorCodes,
+  WalletAuthErrorMessage,
 } from "types/errors";
 
 export { MiniKit } from "./minikit";
@@ -17,6 +19,8 @@ export {
   MiniAppVerifyActionSuccessPayload,
   MiniAppVerifyActionErrorPayload,
   MiniAppPaymentPayload,
+  MiniAppWalletAuthSuccessPayload,
+  MiniAppWalletAuthErrorPayload,
 } from "./types/responses";
 
 export { Tokens, Network, TokenDecimals } from "./types/payment";
