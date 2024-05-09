@@ -1,5 +1,5 @@
 export enum Tokens {
-  USDC = "USDCE",
+  USDC = "USDC",
   WLD = "WLD",
 }
 
