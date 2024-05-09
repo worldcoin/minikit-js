@@ -44,5 +44,5 @@ export type PayCommandPayload = PayCommandInput & {
 };
 
 export type WalletAuthPayload = {
-  message: string;
+  siweMessage: string;
 };

@@ -90,7 +90,7 @@ export const WalletAuth = () => {
       return setGenerationError("Failed to generate message");
     }
 
-    return setMessage(generateMessageResult.message);
+    return setMessage(generateMessageResult.siweMessage);
   }, []);
 
   return (

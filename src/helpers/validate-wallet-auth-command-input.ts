@@ -36,10 +36,6 @@ export const validateWalletAuthCommandInput = (
     return { valid: false, message: "'expirationTime' must be within 7 days" };
   }
 
-  if (params.notBefore && new Date(params.notBefore) < new Date()) {
-    return { valid: false, message: "'notBefore' must be in the future" };
-  }
-
   if (
     params.notBefore &&
     new Date(params.notBefore) > new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)

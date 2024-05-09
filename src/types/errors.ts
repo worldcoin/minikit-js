@@ -59,7 +59,7 @@ export enum WalletAuthErrorCodes {
 
 export const WalletAuthErrorMessage = {
   [WalletAuthErrorCodes.InvalidAddress]:
-    "The specified address is not valid for the connected wallet. Error code is only sent after the user consents (to avoid brute force guessing addresses)",
+    "The specified address is not valid for the connected wallet.",
   [WalletAuthErrorCodes.MalformedRequest]:
     "Provided parameters in the request are invalid.",
   [WalletAuthErrorCodes.UserRejected]: "User rejected the request.",
