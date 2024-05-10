@@ -1,4 +1,11 @@
 export {
+  parseSiweMessage,
+  SAFE_CONTRACT_ABI,
+  verifySiweMessage,
+  generateNonce,
+} from "helpers/siwe/siwe";
+
+export {
   VerificationErrorCodes,
   VerificationErrorMessage,
   PaymentErrorCodes,
@@ -9,7 +16,12 @@ export {
 
 export { MiniKit } from "./minikit";
 
-export { VerifyCommandInput, PayCommandInput, Command } from "./types";
+export {
+  VerifyCommandInput,
+  PayCommandInput,
+  Command,
+  SiweMessage,
+} from "./types";
 
 export {
   ResponseEvent,
