@@ -9,7 +9,10 @@ export const authOptions: NextAuthOptions = {
       id: "worldcoin",
       name: "Worldcoin",
       type: "oauth",
-      wellKnown: "https://id.worldcoin.org/.well-known/openid-configuration",
+      wellKnown:
+        process.env.NEXT_DEPLOYMENT_ENVIRONMENT === "staging"
+          ? "https://staging.id.worldcoin.org/.well-known/openid-configuration"
+          : "https://id.worldcoin.org/.well-known/openid-configuration",
       authorization: { params: { scope: "openid" } },
       clientId: process.env.WLD_CLIENT_ID,
       clientSecret: process.env.WLD_CLIENT_SECRET,
