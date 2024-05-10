@@ -16,8 +16,8 @@ import {
   WalletAuthPayload,
 } from "types/commands";
 import { VerificationLevel } from "@worldcoin/idkit-core";
-import { validateWalletAuthCommandInput } from "helpers/validate-wallet-auth-command-input";
-import { generateSiweMessage } from "helpers/generate-siwe-message";
+import { validateWalletAuthCommandInput } from "helpers/siwe/validate-wallet-auth-command-input";
+import { generateSiweMessage } from "helpers/siwe/siwe";
 
 export const sendMiniKitEvent = <
   T extends WebViewBasePayload = WebViewBasePayload,
