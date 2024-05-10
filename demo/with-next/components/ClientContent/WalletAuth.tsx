@@ -33,6 +33,9 @@ export const WalletAuth = () => {
     setWalletAuthPayloadValidationMessage,
   ] = useState<string | null>();
 
+  const [walletAuthVerificationMessage, setWalletAuthVerificationMessage] =
+    useState<string | null>();
+
   useEffect(() => {
     if (!MiniKit.isInstalled()) {
       return;
@@ -63,6 +66,25 @@ export const WalletAuth = () => {
         } else {
           setWalletAuthPayloadValidationMessage(errorMessage);
         }
+
+        // Call the API to verify the message
+        const response = await fetch("/api/verify-siwe", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            siweResponsePayload: payload,
+          }),
+        });
+        
+        const responseJson = await response.json();
+
+        setWalletAuthVerificationMessage(
+          responseJson.isValid
+            ? "Valid! Successfully Signed In"
+            : `Failed: ${responseJson.message}`
+        );
       }
 
       setReceivedWalletAuthPayload(payload);
@@ -80,7 +102,6 @@ export const WalletAuth = () => {
 
     const generateMessageResult = MiniKit.commands.walletAuth({
       nonce: window.crypto.randomUUID(),
-      statement: "statement",
       requestId: "0",
       expirationTime: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000),
       notBefore: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000),
@@ -137,6 +158,13 @@ export const WalletAuth = () => {
           <p>Validation message:</p>
           <p className="bg-gray-300 p-2">
             {walletAuthPayloadValidationMessage ?? "No validation"}
+          </p>
+        </div>
+
+        <div className="grid gap-y-1">
+          <p>Verification:</p>
+          <p className="bg-gray-300 p-2">
+            {walletAuthVerificationMessage ?? "No verification yet"}
           </p>
         </div>
       </div>

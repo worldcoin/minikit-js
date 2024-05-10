@@ -1,4 +1,4 @@
-export type GenerateSiweMessageInput = {
+export type SiweMessage = {
   scheme?: string;
   domain: string;
   address?: string;
