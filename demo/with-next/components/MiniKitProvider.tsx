@@ -10,4 +10,3 @@ export const MiniKitProvider = ({ children }: { children: ReactNode }) => {
 
   return <>{children}</>;
 };
-``

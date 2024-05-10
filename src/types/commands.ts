@@ -4,6 +4,7 @@ import { Network, Tokens } from "./payment";
 export enum Command {
   Verify = "verify",
   Pay = "pay",
+  WalletAuth = "wallet-auth",
 }
 
 export type WebViewBasePayload = {
@@ -14,7 +15,24 @@ export type WebViewBasePayload = {
 export type VerifyCommandInput = {
   action: IDKitConfig["action"];
   signal?: IDKitConfig["signal"];
-  verification_level: VerificationLevel;
+  verification_level?: VerificationLevel;
+};
+
+export type PayCommandInput = {
+  reference: string;
+  to: string;
+  token_amount: number; // In Decimals
+  token: Tokens;
+  network?: Network; // Optional
+  description: string;
+};
+
+export type WalletAuthInput = {
+  nonce: string;
+  statement?: string;
+  requestId?: string;
+  expirationTime?: Date;
+  notBefore?: Date;
 };
 
 export type VerifyCommandPayload = VerifyCommandInput & {
@@ -25,11 +43,6 @@ export type PayCommandPayload = PayCommandInput & {
   reference: string;
 };
 
-export type PayCommandInput = {
-  reference: string;
-  to: string;
-  token_amount: number; // In Decimals
-  token: Tokens;
-  network?: Network; // Optional
-  description: string;
+export type WalletAuthPayload = {
+  siweMessage: string;
 };

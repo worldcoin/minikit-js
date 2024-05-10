@@ -13,6 +13,7 @@ import * as yup from "yup";
 const paymentSuccessPayloadSchema = yup.object({
   status: yup.string<"success">().oneOf(["success"]),
   transaction_status: yup.string<"submitted">().oneOf(["submitted"]),
+  transaction_id: yup.string().required(),
   reference: yup.string().required(),
   from: yup.string().optional(),
   chain: yup.string().required(),

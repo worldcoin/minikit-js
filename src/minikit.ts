@@ -9,7 +9,15 @@ import {
 } from "./types";
 import { ResponseEvent } from "./types/responses";
 import { Network } from "types/payment";
-import { PayCommandPayload, VerifyCommandPayload } from "types/commands";
+import {
+  PayCommandPayload,
+  VerifyCommandPayload,
+  WalletAuthInput,
+  WalletAuthPayload,
+} from "types/commands";
+import { VerificationLevel } from "@worldcoin/idkit-core";
+import { validateWalletAuthCommandInput } from "helpers/siwe/validate-wallet-auth-command-input";
+import { generateSiweMessage } from "helpers/siwe/siwe";
 
 export const sendMiniKitEvent = <
   T extends WebViewBasePayload = WebViewBasePayload,
@@ -23,6 +31,7 @@ export class MiniKit {
   private static listeners: Record<ResponseEvent, EventHandler> = {
     [ResponseEvent.MiniAppVerifyAction]: () => {},
     [ResponseEvent.MiniAppPayment]: () => {},
+    [ResponseEvent.MiniAppWalletAuth]: () => {},
   };
 
   public static subscribe<E extends ResponseEvent>(
@@ -69,6 +78,7 @@ export class MiniKit {
       const eventPayload: VerifyCommandPayload = {
         ...payload,
         signal: payload.signal || "",
+        verification_level: payload.verification_level || VerificationLevel.Orb,
         timestamp,
       };
       sendMiniKitEvent({ command: Command.Verify, payload: eventPayload });
@@ -79,7 +89,7 @@ export class MiniKit {
     pay: (payload: PayCommandInput): PayCommandPayload | null => {
       if (typeof window === "undefined") {
         console.error(
-          "This method is only available in a browser environment."
+          "'pay' method is only available in a browser environment."
         );
         return null;
       }
@@ -97,6 +107,60 @@ export class MiniKit {
       });
 
       return eventPayload;
+    },
+
+    walletAuth: (payload: WalletAuthInput): WalletAuthPayload | null => {
+      if (typeof window === "undefined") {
+        console.error(
+          "'walletAuth' method is only available in a browser environment."
+        );
+
+        return null;
+      }
+
+      const validationResult = validateWalletAuthCommandInput(payload);
+
+      if (!validationResult.valid) {
+        console.error(
+          "Failed to validate wallet auth input:\n\n -->",
+          validationResult.message
+        );
+
+        return null;
+      }
+
+      let protocol: string | null = null;
+
+      try {
+        const currentUrl = new URL(window.location.href);
+        protocol = currentUrl.protocol.split(":")[0];
+      } catch (error) {
+        console.error("Failed to get current URL", error);
+        return null;
+      }
+
+      const siweMessage = generateSiweMessage({
+        scheme: protocol,
+        domain: window.location.host,
+        statement: payload.statement ?? undefined,
+        uri: window.location.href,
+        version: 1,
+        chain_id: 10,
+        nonce: payload.nonce,
+        issued_at: new Date().toISOString(),
+        expiration_time: payload.expirationTime?.toISOString() ?? undefined,
+        not_before: payload.notBefore?.toISOString() ?? undefined,
+        request_id: payload.requestId ?? undefined,
+      });
+
+      const walletAuthPayload = { siweMessage };
+
+      sendMiniKitEvent<WebViewBasePayload>({
+        command: Command.WalletAuth,
+        payload: walletAuthPayload,
+      });
+
+      return walletAuthPayload;
     },
 
     closeWebview: () => {

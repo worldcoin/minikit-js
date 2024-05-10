@@ -1,10 +1,16 @@
 import { Network } from "./payment";
-import { PaymentErrorCodes, VerificationErrorCodes } from "./errors";
+import {
+  PaymentErrorCodes,
+  VerificationErrorCodes,
+  WalletAuthErrorCodes,
+  WalletAuthErrorMessage,
+} from "./errors";
 import { VerificationLevel } from "@worldcoin/idkit-core";
 
 export enum ResponseEvent {
   MiniAppVerifyAction = "miniapp-verify-action",
   MiniAppPayment = "miniapp-payment",
+  MiniAppWalletAuth = "miniapp-wallet-auth",
 }
 
 export type MiniAppVerifyActionSuccessPayload = {
@@ -41,6 +47,19 @@ export type MiniAppPaymentErrorPayload = {
 export type MiniAppPaymentPayload =
   | MiniAppPaymentSuccessEventPayload
   | MiniAppPaymentErrorPayload;
+
+export type MiniAppWalletAuthSuccessPayload = {
+  status: "success";
+  message: string;
+  signature: string;
+  address: string;
+};
+
+export type MiniAppWalletAuthErrorPayload = {
+  status: "error";
+  error_code: WalletAuthErrorCodes;
+  details: (typeof WalletAuthErrorMessage)[WalletAuthErrorCodes];
+};
 
 export type EventPayload<T extends ResponseEvent = ResponseEvent> =
   T extends ResponseEvent.MiniAppVerifyAction

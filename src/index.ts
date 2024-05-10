@@ -1,13 +1,27 @@
 export {
+  parseSiweMessage,
+  SAFE_CONTRACT_ABI,
+  verifySiweMessage,
+  generateNonce,
+} from "helpers/siwe/siwe";
+
+export {
   VerificationErrorCodes,
   VerificationErrorMessage,
   PaymentErrorCodes,
   PaymentErrorMessage,
+  WalletAuthErrorCodes,
+  WalletAuthErrorMessage,
 } from "types/errors";
 
 export { MiniKit } from "./minikit";
 
-export { VerifyCommandInput, PayCommandInput, Command } from "./types";
+export {
+  VerifyCommandInput,
+  PayCommandInput,
+  Command,
+  SiweMessage,
+} from "./types";
 
 export {
   ResponseEvent,
@@ -17,6 +31,8 @@ export {
   MiniAppVerifyActionSuccessPayload,
   MiniAppVerifyActionErrorPayload,
   MiniAppPaymentPayload,
+  MiniAppWalletAuthSuccessPayload,
+  MiniAppWalletAuthErrorPayload,
 } from "./types/responses";
 
 export { Tokens, Network, TokenDecimals } from "./types/payment";
