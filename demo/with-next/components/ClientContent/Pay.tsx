@@ -82,7 +82,7 @@ export const Pay = () => {
   }, []);
 
   const onPayclick = useCallback(async () => {
-    const tokenAmount = tokenToDecimals(200.13, Tokens.USDC);
+    const tokenAmount = tokenToDecimals(2.13, Tokens.USDC);
     const req = await fetch("/api/prepare-payment", {
       method: "GET",
     });
