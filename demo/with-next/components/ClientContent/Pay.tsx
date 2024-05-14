@@ -84,17 +84,12 @@ export const Pay = () => {
   const onPayClick = useCallback(async () => {
     const tokenAmount = tokenToDecimals(2.13, Tokens.USDC);
 
-    const req = await fetch("/api/prepare-payment", {
-      method: "GET",
-    });
-
-    const res = await req.json();
     const payPayload: PayCommandInput = {
       to: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
       token_amount: tokenAmount,
       token: Tokens.USDC,
       description: "Test example payment for minikit",
-      reference: res.body.referenceId,
+      reference: new Date().toISOString(),
     };
 
     const payload = MiniKit.commands.pay(payPayload);
