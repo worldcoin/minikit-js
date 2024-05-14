@@ -37,6 +37,5 @@ export {
 
 export { Tokens, Network, TokenDecimals } from "./types/payment";
 export { tokenToDecimals } from "helpers/payment/client";
-export { generateReferenceId } from "helpers/payment/backend";
 
 export { VerificationLevel } from "@worldcoin/idkit-core";

@@ -94,6 +94,12 @@ export class MiniKit {
         return null;
       }
 
+      // User generated reference cannot exceed 36 characters in length
+      if (payload.reference.length > 36) {
+        console.error("Reference must not exceed 36 characters");
+        return null;
+      }
+
       const network = Network.Optimism; // MiniKit only supports Optimism for now
 
       const eventPayload: PayCommandPayload = {

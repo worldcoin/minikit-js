@@ -1,25 +1,16 @@
 {
-	"version": "0.2",
-	"enabled": true,
-	"language": "en-US",
-	"allowCompoundWords": true,
-	"dictionaries": [
-		"typescript",
-		"node",
-		"npm",
-		"html"
-	],
-	"enabledLanguageIds": [
-		"typescript",
-		"typescriptreact",
-		"javascript",
-		"markdown",
-		"yaml",
-		"json"
-	],
-	"words": [
-		"idkit",
-		"OIDC",
-		"SIWE"
-	]
+  "version": "0.2",
+  "enabled": true,
+  "language": "en-US",
+  "allowCompoundWords": true,
+  "dictionaries": ["typescript", "node", "npm", "html"],
+  "enabledLanguageIds": [
+    "typescript",
+    "typescriptreact",
+    "javascript",
+    "markdown",
+    "yaml",
+    "json"
+  ],
+  "words": ["idkit", "merkle", "OIDC", "SIWE"]
 }
