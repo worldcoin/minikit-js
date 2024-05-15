@@ -28,15 +28,12 @@ export const VerificationErrorMessage: Record<AppErrorCodes, string> = {
 };
 
 export enum PaymentErrorCodes {
-  MalformedRequest = "malformed_request",
+  InputError = "input_error",
   PaymentRejected = "payment_rejected",
   InvalidReceiver = "invalid_receiver",
   InsufficientBalance = "insufficient_balance",
   TransactionFailed = "transaction_failed",
-  InvalidTokenAddress = "invalid_token_address",
-  InvalidAppId = "invalid_app_id",
   GenericError = "generic_error",
-  DuplicateReference = "duplicate_reference",
 }
 
 export enum PaymentErrorMessage {
