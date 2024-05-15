@@ -87,7 +87,7 @@ export const Pay = () => {
     const payPayload: PayCommandInput = {
       to: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
       token_amount: tokenAmount,
-      token: Tokens.USDC,
+      token: token,
       description: "Test example payment for minikit",
       reference: new Date().toISOString(),
     };
