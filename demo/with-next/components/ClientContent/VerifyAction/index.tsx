@@ -197,14 +197,12 @@ export const VerifyAction = () => {
               <button
                 className="bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
                 onClick={() => onStagingVerifyClick(VerificationLevel.Device)}
-                disabled={process.env.NEXT_DEPLOYMENT_ENVIRONMENT !== "staging"}
               >
                 Send staging app verify (Device)
               </button>
               <button
                 className="bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
                 onClick={() => onStagingVerifyClick(VerificationLevel.Orb)}
-                disabled={process.env.NEXT_DEPLOYMENT_ENVIRONMENT !== "staging"}
               >
                 Send staging app verify (Orb)
               </button>
@@ -215,9 +213,6 @@ export const VerifyAction = () => {
                 className={clsx(
                   "bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
                 )}
-                disabled={
-                  process.env.NEXT_DEPLOYMENT_ENVIRONMENT !== "production"
-                }
                 onClick={() => onProdVerifyClick(VerificationLevel.Device)}
               >
                 Send production app verify (Device)
@@ -225,9 +220,6 @@ export const VerifyAction = () => {
               <button
                 className="bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
                 onClick={() => onProdVerifyClick(VerificationLevel.Orb)}
-                disabled={
-                  process.env.NEXT_DEPLOYMENT_ENVIRONMENT !== "production"
-                }
               >
                 Send production app verify (Orb)
               </button>
