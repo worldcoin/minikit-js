@@ -81,13 +81,13 @@ export const Pay = () => {
     };
   }, []);
 
-  const onPayClick = useCallback(async () => {
-    const tokenAmount = tokenToDecimals(2.13, Tokens.USDC);
+  const onPayClick = useCallback(async (token: Tokens, amount: number) => {
+    const tokenAmount = tokenToDecimals(amount, token);
 
     const payPayload: PayCommandInput = {
       to: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
       token_amount: tokenAmount,
-      token: Tokens.USDC,
+      token: token,
       description: "Test example payment for minikit",
       reference: new Date().toISOString(),
     };
@@ -112,13 +112,20 @@ export const Pay = () => {
             </pre>
           </div>
         </div>
-
-        <button
-          className="bg-black text-white rounded-lg p-4 w-full"
-          onClick={onPayClick}
-        >
-          Send pay
-        </button>
+        <div className="grid grid-cols-2 gap-x-4">
+          <button
+            className="bg-black text-white rounded-lg p-4 w-full"
+            onClick={() => onPayClick(Tokens.USDC, 0.1)}
+          >
+            Send pay (USDC)
+          </button>
+          <button
+            className="bg-black text-white rounded-lg p-4 w-full"
+            onClick={() => onPayClick(Tokens.WLD, 0.1)}
+          >
+            Send pay (WLD)
+          </button>
+        </div>
       </div>
 
       <hr />

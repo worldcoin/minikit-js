@@ -9,6 +9,7 @@ import { useCallback, useEffect, useState } from "react";
 import * as yup from "yup";
 import { validateSchema } from "../helpers/validate-schema";
 import { verifyProof } from "./verify-cloud-proof";
+import { clsx } from "clsx";
 
 const verifyActionSuccessPayloadSchema = yup.object({
   status: yup
@@ -119,7 +120,11 @@ export const VerifyAction = () => {
   }, [lastUsedAction, lastUsedAppId]);
 
   const verifyAction = useCallback(
-    (params: { app_id: IDKitConfig["app_id"]; action: string }) => {
+    (params: {
+      app_id: IDKitConfig["app_id"];
+      action: string;
+      verification_level?: VerificationLevel;
+    }) => {
       setLastUsedAppId(params.app_id);
       setLastUsedAction(params.action);
 
@@ -131,7 +136,7 @@ export const VerifyAction = () => {
 
       const verifyPayload: VerifyCommandInput = {
         action: params.action,
-        verification_level: VerificationLevel.Device,
+        verification_level: params.verification_level,
       };
 
       const payload = MiniKit.commands.verify(verifyPayload);
@@ -140,23 +145,31 @@ export const VerifyAction = () => {
     []
   );
 
-  const onProdVerifyClick = useCallback(() => {
-    verifyAction({
-      app_id: process.env
-        .NEXT_PUBLIC_PROD_VERIFY_APP_ID as IDKitConfig["app_id"],
+  const onProdVerifyClick = useCallback(
+    (verification_level: VerificationLevel) => {
+      verifyAction({
+        app_id: process.env
+          .NEXT_PUBLIC_PROD_VERIFY_APP_ID as IDKitConfig["app_id"],
 
-      action: process.env.NEXT_PUBLIC_PROD_VERIFY_ACTION as string,
-    });
-  }, [verifyAction]);
+        action: process.env.NEXT_PUBLIC_PROD_VERIFY_ACTION as string,
+        verification_level,
+      });
+    },
+    [verifyAction]
+  );
 
-  const onStagingVerifyClick = useCallback(() => {
-    verifyAction({
-      app_id: process.env
-        .NEXT_PUBLIC_STAGING_VERIFY_APP_ID as IDKitConfig["app_id"],
+  const onStagingVerifyClick = useCallback(
+    (verification_level: VerificationLevel) => {
+      verifyAction({
+        app_id: process.env
+          .NEXT_PUBLIC_STAGING_VERIFY_APP_ID as IDKitConfig["app_id"],
 
-      action: process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION as string,
-    });
-  }, [verifyAction]);
+        action: process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION as string,
+        verification_level,
+      });
+    },
+    [verifyAction]
+  );
 
   return (
     <div className="grid gap-y-4">
@@ -180,19 +193,37 @@ export const VerifyAction = () => {
           </div>
 
           <div className="grid gap-y-2">
-            <button
-              className="bg-black text-white rounded-lg p-4 w-full"
-              onClick={onProdVerifyClick}
-            >
-              Send production app verify
-            </button>
+            <div className="grid grid-cols-2 gap-x-2">
+              <button
+                className="bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
+                onClick={() => onStagingVerifyClick(VerificationLevel.Device)}
+              >
+                Send staging app verify (Device)
+              </button>
+              <button
+                className="bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
+                onClick={() => onStagingVerifyClick(VerificationLevel.Orb)}
+              >
+                Send staging app verify (Orb)
+              </button>
+            </div>
 
-            <button
-              className="bg-black text-white rounded-lg p-4 w-full"
-              onClick={onStagingVerifyClick}
-            >
-              Send staging app verify
-            </button>
+            <div className="grid grid-cols-2 gap-x-2">
+              <button
+                className={clsx(
+                  "bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
+                )}
+                onClick={() => onProdVerifyClick(VerificationLevel.Device)}
+              >
+                Send production app verify (Device)
+              </button>
+              <button
+                className="bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
+                onClick={() => onProdVerifyClick(VerificationLevel.Orb)}
+              >
+                Send production app verify (Orb)
+              </button>
+            </div>
           </div>
         </div>
 
