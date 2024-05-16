@@ -1,8 +1,8 @@
 {
   "name": "@worldcoin/minikit-js",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "homepage": "https://docs.worldcoin.org/id/minikit",
-  "description": "Alpha version (not ready): Mini-kit JS is a lightweight sdk for building mini-apps compatible with World ID",
+  "description": "Internal Alpha: Mini-kit JS is a lightweight sdk for building mini-apps compatible with World App",
   "license": "MIT",
   "private": false,
   "type": "module",
