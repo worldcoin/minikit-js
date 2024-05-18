@@ -33,6 +33,7 @@ export type MiniAppVerifyActionPayload =
 export type MiniAppPaymentSuccessEventPayload = {
   status: "success";
   transaction_status: "submitted";
+  transaction_id: string;
   reference: string;
   from: string;
   chain: Network;
