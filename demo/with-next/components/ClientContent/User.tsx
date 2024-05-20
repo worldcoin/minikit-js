@@ -11,7 +11,9 @@ export const User = () => {
       {user?.name ? (
         <p className="truncate">
           User name:{" "}
-          <span className="font-bold max-w-full truncate">{user?.name}</span>
+          <span className="font-bold max-w-full truncate break-all whitespace-break-spaces">
+            {user?.name}
+          </span>
         </p>
       ) : (
         <span className="font-bold">No user</span>
