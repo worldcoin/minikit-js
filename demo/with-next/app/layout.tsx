@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { MiniKitProvider } from "../components/MiniKitProvider";
 import { getServerSession } from "next-auth";
 import SessionProvider from "@/components/SessionProvider";
+import { MiniKitProvider } from "@worldcoin/minikit-js-react";
 
 const inter = Inter({ subsets: ["latin"] });
 

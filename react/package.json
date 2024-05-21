@@ -1,0 +1,43 @@
+{
+  "name": "@worldcoin/minikit-js-react",
+  "version": "0.0.1",
+  "description": "Internal Alpha: React components for Minikit",
+  "main": "index.tsx",
+  "private": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./build/index.js",
+      "types": "./build/index.d.ts",
+      "require": "./build/index.cjs"
+    }
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsup"
+  },
+  "engines": {
+    "node": ">=12.4"
+  },
+  "keywords": [
+    "react",
+    "minikit"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@worldcoin/minikit-js": "link:../src",
+    "react": "18.2.0",
+    "tsup": "^8.0.2"
+  },
+  "peerDependencies": {
+    "@types/react": ">=18.2.0",
+    "@worldcoin/minikit-js": "*",
+    "react": ">=18.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    }
+  }
+}

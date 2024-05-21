@@ -168,9 +168,5 @@ export class MiniKit {
 
       return walletAuthPayload;
     },
-
-    closeWebview: () => {
-      sendWebviewEvent<{ command: string }>({ command: "close" });
-    },
   };
 }
