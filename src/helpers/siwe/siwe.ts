@@ -164,7 +164,9 @@ export const verifySiweMessage = async (
   }
 
   if (nonce && siweMessageData.nonce !== nonce) {
-    throw new Error("Nonce mismatch");
+    throw new Error(
+      `Nonce mismatch. Got: ${siweMessageData.nonce}, Expected: ${nonce}`
+    );
   }
 
   if (statement && siweMessageData.statement !== statement) {
