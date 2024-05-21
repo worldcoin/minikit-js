@@ -25,6 +25,7 @@ const walletAuthErrorPayloadSchema = yup.object({
 export const WalletAuth = () => {
   const [message, setMessage] = useState<string | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
+  const [nonce, setNonce] = useState<string | null>(null);
   const [receivedWalletAuthPayload, setReceivedWalletAuthPayload] =
     useState<Record<string, any> | null>(null);
 
@@ -75,6 +76,7 @@ export const WalletAuth = () => {
           },
           body: JSON.stringify({
             siweResponsePayload: payload,
+            nonce,
           }),
         });
 
@@ -93,15 +95,16 @@ export const WalletAuth = () => {
     return () => {
       MiniKit.unsubscribe(ResponseEvent.MiniAppWalletAuth);
     };
-  }, []);
+  }, [nonce]);
 
   const onGenerateMessageClick = useCallback(() => {
     if (!MiniKit.isInstalled()) {
       return;
     }
-
+    const nonce = window.crypto.randomUUID();
+    setNonce(nonce);
     const generateMessageResult = MiniKit.commands.walletAuth({
-      nonce: window.crypto.randomUUID(),
+      nonce: nonce,
       requestId: "0",
       expirationTime: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000),
       notBefore: new Date(new Date().getTime() - 24 * 60 * 60 * 1000),

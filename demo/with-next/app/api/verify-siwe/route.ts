@@ -12,6 +12,7 @@ const schema = yup.object({
     signature: yup.string().required(),
     address: yup.string().required(),
   }),
+  nonce: yup.string().required(),
 });
 
 export const POST = async (req: NextRequest) => {
@@ -24,10 +25,10 @@ export const POST = async (req: NextRequest) => {
       throw new Error("Invalid data");
     }
 
-    const { siweResponsePayload } = validData;
+    const { siweResponsePayload, nonce } = validData;
     const validMessage = await verifySiweMessage(
       siweResponsePayload as MiniAppWalletAuthSuccessPayload,
-      "12345678"
+      nonce
     );
 
     return new Response(
