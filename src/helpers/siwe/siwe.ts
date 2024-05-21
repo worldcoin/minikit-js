@@ -170,11 +170,15 @@ export const verifySiweMessage = async (
   }
 
   if (statement && siweMessageData.statement !== statement) {
-    throw new Error("Statement mismatch");
+    throw new Error(
+      `Statement mismatch. Got: ${siweMessageData.statement}, Expected: ${statement}`
+    );
   }
 
   if (requestId && siweMessageData.request_id !== requestId) {
-    throw new Error("Request ID mismatch");
+    throw new Error(
+      `Request ID mismatch. Got: ${siweMessageData.request_id}, Expected: ${requestId}`
+    );
   }
 
   // Check ERC-191 Signature Matches
