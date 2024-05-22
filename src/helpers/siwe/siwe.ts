@@ -164,15 +164,21 @@ export const verifySiweMessage = async (
   }
 
   if (nonce && siweMessageData.nonce !== nonce) {
-    throw new Error("Nonce mismatch");
+    throw new Error(
+      `Nonce mismatch. Got: ${siweMessageData.nonce}, Expected: ${nonce}`
+    );
   }
 
   if (statement && siweMessageData.statement !== statement) {
-    throw new Error("Statement mismatch");
+    throw new Error(
+      `Statement mismatch. Got: ${siweMessageData.statement}, Expected: ${statement}`
+    );
   }
 
   if (requestId && siweMessageData.request_id !== requestId) {
-    throw new Error("Request ID mismatch");
+    throw new Error(
+      `Request ID mismatch. Got: ${siweMessageData.request_id}, Expected: ${requestId}`
+    );
   }
 
   // Check ERC-191 Signature Matches
@@ -187,7 +193,7 @@ export const verifySiweMessage = async (
     await contract.checkSignatures(
       hashedMessage,
       `0x${messageBytes}`,
-      signature
+      `0x${signature}`
     );
   } catch (error) {
     throw new Error("Signature verification failed");

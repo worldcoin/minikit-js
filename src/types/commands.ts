@@ -21,7 +21,7 @@ export type VerifyCommandInput = {
 export type PayCommandInput = {
   reference: string;
   to: string;
-  token_amount: number; // In Decimals
+  token_amount: string; // Stringified Decimals
   token: Tokens;
   network?: Network; // Optional
   description: string;
