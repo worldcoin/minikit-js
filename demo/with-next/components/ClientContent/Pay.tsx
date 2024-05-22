@@ -87,7 +87,7 @@ export const Pay = () => {
 
       const payPayload: PayCommandInput = {
         to: address,
-        token_amount: tokenAmount,
+        token_amount: tokenAmount.toString(),
         token: token,
         description: "Test example payment for minikit",
         reference: new Date().toISOString(),
@@ -120,13 +120,13 @@ export const Pay = () => {
             className="bg-black text-white rounded-lg p-4 w-full"
             onClick={() =>
               onPayClick(
-                Tokens.USDC,
+                Tokens.USDCE,
                 0.1,
                 "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
               )
             }
           >
-            Send pay (USDC)
+            Send pay (USDCE)
           </button>
           <button
             className="bg-black text-white rounded-lg p-4 w-full"
@@ -146,13 +146,13 @@ export const Pay = () => {
             className="bg-black text-white rounded-lg p-4 w-full"
             onClick={() =>
               onPayClick(
-                Tokens.USDC,
+                Tokens.USDCE,
                 0.1,
                 "0xc2eD884aEa29135AcaB517c0967225Bf15DeA6E9"
               )
             }
           >
-            Send pay (USDC) Addr 2
+            Send pay (USDCE) Addr 2
           </button>
           <button
             className="bg-black text-white rounded-lg p-4 w-full"
