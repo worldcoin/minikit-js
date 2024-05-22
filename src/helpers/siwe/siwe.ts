@@ -193,7 +193,7 @@ export const verifySiweMessage = async (
     await contract.checkSignatures(
       hashedMessage,
       `0x${messageBytes}`,
-      signature
+      `0x${signature}`
     );
   } catch (error) {
     throw new Error("Signature verification failed");
