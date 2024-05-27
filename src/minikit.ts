@@ -81,7 +81,11 @@ export class MiniKit {
         verification_level: payload.verification_level || VerificationLevel.Orb,
         timestamp,
       };
-      sendMiniKitEvent({ command: Command.Verify, payload: eventPayload });
+      sendMiniKitEvent({
+        command: Command.Verify,
+        version: 1,
+        payload: eventPayload,
+      });
 
       return eventPayload;
     },
@@ -109,6 +113,7 @@ export class MiniKit {
 
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.Pay,
+        version: 1,
         payload: eventPayload,
       });
 
@@ -163,6 +168,7 @@ export class MiniKit {
 
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.WalletAuth,
+        version: 1,
         payload: walletAuthPayload,
       });
 
