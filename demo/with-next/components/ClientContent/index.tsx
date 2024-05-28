@@ -5,6 +5,7 @@ import { Pay } from "./Pay";
 import { User } from "./User";
 import { Nav } from "./Nav";
 import { WalletAuth } from "./WalletAuth";
+import { ExternalLinks } from "./ExternalLinks";
 
 export const ClientContent = () => {
   return (
@@ -22,6 +23,8 @@ export const ClientContent = () => {
           <Pay />
           <hr />
           <WalletAuth />
+          <hr />
+          <ExternalLinks />
         </div>
       </div>
     </div>
