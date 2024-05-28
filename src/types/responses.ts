@@ -19,11 +19,13 @@ export type MiniAppVerifyActionSuccessPayload = {
   merkle_root: string;
   nullifier_hash: string;
   verification_level: VerificationLevel;
+  version: number;
 };
 
 export type MiniAppVerifyActionErrorPayload = {
   status: "error";
   error_code: VerificationErrorCodes;
+  version: number;
 };
 
 export type MiniAppVerifyActionPayload =
@@ -38,11 +40,13 @@ export type MiniAppPaymentSuccessEventPayload = {
   from: string;
   chain: Network;
   timestamp: string;
+  version: number;
 };
 
 export type MiniAppPaymentErrorPayload = {
   status: "error";
   error_code: PaymentErrorCodes;
+  version: number;
 };
 
 export type MiniAppPaymentPayload =
@@ -54,12 +58,14 @@ export type MiniAppWalletAuthSuccessPayload = {
   message: string;
   signature: string;
   address: string;
+  version: number;
 };
 
 export type MiniAppWalletAuthErrorPayload = {
   status: "error";
   error_code: WalletAuthErrorCodes;
   details: (typeof WalletAuthErrorMessage)[WalletAuthErrorCodes];
+  version: number;
 };
 
 export type EventPayload<T extends ResponseEvent = ResponseEvent> =
