@@ -17,6 +17,13 @@ export const ExternalLinks = () => {
         >
           External Link (Button)
         </button>
+
+        <button
+          onClick={() => window.open("https://worldcoin.org/apps", "_blank")}
+          className="text-white bg-green-500 hover:bg-blue-300 transition p-4 leading-[1] rounded-lg"
+        >
+          External Link Blank (Button)
+        </button>
       </div>
     </>
   );
