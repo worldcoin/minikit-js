@@ -2,3 +2,4 @@ packages:
   - "demo/*"
   - "src"
   - "tests"
+  - "react"

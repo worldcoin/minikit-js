@@ -2,7 +2,7 @@ import {
   MiniKit,
   ResponseEvent,
   WalletAuthErrorCodes,
-} from "@worldcoin/minikit-js";
+} from "../../../../packages/src/build";
 import { useCallback, useEffect, useState } from "react";
 import * as yup from "yup";
 import { validateSchema } from "./helpers/validate-schema";

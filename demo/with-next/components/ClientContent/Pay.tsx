@@ -5,7 +5,7 @@ import {
   ResponseEvent,
   Tokens,
   tokenToDecimals,
-} from "@worldcoin/minikit-js";
+} from "../../../../packages/src/build";
 import { useCallback, useEffect, useState } from "react";
 import { validateSchema } from "./helpers/validate-schema";
 import * as yup from "yup";
