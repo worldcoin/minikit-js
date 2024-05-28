@@ -9,6 +9,7 @@ export enum Command {
 
 export type WebViewBasePayload = {
   command: Command;
+  version: number;
   payload: Record<string, any>;
 };
 
