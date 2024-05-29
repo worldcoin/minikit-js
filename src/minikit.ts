@@ -19,6 +19,15 @@ import { VerificationLevel } from "@worldcoin/idkit-core";
 import { validateWalletAuthCommandInput } from "helpers/siwe/validate-wallet-auth-command-input";
 import { generateSiweMessage } from "helpers/siwe/siwe";
 
+type WorldAppInitInput = {
+  world_app_version: number;
+  device_os: "ios|android";
+  supported_commands: Array<{
+    name: Command;
+    supported_versions: Array<number>;
+  }>;
+};
+
 export const sendMiniKitEvent = <
   T extends WebViewBasePayload = WebViewBasePayload,
 >(
@@ -28,6 +37,14 @@ export const sendMiniKitEvent = <
 };
 
 export class MiniKit {
+  private static readonly MINIKIT_VERSION = 1;
+
+  private static readonly commandVersion = {
+    [Command.Verify]: 1,
+    [Command.Pay]: 1,
+    [Command.WalletAuth]: 1,
+  };
+
   private static listeners: Record<ResponseEvent, EventHandler> = {
     [ResponseEvent.MiniAppVerifyAction]: () => {},
     [ResponseEvent.MiniAppPayment]: () => {},
@@ -37,8 +54,14 @@ export class MiniKit {
   private static sendInit() {
     sendWebviewEvent({
       command: "init",
-      payload: { "minikit-version": 1 },
+      payload: { "minikit-version": this.MINIKIT_VERSION },
     });
+  }
+
+  private static commandsValid(input: WorldAppInitInput["supported_commands"]) {
+    return input.every((command) =>
+      command.supported_versions.includes(this.commandVersion[command.name])
+    );
   }
 
   public static subscribe<E extends ResponseEvent>(
@@ -86,6 +109,20 @@ export class MiniKit {
     return true;
   }
 
+  public static worldAppInit(input: WorldAppInitInput) {
+    if (typeof window === "undefined") {
+      console.error("worldAppInit can only be called in the browser");
+    }
+
+    window.WorldApp = true;
+
+    if (!this.commandsValid(input.supported_commands)) {
+      throw new Error("Unsupported app version, please, update your app");
+    }
+
+    this.sendInit();
+  }
+
   public static commands = {
     verify: (payload: VerifyCommandInput): VerifyCommandPayload => {
       const timestamp = new Date().toISOString();
@@ -97,7 +134,7 @@ export class MiniKit {
       };
       sendMiniKitEvent({
         command: Command.Verify,
-        version: 1,
+        version: this.commandVersion[Command.Verify],
         payload: eventPayload,
       });
 
@@ -127,7 +164,7 @@ export class MiniKit {
 
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.Pay,
-        version: 1,
+        version: this.commandVersion[Command.Pay],
         payload: eventPayload,
       });
 
@@ -182,7 +219,7 @@ export class MiniKit {
 
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.WalletAuth,
-        version: 1,
+        version: this.commandVersion[Command.WalletAuth],
         payload: walletAuthPayload,
       });
 
