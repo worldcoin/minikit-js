@@ -52,6 +52,7 @@ export enum WalletAuthErrorCodes {
   InvalidAddress = "invalid_address",
   MalformedRequest = "malformed_request",
   UserRejected = "user_rejected",
+  GenericError = "generic_error",
 }
 
 export const WalletAuthErrorMessage = {
@@ -60,4 +61,5 @@ export const WalletAuthErrorMessage = {
   [WalletAuthErrorCodes.MalformedRequest]:
     "Provided parameters in the request are invalid.",
   [WalletAuthErrorCodes.UserRejected]: "User rejected the request.",
+  [WalletAuthErrorCodes.GenericError]: "Something unexpected went wrong.",
 };
