@@ -34,6 +34,13 @@ export class MiniKit {
     [ResponseEvent.MiniAppWalletAuth]: () => {},
   };
 
+  private static sendInit() {
+    sendWebviewEvent({
+      command: "init",
+      payload: { "minikit-version": 1 },
+    });
+  }
+
   public static subscribe<E extends ResponseEvent>(
     event: E,
     handler: EventHandler<E>
@@ -58,6 +65,8 @@ export class MiniKit {
     if (typeof window !== "undefined" && !Boolean(window.MiniKit)) {
       try {
         window.MiniKit = MiniKit;
+        this.sendInit();
+        console.log(window.WorldApp);
       } catch (error) {
         console.error("Failed to install MiniKit", error);
         return { success: false, error };
@@ -69,6 +78,11 @@ export class MiniKit {
 
   public static isInstalled(debug?: boolean) {
     if (debug) console.log("MiniKit is alive!");
+
+    if (typeof window !== "undefined" && !Boolean(window.WorldApp)) {
+      return false;
+    }
+
     return true;
   }
 

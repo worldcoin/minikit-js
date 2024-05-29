@@ -12,4 +12,6 @@ interface Window {
   };
 
   MiniKit?: import("./minikit").MiniKit;
+
+  WorldApp?: any;
 }
