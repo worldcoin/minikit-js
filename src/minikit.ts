@@ -88,8 +88,6 @@ export class MiniKit {
     if (typeof window !== "undefined" && !Boolean(window.MiniKit)) {
       try {
         window.MiniKit = MiniKit;
-        this.sendInit();
-        console.log(window.WorldApp);
       } catch (error) {
         console.error("Failed to install MiniKit", error);
         return { success: false, error };
@@ -117,7 +115,7 @@ export class MiniKit {
     window.WorldApp = true;
 
     if (!this.commandsValid(input.supported_commands)) {
-      throw new Error("Unsupported app version, please, update your app");
+      throw new Error("Unsupported app version. Please update your app");
     }
 
     this.sendInit();
