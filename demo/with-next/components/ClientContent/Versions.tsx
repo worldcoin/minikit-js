@@ -5,21 +5,8 @@ import {
   MiniKitInstallErrorCode,
   MiniKitInstallErrorMessage,
 } from "@worldcoin/minikit-js";
-import { useEffect } from "react";
 
 export const Versions = () => {
-  useEffect(() => {
-    if (
-      typeof window === "undefined" ||
-      typeof window.WorldApp === "undefined"
-    ) {
-      return;
-    }
-
-    // @ts-ignore
-    console.log(MiniKit.commandsValid(window.WorldApp?.supported_commands));
-  }, []);
-
   const isValid = () => {
     if (
       typeof window === "undefined" ||
@@ -55,8 +42,11 @@ export const Versions = () => {
         <p>window.WorldApp:</p>
 
         <div className="bg-gray-300 min-h-[100px] p-2">
-          <pre className="break-all whitespace-break-spaces">
-            {JSON.stringify(window.WorldApp ?? null, null, 2)}
+          <pre
+            suppressHydrationWarning
+            className="break-all whitespace-break-spaces"
+          >
+            {JSON.stringify(window?.WorldApp ?? null, null, 2)}
           </pre>
         </div>
       </div>
