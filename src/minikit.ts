@@ -18,6 +18,11 @@ import {
 import { VerificationLevel } from "@worldcoin/idkit-core";
 import { validateWalletAuthCommandInput } from "helpers/siwe/validate-wallet-auth-command-input";
 import { generateSiweMessage } from "helpers/siwe/siwe";
+import {
+  MiniKitInstallErrorCode,
+  MiniKitInstallReturnType,
+  MiniKitInstallErrorMessage,
+} from "types";
 
 export const sendMiniKitEvent = <
   T extends WebViewBasePayload = WebViewBasePayload,
@@ -28,11 +33,26 @@ export const sendMiniKitEvent = <
 };
 
 export class MiniKit {
+  private static readonly MINIKIT_VERSION = 1;
+
+  private static readonly commandVersion = {
+    [Command.Verify]: 1,
+    [Command.Pay]: 1,
+    [Command.WalletAuth]: 1,
+  };
+
   private static listeners: Record<ResponseEvent, EventHandler> = {
     [ResponseEvent.MiniAppVerifyAction]: () => {},
     [ResponseEvent.MiniAppPayment]: () => {},
     [ResponseEvent.MiniAppWalletAuth]: () => {},
   };
+
+  private static sendInit() {
+    sendWebviewEvent({
+      command: "init",
+      payload: { version: this.MINIKIT_VERSION },
+    });
+  }
 
   public static subscribe<E extends ResponseEvent>(
     event: E,
@@ -54,14 +74,57 @@ export class MiniKit {
     this.listeners[event](payload);
   }
 
-  public static install() {
-    if (typeof window !== "undefined" && !Boolean(window.MiniKit)) {
-      try {
-        window.MiniKit = MiniKit;
-      } catch (error) {
-        console.error("Failed to install MiniKit", error);
-        return { success: false, error };
-      }
+  private static commandsValid(
+    input: NonNullable<typeof window.WorldApp>["supported_commands"]
+  ) {
+    return input.every((command) =>
+      command.supported_versions.includes(this.commandVersion[command.name])
+    );
+  }
+
+  public static install(): MiniKitInstallReturnType {
+    if (typeof window === "undefined" || Boolean(window.MiniKit)) {
+      return {
+        success: false,
+        errorCode: MiniKitInstallErrorCode.AlreadyInstalled,
+        errorMessage:
+          MiniKitInstallErrorMessage[MiniKitInstallErrorCode.AlreadyInstalled],
+      };
+    }
+
+    if (!window.WorldApp) {
+      return {
+        success: false,
+        errorCode: MiniKitInstallErrorCode.OutsideOfWorldApp,
+        errorMessage:
+          MiniKitInstallErrorMessage[MiniKitInstallErrorCode.OutsideOfWorldApp],
+      };
+    }
+
+    if (!this.commandsValid(window.WorldApp.supported_commands)) {
+      return {
+        success: false,
+        errorCode: MiniKitInstallErrorCode.AppOutOfDate,
+        errorMessage:
+          MiniKitInstallErrorMessage[MiniKitInstallErrorCode.AppOutOfDate],
+      };
+    }
+
+    try {
+      window.MiniKit = MiniKit;
+      this.sendInit();
+    } catch (error) {
+      console.error(
+        MiniKitInstallErrorMessage[MiniKitInstallErrorCode.Unknown],
+        error
+      );
+
+      return {
+        success: false,
+        errorCode: MiniKitInstallErrorCode.Unknown,
+        errorMessage:
+          MiniKitInstallErrorMessage[MiniKitInstallErrorCode.Unknown],
+      };
     }
 
     return { success: true };
@@ -83,7 +146,7 @@ export class MiniKit {
       };
       sendMiniKitEvent({
         command: Command.Verify,
-        version: 1,
+        version: this.commandVersion[Command.Verify],
         payload: eventPayload,
       });
 
@@ -113,7 +176,7 @@ export class MiniKit {
 
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.Pay,
-        version: 1,
+        version: this.commandVersion[Command.Pay],
         payload: eventPayload,
       });
 
@@ -168,7 +231,7 @@ export class MiniKit {
 
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.WalletAuth,
-        version: 1,
+        version: this.commandVersion[Command.WalletAuth],
         payload: walletAuthPayload,
       });
 

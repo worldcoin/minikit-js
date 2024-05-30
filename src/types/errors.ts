@@ -52,6 +52,7 @@ export enum WalletAuthErrorCodes {
   InvalidAddress = "invalid_address",
   MalformedRequest = "malformed_request",
   UserRejected = "user_rejected",
+  GenericError = "generic_error",
 }
 
 export const WalletAuthErrorMessage = {
@@ -60,4 +61,23 @@ export const WalletAuthErrorMessage = {
   [WalletAuthErrorCodes.MalformedRequest]:
     "Provided parameters in the request are invalid.",
   [WalletAuthErrorCodes.UserRejected]: "User rejected the request.",
+  [WalletAuthErrorCodes.GenericError]: "Something unexpected went wrong.",
+};
+
+export enum MiniKitInstallErrorCode {
+  Unknown = "unknown",
+  AlreadyInstalled = "already_installed",
+  OutsideOfWorldApp = "outside_of_worldapp",
+  NotOnClient = "not_on_client",
+  AppOutOfDate = "app_out_of_date",
+}
+
+export const MiniKitInstallErrorMessage = {
+  [MiniKitInstallErrorCode.Unknown]: "Failed to install MiniKit.",
+  [MiniKitInstallErrorCode.AlreadyInstalled]: "MiniKit is already installed.",
+  [MiniKitInstallErrorCode.OutsideOfWorldApp]:
+    "MiniApp launched outside of WorldApp.",
+  [MiniKitInstallErrorCode.NotOnClient]: "Window object is not available.",
+  [MiniKitInstallErrorCode.AppOutOfDate]:
+    "WorldApp is out of date. Please update the app.",
 };
