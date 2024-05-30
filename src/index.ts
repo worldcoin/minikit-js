@@ -12,6 +12,8 @@ export {
   PaymentErrorMessage,
   WalletAuthErrorCodes,
   WalletAuthErrorMessage,
+  MiniKitInstallErrorCode,
+  MiniKitInstallErrorMessage,
 } from "types/errors";
 
 export { MiniKit } from "./minikit";
@@ -37,5 +39,4 @@ export {
 
 export { Tokens, Network, TokenDecimals } from "./types/payment";
 export { tokenToDecimals } from "helpers/payment/client";
-
 export { VerificationLevel } from "@worldcoin/idkit-core";

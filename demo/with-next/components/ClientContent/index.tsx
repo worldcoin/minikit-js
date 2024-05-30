@@ -6,6 +6,12 @@ import { User } from "./User";
 import { Nav } from "./Nav";
 import { WalletAuth } from "./WalletAuth";
 import { ExternalLinks } from "./ExternalLinks";
+import dynamic from "next/dynamic";
+
+const VersionsNoSSR = dynamic(
+  () => import("./Versions").then((comp) => comp.Versions),
+  { ssr: false }
+);
 
 export const ClientContent = () => {
   return (
@@ -18,6 +24,8 @@ export const ClientContent = () => {
         <hr />
 
         <div className="grid gap-y-8">
+          <VersionsNoSSR />
+          <hr />
           <VerifyAction />
           <hr />
           <Pay />
