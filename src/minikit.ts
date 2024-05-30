@@ -54,7 +54,7 @@ export class MiniKit {
   private static sendInit() {
     sendWebviewEvent({
       command: "init",
-      payload: { "minikit-version": this.MINIKIT_VERSION },
+      payload: { version: this.MINIKIT_VERSION },
     });
   }
 
@@ -88,6 +88,7 @@ export class MiniKit {
     if (typeof window !== "undefined" && !Boolean(window.MiniKit)) {
       try {
         window.MiniKit = MiniKit;
+        this.sendInit();
       } catch (error) {
         console.error("Failed to install MiniKit", error);
         return { success: false, error };
@@ -117,8 +118,6 @@ export class MiniKit {
     if (!this.commandsValid(input.supported_commands)) {
       throw new Error("Unsupported app version. Please update your app");
     }
-
-    this.sendInit();
   }
 
   public static commands = {
@@ -222,10 +221,6 @@ export class MiniKit {
       });
 
       return walletAuthPayload;
-    },
-
-    closeWebview: () => {
-      sendWebviewEvent<{ command: string }>({ command: "close" });
     },
   };
 }
