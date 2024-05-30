@@ -19,11 +19,15 @@ export type VerifyCommandInput = {
   verification_level?: VerificationLevel;
 };
 
+export type TokensPayload = {
+  symbol: Tokens;
+  token_amount: string;
+};
+
 export type PayCommandInput = {
   reference: string;
   to: string;
-  token_amount: string; // Stringified Decimals
-  token: Tokens;
+  tokens: TokensPayload[];
   network?: Network; // Optional
   description: string;
 };
