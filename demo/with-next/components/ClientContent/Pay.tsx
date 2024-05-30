@@ -82,18 +82,40 @@ export const Pay = () => {
   }, []);
 
   const onPayClick = useCallback(
-    async (token: Tokens, amount: number, address: string) => {
-      const tokenAmount = tokenToDecimals(amount, token);
+    async (amount: number, address: string, token?: Tokens) => {
+      const wldAmount = tokenToDecimals(amount, Tokens.WLD);
+      const usdcAmount = tokenToDecimals(amount, Tokens.USDCE);
+
+      const tokenPayload = [
+        {
+          symbol: Tokens.WLD,
+          token_amount: wldAmount.toString(),
+        },
+        {
+          symbol: Tokens.USDCE,
+          token_amount: usdcAmount.toString(),
+        },
+      ];
 
       const payPayload: PayCommandInput = {
         to: address,
-        token_amount: tokenAmount.toString(),
-        token: token,
+        tokens: token
+          ? [
+              {
+                symbol: token,
+                token_amount:
+                  token === Tokens.WLD
+                    ? wldAmount.toString()
+                    : usdcAmount.toString(),
+              },
+            ]
+          : tokenPayload,
         description: "Test example payment for minikit",
         reference: new Date().toISOString(),
       };
 
       const payload = MiniKit.commands.pay(payPayload);
+
       setSentPayPayload({
         payload,
       });
@@ -115,56 +137,38 @@ export const Pay = () => {
             </pre>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-x-4">
+        <div className="grid grid-cols-3 gap-x-4">
           <button
             className="bg-black text-white rounded-lg p-4 w-full"
             onClick={() =>
-              onPayClick(
-                Tokens.USDCE,
-                0.1,
-                "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
-              )
+              onPayClick(0.1, "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045")
             }
           >
-            Send pay (USDCE)
+            Pay (USDCE + WLD)
           </button>
           <button
             className="bg-black text-white rounded-lg p-4 w-full"
             onClick={() =>
               onPayClick(
-                Tokens.WLD,
                 0.1,
-                "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+                "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+                Tokens.WLD
               )
             }
           >
-            Send pay (WLD)
-          </button>
-        </div>
-        <div className="grid grid-cols-2 gap-x-4">
-          <button
-            className="bg-black text-white rounded-lg p-4 w-full"
-            onClick={() =>
-              onPayClick(
-                Tokens.USDCE,
-                0.1,
-                "0xc2eD884aEa29135AcaB517c0967225Bf15DeA6E9"
-              )
-            }
-          >
-            Send pay (USDCE) Addr 2
+            Pay Single (WLD)
           </button>
           <button
             className="bg-black text-white rounded-lg p-4 w-full"
             onClick={() =>
               onPayClick(
-                Tokens.WLD,
                 0.1,
-                "0xc2eD884aEa29135AcaB517c0967225Bf15DeA6E9"
+                "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+                Tokens.USDCE
               )
             }
           >
-            Send pay (WLD) Addr 2
+            Pay Single (USDC)
           </button>
         </div>
       </div>
