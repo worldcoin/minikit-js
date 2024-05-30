@@ -6,6 +6,7 @@ import { User } from "./User";
 import { Nav } from "./Nav";
 import { WalletAuth } from "./WalletAuth";
 import { ExternalLinks } from "./ExternalLinks";
+import { Versions } from "./Versions";
 
 export const ClientContent = () => {
   return (
@@ -18,6 +19,8 @@ export const ClientContent = () => {
         <hr />
 
         <div className="grid gap-y-8">
+          <Versions />
+          <hr />
           <VerifyAction />
           <hr />
           <Pay />
