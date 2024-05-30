@@ -1,5 +1,6 @@
 import { IDKitConfig, VerificationLevel } from "@worldcoin/idkit-core/*";
 import { Network, Tokens } from "./payment";
+import { MiniKitInstallErrorCode, MiniKitInstallErrorMessage } from "./";
 
 export enum Command {
   Verify = "verify",
@@ -47,3 +48,11 @@ export type PayCommandPayload = PayCommandInput & {
 export type WalletAuthPayload = {
   siweMessage: string;
 };
+
+export type MiniKitInstallReturnType =
+  | { success: true }
+  | {
+      success: false;
+      errorCode: MiniKitInstallErrorCode;
+      errorMessage: (typeof MiniKitInstallErrorMessage)[MiniKitInstallErrorCode];
+    };

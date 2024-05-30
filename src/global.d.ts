@@ -12,4 +12,14 @@ interface Window {
   };
 
   MiniKit?: import("./minikit").MiniKit;
+
+  WorldApp?: {
+    world_app_version: number;
+    device_os: "ios" | "android";
+
+    supported_commands: Array<{
+      name: import("./types/commands").Command;
+      supported_versions: Array<number>;
+    }>;
+  };
 }

@@ -3,6 +3,7 @@ export {
   PayCommandInput,
   WebViewBasePayload,
   Command,
+  MiniKitInstallReturnType,
 } from "./commands";
 
 export {
@@ -13,5 +14,5 @@ export {
 } from "./responses";
 
 export { Tokens } from "./payment";
-
 export { SiweMessage } from "./wallet-auth";
+export { MiniKitInstallErrorCode, MiniKitInstallErrorMessage } from "./errors";
