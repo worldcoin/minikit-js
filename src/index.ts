@@ -40,8 +40,8 @@ export {
 export { Tokens, Network, TokenDecimals } from "./types/payment";
 export { tokenToDecimals } from "helpers/payment/client";
 
-export { VerificationLevel, ISuccessResult } from "@worldcoin/idkit-core";
+export { VerificationLevel, type ISuccessResult } from "@worldcoin/idkit-core";
 export {
   verifyCloudProof,
-  IVerifyResponse,
+  type IVerifyResponse,
 } from "@worldcoin/idkit-core/backend";
