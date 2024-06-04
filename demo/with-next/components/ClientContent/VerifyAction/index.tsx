@@ -1,9 +1,10 @@
-import { IDKitConfig, VerificationLevel } from "@worldcoin/idkit-core";
 import {
   MiniKit,
   ResponseEvent,
   VerificationErrorCodes,
   VerifyCommandInput,
+  VerificationLevel,
+  ISuccessResult,
 } from "@worldcoin/minikit-js";
 import { useCallback, useEffect, useState } from "react";
 import * as yup from "yup";
@@ -53,9 +54,9 @@ export const VerifyAction = () => {
     any
   > | null>(null);
 
-  const [lastUsedAppId, setLastUsedAppId] = useState<
-    IDKitConfig["app_id"] | null
-  >(null);
+  const [lastUsedAppId, setLastUsedAppId] = useState<`app_${string}` | null>(
+    null
+  );
 
   const [lastUsedAction, setLastUsedAction] = useState<string | null>(null);
 
@@ -101,12 +102,7 @@ export const VerifyAction = () => {
       }
 
       const verifyResponse = await verifyProof({
-        payload: {
-          proof: payload.proof,
-          merkle_root: payload.merkle_root,
-          nullifier_hash: payload.nullifier_hash,
-          verification_level: payload.verification_level,
-        },
+        payload: payload as ISuccessResult,
         app_id: lastUsedAppId,
         action: lastUsedAction,
       });
@@ -121,7 +117,7 @@ export const VerifyAction = () => {
 
   const verifyAction = useCallback(
     (params: {
-      app_id: IDKitConfig["app_id"];
+      app_id: `app_${string}`;
       action: string;
       verification_level?: VerificationLevel;
     }) => {
@@ -148,9 +144,7 @@ export const VerifyAction = () => {
   const onProdVerifyClick = useCallback(
     (verification_level: VerificationLevel) => {
       verifyAction({
-        app_id: process.env
-          .NEXT_PUBLIC_PROD_VERIFY_APP_ID as IDKitConfig["app_id"],
-
+        app_id: process.env.NEXT_PUBLIC_PROD_VERIFY_APP_ID as `app_${string}`,
         action: process.env.NEXT_PUBLIC_PROD_VERIFY_ACTION as string,
         verification_level,
       });
@@ -162,8 +156,7 @@ export const VerifyAction = () => {
     (verification_level: VerificationLevel) => {
       verifyAction({
         app_id: process.env
-          .NEXT_PUBLIC_STAGING_VERIFY_APP_ID as IDKitConfig["app_id"],
-
+          .NEXT_PUBLIC_STAGING_VERIFY_APP_ID as `app_${string}`,
         action: process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION as string,
         verification_level,
       });

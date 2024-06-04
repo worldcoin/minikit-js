@@ -1,14 +1,13 @@
 "use server";
 
-import { IDKitConfig, ISuccessResult } from "@worldcoin/idkit-core";
-
 import {
+  ISuccessResult,
   IVerifyResponse,
   verifyCloudProof,
-} from "@worldcoin/idkit-core/backend";
+} from "@worldcoin/minikit-js";
 
 export const verifyProof = async (params: {
-  app_id: IDKitConfig["app_id"];
+  app_id: `app_${string}`;
   action: string;
   payload: ISuccessResult;
 }) => {
