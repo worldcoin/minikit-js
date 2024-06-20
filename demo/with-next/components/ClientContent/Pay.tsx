@@ -141,7 +141,7 @@ export const Pay = () => {
           <button
             className="bg-black text-white rounded-lg p-4 w-full"
             onClick={() =>
-              onPayClick(0.1, "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045")
+              onPayClick(11, "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045")
             }
           >
             Pay (USDCE + WLD)
