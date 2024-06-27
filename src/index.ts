@@ -14,6 +14,7 @@ export {
   WalletAuthErrorMessage,
   MiniKitInstallErrorCode,
   MiniKitInstallErrorMessage,
+  PaymentValidationErrors,
 } from "types/errors";
 
 export { MiniKit } from "./minikit";

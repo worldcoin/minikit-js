@@ -5,7 +5,7 @@ import { MiniAppPaymentErrorPayload } from "types/responses";
 
 export const getPaymentErrorMessage = (
   payload: MiniAppPaymentErrorPayload
-): void => {
+): string => {
   return PaymentErrorMessage[payload.error_code];
 };
 
@@ -18,7 +18,7 @@ export const tokenToDecimals = (amount: number, token: Tokens): number => {
   }
   const factor = 10 ** decimals;
   const result = amount * factor;
-if (!Number.isInteger(result)) {
+  if (!Number.isInteger(result)) {
     throw new Error(`The resulting amount is not a whole number: ${result}`);
   }
   return result;

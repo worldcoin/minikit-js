@@ -36,15 +36,25 @@ export enum PaymentErrorCodes {
   GenericError = "generic_error",
 }
 
-export enum PaymentErrorMessage {
+export const PaymentErrorMessage: Record<PaymentErrorCodes, string> = {
+  [PaymentErrorCodes.InputError]:
+    "There was a problem with this request. Please try again or contact the app owner.",
+  [PaymentErrorCodes.PaymentRejected]:
+    "You’ve cancelled the payment in World App.",
+  [PaymentErrorCodes.InvalidReceiver]:
+    "The receiver address is invalid. Please contact the app owner.",
+  [PaymentErrorCodes.InsufficientBalance]:
+    "You do not have enough balance to complete this transaction.",
+  [PaymentErrorCodes.TransactionFailed]:
+    "The transaction failed. Please try again.",
+  [PaymentErrorCodes.GenericError]:
+    "Something unexpected went wrong. Please try again.",
+};
+
+export enum PaymentValidationErrors {
   MalformedRequest = "There was a problem with this request. Please try again or contact the app owner.",
-  PaymentRejected = "You’ve cancelled the payment in World App.",
-  InvalidReceiver = "The receiver address is invalid. Please contact the app owner.",
-  InsufficientBalance = "You do not have enough balance to complete this transaction.",
-  TransactionFailed = "The transaction failed. Please try again.",
   InvalidTokenAddress = "The token address is invalid. Please contact the app owner.",
   InvalidAppId = "The app ID is invalid. Please contact the app owner.",
-  GenericError = "Something unexpected went wrong. Please try again.",
   DuplicateReference = "This reference ID already exists please generate a new one and try again.",
 }
 
