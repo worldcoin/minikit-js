@@ -34,6 +34,7 @@ export enum PaymentErrorCodes {
   InsufficientBalance = "insufficient_balance",
   TransactionFailed = "transaction_failed",
   GenericError = "generic_error",
+  UserBlocked = "user_blocked",
 }
 
 export const PaymentErrorMessage: Record<PaymentErrorCodes, string> = {
@@ -49,6 +50,8 @@ export const PaymentErrorMessage: Record<PaymentErrorCodes, string> = {
     "The transaction failed. Please try again.",
   [PaymentErrorCodes.GenericError]:
     "Something unexpected went wrong. Please try again.",
+  [PaymentErrorCodes.UserBlocked]:
+    "User's region is blocked from making payments.",
 };
 
 export enum PaymentValidationErrors {
