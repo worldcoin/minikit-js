@@ -33,6 +33,7 @@ export const ClientContent = () => {
           <WalletAuth />
           <hr />
           <ExternalLinks />
+          <input className="border text-xs" placeholder="textbox"></input>
         </div>
       </div>
     </div>
