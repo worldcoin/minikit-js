@@ -23,6 +23,7 @@ import {
   MiniKitInstallReturnType,
   MiniKitInstallErrorMessage,
 } from "types";
+import { validatePaymentPayload } from "helpers/payment/client";
 
 export const sendMiniKitEvent = <
   T extends WebViewBasePayload = WebViewBasePayload,
@@ -161,9 +162,8 @@ export class MiniKit {
         return null;
       }
 
-      // User generated reference cannot exceed 36 characters in length
-      if (payload.reference.length > 36) {
-        console.error("Reference must not exceed 36 characters");
+      // Validate the payload
+      if (!validatePaymentPayload(payload)) {
         return null;
       }
 
