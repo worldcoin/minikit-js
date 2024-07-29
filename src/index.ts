@@ -2,7 +2,6 @@ export {
   parseSiweMessage,
   SAFE_CONTRACT_ABI,
   verifySiweMessage,
-  generateNonce,
 } from "helpers/siwe/siwe";
 
 export {

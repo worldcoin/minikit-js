@@ -1,7 +1,6 @@
 import { SiweMessage } from "types/wallet-auth";
 import { ethers } from "ethers";
 import { MiniAppWalletAuthSuccessPayload } from "types/responses";
-import { randomBytes } from "crypto";
 
 const PREAMBLE = " wants you to sign in with your Ethereum account:";
 const URI_TAG = "URI: ";
@@ -199,12 +198,4 @@ export const verifySiweMessage = async (
     throw new Error("Signature verification failed");
   }
   return { isValid: true, siweMessageData: siweMessageData };
-};
-
-export const generateNonce = (): string => {
-  const nonce = randomBytes(12).toString("hex"); // Generates a 24-character hex string
-  if (!nonce || nonce.length < 8) {
-    throw new Error("Error during nonce creation.");
-  }
-  return nonce;
 };
