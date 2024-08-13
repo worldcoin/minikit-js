@@ -1,4 +1,5 @@
 import {
+  MiniAppPaymentPayload,
   MiniKit,
   PayCommandInput,
   PaymentErrorCodes,
@@ -75,6 +76,34 @@ export const Pay = () => {
 
       setPaymentAppPayload(JSON.stringify(payload, null, 2));
     });
+
+    return () => {
+      MiniKit.unsubscribe(ResponseEvent.MiniAppPayment);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!MiniKit.isInstalled()) {
+      console.error("MiniKit is not installed");
+      return;
+    }
+
+    MiniKit.subscribe(
+      ResponseEvent.MiniAppPayment,
+      async (response: MiniAppPaymentPayload) => {
+        if (response.status == "success") {
+          const res = await fetch(`/api/confirm-payment`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(response),
+          });
+          const payment = await res.json();
+          if (payment.success) {
+            // Congrats your payment was successful!
+          }
+        }
+      }
+    );
 
     return () => {
       MiniKit.unsubscribe(ResponseEvent.MiniAppPayment);

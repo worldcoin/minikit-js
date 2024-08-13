@@ -97,6 +97,33 @@ export const WalletAuth = () => {
     };
   }, [nonce]);
 
+  useEffect(() => {
+    if (!MiniKit.isInstalled()) {
+      return;
+    }
+
+    MiniKit.subscribe(ResponseEvent.MiniAppWalletAuth, async (payload) => {
+      if (payload.status === "error") {
+        return;
+      } else {
+        const response = await fetch("/api/complete-siwe", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            siweResponsePayload: payload,
+            nonce,
+          }),
+        });
+      }
+    });
+
+    return () => {
+      MiniKit.unsubscribe(ResponseEvent.MiniAppWalletAuth);
+    };
+  }, []);
+
   const onGenerateMessageClick = useCallback(() => {
     if (!MiniKit.isInstalled()) {
       return;

@@ -7,8 +7,8 @@
 
 <script>
 import HelloWorld from "./components/HelloWorld.vue";
-import * as IdkitCore from "@worldcoin/idkit-core";
-
+import { VerificationLevel } from "@worldcoin/idkit-core";
+console.log(VerificationLevel.Device);
 export default {
   name: "App",
   components: {
