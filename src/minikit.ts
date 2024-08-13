@@ -133,7 +133,7 @@ export class MiniKit {
 
   public static isInstalled(debug?: boolean) {
     if (debug) console.log("MiniKit is alive!");
-    return true;
+    return Boolean(window.MiniKit);
   }
 
   public static commands = {
