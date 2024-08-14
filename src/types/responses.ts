@@ -32,7 +32,7 @@ export type MiniAppVerifyActionPayload =
   | MiniAppVerifyActionSuccessPayload
   | MiniAppVerifyActionErrorPayload;
 
-export type MiniAppPaymentSuccessEventPayload = {
+export type MiniAppPaymentSuccessPayload = {
   status: "success";
   transaction_status: "submitted";
   transaction_id: string;
@@ -50,7 +50,7 @@ export type MiniAppPaymentErrorPayload = {
 };
 
 export type MiniAppPaymentPayload =
-  | MiniAppPaymentSuccessEventPayload
+  | MiniAppPaymentSuccessPayload
   | MiniAppPaymentErrorPayload;
 
 export type MiniAppWalletAuthSuccessPayload = {
@@ -68,10 +68,18 @@ export type MiniAppWalletAuthErrorPayload = {
   version: number;
 };
 
+export type MiniAppWalletAuthPayload =
+  | MiniAppWalletAuthSuccessPayload
+  | MiniAppWalletAuthErrorPayload;
+
+type EventPayloadMap = {
+  [ResponseEvent.MiniAppVerifyAction]: MiniAppVerifyActionPayload;
+  [ResponseEvent.MiniAppPayment]: MiniAppPaymentPayload;
+  [ResponseEvent.MiniAppWalletAuth]: MiniAppWalletAuthPayload;
+};
+
 export type EventPayload<T extends ResponseEvent = ResponseEvent> =
-  T extends ResponseEvent.MiniAppVerifyAction
-    ? MiniAppVerifyActionPayload
-    : MiniAppPaymentPayload;
+  T extends keyof EventPayloadMap ? EventPayloadMap[T] : never;
 
 export type EventHandler<E extends ResponseEvent = ResponseEvent> = <
   T extends EventPayload<E>,

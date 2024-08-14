@@ -9,6 +9,7 @@ export {
 export {
   MiniAppVerifyActionPayload,
   MiniAppPaymentPayload,
+  MiniAppWalletAuthPayload,
   EventPayload,
   EventHandler,
 } from "./responses";

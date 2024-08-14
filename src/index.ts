@@ -27,14 +27,15 @@ export {
 
 export {
   ResponseEvent,
-  MiniAppVerifyActionPayload,
-  MiniAppPaymentErrorPayload,
-  MiniAppPaymentSuccessEventPayload,
   MiniAppVerifyActionSuccessPayload,
   MiniAppVerifyActionErrorPayload,
+  MiniAppVerifyActionPayload,
+  MiniAppPaymentErrorPayload,
+  MiniAppPaymentSuccessPayload,
   MiniAppPaymentPayload,
   MiniAppWalletAuthSuccessPayload,
   MiniAppWalletAuthErrorPayload,
+  MiniAppWalletAuthPayload,
 } from "./types/responses";
 
 export { Tokens, Network, TokenDecimals } from "./types/payment";
