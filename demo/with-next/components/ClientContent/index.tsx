@@ -7,6 +7,7 @@ import { Nav } from "./Nav";
 import { WalletAuth } from "./WalletAuth";
 import { ExternalLinks } from "./ExternalLinks";
 import dynamic from "next/dynamic";
+import { CameraComponent } from "./Camera";
 
 const VersionsNoSSR = dynamic(
   () => import("./Versions").then((comp) => comp.Versions),
@@ -33,6 +34,8 @@ export const ClientContent = () => {
           <WalletAuth />
           <hr />
           <ExternalLinks />
+          <hr />
+          <CameraComponent />
         </div>
       </div>
     </div>
