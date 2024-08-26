@@ -9,21 +9,39 @@ export const ExternalLinks = () => {
           href="https://worldcoin.org/apps"
           className="bg-green-500 text-white text-center rounded-lg p-3"
         >
-          External Link (Link)
+          Valid Associated Domain (Link)
         </Link>
         <button
           onClick={() => window.open("https://worldcoin.org/apps")}
           className="text-white bg-green-500 hover:bg-blue-300 transition p-4 leading-[1] rounded-lg"
         >
-          External Link (Button)
+          Valid Associated Domain (Button)
+        </button>
+        <Link
+          href="https://whitepaper.worldcoin.org"
+          className="bg-green-500 text-white text-center rounded-lg p-3"
+        >
+          Valid Subdomain (Link)
+        </Link>
+        <button
+          onClick={() => window.open("https://whitepaper.worldcoin.org")}
+          className="text-white bg-green-500 transition p-4 leading-[1] rounded-lg"
+        >
+          Valid Subdomain (Button)
         </button>
 
         <button
-          onClick={() => window.open("https://worldcoin.org/apps", "_blank")}
-          className="text-white bg-green-500 hover:bg-blue-300 transition p-4 leading-[1] rounded-lg"
+          onClick={() => window.open("https://google.com", "_blank")}
+          className="text-white bg-red-500 transition p-4 leading-[1] rounded-lg"
         >
-          External Link Blank (Button)
+          Invalid External Link (Button)
         </button>
+        <Link
+          href="https://google.com"
+          className="bg-red-500 text-white text-center rounded-lg p-3"
+        >
+          Invalid External Link (Link)
+        </Link>
       </div>
     </>
   );
