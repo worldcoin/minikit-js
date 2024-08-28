@@ -4,17 +4,7 @@ export {
   verifySiweMessage,
 } from "helpers/siwe/siwe";
 
-export {
-  VerificationErrorCodes,
-  VerificationErrorMessage,
-  PaymentErrorCodes,
-  PaymentErrorMessage,
-  WalletAuthErrorCodes,
-  WalletAuthErrorMessage,
-  MiniKitInstallErrorCode,
-  MiniKitInstallErrorMessage,
-  PaymentValidationErrors,
-} from "types/errors";
+export * from "types/errors";
 
 export { MiniKit } from "./minikit";
 
@@ -25,18 +15,7 @@ export {
   SiweMessage,
 } from "./types";
 
-export {
-  ResponseEvent,
-  MiniAppVerifyActionSuccessPayload,
-  MiniAppVerifyActionErrorPayload,
-  MiniAppVerifyActionPayload,
-  MiniAppPaymentErrorPayload,
-  MiniAppPaymentSuccessPayload,
-  MiniAppPaymentPayload,
-  MiniAppWalletAuthSuccessPayload,
-  MiniAppWalletAuthErrorPayload,
-  MiniAppWalletAuthPayload,
-} from "./types/responses";
+export * from "./types/responses";
 
 export { Tokens, Network, TokenDecimals } from "./types/payment";
 export { tokenToDecimals } from "helpers/payment/client";

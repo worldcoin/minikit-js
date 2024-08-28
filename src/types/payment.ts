@@ -8,7 +8,7 @@ export const TokenDecimals: { [key in Tokens]: number } = {
   [Tokens.WLD]: 18,
 };
 
-// We currently only support one network
 export enum Network {
   Optimism = "optimism",
+  WorldChain = "worldchain",
 }

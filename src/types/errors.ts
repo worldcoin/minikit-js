@@ -74,6 +74,41 @@ export const WalletAuthErrorMessage = {
   [WalletAuthErrorCodes.GenericError]: "Something unexpected went wrong.",
 };
 
+export enum SendTransactionErrorCodes {
+  InvalidOperation = "invalid_operation",
+  UserRejected = "user_rejected",
+  InputError = "input_error",
+  SimulationFailed = "simulation_failed",
+  GenericError = "generic_error",
+}
+
+export const SendTransactionErrorMessage = {
+  [SendTransactionErrorCodes.InvalidOperation]:
+    "Transaction included an operation that was invalid",
+  [SendTransactionErrorCodes.UserRejected]: "User rejected the request.",
+  [SendTransactionErrorCodes.InputError]: "Invalid payload.",
+  [SendTransactionErrorCodes.SimulationFailed]:
+    "The transaction simulation failed.",
+  [SendTransactionErrorCodes.GenericError]:
+    "Something unexpected went wrong. Please try again.",
+};
+
+export enum SignMessageErrorCode {
+  InvalidMessage = "invalid_message",
+  UserRejected = "user_rejected",
+  GenericError = "generic_error",
+}
+
+export const SignMessageErrorMessage = {
+  [SignMessageErrorCode.InvalidMessage]: "Invalid message requested",
+  [SignMessageErrorCode.UserRejected]: "User rejected the request.",
+  [SignMessageErrorCode.GenericError]: "Something unexpected went wrong.",
+};
+
+export type SignTypedDataErrorCode = SignMessageErrorCode;
+
+export const SignTypedDataErrorMessage = SignMessageErrorMessage;
+
 export enum MiniKitInstallErrorCode {
   Unknown = "unknown",
   AlreadyInstalled = "already_installed",

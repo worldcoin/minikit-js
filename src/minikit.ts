@@ -11,6 +11,12 @@ import { ResponseEvent } from "./types/responses";
 import { Network } from "types/payment";
 import {
   PayCommandPayload,
+  SendTransactionInput,
+  SendTransactionPayload,
+  SignMessageInput,
+  SignMessagePayload,
+  SignTypedDataInput,
+  SignTypedDataPayload,
   VerifyCommandPayload,
   WalletAuthInput,
   WalletAuthPayload,
@@ -40,12 +46,18 @@ export class MiniKit {
     [Command.Verify]: 1,
     [Command.Pay]: 1,
     [Command.WalletAuth]: 1,
+    [Command.SendTransaction]: 1,
+    [Command.SignMessage]: 1,
+    [Command.SignTypedData]: 1,
   };
 
   private static listeners: Record<ResponseEvent, EventHandler> = {
     [ResponseEvent.MiniAppVerifyAction]: () => {},
     [ResponseEvent.MiniAppPayment]: () => {},
     [ResponseEvent.MiniAppWalletAuth]: () => {},
+    [ResponseEvent.MiniAppSendTransaction]: () => {},
+    [ResponseEvent.MiniAppSignMessage]: () => {},
+    [ResponseEvent.MiniAppSignTypedData]: () => {},
   };
 
   private static sendInit() {
@@ -238,8 +250,36 @@ export class MiniKit {
       return walletAuthPayload;
     },
 
-    closeWebview: () => {
-      sendWebviewEvent<{ command: string }>({ command: "close" });
+    sendTransaction: (
+      payload: SendTransactionInput
+    ): SendTransactionPayload => {
+      sendMiniKitEvent<WebViewBasePayload>({
+        command: Command.SendTransaction,
+        version: 1,
+        payload,
+      });
+
+      return payload;
+    },
+
+    signMessage: (payload: SignMessageInput): SignMessagePayload => {
+      sendMiniKitEvent<WebViewBasePayload>({
+        command: Command.SignMessage,
+        version: 1,
+        payload,
+      });
+
+      return payload;
+    },
+
+    signTypedData: (payload: SignTypedDataInput): SignTypedDataPayload => {
+      sendMiniKitEvent<WebViewBasePayload>({
+        command: Command.SignTypedData,
+        version: 1,
+        payload,
+      });
+
+      return payload;
     },
   };
 }
