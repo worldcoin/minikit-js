@@ -1,11 +1,16 @@
 import { IDKitConfig, VerificationLevel } from "@worldcoin/idkit-core/*";
 import { Network, Tokens } from "./payment";
 import { MiniKitInstallErrorCode, MiniKitInstallErrorMessage } from "./";
+import { Permit2, Transaction } from "./transactions";
+import type { TypedData, TypedDataDomain } from "abitype";
 
 export enum Command {
   Verify = "verify",
   Pay = "pay",
   WalletAuth = "wallet-auth",
+  SendTransaction = "send-transaction",
+  SignMessage = "sign-message",
+  SignTypedData = "sign-typed-data",
 }
 
 export type WebViewBasePayload = {
@@ -14,10 +19,16 @@ export type WebViewBasePayload = {
   payload: Record<string, any>;
 };
 
+// Values developers can specify
 export type VerifyCommandInput = {
   action: IDKitConfig["action"];
   signal?: IDKitConfig["signal"];
   verification_level?: VerificationLevel;
+};
+
+// Full list of values sent to the app
+export type VerifyCommandPayload = VerifyCommandInput & {
+  timestamp: string;
 };
 
 export type TokensPayload = {
@@ -33,20 +44,14 @@ export type PayCommandInput = {
   description: string;
 };
 
+export type PayCommandPayload = PayCommandInput;
+
 export type WalletAuthInput = {
   nonce: string;
   statement?: string;
   requestId?: string;
   expirationTime?: Date;
   notBefore?: Date;
-};
-
-export type VerifyCommandPayload = VerifyCommandInput & {
-  timestamp: string;
-};
-
-export type PayCommandPayload = PayCommandInput & {
-  reference: string;
 };
 
 export type WalletAuthPayload = {
@@ -60,3 +65,25 @@ export type MiniKitInstallReturnType =
       errorCode: MiniKitInstallErrorCode;
       errorMessage: (typeof MiniKitInstallErrorMessage)[MiniKitInstallErrorCode];
     };
+
+export type SendTransactionInput = {
+  payload: Transaction[];
+  permit2?: Permit2[]; // Optional
+};
+
+export type SendTransactionPayload = SendTransactionInput;
+
+export type SignMessageInput = {
+  message: string;
+};
+
+export type SignMessagePayload = SignMessageInput;
+
+export type SignTypedDataInput = {
+  types: TypedData;
+  primaryType: string;
+  message: Record<string, unknown>;
+  domain?: TypedDataDomain;
+};
+
+export type SignTypedDataPayload = SignTypedDataInput;

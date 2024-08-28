@@ -11,6 +11,9 @@ export enum ResponseEvent {
   MiniAppVerifyAction = "miniapp-verify-action",
   MiniAppPayment = "miniapp-payment",
   MiniAppWalletAuth = "miniapp-wallet-auth",
+  MiniAppSendTransaction = "miniapp-send-transaction",
+  MiniAppSignMessage = "miniapp-sign-message",
+  MiniAppSignTypedData = "miniapp-sign-typed-data",
 }
 
 export type MiniAppVerifyActionSuccessPayload = {
@@ -72,10 +75,64 @@ export type MiniAppWalletAuthPayload =
   | MiniAppWalletAuthSuccessPayload
   | MiniAppWalletAuthErrorPayload;
 
+export type MiniAppSendTransactionSuccessPayload = {
+  status: "success";
+  transaction_status: "submitted";
+  transaction_id: string;
+  reference: string;
+  from: string;
+  chain: Network;
+  timestamp: string;
+  version: number;
+};
+
+export type MiniAppSendTransactionErrorPayload = {
+  status: "error";
+  error_code: string;
+  version: number;
+};
+
+export type MiniAppSendTransactionPayload =
+  | MiniAppSendTransactionSuccessPayload
+  | MiniAppSendTransactionErrorPayload;
+
+export type MiniAppSignMessageSuccessPayload = {
+  status: "success";
+  signature: string;
+  version: number;
+};
+
+export type MiniAppSignMessageErrorPayload = {
+  status: "error";
+  error_code: string;
+  version: number;
+};
+
+export type MiniAppSignMessagePayload =
+  | MiniAppSignMessageSuccessPayload
+  | MiniAppSignMessageErrorPayload;
+
+export type MiniAppSignTypedDataSuccessPayload = {
+  status: "success";
+  signature: string;
+  version: number;
+};
+
+export type MiniAppSignTypedDataErrorPayload = {
+  status: "error";
+  error_code: string;
+  version: number;
+};
+
+export type MiniAppSignTypedDataPayload =
+  | MiniAppSignTypedDataSuccessPayload
+  | MiniAppSignTypedDataErrorPayload;
+
 type EventPayloadMap = {
   [ResponseEvent.MiniAppVerifyAction]: MiniAppVerifyActionPayload;
   [ResponseEvent.MiniAppPayment]: MiniAppPaymentPayload;
   [ResponseEvent.MiniAppWalletAuth]: MiniAppWalletAuthPayload;
+  [ResponseEvent.MiniAppSendTransaction]: MiniAppSendTransactionPayload;
 };
 
 export type EventPayload<T extends ResponseEvent = ResponseEvent> =
