@@ -1,6 +1,9 @@
 import { Network } from "./payment";
 import {
   PaymentErrorCodes,
+  SendTransactionErrorCodes,
+  SignMessageErrorCode,
+  SignTypedDataErrorCode,
   VerificationErrorCodes,
   WalletAuthErrorCodes,
   WalletAuthErrorMessage,
@@ -88,7 +91,7 @@ export type MiniAppSendTransactionSuccessPayload = {
 
 export type MiniAppSendTransactionErrorPayload = {
   status: "error";
-  error_code: string;
+  error_code: SendTransactionErrorCodes;
   version: number;
 };
 
@@ -104,7 +107,7 @@ export type MiniAppSignMessageSuccessPayload = {
 
 export type MiniAppSignMessageErrorPayload = {
   status: "error";
-  error_code: string;
+  error_code: SignMessageErrorCode;
   version: number;
 };
 
@@ -120,7 +123,7 @@ export type MiniAppSignTypedDataSuccessPayload = {
 
 export type MiniAppSignTypedDataErrorPayload = {
   status: "error";
-  error_code: string;
+  error_code: SignTypedDataErrorCode;
   version: number;
 };
 
@@ -133,6 +136,8 @@ type EventPayloadMap = {
   [ResponseEvent.MiniAppPayment]: MiniAppPaymentPayload;
   [ResponseEvent.MiniAppWalletAuth]: MiniAppWalletAuthPayload;
   [ResponseEvent.MiniAppSendTransaction]: MiniAppSendTransactionPayload;
+  [ResponseEvent.MiniAppSignMessage]: MiniAppSignMessagePayload;
+  [ResponseEvent.MiniAppSignTypedData]: MiniAppSignTypedDataPayload;
 };
 
 export type EventPayload<T extends ResponseEvent = ResponseEvent> =
