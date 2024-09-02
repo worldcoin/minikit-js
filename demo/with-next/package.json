@@ -18,7 +18,8 @@
     "prettier-plugin-sort-imports-desc": "^1.0.0",
     "react": "^18",
     "react-dom": "^18",
-    "yup": "^1.4.0"
+    "yup": "^1.4.0",
+    "viem": "^2.0.0"
   },
   "devDependencies": {
     "@types/node": "^20",
