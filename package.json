@@ -8,7 +8,7 @@
     "build": "turbo run build",
     "prepublishOnly": "npm run build"
   },
-  "devDependencies": {
+  "dependencies": {
     "turbo": "^2.1.1"
   },
   "engines": {

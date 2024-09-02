@@ -1,4 +1,4 @@
-import { IDKitConfig, VerificationLevel } from "@worldcoin/idkit-core/*";
+import { IDKitConfig, VerificationLevel } from "@worldcoin/idkit-core";
 import { Network, Tokens } from "./payment";
 import { Permit2, Transaction } from "./transactions";
 import type { TypedData, TypedDataDomain } from "abitype";

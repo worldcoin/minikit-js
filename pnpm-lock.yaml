@@ -7,7 +7,7 @@ settings:
 importers:
 
   .:
-    devDependencies:
+    dependencies:
       turbo:
         specifier: ^2.1.1
         version: 2.1.1
@@ -70,14 +70,17 @@ importers:
   src:
     dependencies:
       '@worldcoin/idkit-core':
-        specifier: ^1.2.2
-        version: 1.2.2(@types/react@18.2.79)(react@18.2.0)(typescript@5.4.5)
+        specifier: ^1.3.0
+        version: 1.3.0(@types/react@18.2.79)(react@18.2.0)(typescript@5.4.5)
       abitype:
         specifier: ^1.0.6
         version: 1.0.6(typescript@5.4.5)
       ethers:
         specifier: ^6.0.8
         version: 6.12.1
+      turbo:
+        specifier: ^2.1.1
+        version: 2.1.1
     devDependencies:
       '@typescript-eslint/eslint-plugin':
         specifier: ^7.7.0
@@ -1364,8 +1367,8 @@ packages:
       typescript:
         optional: true
 
-  '@worldcoin/idkit-core@1.2.2':
-    resolution: {integrity: sha512-zc+DG1iZrQZ1LI1B3b+skb9K4TvvI55KDxWcKzdL83N8Xr1PNZ9icOWrwndufpp6IbEz+BNJFZV0hVf/KS2Zgg==}
+  '@worldcoin/idkit-core@1.3.0':
+    resolution: {integrity: sha512-HAgaZl8rmKq5aKeNAOXIbvhDwtpxTM4Wsy8F26LH1vMBgTe3tx/wHXmV7jsNl1p2k8XRhGmrAdqeRVK5QPhBfg==}
     engines: {node: '>=12.4'}
 
   abitype@1.0.5:
@@ -4961,7 +4964,7 @@ snapshots:
       - immer
       - react
 
-  '@worldcoin/idkit-core@1.2.2(@types/react@18.2.79)(react@18.2.0)(typescript@5.4.5)':
+  '@worldcoin/idkit-core@1.3.0(@types/react@18.2.79)(react@18.2.0)(typescript@5.4.5)':
     dependencies:
       browser-or-node: 3.0.0-pre.0
       buffer: 6.0.3
