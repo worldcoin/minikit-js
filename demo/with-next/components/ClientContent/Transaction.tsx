@@ -1,4 +1,5 @@
 import {
+  MiniAppSendTransactionPayload,
   MiniKit,
   ResponseEvent,
   SendTransactionErrorCodes,
@@ -7,7 +8,6 @@ import { useCallback, useEffect, useState } from "react";
 import * as yup from "yup";
 import { validateSchema } from "./helpers/validate-schema";
 import USDCABI from "../../abi/USDC.json";
-import { MiniAppSendTransactionPayload } from "../../../../src";
 
 const sendTransactionSuccessPayloadSchema = yup.object({
   status: yup.string<"success">().oneOf(["success"]),

@@ -2,15 +2,15 @@ import {
   MiniKit,
   SignMessageErrorCodes,
   ResponseEvent,
+  MiniAppSignMessagePayload,
+  SignMessageInput,
 } from "@worldcoin/minikit-js";
 import { useCallback, useEffect, useState } from "react";
 import { validateSchema } from "./helpers/validate-schema";
 import * as yup from "yup";
-import { SignMessageInput } from "../../../../src/types/commands";
 import { verifyMessage } from "@wagmi/core";
 import { config } from "../config";
 import { optimism } from "@wagmi/core/chains";
-import { MiniAppSignMessagePayload } from "../../../../src";
 
 const signMessageSuccessPayloadSchema = yup.object({
   message: yup.string().required(),

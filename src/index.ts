@@ -10,6 +10,7 @@ export {
 } from "./types";
 
 export * from "./types/responses";
+export * from "./types/commands";
 
 export { Tokens, Network, TokenDecimals } from "./types/payment";
 export { tokenToDecimals } from "helpers/payment/client";
