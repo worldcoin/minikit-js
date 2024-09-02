@@ -93,23 +93,27 @@ export const SendTransactionErrorMessage = {
     "Something unexpected went wrong. Please try again.",
 };
 
-export enum SignMessageErrorCode {
+export enum SignMessageErrorCodes {
   InvalidMessage = "invalid_message",
   UserRejected = "user_rejected",
   GenericError = "generic_error",
 }
 
 export const SignMessageErrorMessage = {
-  [SignMessageErrorCode.InvalidMessage]: "Invalid message requested",
-  [SignMessageErrorCode.UserRejected]: "User rejected the request.",
-  [SignMessageErrorCode.GenericError]: "Something unexpected went wrong.",
+  [SignMessageErrorCodes.InvalidMessage]: "Invalid message requested",
+  [SignMessageErrorCodes.UserRejected]: "User rejected the request.",
+  [SignMessageErrorCodes.GenericError]: "Something unexpected went wrong.",
 };
 
-export type SignTypedDataErrorCode = SignMessageErrorCode;
+export enum SignTypedDataErrorCodes {
+  InvalidMessage = "invalid_message",
+  UserRejected = "user_rejected",
+  GenericError = "generic_error",
+}
 
 export const SignTypedDataErrorMessage = SignMessageErrorMessage;
 
-export enum MiniKitInstallErrorCode {
+export enum MiniKitInstallErrorCodes {
   Unknown = "unknown",
   AlreadyInstalled = "already_installed",
   OutsideOfWorldApp = "outside_of_worldapp",
@@ -118,11 +122,11 @@ export enum MiniKitInstallErrorCode {
 }
 
 export const MiniKitInstallErrorMessage = {
-  [MiniKitInstallErrorCode.Unknown]: "Failed to install MiniKit.",
-  [MiniKitInstallErrorCode.AlreadyInstalled]: "MiniKit is already installed.",
-  [MiniKitInstallErrorCode.OutsideOfWorldApp]:
+  [MiniKitInstallErrorCodes.Unknown]: "Failed to install MiniKit.",
+  [MiniKitInstallErrorCodes.AlreadyInstalled]: "MiniKit is already installed.",
+  [MiniKitInstallErrorCodes.OutsideOfWorldApp]:
     "MiniApp launched outside of WorldApp.",
-  [MiniKitInstallErrorCode.NotOnClient]: "Window object is not available.",
-  [MiniKitInstallErrorCode.AppOutOfDate]:
+  [MiniKitInstallErrorCodes.NotOnClient]: "Window object is not available.",
+  [MiniKitInstallErrorCodes.AppOutOfDate]:
     "WorldApp is out of date. Please update the app.",
 };

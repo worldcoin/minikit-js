@@ -7,9 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc"
+    "type-check": "tsc"
   },
   "dependencies": {
+    "@wagmi/core": "^2.13.4",
     "@worldcoin/minikit-js": "workspace:*",
     "clsx": "^2.1.1",
     "next": "14.2.1",

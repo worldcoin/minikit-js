@@ -21,11 +21,9 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <MiniKitProvider>
-        <body className={inter.className}>
-          <SessionProvider session={session}>{children}</SessionProvider>
-        </body>
-      </MiniKitProvider>
+      <body className={inter.className}>
+        <SessionProvider session={session}>{children}</SessionProvider>
+      </body>
     </html>
   );
 }

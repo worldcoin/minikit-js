@@ -8,6 +8,9 @@ import { WalletAuth } from "./WalletAuth";
 import { ExternalLinks } from "./ExternalLinks";
 import dynamic from "next/dynamic";
 import { CameraComponent } from "./Camera";
+import { SendTransaction } from "./Transaction";
+import { SignMessage } from "./SignMessage";
+import { SignTypedData } from "./SignTypedMessage";
 
 const VersionsNoSSR = dynamic(
   () => import("./Versions").then((comp) => comp.Versions),
@@ -32,6 +35,12 @@ export const ClientContent = () => {
           <Pay />
           <hr />
           <WalletAuth />
+          <hr />
+          <SendTransaction />
+          <hr />
+          <SignMessage />
+          <hr />
+          <SignTypedData />
           <hr />
           <ExternalLinks />
           <hr />

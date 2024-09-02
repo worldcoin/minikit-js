@@ -8,10 +8,11 @@
     "build": "turbo run build",
     "prepublishOnly": "npm run build"
   },
-  "devDependencies": {
-    "turbo": "^1.11.1"
+  "dependencies": {
+    "turbo": "^2.1.1"
   },
   "engines": {
     "node": ">=18"
-  }
+  },
+  "packageManager": "pnpm@9.9.0"
 }

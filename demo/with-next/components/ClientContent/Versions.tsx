@@ -2,7 +2,7 @@
 
 import {
   MiniKit,
-  MiniKitInstallErrorCode,
+  MiniKitInstallErrorCodes,
   MiniKitInstallErrorMessage,
 } from "@worldcoin/minikit-js";
 
@@ -23,7 +23,7 @@ export const Versions = () => {
         return {
           isValid: false,
           error:
-            MiniKitInstallErrorMessage[MiniKitInstallErrorCode.AppOutOfDate],
+            MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.AppOutOfDate],
         };
       }
     } catch (error) {

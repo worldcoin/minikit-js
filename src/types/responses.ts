@@ -2,8 +2,8 @@ import { Network } from "./payment";
 import {
   PaymentErrorCodes,
   SendTransactionErrorCodes,
-  SignMessageErrorCode,
-  SignTypedDataErrorCode,
+  SignMessageErrorCodes,
+  SignTypedDataErrorCodes,
   VerificationErrorCodes,
   WalletAuthErrorCodes,
   WalletAuthErrorMessage,
@@ -102,12 +102,13 @@ export type MiniAppSendTransactionPayload =
 export type MiniAppSignMessageSuccessPayload = {
   status: "success";
   signature: string;
+  address: string;
   version: number;
 };
 
 export type MiniAppSignMessageErrorPayload = {
   status: "error";
-  error_code: SignMessageErrorCode;
+  error_code: SignMessageErrorCodes;
   version: number;
 };
 
@@ -118,12 +119,13 @@ export type MiniAppSignMessagePayload =
 export type MiniAppSignTypedDataSuccessPayload = {
   status: "success";
   signature: string;
+  address: string;
   version: number;
 };
 
 export type MiniAppSignTypedDataErrorPayload = {
   status: "error";
-  error_code: SignTypedDataErrorCode;
+  error_code: SignTypedDataErrorCodes;
   version: number;
 };
 
