@@ -16,4 +16,4 @@ export {
 
 export { Tokens } from "./payment";
 export { SiweMessage } from "./wallet-auth";
-export { MiniKitInstallErrorCode, MiniKitInstallErrorMessage } from "./errors";
+export { MiniKitInstallErrorCodes, MiniKitInstallErrorMessage } from "./errors";

@@ -1,8 +1,8 @@
 import { IDKitConfig, VerificationLevel } from "@worldcoin/idkit-core/*";
 import { Network, Tokens } from "./payment";
-import { MiniKitInstallErrorCode, MiniKitInstallErrorMessage } from "./";
 import { Permit2, Transaction } from "./transactions";
 import type { TypedData, TypedDataDomain } from "abitype";
+import { MiniKitInstallErrorCodes, MiniKitInstallErrorMessage } from "./errors";
 
 export enum Command {
   Verify = "verify",
@@ -62,8 +62,8 @@ export type MiniKitInstallReturnType =
   | { success: true }
   | {
       success: false;
-      errorCode: MiniKitInstallErrorCode;
-      errorMessage: (typeof MiniKitInstallErrorMessage)[MiniKitInstallErrorCode];
+      errorCode: MiniKitInstallErrorCodes;
+      errorMessage: (typeof MiniKitInstallErrorMessage)[MiniKitInstallErrorCodes];
     };
 
 export type SendTransactionInput = {

@@ -25,7 +25,7 @@ import { VerificationLevel } from "@worldcoin/idkit-core";
 import { validateWalletAuthCommandInput } from "helpers/siwe/validate-wallet-auth-command-input";
 import { generateSiweMessage } from "helpers/siwe/siwe";
 import {
-  MiniKitInstallErrorCode,
+  MiniKitInstallErrorCodes,
   MiniKitInstallReturnType,
   MiniKitInstallErrorMessage,
 } from "types";
@@ -99,27 +99,29 @@ export class MiniKit {
     if (typeof window === "undefined" || Boolean(window.MiniKit)) {
       return {
         success: false,
-        errorCode: MiniKitInstallErrorCode.AlreadyInstalled,
+        errorCode: MiniKitInstallErrorCodes.AlreadyInstalled,
         errorMessage:
-          MiniKitInstallErrorMessage[MiniKitInstallErrorCode.AlreadyInstalled],
+          MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.AlreadyInstalled],
       };
     }
 
     if (!window.WorldApp) {
       return {
         success: false,
-        errorCode: MiniKitInstallErrorCode.OutsideOfWorldApp,
+        errorCode: MiniKitInstallErrorCodes.OutsideOfWorldApp,
         errorMessage:
-          MiniKitInstallErrorMessage[MiniKitInstallErrorCode.OutsideOfWorldApp],
+          MiniKitInstallErrorMessage[
+            MiniKitInstallErrorCodes.OutsideOfWorldApp
+          ],
       };
     }
 
     if (!this.commandsValid(window.WorldApp.supported_commands)) {
       return {
         success: false,
-        errorCode: MiniKitInstallErrorCode.AppOutOfDate,
+        errorCode: MiniKitInstallErrorCodes.AppOutOfDate,
         errorMessage:
-          MiniKitInstallErrorMessage[MiniKitInstallErrorCode.AppOutOfDate],
+          MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.AppOutOfDate],
       };
     }
 
@@ -128,15 +130,15 @@ export class MiniKit {
       this.sendInit();
     } catch (error) {
       console.error(
-        MiniKitInstallErrorMessage[MiniKitInstallErrorCode.Unknown],
+        MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.Unknown],
         error
       );
 
       return {
         success: false,
-        errorCode: MiniKitInstallErrorCode.Unknown,
+        errorCode: MiniKitInstallErrorCodes.Unknown,
         errorMessage:
-          MiniKitInstallErrorMessage[MiniKitInstallErrorCode.Unknown],
+          MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.Unknown],
       };
     }
 
