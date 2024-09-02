@@ -1,9 +1,3 @@
-export {
-  parseSiweMessage,
-  SAFE_CONTRACT_ABI,
-  verifySiweMessage,
-} from "helpers/siwe/siwe";
-
 export * from "types/errors";
 
 export { MiniKit } from "./minikit";
@@ -16,6 +10,7 @@ export {
 } from "./types";
 
 export * from "./types/responses";
+export * from "./types/commands";
 
 export { Tokens, Network, TokenDecimals } from "./types/payment";
 export { tokenToDecimals } from "helpers/payment/client";
@@ -25,3 +20,9 @@ export {
   verifyCloudProof,
   type IVerifyResponse,
 } from "@worldcoin/idkit-core/backend";
+
+export {
+  parseSiweMessage,
+  SAFE_CONTRACT_ABI,
+  verifySiweMessage,
+} from "helpers/siwe/siwe";

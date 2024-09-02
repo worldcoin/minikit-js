@@ -2,14 +2,14 @@ import {
   MiniKit,
   SignTypedDataErrorCodes,
   ResponseEvent,
+  MiniAppSignTypedDataPayload,
+  SignTypedDataInput,
 } from "@worldcoin/minikit-js";
 import { useCallback, useEffect, useState } from "react";
 import { validateSchema } from "./helpers/validate-schema";
 import * as yup from "yup";
-import { SignTypedDataInput } from "../../../../src/types/commands";
 import { verifyMessage } from "@wagmi/core";
 import { config } from "../config";
-import { optimism } from "@wagmi/core/chains";
 
 const signTypedDataSuccessPayloadSchema = yup.object({
   message: yup.string().required(),
@@ -38,7 +38,7 @@ export const SignTypedData = () => {
   ] = useState<string | null>();
 
   const [
-    signTypedDataPayloadVerificaitonMessage,
+    signTypedDataPayloadVerificationMessage,
     setSignTypedDataPayloadVerificationMessage,
   ] = useState<string | null>();
 
@@ -50,45 +50,48 @@ export const SignTypedData = () => {
       return;
     }
 
-    MiniKit.subscribe(ResponseEvent.MiniAppSignTypedData, async (payload) => {
-      console.log("MiniAppSignTypedData, SUBSCRIBE PAYLOAD", payload);
+    MiniKit.subscribe(
+      ResponseEvent.MiniAppSignTypedData,
+      async (payload: MiniAppSignTypedDataPayload) => {
+        console.log("MiniAppSignTypedData, SUBSCRIBE PAYLOAD", payload);
 
-      if (payload.status === "error") {
-        const errorMessage = await validateSchema(
-          signTypedDataErrorPayloadSchema,
-          payload
-        );
+        if (payload.status === "error") {
+          const errorMessage = await validateSchema(
+            signTypedDataErrorPayloadSchema,
+            payload
+          );
 
-        if (!errorMessage) {
-          setSignTypedDataPayloadValidationMessage("Payload is valid");
+          if (!errorMessage) {
+            setSignTypedDataPayloadValidationMessage("Payload is valid");
+          } else {
+            setSignTypedDataPayloadValidationMessage(errorMessage);
+          }
         } else {
-          setSignTypedDataPayloadValidationMessage(errorMessage);
-        }
-      } else {
-        const errorMessage = await validateSchema(
-          signTypedDataSuccessPayloadSchema,
-          payload
-        );
+          const errorMessage = await validateSchema(
+            signTypedDataSuccessPayloadSchema,
+            payload
+          );
 
-        if (!errorMessage) {
-          setSignTypedDataPayloadValidationMessage("Payload is valid");
-        } else {
-          setSignTypedDataPayloadValidationMessage(errorMessage);
+          if (!errorMessage) {
+            setSignTypedDataPayloadValidationMessage("Payload is valid");
+          } else {
+            setSignTypedDataPayloadValidationMessage(errorMessage);
+          }
         }
+
+        const isValid = await verifyMessage(config, {
+          address: "0x4564420674EA68fcc61b463C0494807C759d47e6",
+          message: "hello world",
+          signature:
+            "0x654c6c04ba9496731e26f92b74a0de100e2dc72e0ae646698d5f8ed68c2b9db03bb46a772843608717d8ba3d8ae1d4a330bc97315b14397d9216b45b3834351d1b",
+        });
+
+        setSignTypedDataAppPayload(JSON.stringify(payload, null, 2));
+        setSignTypedDataPayloadVerificationMessage(
+          isValid ? "Signature is valid" : "Signature is invalid"
+        );
       }
-
-      const isValid = await verifyMessage(config, {
-        address: "0x4564420674EA68fcc61b463C0494807C759d47e6",
-        message: "hello world",
-        signature:
-          "0x654c6c04ba9496731e26f92b74a0de100e2dc72e0ae646698d5f8ed68c2b9db03bb46a772843608717d8ba3d8ae1d4a330bc97315b14397d9216b45b3834351d1b",
-      });
-
-      setSignTypedDataAppPayload(JSON.stringify(payload, null, 2));
-      setSignTypedDataPayloadVerificationMessage(
-        isValid ? "Signature is valid" : "Signature is invalid"
-      );
-    });
+    );
 
     return () => {
       MiniKit.unsubscribe(ResponseEvent.MiniAppSignTypedData);

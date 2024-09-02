@@ -1,4 +1,5 @@
 import {
+  MiniAppSendTransactionPayload,
   MiniKit,
   ResponseEvent,
   SendTransactionErrorCodes,
@@ -55,55 +56,58 @@ export const SendTransaction = () => {
       return;
     }
 
-    MiniKit.subscribe(ResponseEvent.MiniAppSendTransaction, async (payload) => {
-      console.log("MiniAppSendTransaction, SUBSCRIBE PAYLOAD", payload);
+    MiniKit.subscribe(
+      ResponseEvent.MiniAppSendTransaction,
+      async (payload: MiniAppSendTransactionPayload) => {
+        console.log("MiniAppSendTransaction, SUBSCRIBE PAYLOAD", payload);
 
-      if (payload.status === "error") {
-        const errorMessage = await validateSchema(
-          sendTransactionErrorPayloadSchema,
-          payload
-        );
+        if (payload.status === "error") {
+          const errorMessage = await validateSchema(
+            sendTransactionErrorPayloadSchema,
+            payload
+          );
 
-        if (!errorMessage) {
-          setSendTransactionPayloadValidationMessage("Payload is valid");
+          if (!errorMessage) {
+            setSendTransactionPayloadValidationMessage("Payload is valid");
+          } else {
+            setSendTransactionPayloadValidationMessage(errorMessage);
+          }
         } else {
-          setSendTransactionPayloadValidationMessage(errorMessage);
+          const errorMessage = await validateSchema(
+            sendTransactionSuccessPayloadSchema,
+            payload
+          );
+
+          if (!errorMessage) {
+            setSendTransactionPayloadValidationMessage("Payload is valid");
+          } else {
+            setSendTransactionPayloadValidationMessage(errorMessage);
+          }
+
+          // // Call the API to verify the message
+          // const response = await fetch("/api/verify-siwe", {
+          //   method: "POST",
+          //   headers: {
+          //     "Content-Type": "application/json",
+          //   },
+          //   body: JSON.stringify({
+          //     siweResponsePayload: payload,
+          //   }),
+          // });
+
+          // const responseJson = await response.json();
+
+          // setSendTransactionVerificationMessage(
+          //   responseJson.isValid
+          //     ? "Valid! Successful Transaction"
+          //     : `Failed: ${responseJson.message}`
+          // );
         }
-      } else {
-        const errorMessage = await validateSchema(
-          sendTransactionSuccessPayloadSchema,
-          payload
-        );
+        setSendTransactionVerificationMessage("TODO");
 
-        if (!errorMessage) {
-          setSendTransactionPayloadValidationMessage("Payload is valid");
-        } else {
-          setSendTransactionPayloadValidationMessage(errorMessage);
-        }
-
-        // // Call the API to verify the message
-        // const response = await fetch("/api/verify-siwe", {
-        //   method: "POST",
-        //   headers: {
-        //     "Content-Type": "application/json",
-        //   },
-        //   body: JSON.stringify({
-        //     siweResponsePayload: payload,
-        //   }),
-        // });
-
-        // const responseJson = await response.json();
-
-        // setSendTransactionVerificationMessage(
-        //   responseJson.isValid
-        //     ? "Valid! Successful Transaction"
-        //     : `Failed: ${responseJson.message}`
-        // );
+        setReceivedSendTransactionPayload(payload);
       }
-      setSendTransactionVerificationMessage("TODO");
-
-      setReceivedSendTransactionPayload(payload);
-    });
+    );
 
     return () => {
       MiniKit.unsubscribe(ResponseEvent.MiniAppSendTransaction);
