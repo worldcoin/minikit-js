@@ -1,6 +1,13 @@
 import { SiweMessage } from "types/wallet-auth";
-import { ethers } from "ethers";
 import { MiniAppWalletAuthSuccessPayload } from "types/responses";
+import {
+  hashMessage,
+  createPublicClient,
+  http,
+  getContract,
+  Client,
+} from "viem";
+import { optimism } from "viem/chains";
 
 const PREAMBLE = " wants you to sign in with your Ethereum account:";
 const URI_TAG = "URI: ";
@@ -130,7 +137,7 @@ export const SAFE_CONTRACT_ABI = [
     ],
     outputs: [],
   },
-];
+] as const;
 
 // Nonce is required to be passed in as a parameter to verify the message
 export const verifySiweMessage = async (
@@ -138,7 +145,7 @@ export const verifySiweMessage = async (
   nonce: string,
   statement?: string,
   requestId?: string,
-  userProvider?: ethers.Provider
+  userProvider?: Client
 ) => {
   if (typeof window !== "undefined") {
     throw new Error("Verify can only be called in the backend");
@@ -182,18 +189,22 @@ export const verifySiweMessage = async (
 
   // Check ERC-191 Signature Matches
   let provider =
-    userProvider || ethers.getDefaultProvider("https://mainnet.optimism.io");
+    userProvider || createPublicClient({ chain: optimism, transport: http() });
   const signedMessage = `${ERC_191_PREFIX}${message.length}${message}`;
   const messageBytes = Buffer.from(signedMessage, "utf8").toString("hex");
-  const hashedMessage = ethers.hashMessage(signedMessage);
-  const contract = new ethers.Contract(address, SAFE_CONTRACT_ABI, provider);
+  const hashedMessage = hashMessage(signedMessage);
+  const contract = getContract({
+    address: address as `0x${string}`,
+    abi: SAFE_CONTRACT_ABI,
+    client: provider,
+  });
 
   try {
-    await contract.checkSignatures(
+    await contract.read.checkSignatures([
       hashedMessage,
       `0x${messageBytes}`,
-      `0x${signature}`
-    );
+      `0x${signature}`,
+    ]);
   } catch (error) {
     throw new Error("Signature verification failed");
   }
