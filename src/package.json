@@ -41,7 +41,6 @@
     "prettier": "^3.2.5",
     "prettier-plugin-sort-imports-desc": "^1.0.0",
     "tsup": "^8.0.2",
-    "turbo": "^1.13.2",
     "typescript": "^5.4.5"
   },
   "peerDependencies": {
