@@ -137,7 +137,7 @@ export const SAFE_CONTRACT_ABI = [
     ],
     outputs: [],
   },
-] as const;
+];
 
 // Nonce is required to be passed in as a parameter to verify the message
 export const verifySiweMessage = async (
