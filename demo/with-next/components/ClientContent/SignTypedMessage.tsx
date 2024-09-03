@@ -148,7 +148,7 @@ export const SignTypedData = () => {
           className="bg-black text-white rounded-lg p-4 w-full"
           onClick={onSignTypedData}
         >
-          Sign Message
+          Sign Typed Data
         </button>
       </div>
 
