@@ -134,29 +134,42 @@ export const SendTransaction = () => {
       deadline,
     };
 
+    const transferDetails = {
+      to: "0x126f7998Eb44Dd2d097A8AB2eBcb28dEA1646AC8",
+      requestedAmount: "1000000",
+    };
+
     const payload = MiniKit.commands.sendTransaction({
       transaction: [
         {
-          to: "0x6c837b175a9135eaea5ff4762a2fe7058997bbce",
+          to: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
           abi: DEXABI,
           functionName: "signatureTransfer",
-          args: [permitTransfer, "PERMIT2_SIGNATURE_PLACEHOLDER_0"],
+          args: [
+            permitTransfer,
+            transferDetails,
+            "PERMIT2_SIGNATURE_PLACEHOLDER_0",
+          ],
         },
         {
-          to: "0x6c837b175a9135eaea5ff4762a2fe7058997bbce",
+          to: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
           abi: DEXABI,
           functionName: "signatureTransfer",
-          args: [permitTransfer, "PERMIT2_SIGNATURE_PLACEHOLDER_1"],
+          args: [
+            permitTransfer,
+            transferDetails,
+            "PERMIT2_SIGNATURE_PLACEHOLDER_1",
+          ],
         },
       ],
       permit2: [
         {
           ...permitTransfer,
-          spender: "0x6c837b175a9135eaea5ff4762a2fe7058997bbce",
+          spender: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
         },
         {
           ...permitTransfer,
-          spender: "0x6c837b175a9135eaea5ff4762a2fe7058997bbce",
+          spender: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
         },
       ],
     });
