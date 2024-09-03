@@ -7,7 +7,8 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import * as yup from "yup";
 import { validateSchema } from "./helpers/validate-schema";
-import USDCABI from "../../abi/USDC.json";
+import DEXABI from "../../abi/DEX.json";
+import { PermitTransferFrom } from "@uniswap/permit2-sdk";
 
 const sendTransactionSuccessPayloadSchema = yup.object({
   status: yup.string<"success">().oneOf(["success"]),
@@ -30,6 +31,10 @@ const sendTransactionErrorPayloadSchema = yup.object({
 const testTokens = {
   optimism: {
     USDC: "0x0b2c639c533813f4aa9d7837caf62653d097ff85",
+    USDCE: "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
+  },
+  worldchain: {
+    USDCE: "0x79A02482A880bCE3F13e09Da970dC34db4CD24d1",
   },
 };
 
@@ -115,33 +120,44 @@ export const SendTransaction = () => {
   }, []);
 
   const onSendTransactionClick = useCallback(() => {
-    const deadline = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+    const deadline = Math.floor(
+      (Date.now() + 30 * 60 * 1000) / 1000
+    ).toString();
+
+    // transfers can also be at most 1 hour in the future.
+    const permitTransfer: PermitTransferFrom = {
+      permitted: {
+        token: testTokens.optimism.USDCE,
+        amount: "1000000",
+      },
+      spender: "0x0c892815f0B058E69987920A23FBb33c834289cf",
+      nonce: "12345",
+      deadline,
+    };
 
     const payload = MiniKit.commands.sendTransaction({
       transaction: [
         {
-          to: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-          abi: USDCABI,
-          functionName: "transferFrom",
-          args: [2000000, "PERMIT2_SIGNATURE_PLACEHOLDER_1"],
+          to: "0x6c837b175a9135eaea5ff4762a2fe7058997bbce",
+          abi: DEXABI,
+          functionName: "signatureTransfer",
+          args: [permitTransfer, "PERMIT2_SIGNATURE_PLACEHOLDER_0"],
         },
         {
-          to: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-          abi: USDCABI,
-          functionName: "transferFrom",
-          args: [100000, "PERMIT2_SIGNATURE_PLACEHOLDER_2"],
+          to: "0x6c837b175a9135eaea5ff4762a2fe7058997bbce",
+          abi: DEXABI,
+          functionName: "signatureTransfer",
+          args: [permitTransfer, "PERMIT2_SIGNATURE_PLACEHOLDER_1"],
         },
       ],
       permit2: [
         {
-          deadline: deadline,
-          token_address: testTokens.optimism.USDC,
-          amount: "100000000",
+          ...permitTransfer,
+          spender: "0x6c837b175a9135eaea5ff4762a2fe7058997bbce",
         },
         {
-          deadline: deadline,
-          token_address: testTokens.optimism.USDC,
-          amount: "100000000",
+          ...permitTransfer,
+          spender: "0x6c837b175a9135eaea5ff4762a2fe7058997bbce",
         },
       ],
     });
