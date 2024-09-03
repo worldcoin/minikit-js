@@ -76,7 +76,8 @@ export const SignMessage = () => {
             signMessageSuccessPayloadSchema,
             payload
           );
-
+          
+          // This checks if the response format is correct
           if (!errorMessage) {
             setSignMessagePayloadValidationMessage("Payload is valid");
           } else {
@@ -92,7 +93,8 @@ export const SignMessage = () => {
             messageHash,
             payload.signature,
           )
-          
+
+          // Checks functionally if the signature is correct
           if(isValid) {
             setSignMessagePayloadVerificationMessage("Signature is valid")
           } else {

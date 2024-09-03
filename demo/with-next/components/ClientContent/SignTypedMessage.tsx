@@ -10,6 +10,7 @@ import { validateSchema } from "./helpers/validate-schema";
 import * as yup from "yup";
 import { verifyMessage } from "@wagmi/core";
 import { config } from "../config";
+import Safe, { hashSafeMessage } from "@safe-global/protocol-kit";
 
 const signTypedDataSuccessPayloadSchema = yup.object({
   message: yup.string().required(),
@@ -26,6 +27,71 @@ const signTypedDataErrorPayloadSchema = yup.object({
   status: yup.string<"error">().equals(["error"]).required(),
   version: yup.number().required(),
 });
+
+const signTypedDataPayload = {
+  "types":{
+     "EIP712Domain":[
+        {
+           "name":"name",
+           "type":"string"
+        },
+        {
+           "name":"version",
+           "type":"string"
+        },
+        {
+           "name":"chainId",
+           "type":"uint256"
+        },
+        {
+           "name":"verifyingContract",
+           "type":"address"
+        }
+     ],
+     "Person":[
+        {
+           "name":"name",
+           "type":"string"
+        },
+        {
+           "name":"wallet",
+           "type":"address"
+        }
+     ],
+     "Mail":[
+        {
+           "name":"from",
+           "type":"Person"
+        },
+        {
+           "name":"to",
+           "type":"Person"
+        },
+        {
+           "name":"contents",
+           "type":"string"
+        }
+     ]
+  },
+  "primaryType":"Mail",
+  "domain":{
+     "name":"Ether Mail",
+     "version":"1",
+     "chainId":1,
+     "verifyingContract":"0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC"
+  },
+  "message":{
+     "from":{
+        "name":"Cow",
+        "wallet":"0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826"
+     },
+     "to":{
+        "name":"Bob",
+        "wallet":"0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB"
+     },
+     "contents":"Hello, Bob!"
+  }
+};
 
 export const SignTypedData = () => {
   const [signTypedDataAppPayload, setSignTypedDataAppPayload] = useState<
@@ -72,24 +138,32 @@ export const SignTypedData = () => {
             payload
           );
 
+          setSignTypedDataAppPayload(JSON.stringify(payload, null, 2));
+          
+          // This checks if the response format is correct
           if (!errorMessage) {
             setSignTypedDataPayloadValidationMessage("Payload is valid");
           } else {
             setSignTypedDataPayloadValidationMessage(errorMessage);
           }
+
+          const messageHash = hashSafeMessage(signTypedDataPayload)
+
+          const isValid = await (await Safe.init({
+            provider: "https://opt-mainnet.g.alchemy.com/v2/Ha76ahWcm6iDVBU7GNr5n-ONLgzWnkWc",
+            safeAddress: payload.address,
+          })).isValidSignature(
+            messageHash,
+            payload.signature,
+          )
+
+          // Checks functionally if the signature is correct
+          if(isValid) {
+            setSignTypedDataPayloadVerificationMessage("Signature is valid")
+          } else {
+            setSignTypedDataPayloadVerificationMessage("Signature is invalid (We are verifying on optimism, if you are using worldchain message andy")
+          }
         }
-
-        const isValid = await verifyMessage(config, {
-          address: "0x4564420674EA68fcc61b463C0494807C759d47e6",
-          message: "hello world",
-          signature:
-            "0x654c6c04ba9496731e26f92b74a0de100e2dc72e0ae646698d5f8ed68c2b9db03bb46a772843608717d8ba3d8ae1d4a330bc97315b14397d9216b45b3834351d1b",
-        });
-
-        setSignTypedDataAppPayload(JSON.stringify(payload, null, 2));
-        setSignTypedDataPayloadVerificationMessage(
-          isValid ? "Signature is valid" : "Signature is invalid"
-        );
       }
     );
 
@@ -99,32 +173,6 @@ export const SignTypedData = () => {
   }, []);
 
   const onSignTypedData = useCallback(async () => {
-    const signTypedDataPayload: SignTypedDataInput = {
-      types: {
-        Person: [
-          { name: "name", type: "string" },
-          { name: "wallet", type: "address" },
-        ],
-        Mail: [
-          { name: "from", type: "Person" },
-          { name: "to", type: "Person" },
-          { name: "contents", type: "string" },
-        ],
-      },
-      primaryType: "Mail",
-      message: {
-        from: {
-          name: "Cow",
-          wallet: "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826",
-        },
-        to: {
-          name: "Bob",
-          wallet: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB",
-        },
-        contents: "Hello, Bob!",
-      },
-    };
-
     const payload = MiniKit.commands.signTypedData(signTypedDataPayload);
 
     setSentSignTypedDataPayload({
@@ -170,9 +218,9 @@ export const SignTypedData = () => {
           </p>
         </div>
         <div>
-          <p>Verification message:</p>
-          <p className="bg-gray-300 p-2">
-            {signTypedDataPayloadValidationMessage ?? "No validation"}
+        <p>Check does signature verify:</p>
+        <p className="bg-gray-300 p-2">
+            {signTypedDataPayloadVerificationMessage ?? "No verification"}
           </p>
         </div>
       </div>
