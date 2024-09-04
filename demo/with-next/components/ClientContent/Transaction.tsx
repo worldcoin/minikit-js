@@ -133,11 +133,21 @@ export const SendTransaction = () => {
       nonce: "12345",
       deadline,
     };
+    const permitTransferArgsForm = [
+      [permitTransfer.permitted.token, permitTransfer.permitted.amount],
+      permitTransfer.nonce,
+      permitTransfer.deadline
+    ]
 
     const transferDetails = {
       to: "0x126f7998Eb44Dd2d097A8AB2eBcb28dEA1646AC8",
       requestedAmount: "1000000",
     };
+
+    const transferDetailsArgsForm = [
+      transferDetails.to,
+      transferDetails.requestedAmount
+    ]
 
     const payload = MiniKit.commands.sendTransaction({
       transaction: [
@@ -146,8 +156,8 @@ export const SendTransaction = () => {
           abi: DEXABI,
           functionName: "signatureTransfer",
           args: [
-            permitTransfer,
-            transferDetails,
+            permitTransferArgsForm,
+            transferDetailsArgsForm,
             "PERMIT2_SIGNATURE_PLACEHOLDER_0",
           ],
         },
@@ -156,8 +166,8 @@ export const SendTransaction = () => {
           abi: DEXABI,
           functionName: "signatureTransfer",
           args: [
-            permitTransfer,
-            transferDetails,
+            permitTransferArgsForm,
+            transferDetailsArgsForm,
             "PERMIT2_SIGNATURE_PLACEHOLDER_1",
           ],
         },
