@@ -51,59 +51,58 @@ export const SignMessage = () => {
   const messageToSign = "hello world";
 
   useEffect(() => {
+    console.log("listener installed: ", MiniKit.isInstalled());
     if (!MiniKit.isInstalled()) {
       return;
     }
 
-    MiniKit.subscribe(
-      ResponseEvent.MiniAppSignMessage,
-      async (payload: MiniAppSignMessagePayload) => {
-        console.log("MiniAppSignMessage, SUBSCRIBE PAYLOAD", payload);
+    MiniKit.subscribe(ResponseEvent.MiniAppSignMessage, async (payload) => {
+      console.log("MiniAppSignMessage, SUBSCRIBE PAYLOAD", payload);
+      setSignMessageAppPayload(JSON.stringify(payload, null, 2));
+      if (payload.status === "error") {
+        const errorMessage = await validateSchema(
+          signMessageErrorPayloadSchema,
+          payload
+        );
 
-        if (payload.status === "error") {
-          const errorMessage = await validateSchema(
-            signMessageErrorPayloadSchema,
-            payload
-          );
-
-          if (!errorMessage) {
-            setSignMessagePayloadValidationMessage("Payload is valid");
-          } else {
-            setSignMessagePayloadValidationMessage(errorMessage);
-          }
+        if (!errorMessage) {
+          setSignMessagePayloadValidationMessage("Payload is valid");
         } else {
-          const errorMessage = await validateSchema(
-            signMessageSuccessPayloadSchema,
-            payload
-          );
-          
-          // This checks if the response format is correct
-          if (!errorMessage) {
-            setSignMessagePayloadValidationMessage("Payload is valid");
-          } else {
-            setSignMessagePayloadValidationMessage(errorMessage);
-          }
+          setSignMessagePayloadValidationMessage(errorMessage);
+        }
+      } else {
+        const errorMessage = await validateSchema(
+          signMessageSuccessPayloadSchema,
+          payload
+        );
 
-          const messageHash = hashSafeMessage(messageToSign)
+        // This checks if the response format is correct
+        if (!errorMessage) {
+          setSignMessagePayloadValidationMessage("Payload is valid");
+        } else {
+          setSignMessagePayloadValidationMessage(errorMessage);
+        }
 
-          const isValid = await (await Safe.init({
-            provider: "https://opt-mainnet.g.alchemy.com/v2/Ha76ahWcm6iDVBU7GNr5n-ONLgzWnkWc",
+        const messageHash = hashSafeMessage(messageToSign);
+
+        const isValid = await (
+          await Safe.init({
+            provider:
+              "https://opt-mainnet.g.alchemy.com/v2/Ha76ahWcm6iDVBU7GNr5n-ONLgzWnkWc",
             safeAddress: payload.address,
-          })).isValidSignature(
-            messageHash,
-            payload.signature,
-          )
+          })
+        ).isValidSignature(messageHash, payload.signature);
 
-          // Checks functionally if the signature is correct
-          if(isValid) {
-            setSignMessagePayloadVerificationMessage("Signature is valid")
-          } else {
-            setSignMessagePayloadVerificationMessage("Signature is invalid (We are verifying on optimism, if you are using worldchain message andy")
-          }
-
+        // Checks functionally if the signature is correct
+        if (isValid) {
+          setSignMessagePayloadVerificationMessage("Signature is valid");
+        } else {
+          setSignMessagePayloadVerificationMessage(
+            "Signature is invalid (We are verifying on optimism, if you are using worldchain message andy"
+          );
         }
       }
-    );
+    });
 
     return () => {
       MiniKit.unsubscribe(ResponseEvent.MiniAppSignMessage);
