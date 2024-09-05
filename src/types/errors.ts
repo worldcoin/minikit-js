@@ -79,6 +79,7 @@ export enum SendTransactionErrorCodes {
   UserRejected = "user_rejected",
   InputError = "input_error",
   SimulationFailed = "simulation_failed",
+  TransactionFailed = "transaction_failed",
   GenericError = "generic_error",
 }
 
@@ -89,6 +90,8 @@ export const SendTransactionErrorMessage = {
   [SendTransactionErrorCodes.InputError]: "Invalid payload.",
   [SendTransactionErrorCodes.SimulationFailed]:
     "The transaction simulation failed.",
+  [SendTransactionErrorCodes.TransactionFailed]:
+    "The transaction failed. Please try again later.",
   [SendTransactionErrorCodes.GenericError]:
     "Something unexpected went wrong. Please try again.",
 };

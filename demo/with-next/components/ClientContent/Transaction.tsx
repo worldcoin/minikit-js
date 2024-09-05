@@ -8,7 +8,6 @@ import { useCallback, useEffect, useState } from "react";
 import * as yup from "yup";
 import { validateSchema } from "./helpers/validate-schema";
 import DEXABI from "../../abi/DEX.json";
-import { PermitTransferFrom } from "@uniswap/permit2-sdk";
 
 const sendTransactionSuccessPayloadSchema = yup.object({
   status: yup.string<"success">().oneOf(["success"]),
