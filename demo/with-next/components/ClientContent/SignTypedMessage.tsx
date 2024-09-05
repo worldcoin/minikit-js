@@ -3,17 +3,13 @@ import {
   SignTypedDataErrorCodes,
   ResponseEvent,
   MiniAppSignTypedDataPayload,
-  SignTypedDataInput,
 } from "@worldcoin/minikit-js";
 import { useCallback, useEffect, useState } from "react";
 import { validateSchema } from "./helpers/validate-schema";
 import * as yup from "yup";
-import { verifyMessage } from "@wagmi/core";
-import { config } from "../config";
 import Safe, { hashSafeMessage } from "@safe-global/protocol-kit";
 
 const signTypedDataSuccessPayloadSchema = yup.object({
-  message: yup.string().required(),
   status: yup.string<"success">().oneOf(["success"]),
   signature: yup.string().required(),
   address: yup.string().required(),
@@ -97,6 +93,7 @@ export const SignTypedData = () => {
   const [signTypedDataAppPayload, setSignTypedDataAppPayload] = useState<
     string | undefined
   >();
+  const [tempInstallFix, setTempInstallFix] = useState(0);
 
   const [
     signTypedDataPayloadValidationMessage,
@@ -170,7 +167,7 @@ export const SignTypedData = () => {
     return () => {
       MiniKit.unsubscribe(ResponseEvent.MiniAppSignTypedData);
     };
-  }, []);
+  }, [tempInstallFix]);
 
   const onSignTypedData = useCallback(async () => {
     const payload = MiniKit.commands.signTypedData(signTypedDataPayload);
@@ -178,6 +175,7 @@ export const SignTypedData = () => {
     setSentSignTypedDataPayload({
       payload,
     });
+    setTempInstallFix((prev) => prev + 1);
   }, []);
 
   return (

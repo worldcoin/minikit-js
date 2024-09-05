@@ -45,6 +45,7 @@ export const SendTransaction = () => {
   > | null>(null);
   const [receivedSendTransactionPayload, setReceivedSendTransactionPayload] =
     useState<Record<string, any> | null>(null);
+  const [tempInstallFix, setTempInstallFix] = useState(0);
 
   const [
     sendTransactionPayloadValidationMessage,
@@ -117,7 +118,7 @@ export const SendTransaction = () => {
     return () => {
       MiniKit.unsubscribe(ResponseEvent.MiniAppSendTransaction);
     };
-  }, []);
+  }, [tempInstallFix]);
 
   const onSendTransactionClick = useCallback(() => {
     const deadline = Math.floor(
@@ -183,6 +184,7 @@ export const SendTransaction = () => {
         },
       ],
     });
+    setTempInstallFix((prev) => prev + 1);
     setTransactionData(payload);
   }, []);
 
