@@ -77,6 +77,7 @@ export const Pay = () => {
     });
 
     return () => {
+      console.log("removed");
       MiniKit.unsubscribe(ResponseEvent.MiniAppPayment);
     };
   }, [test]);
