@@ -80,7 +80,6 @@ export const VerifyAction = () => {
 
         setVerifyActionAppPayload(payload);
 
-        return console.log("Error payload", payload);
       }
 
       const errorMessage = await validateSchema(
@@ -88,7 +87,6 @@ export const VerifyAction = () => {
         payload
       );
 
-      console.log("errorMessage", payload.verification_level);
 
       if (errorMessage) {
         return setVerifyActionAppPayloadValidationMessage(errorMessage);

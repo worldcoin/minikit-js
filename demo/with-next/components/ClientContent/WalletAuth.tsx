@@ -41,7 +41,6 @@ export const WalletAuth = () => {
     if (!MiniKit.isInstalled()) {
       return;
     }
-    console.log("here");
     MiniKit.subscribe(ResponseEvent.MiniAppWalletAuth, async (payload) => {
       console.log("MiniAppWalletAuth, SUBSCRIBE PAYLOAD", payload);
       if (payload.status === "error") {

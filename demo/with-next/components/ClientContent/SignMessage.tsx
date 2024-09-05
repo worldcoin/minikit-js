@@ -112,7 +112,6 @@ export const SignMessage = () => {
     const signMessagePayload: SignMessageInput = {
       message: messageToSign,
     };
-    console.log("listener 1 installed: ", MiniKit.isInstalled());
 
     const payload = MiniKit.commands.signMessage(signMessagePayload);
     setSentSignMessagePayload({
