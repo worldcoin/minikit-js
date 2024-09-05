@@ -43,6 +43,7 @@ export const WalletAuth = () => {
     }
     console.log("here");
     MiniKit.subscribe(ResponseEvent.MiniAppWalletAuth, async (payload) => {
+      console.log("MiniAppWalletAuth, SUBSCRIBE PAYLOAD", payload);
       if (payload.status === "error") {
         const errorMessage = await validateSchema(
           walletAuthErrorPayloadSchema,
