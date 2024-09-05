@@ -106,7 +106,7 @@ export const SignMessage = () => {
     return () => {
       MiniKit.unsubscribe(ResponseEvent.MiniAppSignMessage);
     };
-  }, []);
+  }, [messageToSign]);
 
   const onSignMessage = useCallback(async () => {
     const signMessagePayload: SignMessageInput = {
@@ -118,7 +118,7 @@ export const SignMessage = () => {
     setSentSignMessagePayload({
       payload,
     });
-  }, []);
+  }, [messageToSign]);
 
   return (
     <div>

@@ -32,7 +32,7 @@ export const Pay = () => {
   const [paymentAppPayload, setPaymentAppPayload] = useState<
     string | undefined
   >();
-
+  const test = "test";
   const [paymentPayloadValidationMessage, setPaymentPayloadValidationMessage] =
     useState<string | null>();
 
@@ -79,7 +79,7 @@ export const Pay = () => {
     return () => {
       MiniKit.unsubscribe(ResponseEvent.MiniAppPayment);
     };
-  }, []);
+  }, [test]);
 
   const onPayClick = useCallback(
     async (amount: number, address: string, token?: Tokens) => {
