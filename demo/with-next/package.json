@@ -15,6 +15,7 @@
     "@wagmi/core": "^2.13.4",
     "@worldcoin/minikit-js": "workspace:*",
     "clsx": "^2.1.1",
+    "eruda": "^3.2.3",
     "next": "14.2.1",
     "next-auth": "^4.24.7",
     "permit2-sdk": "link:@uniswap/v3-sdk/permit2-sdk",
