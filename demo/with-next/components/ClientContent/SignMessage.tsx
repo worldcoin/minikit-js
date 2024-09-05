@@ -47,7 +47,7 @@ export const SignMessage = () => {
     string,
     any
   > | null>(null);
-
+  const [tempInstallFix, setTempInstallFix] = useState(0);
   const messageToSign = "hello world";
 
   useEffect(() => {
@@ -106,7 +106,7 @@ export const SignMessage = () => {
     return () => {
       MiniKit.unsubscribe(ResponseEvent.MiniAppSignMessage);
     };
-  }, [messageToSign]);
+  }, [tempInstallFix]);
 
   const onSignMessage = useCallback(async () => {
     const signMessagePayload: SignMessageInput = {
@@ -118,6 +118,7 @@ export const SignMessage = () => {
     setSentSignMessagePayload({
       payload,
     });
+    setTempInstallFix((prev) => prev + 1);
   }, [messageToSign]);
 
   return (

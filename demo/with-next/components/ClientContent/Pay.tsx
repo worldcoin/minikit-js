@@ -32,7 +32,7 @@ export const Pay = () => {
   const [paymentAppPayload, setPaymentAppPayload] = useState<
     string | undefined
   >();
-  const test = "test";
+  const [tempInstallFix, setTempInstallFix] = useState(0);
   const [paymentPayloadValidationMessage, setPaymentPayloadValidationMessage] =
     useState<string | null>();
 
@@ -80,7 +80,7 @@ export const Pay = () => {
       console.log("removed");
       MiniKit.unsubscribe(ResponseEvent.MiniAppPayment);
     };
-  }, [test]);
+  }, [tempInstallFix]);
 
   const onPayClick = useCallback(
     async (amount: number, address: string, token?: Tokens) => {
@@ -116,7 +116,7 @@ export const Pay = () => {
       };
 
       const payload = MiniKit.commands.pay(payPayload);
-
+      setTempInstallFix((prev) => prev + 1);
       setSentPayPayload({
         payload,
       });
