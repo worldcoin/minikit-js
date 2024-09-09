@@ -13,7 +13,6 @@ const sendTransactionSuccessPayloadSchema = yup.object({
   status: yup.string<"success">().oneOf(["success"]),
   transaction_status: yup.string<"submitted">().oneOf(["submitted"]),
   transaction_id: yup.string().required(),
-  reference: yup.string().required(),
   from: yup.string().optional(),
   chain: yup.string().required(),
   timestamp: yup.string().required(),
