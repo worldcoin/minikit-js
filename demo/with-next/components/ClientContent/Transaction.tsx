@@ -136,8 +136,8 @@ export const SendTransaction = () => {
     const permitTransferArgsForm = [
       [permitTransfer.permitted.token, permitTransfer.permitted.amount],
       permitTransfer.nonce,
-      permitTransfer.deadline
-    ]
+      permitTransfer.deadline,
+    ];
 
     const transferDetails = {
       to: "0x126f7998Eb44Dd2d097A8AB2eBcb28dEA1646AC8",
@@ -146,13 +146,13 @@ export const SendTransaction = () => {
 
     const transferDetailsArgsForm = [
       transferDetails.to,
-      transferDetails.requestedAmount
-    ]
+      transferDetails.requestedAmount,
+    ];
 
     const payload = MiniKit.commands.sendTransaction({
       transaction: [
         {
-          to: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
+          address: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
           abi: DEXABI,
           functionName: "signatureTransfer",
           args: [
@@ -162,7 +162,7 @@ export const SendTransaction = () => {
           ],
         },
         {
-          to: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
+          address: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
           abi: DEXABI,
           functionName: "signatureTransfer",
           args: [

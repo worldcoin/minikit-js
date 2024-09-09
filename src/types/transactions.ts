@@ -17,7 +17,7 @@ export type Permit2 = {
 };
 
 export type Transaction = {
-  to: string;
+  address: string;
   abi: Abi | readonly unknown[];
   functionName: ContractFunctionName<
     Abi | readonly unknown[],
