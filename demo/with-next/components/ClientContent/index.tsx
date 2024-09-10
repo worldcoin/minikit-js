@@ -45,6 +45,7 @@ export const ClientContent = () => {
           <ExternalLinks />
           <hr />
           <CameraComponent />
+          <input className="text-xs border-black border-2" />
         </div>
       </div>
     </div>
