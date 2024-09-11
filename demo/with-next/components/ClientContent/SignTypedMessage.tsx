@@ -126,6 +126,7 @@ export const SignTypedData = () => {
       ResponseEvent.MiniAppSignTypedData,
       async (payload: MiniAppSignTypedDataPayload) => {
         console.log("MiniAppSignTypedData, SUBSCRIBE PAYLOAD", payload);
+        setSignTypedDataAppPayload(JSON.stringify(payload, null, 2));
 
         if (payload.status === "error") {
           const errorMessage = await validateSchema(
@@ -143,8 +144,6 @@ export const SignTypedData = () => {
             signTypedDataSuccessPayloadSchema,
             payload
           );
-
-          setSignTypedDataAppPayload(JSON.stringify(payload, null, 2));
 
           // This checks if the response format is correct
           if (!errorMessage) {
