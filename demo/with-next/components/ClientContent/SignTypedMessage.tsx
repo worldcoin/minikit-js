@@ -25,68 +25,77 @@ const signTypedDataErrorPayloadSchema = yup.object({
 });
 
 const signTypedDataPayload = {
-  "types":{
-     "EIP712Domain":[
-        {
-           "name":"name",
-           "type":"string"
-        },
-        {
-           "name":"version",
-           "type":"string"
-        },
-        {
-           "name":"chainId",
-           "type":"uint256"
-        },
-        {
-           "name":"verifyingContract",
-           "type":"address"
-        }
-     ],
-     "Person":[
-        {
-           "name":"name",
-           "type":"string"
-        },
-        {
-           "name":"wallet",
-           "type":"address"
-        }
-     ],
-     "Mail":[
-        {
-           "name":"from",
-           "type":"Person"
-        },
-        {
-           "name":"to",
-           "type":"Person"
-        },
-        {
-           "name":"contents",
-           "type":"string"
-        }
-     ]
+  types: {
+    EIP712Domain: [
+      {
+        type: "uint256",
+        name: "chainId",
+      },
+      {
+        type: "address",
+        name: "verifyingContract",
+      },
+    ],
+    SafeTx: [
+      {
+        type: "address",
+        name: "to",
+      },
+      {
+        type: "uint256",
+        name: "value",
+      },
+      {
+        type: "bytes",
+        name: "data",
+      },
+      {
+        type: "uint8",
+        name: "operation",
+      },
+      {
+        type: "uint256",
+        name: "safeTxGas",
+      },
+      {
+        type: "uint256",
+        name: "baseGas",
+      },
+      {
+        type: "uint256",
+        name: "gasPrice",
+      },
+      {
+        type: "address",
+        name: "gasToken",
+      },
+      {
+        type: "address",
+        name: "refundReceiver",
+      },
+      {
+        type: "uint256",
+        name: "nonce",
+      },
+    ],
   },
-  "primaryType":"Mail",
-  "domain":{
-     "name":"Ether Mail",
-     "version":"1",
-     "chainId":1,
-     "verifyingContract":"0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC"
+  domain: {
+    verifyingContract: "0xd809de3086Ea4f53ed3979CEad25e1Ff72b564a3",
+    chainId: 480,
   },
-  "message":{
-     "from":{
-        "name":"Cow",
-        "wallet":"0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826"
-     },
-     "to":{
-        "name":"Bob",
-        "wallet":"0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB"
-     },
-     "contents":"Hello, Bob!"
-  }
+  primaryType: "SafeTx",
+  message: {
+    to: "0xFC637b77f1aF17fdfEE457bd6fbe2F785FF870a5",
+    value: "0",
+    data: "0xa9059cbb000000000000000000000000deaddeaddeaddeaddeaddeaddeaddeaddead00010000000000000000000000000000000000000000000000010001000001000001",
+    operation: 0,
+    baseGas: "0",
+    gasPrice: "0",
+    gasToken: "0x0000000000000000000000000000000000000000",
+    refundReceiver: "0x0000000000000000000000000000000000000000",
+    nonce: 0,
+    safeTxGas: "0",
+  },
 };
 
 export const SignTypedData = () => {
@@ -136,7 +145,7 @@ export const SignTypedData = () => {
           );
 
           setSignTypedDataAppPayload(JSON.stringify(payload, null, 2));
-          
+
           // This checks if the response format is correct
           if (!errorMessage) {
             setSignTypedDataPayloadValidationMessage("Payload is valid");
@@ -144,21 +153,23 @@ export const SignTypedData = () => {
             setSignTypedDataPayloadValidationMessage(errorMessage);
           }
 
-          const messageHash = hashSafeMessage(signTypedDataPayload)
+          const messageHash = hashSafeMessage(signTypedDataPayload);
 
-          const isValid = await (await Safe.init({
-            provider: "https://opt-mainnet.g.alchemy.com/v2/Ha76ahWcm6iDVBU7GNr5n-ONLgzWnkWc",
-            safeAddress: payload.address,
-          })).isValidSignature(
-            messageHash,
-            payload.signature,
-          )
+          const isValid = await (
+            await Safe.init({
+              provider:
+                "https://opt-mainnet.g.alchemy.com/v2/Ha76ahWcm6iDVBU7GNr5n-ONLgzWnkWc",
+              safeAddress: payload.address,
+            })
+          ).isValidSignature(messageHash, payload.signature);
 
           // Checks functionally if the signature is correct
-          if(isValid) {
-            setSignTypedDataPayloadVerificationMessage("Signature is valid")
+          if (isValid) {
+            setSignTypedDataPayloadVerificationMessage("Signature is valid");
           } else {
-            setSignTypedDataPayloadVerificationMessage("Signature is invalid (We are verifying on optimism, if you are using worldchain message andy")
+            setSignTypedDataPayloadVerificationMessage(
+              "Signature is invalid (We are verifying on optimism, if you are using worldchain message andy"
+            );
           }
         }
       }
@@ -216,8 +227,8 @@ export const SignTypedData = () => {
           </p>
         </div>
         <div>
-        <p>Check does signature verify:</p>
-        <p className="bg-gray-300 p-2">
+          <p>Check does signature verify:</p>
+          <p className="bg-gray-300 p-2">
             {signTypedDataPayloadVerificationMessage ?? "No verification"}
           </p>
         </div>
