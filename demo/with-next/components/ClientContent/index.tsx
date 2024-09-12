@@ -42,10 +42,10 @@ export const ClientContent = () => {
           <hr />
           <SignTypedData />
           <hr />
+          <input className="text-xs border-black border-2" />
           <ExternalLinks />
           <hr />
           <CameraComponent />
-          <input className="text-xs border-black border-2" />
         </div>
       </div>
     </div>
