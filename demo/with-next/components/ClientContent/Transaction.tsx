@@ -138,14 +138,39 @@ export const SendTransaction = () => {
       permitTransfer.deadline,
     ];
 
+    const permitTransfer2 = {
+      permitted: {
+        token: testTokens.optimism.USDCE,
+        amount: "20000",
+      },
+      nonce: Date.now().toString(),
+      deadline,
+    };
+
+    const permitTransferArgsForm2 = [
+      [permitTransfer2.permitted.token, permitTransfer2.permitted.amount],
+      permitTransfer2.nonce,
+      permitTransfer2.deadline,
+    ];
+
     const transferDetails = {
       to: "0x126f7998Eb44Dd2d097A8AB2eBcb28dEA1646AC8",
       requestedAmount: "10000",
     };
 
+    const transferDetails2 = {
+      to: "0x126f7998Eb44Dd2d097A8AB2eBcb28dEA1646AC8",
+      requestedAmount: "20000",
+    };
+
     const transferDetailsArgsForm = [
       transferDetails.to,
       transferDetails.requestedAmount,
+    ];
+
+    const transferDetailsArgsForm2 = [
+      transferDetails2.to,
+      transferDetails2.requestedAmount,
     ];
 
     const payload = MiniKit.commands.sendTransaction({
@@ -160,10 +185,24 @@ export const SendTransaction = () => {
             "PERMIT2_SIGNATURE_PLACEHOLDER_0",
           ],
         },
+        {
+          address: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
+          abi: DEXABI,
+          functionName: "signatureTransfer",
+          args: [
+            permitTransferArgsForm2,
+            transferDetailsArgsForm2,
+            "PERMIT2_SIGNATURE_PLACEHOLDER_1",
+          ],
+        },
       ],
       permit2: [
         {
           ...permitTransfer,
+          spender: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
+        },
+        {
+          ...permitTransfer2,
           spender: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
         },
       ],
