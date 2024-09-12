@@ -127,7 +127,7 @@ export const SendTransaction = () => {
     const permitTransfer = {
       permitted: {
         token: testTokens.optimism.USDCE,
-        amount: "1000000",
+        amount: "10000",
       },
       nonce: Date.now().toString(),
       deadline,
@@ -140,7 +140,7 @@ export const SendTransaction = () => {
 
     const transferDetails = {
       to: "0x126f7998Eb44Dd2d097A8AB2eBcb28dEA1646AC8",
-      requestedAmount: "1000000",
+      requestedAmount: "10000",
     };
 
     const transferDetailsArgsForm = [
