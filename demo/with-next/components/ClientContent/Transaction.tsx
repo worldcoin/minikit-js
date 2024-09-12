@@ -118,7 +118,7 @@ export const SendTransaction = () => {
     };
   }, [tempInstallFix]);
 
-  const onSendTransactionClick = useCallback(() => {
+  const onSendTransactionClick = () => {
     const deadline = Math.floor(
       (Date.now() + 30 * 60 * 1000) / 1000
     ).toString();
@@ -170,7 +170,7 @@ export const SendTransaction = () => {
     });
     setTempInstallFix((prev) => prev + 1);
     setTransactionData(payload);
-  }, []);
+  };
 
   return (
     <div className="grid gap-y-2">
