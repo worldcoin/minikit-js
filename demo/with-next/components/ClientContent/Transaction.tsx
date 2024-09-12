@@ -132,6 +132,61 @@ export const SendTransaction = () => {
       nonce: Date.now().toString(),
       deadline,
     };
+
+    const permitTransferArgsForm = [
+      [permitTransfer.permitted.token, permitTransfer.permitted.amount],
+      permitTransfer.nonce,
+      permitTransfer.deadline,
+    ];
+
+    const transferDetails = {
+      to: "0x126f7998Eb44Dd2d097A8AB2eBcb28dEA1646AC8",
+      requestedAmount: "10000",
+    };
+
+    const transferDetailsArgsForm = [
+      transferDetails.to,
+      transferDetails.requestedAmount,
+    ];
+
+    const payload = MiniKit.commands.sendTransaction({
+      transaction: [
+        {
+          address: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
+          abi: DEXABI,
+          functionName: "signatureTransfer",
+          args: [
+            permitTransferArgsForm,
+            transferDetailsArgsForm,
+            "PERMIT2_SIGNATURE_PLACEHOLDER_0",
+          ],
+        },
+      ],
+      permit2: [
+        {
+          ...permitTransfer,
+          spender: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
+        },
+      ],
+    });
+    setTempInstallFix((prev) => prev + 1);
+    setTransactionData(payload);
+  };
+
+  const onSendNestedTransactionClick = () => {
+    const deadline = Math.floor(
+      (Date.now() + 30 * 60 * 1000) / 1000
+    ).toString();
+
+    // transfers can also be at most 1 hour in the future.
+    const permitTransfer = {
+      permitted: {
+        token: testTokens.optimism.USDCE,
+        amount: "10000",
+      },
+      nonce: Date.now().toString(),
+      deadline,
+    };
     const permitTransferArgsForm = [
       [permitTransfer.permitted.token, permitTransfer.permitted.amount],
       permitTransfer.nonce,
@@ -226,13 +281,20 @@ export const SendTransaction = () => {
           </pre>
         </div>
       </div>
-
-      <button
-        className="bg-black text-white rounded-lg p-4 w-full"
-        onClick={onSendTransactionClick}
-      >
-        Send Transaction
-      </button>
+      <div className="grid gap-x-2 grid-cols-2">
+        <button
+          className="bg-black text-white rounded-lg p-4 w-full"
+          onClick={onSendTransactionClick}
+        >
+          Send Transaction
+        </button>
+        <button
+          className="bg-black text-white rounded-lg p-4 w-full"
+          onClick={onSendNestedTransactionClick}
+        >
+          Send Nested Transaction
+        </button>
+      </div>
 
       <div className="grid gap-y-1">
         <p>
