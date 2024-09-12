@@ -198,7 +198,7 @@ export const SendTransaction = () => {
         token: testTokens.optimism.USDCE,
         amount: "20000",
       },
-      nonce: Date.now().toString(),
+      nonce: deadline,
       deadline,
     };
 
