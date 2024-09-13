@@ -98,6 +98,44 @@ const signTypedDataPayload = {
   },
 };
 
+const stateChangesPayload = {
+  types: {
+    EIP712Domain: [
+      { type: "uint256", name: "chainId" },
+      { type: "address", name: "verifyingContract" },
+    ],
+    SafeTx: [
+      { type: "address", name: "to" },
+      { type: "uint256", name: "value" },
+      { type: "bytes", name: "data" },
+      { type: "uint8", name: "operation" },
+      { type: "uint256", name: "safeTxGas" },
+      { type: "uint256", name: "baseGas" },
+      { type: "uint256", name: "gasPrice" },
+      { type: "address", name: "gasToken" },
+      { type: "address", name: "refundReceiver" },
+      { type: "uint256", name: "nonce" },
+    ],
+  },
+  domain: {
+    verifyingContract: "0xd809de3086Ea4f53ed3979CEad25e1Ff72b564a3",
+    chainId: 480,
+  },
+  primaryType: "SafeTx",
+  message: {
+    to: "0xd809de3086Ea4f53ed3979CEad25e1Ff72b564a3",
+    value: 0,
+    data: "0x0d582f13000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000002",
+    operation: 0,
+    safeTxGas: 0,
+    baseGas: 0,
+    gasPrice: 0,
+    gasToken: "0x0000000000000000000000000000000000000000",
+    refundReceiver: "0x0000000000000000000000000000000000000000",
+    nonce: 0,
+  },
+};
+
 export const SignTypedData = () => {
   const [signTypedDataAppPayload, setSignTypedDataAppPayload] = useState<
     string | undefined
@@ -179,8 +217,10 @@ export const SignTypedData = () => {
     };
   }, [tempInstallFix]);
 
-  const onSignTypedData = useCallback(async () => {
-    const payload = MiniKit.commands.signTypedData(signTypedDataPayload);
+  const onSignTypedData = useCallback(async (stateChanges?: boolean) => {
+    const payload = MiniKit.commands.signTypedData(
+      stateChanges ? stateChangesPayload : signTypedDataPayload
+    );
 
     setSentSignTypedDataPayload({
       payload,
@@ -200,12 +240,20 @@ export const SignTypedData = () => {
             </pre>
           </div>
         </div>
-        <button
-          className="bg-black text-white rounded-lg p-4 w-full"
-          onClick={onSignTypedData}
-        >
-          Sign Typed Data
-        </button>
+        <div className="grid grid-cols-2 gap-x-3">
+          <button
+            className="bg-black text-white rounded-lg p-4 w-full"
+            onClick={() => onSignTypedData()}
+          >
+            Sign Typed Data
+          </button>
+          <button
+            className="bg-black text-white rounded-lg p-4 w-full"
+            onClick={() => onSignTypedData(true)}
+          >
+            Sign Typed Data State Changes
+          </button>
+        </div>
       </div>
 
       <hr />
