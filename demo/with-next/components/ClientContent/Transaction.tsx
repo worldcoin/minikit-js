@@ -4,16 +4,16 @@ import {
   ResponseEvent,
   SendTransactionErrorCodes,
 } from "@worldcoin/minikit-js";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import * as yup from "yup";
 import { validateSchema } from "./helpers/validate-schema";
-import USDCABI from "../../abi/USDC.json";
+import DEXABI from "../../abi/DEX.json";
+import ANDYABI from "../../abi/Andy.json";
 
 const sendTransactionSuccessPayloadSchema = yup.object({
   status: yup.string<"success">().oneOf(["success"]),
   transaction_status: yup.string<"submitted">().oneOf(["submitted"]),
   transaction_id: yup.string().required(),
-  reference: yup.string().required(),
   from: yup.string().optional(),
   chain: yup.string().required(),
   timestamp: yup.string().required(),
@@ -30,6 +30,10 @@ const sendTransactionErrorPayloadSchema = yup.object({
 const testTokens = {
   optimism: {
     USDC: "0x0b2c639c533813f4aa9d7837caf62653d097ff85",
+    USDCE: "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
+  },
+  worldchain: {
+    USDCE: "0x79A02482A880bCE3F13e09Da970dC34db4CD24d1",
   },
 };
 
@@ -40,6 +44,7 @@ export const SendTransaction = () => {
   > | null>(null);
   const [receivedSendTransactionPayload, setReceivedSendTransactionPayload] =
     useState<Record<string, any> | null>(null);
+  const [tempInstallFix, setTempInstallFix] = useState(0);
 
   const [
     sendTransactionPayloadValidationMessage,
@@ -112,41 +117,209 @@ export const SendTransaction = () => {
     return () => {
       MiniKit.unsubscribe(ResponseEvent.MiniAppSendTransaction);
     };
-  }, []);
+  }, [tempInstallFix]);
 
-  const onSendTransactionClick = useCallback(() => {
-    const deadline = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+  const onSendTransactionClick = () => {
+    const deadline = Math.floor(
+      (Date.now() + 30 * 60 * 1000) / 1000
+    ).toString();
+
+    // transfers can also be at most 1 hour in the future.
+    const permitTransfer = {
+      permitted: {
+        token: testTokens.optimism.USDCE,
+        amount: "10000",
+      },
+      nonce: Date.now().toString(),
+      deadline,
+    };
+
+    const permitTransferArgsForm = [
+      [permitTransfer.permitted.token, permitTransfer.permitted.amount],
+      permitTransfer.nonce,
+      permitTransfer.deadline,
+    ];
+
+    const transferDetails = {
+      to: "0x126f7998Eb44Dd2d097A8AB2eBcb28dEA1646AC8",
+      requestedAmount: "10000",
+    };
+
+    const transferDetailsArgsForm = [
+      transferDetails.to,
+      transferDetails.requestedAmount,
+    ];
 
     const payload = MiniKit.commands.sendTransaction({
-      payload: [
+      transaction: [
         {
-          to: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-          abi: USDCABI,
-          functionName: "transferFrom",
-          args: [2000000, "PERMIT2_SIGNATURE_PLACEHOLDER_1"],
-        },
-        {
-          to: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-          abi: USDCABI,
-          functionName: "transferFrom",
-          args: [100000, "PERMIT2_SIGNATURE_PLACEHOLDER_2"],
+          address: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
+          abi: DEXABI,
+          functionName: "signatureTransfer",
+          args: [
+            permitTransferArgsForm,
+            transferDetailsArgsForm,
+            "PERMIT2_SIGNATURE_PLACEHOLDER_0",
+          ],
         },
       ],
       permit2: [
         {
-          deadline: deadline,
-          token_address: testTokens.optimism.USDC,
-          amount: "100000000",
-        },
-        {
-          deadline: deadline,
-          token_address: testTokens.optimism.USDC,
-          amount: "100000000",
+          ...permitTransfer,
+          spender: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
         },
       ],
     });
+    setTempInstallFix((prev) => prev + 1);
     setTransactionData(payload);
-  }, []);
+  };
+
+  const onSendNestedTransactionClick = () => {
+    const deadline = Math.floor(
+      (Date.now() + 30 * 60 * 1000) / 1000
+    ).toString();
+
+    // transfers can also be at most 1 hour in the future.
+    const permitTransfer = {
+      permitted: {
+        token: testTokens.optimism.USDCE,
+        amount: "10000",
+      },
+      nonce: Date.now().toString(),
+      deadline,
+    };
+    const permitTransferArgsForm = [
+      [permitTransfer.permitted.token, permitTransfer.permitted.amount],
+      permitTransfer.nonce,
+      permitTransfer.deadline,
+    ];
+
+    const permitTransfer2 = {
+      permitted: {
+        token: testTokens.optimism.USDCE,
+        amount: "20000",
+      },
+      nonce: deadline,
+      deadline,
+    };
+
+    const permitTransferArgsForm2 = [
+      [permitTransfer2.permitted.token, permitTransfer2.permitted.amount],
+      permitTransfer2.nonce,
+      permitTransfer2.deadline,
+    ];
+
+    const transferDetails = {
+      to: "0x126f7998Eb44Dd2d097A8AB2eBcb28dEA1646AC8",
+      requestedAmount: "10000",
+    };
+
+    const transferDetails2 = {
+      to: "0x126f7998Eb44Dd2d097A8AB2eBcb28dEA1646AC8",
+      requestedAmount: "20000",
+    };
+
+    const transferDetailsArgsForm = [
+      transferDetails.to,
+      transferDetails.requestedAmount,
+    ];
+
+    const transferDetailsArgsForm2 = [
+      transferDetails2.to,
+      transferDetails2.requestedAmount,
+    ];
+
+    const payload = MiniKit.commands.sendTransaction({
+      transaction: [
+        {
+          address: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
+          abi: DEXABI,
+          functionName: "signatureTransfer",
+          args: [
+            permitTransferArgsForm,
+            transferDetailsArgsForm,
+            "PERMIT2_SIGNATURE_PLACEHOLDER_0",
+          ],
+        },
+        {
+          address: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
+          abi: DEXABI,
+          functionName: "signatureTransfer",
+          args: [
+            permitTransferArgsForm2,
+            transferDetailsArgsForm2,
+            "PERMIT2_SIGNATURE_PLACEHOLDER_1",
+          ],
+        },
+      ],
+      permit2: [
+        {
+          ...permitTransfer,
+          spender: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
+        },
+        {
+          ...permitTransfer2,
+          spender: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
+        },
+      ],
+    });
+    setTempInstallFix((prev) => prev + 1);
+    setTransactionData(payload);
+  };
+
+  const testNFTPurchase = () => {
+    const deadline = Math.floor(
+      (Date.now() + 30 * 60 * 1000) / 1000
+    ).toString();
+
+    // transfers can also be at most 1 hour in the future.
+    const permitTransfer = {
+      permitted: {
+        token: testTokens.optimism.USDCE,
+        amount: "1000000",
+      },
+      nonce: Date.now().toString(),
+      deadline,
+    };
+    const permitTransferArgsForm = [
+      [permitTransfer.permitted.token, permitTransfer.permitted.amount],
+      permitTransfer.nonce,
+      permitTransfer.deadline,
+    ];
+
+    const transferDetails = {
+      to: "0x640487Ce2c45bD05D03b65783c15aa1ac694cDb6",
+      requestedAmount: "1000000",
+    };
+
+    const transferDetailsArgsForm = [
+      transferDetails.to,
+      transferDetails.requestedAmount,
+    ];
+
+    const payload = MiniKit.commands.sendTransaction({
+      transaction: [
+        {
+          address: "0x640487Ce2c45bD05D03b65783c15aa1ac694cDb6",
+          abi: ANDYABI,
+          functionName: "buyNFTWithPermit2",
+          args: [
+            permitTransferArgsForm,
+            transferDetailsArgsForm,
+            "PERMIT2_SIGNATURE_PLACEHOLDER_0",
+          ],
+        },
+      ],
+      permit2: [
+        {
+          ...permitTransfer,
+          spender: "0x640487Ce2c45bD05D03b65783c15aa1ac694cDb6",
+        },
+      ],
+    });
+    setTempInstallFix((prev) => prev + 1);
+    setTransactionData(payload);
+  };
 
   return (
     <div className="grid gap-y-2">
@@ -163,13 +336,29 @@ export const SendTransaction = () => {
           </pre>
         </div>
       </div>
+      <div className="grid gap-x-2 grid-cols-2">
+        <button
+          className="bg-black text-white rounded-lg p-4 w-full"
+          onClick={onSendTransactionClick}
+        >
+          Send Transaction
+        </button>
 
-      <button
-        className="bg-black text-white rounded-lg p-4 w-full"
-        onClick={onSendTransactionClick}
-      >
-        Send Transaction
-      </button>
+        <button
+          className="bg-black text-white rounded-lg p-4 w-full"
+          onClick={onSendNestedTransactionClick}
+        >
+          Send Nested Transaction
+        </button>
+      </div>
+      <div className="grid gap-x-2 grid-cols-2">
+        <button
+          className="bg-black text-white rounded-lg p-4 w-full"
+          onClick={testNFTPurchase}
+        >
+          Purchase NFT Permit2
+        </button>
+      </div>
 
       <div className="grid gap-y-1">
         <p>

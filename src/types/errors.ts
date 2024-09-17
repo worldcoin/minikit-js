@@ -79,7 +79,11 @@ export enum SendTransactionErrorCodes {
   UserRejected = "user_rejected",
   InputError = "input_error",
   SimulationFailed = "simulation_failed",
+  TransactionFailed = "transaction_failed",
   GenericError = "generic_error",
+  DisallowedOperation = "disallowed_operation",
+  InvalidContract = "invalid_contract",
+  MaliciousOperation = "malicious_operation",
 }
 
 export const SendTransactionErrorMessage = {
@@ -89,8 +93,16 @@ export const SendTransactionErrorMessage = {
   [SendTransactionErrorCodes.InputError]: "Invalid payload.",
   [SendTransactionErrorCodes.SimulationFailed]:
     "The transaction simulation failed.",
+  [SendTransactionErrorCodes.TransactionFailed]:
+    "The transaction failed. Please try again later.",
   [SendTransactionErrorCodes.GenericError]:
     "Something unexpected went wrong. Please try again.",
+  [SendTransactionErrorCodes.DisallowedOperation]:
+    "The operation requested is not allowed. Please refer to the docs.",
+  [SendTransactionErrorCodes.InvalidContract]:
+    "The contract address is not allowed for your application. Please check your developer portal configurations",
+  [SendTransactionErrorCodes.MaliciousOperation]:
+    "The operation requested is considered malicious.",
 };
 
 export enum SignMessageErrorCodes {
@@ -106,12 +118,17 @@ export const SignMessageErrorMessage = {
 };
 
 export enum SignTypedDataErrorCodes {
-  InvalidMessage = "invalid_message",
+  InvalidOperation = "invalid_operation",
   UserRejected = "user_rejected",
+  InputError = "input_error",
+  SimulationFailed = "simulation_failed",
   GenericError = "generic_error",
+  DisallowedOperation = "disallowed_operation",
+  InvalidContract = "invalid_contract",
+  MaliciousOperation = "malicious_operation",
 }
 
-export const SignTypedDataErrorMessage = SignMessageErrorMessage;
+export const SignTypedDataErrorMessage = SendTransactionErrorMessage;
 
 export enum MiniKitInstallErrorCodes {
   Unknown = "unknown",

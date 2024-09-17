@@ -7,13 +7,17 @@ import type {
 } from "abitype";
 
 export type Permit2 = {
-  deadline: string;
-  token_address: string;
-  amount: string;
+  permitted: {
+    token: string;
+    amount: string | unknown;
+  };
+  spender: string;
+  nonce: string | unknown;
+  deadline: string | unknown;
 };
 
 export type Transaction = {
-  to: string;
+  address: string;
   abi: Abi | readonly unknown[];
   functionName: ContractFunctionName<
     Abi | readonly unknown[],

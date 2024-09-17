@@ -14,6 +14,11 @@ export const CameraComponent = () => {
     []
   );
 
+  const playSound = useCallback(() => {
+    const audio = new Audio("/money.mp3");
+    audio.play();
+  }, []);
+
   const handleMicAccess = useCallback(async () => {
     if (isMicOn) {
       // Stop microphone access
@@ -89,6 +94,14 @@ export const CameraComponent = () => {
           onClick={handleMicAccess}
         >
           {isMicOn ? "Stop microphone" : "Activate microphone"}
+        </button>
+      </label>
+      <label className="items-center justify-center rounded-lg bg-2f2b43/5 hover:bg-2f2b43/10">
+        <button
+          className="grid justify-items-center bg-green-500 p-4 rounded-lg text-white w-full"
+          onClick={playSound}
+        >
+          Play Sound
         </button>
       </label>
     </div>

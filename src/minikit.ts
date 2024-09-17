@@ -83,7 +83,6 @@ export class MiniKit {
       console.error(`No handler for event ${event}`);
       return;
     }
-
     this.listeners[event](payload);
   }
 

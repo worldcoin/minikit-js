@@ -67,7 +67,7 @@ export type MiniKitInstallReturnType =
     };
 
 export type SendTransactionInput = {
-  payload: Transaction[];
+  transaction: Transaction[];
   permit2?: Permit2[]; // Optional
 };
 
