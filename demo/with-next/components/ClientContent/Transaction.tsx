@@ -4,10 +4,11 @@ import {
   ResponseEvent,
   SendTransactionErrorCodes,
 } from "@worldcoin/minikit-js";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import * as yup from "yup";
 import { validateSchema } from "./helpers/validate-schema";
 import DEXABI from "../../abi/DEX.json";
+import ANDYABI from "../../abi/Andy.json";
 
 const sendTransactionSuccessPayloadSchema = yup.object({
   status: yup.string<"success">().oneOf(["success"]),
@@ -266,6 +267,60 @@ export const SendTransaction = () => {
     setTransactionData(payload);
   };
 
+  const testNFTPurchase = () => {
+    const deadline = Math.floor(
+      (Date.now() + 30 * 60 * 1000) / 1000
+    ).toString();
+
+    // transfers can also be at most 1 hour in the future.
+    const permitTransfer = {
+      permitted: {
+        token: testTokens.optimism.USDCE,
+        amount: "1000000",
+      },
+      nonce: Date.now().toString(),
+      deadline,
+    };
+    const permitTransferArgsForm = [
+      [permitTransfer.permitted.token, permitTransfer.permitted.amount],
+      permitTransfer.nonce,
+      permitTransfer.deadline,
+    ];
+
+    const transferDetails = {
+      to: "0x640487Ce2c45bD05D03b65783c15aa1ac694cDb6",
+      requestedAmount: "1000000",
+    };
+
+    const transferDetailsArgsForm = [
+      transferDetails.to,
+      transferDetails.requestedAmount,
+    ];
+
+    const payload = MiniKit.commands.sendTransaction({
+      transaction: [
+        {
+          address: "0x640487Ce2c45bD05D03b65783c15aa1ac694cDb6",
+          abi: ANDYABI,
+          functionName: "buyNFTWithPermit2",
+          args: [
+            permitTransferArgsForm,
+            transferDetailsArgsForm,
+            "PERMIT2_SIGNATURE_PLACEHOLDER_0",
+          ],
+        },
+      ],
+      permit2: [
+        {
+          ...permitTransfer,
+          spender: "0x640487Ce2c45bD05D03b65783c15aa1ac694cDb6",
+        },
+      ],
+    });
+    setTempInstallFix((prev) => prev + 1);
+    setTransactionData(payload);
+  };
+
   return (
     <div className="grid gap-y-2">
       <h2 className="text-2xl font-bold">Transaction</h2>
@@ -288,11 +343,20 @@ export const SendTransaction = () => {
         >
           Send Transaction
         </button>
+
         <button
           className="bg-black text-white rounded-lg p-4 w-full"
           onClick={onSendNestedTransactionClick}
         >
           Send Nested Transaction
+        </button>
+      </div>
+      <div className="grid gap-x-2 grid-cols-2">
+        <button
+          className="bg-black text-white rounded-lg p-4 w-full"
+          onClick={testNFTPurchase}
+        >
+          Purchase NFT Permit2
         </button>
       </div>
 
