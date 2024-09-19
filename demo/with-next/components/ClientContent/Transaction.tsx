@@ -153,7 +153,7 @@ export const SendTransaction = () => {
     const payload = MiniKit.commands.sendTransaction({
       transaction: [
         {
-          address: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
+          address: "0xE7F033EE50e96Bae59b8e9Dfb7360d493D31443A.",
           abi: DEXABI,
           functionName: "signatureTransfer",
           args: [
@@ -166,7 +166,7 @@ export const SendTransaction = () => {
       permit2: [
         {
           ...permitTransfer,
-          spender: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
+          spender: "0xE7F033EE50e96Bae59b8e9Dfb7360d493D31443A.",
         },
       ],
     });
@@ -232,7 +232,7 @@ export const SendTransaction = () => {
     const payload = MiniKit.commands.sendTransaction({
       transaction: [
         {
-          address: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
+          address: "0xE7F033EE50e96Bae59b8e9Dfb7360d493D31443A.",
           abi: DEXABI,
           functionName: "signatureTransfer",
           args: [
@@ -242,7 +242,7 @@ export const SendTransaction = () => {
           ],
         },
         {
-          address: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
+          address: "0xE7F033EE50e96Bae59b8e9Dfb7360d493D31443A.",
           abi: DEXABI,
           functionName: "signatureTransfer",
           args: [
@@ -255,11 +255,11 @@ export const SendTransaction = () => {
       permit2: [
         {
           ...permitTransfer,
-          spender: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
+          spender: "0xE7F033EE50e96Bae59b8e9Dfb7360d493D31443A.",
         },
         {
           ...permitTransfer2,
-          spender: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
+          spender: "0xE7F033EE50e96Bae59b8e9Dfb7360d493D31443A.",
         },
       ],
     });
