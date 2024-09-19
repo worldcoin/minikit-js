@@ -60,6 +60,8 @@ export class MiniKit {
     [ResponseEvent.MiniAppSignTypedData]: () => {},
   };
 
+  public static walletAddress: string | null = null;
+
   private static sendInit() {
     sendWebviewEvent({
       command: "init",
@@ -71,7 +73,24 @@ export class MiniKit {
     event: E,
     handler: EventHandler<E>
   ) {
-    this.listeners[event] = handler;
+    if (event === ResponseEvent.MiniAppWalletAuth) {
+      const originalHandler =
+        handler as EventHandler<ResponseEvent.MiniAppWalletAuth>;
+
+      const wrappedHandler: EventHandler<ResponseEvent.MiniAppWalletAuth> = (
+        payload
+      ) => {
+        if (payload.status === "success") {
+          MiniKit.walletAddress = payload.address;
+        }
+
+        originalHandler(payload);
+      };
+
+      this.listeners[event] = wrappedHandler as EventHandler<E>;
+    } else {
+      this.listeners[event] = handler;
+    }
   }
 
   public static unsubscribe(event: ResponseEvent) {
