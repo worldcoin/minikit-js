@@ -130,7 +130,7 @@ export const SendTransaction = () => {
         token: "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
         amount: "10000",
       },
-      nonce: (Date.now() / 1000).toString(),
+      nonce: Date.now().toString(),
       deadline,
     };
 
