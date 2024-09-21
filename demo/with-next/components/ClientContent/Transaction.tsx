@@ -153,7 +153,7 @@ export const SendTransaction = () => {
     const payload = MiniKit.commands.sendTransaction({
       transaction: [
         {
-          address: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f.",
+          address: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
           abi: DEXABI,
           functionName: "signatureTransfer",
           args: [
@@ -166,7 +166,7 @@ export const SendTransaction = () => {
       permit2: [
         {
           ...permitTransfer,
-          spender: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f.",
+          spender: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
         },
       ],
     });
