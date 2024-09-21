@@ -127,10 +127,10 @@ export const SendTransaction = () => {
     // transfers can also be at most 1 hour in the future.
     const permitTransfer = {
       permitted: {
-        token: testTokens.worldchain.USDCE,
+        token: testTokens.optimism.USDCE,
         amount: "10000",
       },
-      nonce: Date.now().toString(),
+      nonce: (Date.now() / 1000).toString(),
       deadline,
     };
 
@@ -182,7 +182,7 @@ export const SendTransaction = () => {
     // transfers can also be at most 1 hour in the future.
     const permitTransfer = {
       permitted: {
-        token: testTokens.worldchain.USDCE,
+        token: testTokens.optimism.USDCE,
         amount: "10000",
       },
       nonce: Date.now().toString(),
@@ -196,7 +196,7 @@ export const SendTransaction = () => {
 
     const permitTransfer2 = {
       permitted: {
-        token: testTokens.worldchain.USDCE,
+        token: testTokens.optimism.USDCE,
         amount: "20000",
       },
       nonce: deadline,
@@ -275,7 +275,7 @@ export const SendTransaction = () => {
     // transfers can also be at most 1 hour in the future.
     const permitTransfer = {
       permitted: {
-        token: testTokens.worldchain.USDCE,
+        token: testTokens.optimism.USDCE,
         amount: "1000000",
       },
       nonce: Date.now().toString(),
