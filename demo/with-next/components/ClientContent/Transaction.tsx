@@ -127,7 +127,7 @@ export const SendTransaction = () => {
     // transfers can also be at most 1 hour in the future.
     const permitTransfer = {
       permitted: {
-        token: testTokens.optimism.USDCE,
+        token: "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
         amount: "10000",
       },
       nonce: (Date.now() / 1000).toString(),
