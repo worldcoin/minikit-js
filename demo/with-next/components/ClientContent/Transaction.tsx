@@ -127,7 +127,7 @@ export const SendTransaction = () => {
     // transfers can also be at most 1 hour in the future.
     const permitTransfer = {
       permitted: {
-        token: "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
+        token: testTokens.worldchain.USDCE,
         amount: "10000",
       },
       nonce: Date.now().toString(),
