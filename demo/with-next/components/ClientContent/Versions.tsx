@@ -34,13 +34,17 @@ export const Versions = () => {
     }
   };
 
+  const reinstall = () => {
+    MiniKit.install();
+    JSON.stringify(isValid() ?? null, null, 2);
+  };
   return (
     <div className="grid gap-y-4">
       <h2 className="font-bold text-2xl">Versions</h2>
 
       <div>
         <p>window.WorldApp:</p>
-
+        <button onClick={reinstall}>Install</button>
         <div className="bg-gray-300 min-h-[100px] p-2">
           <pre
             suppressHydrationWarning

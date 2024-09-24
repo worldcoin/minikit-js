@@ -110,7 +110,7 @@ export const Pay = () => {
               },
             ]
           : tokenPayload,
-        description: "Test example payment for minikit",
+        description: "Test example payment for minikit on Worldchain",
         reference: new Date().toISOString(),
       };
 

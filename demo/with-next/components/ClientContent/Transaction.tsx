@@ -127,7 +127,7 @@ export const SendTransaction = () => {
     // transfers can also be at most 1 hour in the future.
     const permitTransfer = {
       permitted: {
-        token: testTokens.optimism.USDCE,
+        token: testTokens.worldchain.USDCE,
         amount: "10000",
       },
       nonce: Date.now().toString(),
@@ -153,7 +153,7 @@ export const SendTransaction = () => {
     const payload = MiniKit.commands.sendTransaction({
       transaction: [
         {
-          address: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
+          address: "0x78c9b378b47c1700838c599e42edd4ffd1865ccd",
           abi: DEXABI,
           functionName: "signatureTransfer",
           args: [
@@ -166,7 +166,7 @@ export const SendTransaction = () => {
       permit2: [
         {
           ...permitTransfer,
-          spender: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
+          spender: "0x78c9b378b47c1700838c599e42edd4ffd1865ccd",
         },
       ],
     });
@@ -182,7 +182,7 @@ export const SendTransaction = () => {
     // transfers can also be at most 1 hour in the future.
     const permitTransfer = {
       permitted: {
-        token: testTokens.optimism.USDCE,
+        token: testTokens.worldchain.USDCE,
         amount: "10000",
       },
       nonce: Date.now().toString(),
@@ -196,7 +196,7 @@ export const SendTransaction = () => {
 
     const permitTransfer2 = {
       permitted: {
-        token: testTokens.optimism.USDCE,
+        token: testTokens.worldchain.USDCE,
         amount: "20000",
       },
       nonce: deadline,
@@ -232,7 +232,7 @@ export const SendTransaction = () => {
     const payload = MiniKit.commands.sendTransaction({
       transaction: [
         {
-          address: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
+          address: "0x78c9b378b47c1700838c599e42edd4ffd1865ccd",
           abi: DEXABI,
           functionName: "signatureTransfer",
           args: [
@@ -242,7 +242,7 @@ export const SendTransaction = () => {
           ],
         },
         {
-          address: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
+          address: "0x78c9b378b47c1700838c599e42edd4ffd1865ccd",
           abi: DEXABI,
           functionName: "signatureTransfer",
           args: [
@@ -255,11 +255,11 @@ export const SendTransaction = () => {
       permit2: [
         {
           ...permitTransfer,
-          spender: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
+          spender: "0x78c9b378b47c1700838c599e42edd4ffd1865ccd",
         },
         {
           ...permitTransfer2,
-          spender: "0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f",
+          spender: "0x78c9b378b47c1700838c599e42edd4ffd1865ccd",
         },
       ],
     });
@@ -275,7 +275,7 @@ export const SendTransaction = () => {
     // transfers can also be at most 1 hour in the future.
     const permitTransfer = {
       permitted: {
-        token: testTokens.optimism.USDCE,
+        token: testTokens.worldchain.USDCE,
         amount: "1000000",
       },
       nonce: Date.now().toString(),

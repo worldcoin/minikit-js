@@ -108,8 +108,15 @@ export class MiniKit {
   private static commandsValid(
     input: NonNullable<typeof window.WorldApp>["supported_commands"]
   ) {
-    return input.every((command) =>
-      command.supported_versions.includes(this.commandVersion[command.name])
+    return Object.entries(this.commandVersion).every(
+      ([commandName, version]) => {
+        const commandInput = input.find(
+          (command) => command.name === commandName
+        );
+        return commandInput
+          ? commandInput.supported_versions.includes(version)
+          : false;
+      }
     );
   }
 
