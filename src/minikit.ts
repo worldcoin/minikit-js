@@ -51,6 +51,15 @@ export class MiniKit {
     [Command.SignTypedData]: 1,
   };
 
+  private static isCommandAvailable = {
+    [Command.Verify]: false,
+    [Command.Pay]: false,
+    [Command.WalletAuth]: false,
+    [Command.SendTransaction]: false,
+    [Command.SignMessage]: false,
+    [Command.SignTypedData]: false,
+  };
+
   private static listeners: Record<ResponseEvent, EventHandler> = {
     [ResponseEvent.MiniAppVerifyAction]: () => {},
     [ResponseEvent.MiniAppPayment]: () => {},
@@ -113,6 +122,15 @@ export class MiniKit {
         const commandInput = input.find(
           (command) => command.name === commandName
         );
+
+        if (!commandInput) {
+          console.error(
+            `Command ${commandName} is not supported by the app. Try updating the app version`
+          );
+        } else {
+          MiniKit.isCommandAvailable[commandName] = true;
+        }
+
         return commandInput
           ? commandInput.supported_versions.includes(version)
           : false;
@@ -141,15 +159,6 @@ export class MiniKit {
       };
     }
 
-    if (!this.commandsValid(window.WorldApp.supported_commands)) {
-      return {
-        success: false,
-        errorCode: MiniKitInstallErrorCodes.AppOutOfDate,
-        errorMessage:
-          MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.AppOutOfDate],
-      };
-    }
-
     try {
       window.MiniKit = MiniKit;
       this.sendInit();
@@ -167,6 +176,16 @@ export class MiniKit {
       };
     }
 
+    // If commands are missing we will install minikit regardless
+    if (!this.commandsValid(window.WorldApp.supported_commands)) {
+      return {
+        success: false,
+        errorCode: MiniKitInstallErrorCodes.AppOutOfDate,
+        errorMessage:
+          MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.AppOutOfDate],
+      };
+    }
+
     return { success: true };
   }
 
@@ -176,7 +195,18 @@ export class MiniKit {
   }
 
   public static commands = {
-    verify: (payload: VerifyCommandInput): VerifyCommandPayload => {
+    verify: (payload: VerifyCommandInput): VerifyCommandPayload | null => {
+      if (
+        typeof window === "undefined" ||
+        !this.isCommandAvailable[Command.Verify]
+      ) {
+        console.error(
+          "'verify' command is unavailable. Check MiniKit.install() or update the app version"
+        );
+
+        return null;
+      }
+
       const timestamp = new Date().toISOString();
       const eventPayload: VerifyCommandPayload = {
         ...payload,
@@ -194,9 +224,12 @@ export class MiniKit {
     },
 
     pay: (payload: PayCommandInput): PayCommandPayload | null => {
-      if (typeof window === "undefined") {
+      if (
+        typeof window === "undefined" ||
+        !this.isCommandAvailable[Command.Pay]
+      ) {
         console.error(
-          "'pay' method is only available in a browser environment."
+          "'pay' command is unavailable. Check MiniKit.install() or update the app version"
         );
         return null;
       }
@@ -223,9 +256,12 @@ export class MiniKit {
     },
 
     walletAuth: (payload: WalletAuthInput): WalletAuthPayload | null => {
-      if (typeof window === "undefined") {
+      if (
+        typeof window === "undefined" ||
+        !this.isCommandAvailable[Command.WalletAuth]
+      ) {
         console.error(
-          "'walletAuth' method is only available in a browser environment."
+          "'walletAuth' command is unavailable. Check MiniKit.install() or update the app version"
         );
 
         return null;
@@ -279,7 +315,18 @@ export class MiniKit {
 
     sendTransaction: (
       payload: SendTransactionInput
-    ): SendTransactionPayload => {
+    ): SendTransactionPayload | null => {
+      if (
+        typeof window === "undefined" ||
+        !this.isCommandAvailable[Command.SendTransaction]
+      ) {
+        console.error(
+          "'sendTransaction' command is unavailable. Check MiniKit.install() or update the app version"
+        );
+
+        return null;
+      }
+
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.SendTransaction,
         version: 1,
@@ -289,7 +336,18 @@ export class MiniKit {
       return payload;
     },
 
-    signMessage: (payload: SignMessageInput): SignMessagePayload => {
+    signMessage: (payload: SignMessageInput): SignMessagePayload | null => {
+      if (
+        typeof window === "undefined" ||
+        !this.isCommandAvailable[Command.SignMessage]
+      ) {
+        console.error(
+          "'signMessage' command is unavailable. Check MiniKit.install() or update the app version"
+        );
+
+        return null;
+      }
+
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.SignMessage,
         version: 1,
@@ -299,7 +357,20 @@ export class MiniKit {
       return payload;
     },
 
-    signTypedData: (payload: SignTypedDataInput): SignTypedDataPayload => {
+    signTypedData: (
+      payload: SignTypedDataInput
+    ): SignTypedDataPayload | null => {
+      if (
+        typeof window === "undefined" ||
+        !this.isCommandAvailable[Command.SignTypedData]
+      ) {
+        console.error(
+          "'signTypedData' command is unavailable. Check MiniKit.install() or update the app version"
+        );
+
+        return null;
+      }
+
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.SignTypedData,
         version: 1,
