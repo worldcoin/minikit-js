@@ -158,15 +158,7 @@ export class MiniKit {
           ],
       };
     }
-    // If commands are missing we will install minikit regardless
-    if (!this.commandsValid(window.WorldApp.supported_commands)) {
-      return {
-        success: false,
-        errorCode: MiniKitInstallErrorCodes.AppOutOfDate,
-        errorMessage:
-          MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.AppOutOfDate],
-      };
-    }
+
     try {
       window.MiniKit = MiniKit;
       this.sendInit();
@@ -181,6 +173,16 @@ export class MiniKit {
         errorCode: MiniKitInstallErrorCodes.Unknown,
         errorMessage:
           MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.Unknown],
+      };
+    }
+
+    // If commands are missing we will install minikit regardless
+    if (!this.commandsValid(window.WorldApp.supported_commands)) {
+      return {
+        success: false,
+        errorCode: MiniKitInstallErrorCodes.AppOutOfDate,
+        errorMessage:
+          MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.AppOutOfDate],
       };
     }
 
