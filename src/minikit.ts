@@ -185,6 +185,12 @@ export class MiniKit {
           MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.AppOutOfDate],
       };
     }
+    return {
+      success: false,
+      errorCode: MiniKitInstallErrorCodes.AppOutOfDate,
+      errorMessage:
+        MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.AppOutOfDate],
+    };
 
     return { success: true };
   }
