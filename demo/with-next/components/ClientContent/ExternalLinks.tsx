@@ -9,7 +9,7 @@ export const ExternalLinks = () => {
           href="https://worldcoin.org/world-chain"
           className="bg-green-500 text-white text-center rounded-lg p-3"
         >
-          Valid Associated Domain (Link)
+          Valid Associated Domain (LINK)
         </Link>
         <button
           onClick={() => window.open("https://worldcoin.org/world-chain")}
