@@ -44,7 +44,7 @@ export class MiniKit {
 
   private static readonly commandVersion = {
     [Command.Verify]: 1,
-    [Command.Pay]: 2,
+    [Command.Pay]: 1,
     [Command.WalletAuth]: 1,
     [Command.SendTransaction]: 1,
     [Command.SignMessage]: 1,
