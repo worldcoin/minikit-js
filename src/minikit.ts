@@ -158,16 +158,40 @@ export class MiniKit {
           ],
       };
     }
-    return {
-      success: false,
-      errorCode: MiniKitInstallErrorCodes.AppOutOfDate,
-      errorMessage:
-        MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.AppOutOfDate],
-    };
+
+    try {
+      window.MiniKit = MiniKit;
+      this.sendInit();
+    } catch (error) {
+      console.error(
+        MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.Unknown],
+        error
+      );
+
+      return {
+        success: false,
+        errorCode: MiniKitInstallErrorCodes.Unknown,
+        errorMessage:
+          MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.Unknown],
+      };
+    }
+
+    // If commands are missing we will install minikit regardless
+    if (!this.commandsValid(window.WorldApp.supported_commands)) {
+      return {
+        success: false,
+        errorCode: MiniKitInstallErrorCodes.AppOutOfDate,
+        errorMessage:
+          MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.AppOutOfDate],
+      };
+    }
+
+    return { success: true };
   }
 
   public static isInstalled(debug?: boolean) {
     if (debug) console.log("MiniKit is alive!");
+    return Boolean(window.MiniKit);
   }
 
   public static commands = {
