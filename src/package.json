@@ -1,6 +1,6 @@
 {
   "name": "@worldcoin/minikit-js",
-  "version": "0.0.33-internal-alpha",
+  "version": "0.0.34-internal-alpha",
   "homepage": "https://docs.worldcoin.org/id/minikit",
   "description": "Internal Alpha: Mini-kit JS is a lightweight sdk for building mini-apps compatible with World App",
   "license": "MIT",
@@ -18,8 +18,18 @@
       }
     }
   },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./build/*/index.d.ts",
+        "./build/index.d.ts"
+      ]
+    }
+  },
+  "main": "index.ts",
+  "types": "index.ts",
   "engines": {
-    "node": ">=16"
+    "node": ">= 16"
   },
   "files": [
     "./build/**",
