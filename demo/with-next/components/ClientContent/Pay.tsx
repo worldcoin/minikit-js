@@ -1,3 +1,6 @@
+import { useCallback, useEffect, useState } from "react";
+import { validateSchema } from "./helpers/validate-schema";
+import * as yup from "yup";
 import {
   MiniKit,
   PayCommandInput,
@@ -6,9 +9,6 @@ import {
   Tokens,
   tokenToDecimals,
 } from "@worldcoin/minikit-js";
-import { useCallback, useEffect, useState } from "react";
-import { validateSchema } from "./helpers/validate-schema";
-import * as yup from "yup";
 
 const paymentSuccessPayloadSchema = yup.object({
   status: yup.string<"success">().oneOf(["success"]),

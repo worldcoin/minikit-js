@@ -191,7 +191,12 @@ export class MiniKit {
 
   public static isInstalled(debug?: boolean) {
     if (debug) console.log("MiniKit is alive!");
-    return Boolean(window.MiniKit);
+    const isInstalled = Boolean(window.MiniKit);
+    if (!isInstalled)
+      console.error(
+        "MiniKit is not installed. Make sure you're running the application inside of World App"
+      );
+    return isInstalled;
   }
 
   public static commands = {

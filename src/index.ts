@@ -1,5 +1,3 @@
-export * from "types/errors";
-
 export { MiniKit } from "./minikit";
 
 export {
@@ -11,6 +9,7 @@ export {
 
 export * from "./types/responses";
 export * from "./types/commands";
+export * from "./types/errors";
 
 export { Tokens, Network, TokenDecimals } from "./types/payment";
 export { tokenToDecimals } from "helpers/payment/client";
