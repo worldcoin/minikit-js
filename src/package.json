@@ -8,8 +8,8 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./build/index.js",
       "types": "./build/index.d.ts",
+      "import": "./build/index.js",
       "require": "./build/index.cjs"
     }
   },

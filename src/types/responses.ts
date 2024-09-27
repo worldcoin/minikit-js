@@ -92,6 +92,7 @@ export type MiniAppSendTransactionSuccessPayload = {
 export type MiniAppSendTransactionErrorPayload = {
   status: "error";
   error_code: SendTransactionErrorCodes;
+  debugUrl?: string;
   version: number;
 };
 
@@ -109,6 +110,7 @@ export type MiniAppSignMessageSuccessPayload = {
 export type MiniAppSignMessageErrorPayload = {
   status: "error";
   error_code: SignMessageErrorCodes;
+  debugUrl?: string;
   version: number;
 };
 
@@ -126,6 +128,7 @@ export type MiniAppSignTypedDataSuccessPayload = {
 export type MiniAppSignTypedDataErrorPayload = {
   status: "error";
   error_code: SignTypedDataErrorCodes;
+  debugUrl?: string;
   version: number;
 };
 
