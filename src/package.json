@@ -9,12 +9,12 @@
   "exports": {
     ".": {
       "import": {
-        "types": "./index.d.ts",
-        "default": "./index.js"
+        "types": "./build/index.d.ts",
+        "default": "./build/index.js"
       },
       "require": {
-        "types": "./index.d.cts",
-        "default": "./index.cjs"
+        "types": "./build/index.d.cts",
+        "default": "./build/index.cjs"
       }
     }
   },
