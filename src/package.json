@@ -18,6 +18,16 @@
       }
     }
   },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./build/*/index.d.ts",
+        "./build/index.d.ts"
+      ]
+    }
+  },
+  "main": "index.ts",
+  "types": "index.ts",
   "engines": {
     "node": ">=16"
   },
