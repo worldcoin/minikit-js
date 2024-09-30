@@ -178,12 +178,12 @@ export class MiniKit {
 
     // If commands are missing we will install minikit regardless
     if (!this.commandsValid(window.WorldApp.supported_commands)) {
-      // return {
-      //   success: false,
-      //   errorCode: MiniKitInstallErrorCodes.AppOutOfDate,
-      //   errorMessage:
-      //     MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.AppOutOfDate],
-      // };
+      return {
+        success: false,
+        errorCode: MiniKitInstallErrorCodes.AppOutOfDate,
+        errorMessage:
+          MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.AppOutOfDate],
+      };
     }
 
     return { success: true };
@@ -321,16 +321,16 @@ export class MiniKit {
     sendTransaction: (
       payload: SendTransactionInput
     ): SendTransactionPayload | null => {
-      // if (
-      //   typeof window === "undefined" ||
-      //   !this.isCommandAvailable[Command.SendTransaction]
-      // ) {
-      //   console.error(
-      //     "'sendTransaction' command is unavailable. Check MiniKit.install() or update the app version"
-      //   );
+      if (
+        typeof window === "undefined" ||
+        !this.isCommandAvailable[Command.SendTransaction]
+      ) {
+        console.error(
+          "'sendTransaction' command is unavailable. Check MiniKit.install() or update the app version"
+        );
 
-      //   return null;
-      // }
+        return null;
+      }
 
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.SendTransaction,
@@ -342,16 +342,16 @@ export class MiniKit {
     },
 
     signMessage: (payload: SignMessageInput): SignMessagePayload | null => {
-      // if (
-      //   typeof window === "undefined" ||
-      //   !this.isCommandAvailable[Command.SignMessage]
-      // ) {
-      //   console.error(
-      //     "'signMessage' command is unavailable. Check MiniKit.install() or update the app version"
-      //   );
+      if (
+        typeof window === "undefined" ||
+        !this.isCommandAvailable[Command.SignMessage]
+      ) {
+        console.error(
+          "'signMessage' command is unavailable. Check MiniKit.install() or update the app version"
+        );
 
-      //   return null;
-      // }
+        return null;
+      }
 
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.SignMessage,
@@ -365,16 +365,16 @@ export class MiniKit {
     signTypedData: (
       payload: SignTypedDataInput
     ): SignTypedDataPayload | null => {
-      // if (
-      //   typeof window === "undefined" ||
-      //   !this.isCommandAvailable[Command.SignTypedData]
-      // ) {
-      //   console.error(
-      //     "'signTypedData' command is unavailable. Check MiniKit.install() or update the app version"
-      //   );
+      if (
+        typeof window === "undefined" ||
+        !this.isCommandAvailable[Command.SignTypedData]
+      ) {
+        console.error(
+          "'signTypedData' command is unavailable. Check MiniKit.install() or update the app version"
+        );
 
-      //   return null;
-      // }
+        return null;
+      }
 
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.SignTypedData,
