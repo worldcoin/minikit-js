@@ -244,7 +244,7 @@ export class MiniKit {
         return null;
       }
 
-      const network = Network.Optimism; // MiniKit only supports Optimism for now
+      const network = Network.WorldChain; // MiniKit only supports Optimism for now
 
       const eventPayload: PayCommandPayload = {
         ...payload,
