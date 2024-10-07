@@ -1,23 +1,20 @@
 "use client";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { PublicClient, TransactionReceipt } from "viem";
-import { fetchTransactionHash, TransactionStatus } from ".";
+import { fetchTransactionHash } from ".";
 import { AppConfig } from "../types/client";
 
-/**
- * Arguments for the useTransactionReceipt hook.
- */
 interface UseTransactionReceiptOptions {
-  client: PublicClient; // Viem Client instance
-  appConfig: AppConfig; // Developer Portal Config
-  transactionId: string; // Required Transaction ID
-  confirmations?: number; // Number of block confirmations to wait for
+  client: PublicClient;
+  appConfig: AppConfig;
+  transactionId: string;
+  confirmations?: number;
   timeout?: number;
   pollingInterval?: number;
 }
 
 interface UseTransactionReceiptResult {
-  transactionHash?: string;
+  transactionHash?: `0x${string}`;
   receipt?: TransactionReceipt;
   isError: boolean;
   isLoading: boolean;
@@ -26,12 +23,6 @@ interface UseTransactionReceiptResult {
   cancel: () => void;
 }
 
-/**
- * Hook to fetch a transaction receipt and poll for updates.
- *
- * @param options - Configuration options for the hook.
- * @returns Similar to Wagmi's useTransactionReceipt hook.
- */
 export function useWaitForTransactionReceipt(
   options: UseTransactionReceiptOptions
 ): UseTransactionReceiptResult {
@@ -56,41 +47,31 @@ export function useWaitForTransactionReceipt(
   const [error, setError] = useState<Error | undefined>(undefined);
   const [shouldCancel, setShouldCancel] = useState<boolean>(false);
 
-  // Derived boolean flags
+  const failureCountRef = useRef(0);
+
   const isLoading =
     receipt === undefined && (isLoadingReceipt || isLoadingHash);
   const isSuccess = receipt !== undefined && receipt.status === "success";
-  const isFailed = receipt !== undefined && receipt.status === "reverted";
 
-  // Overall status flags
-  const overallIsError = isError || isFailed;
-  const overallIsSuccess = isSuccess;
   const cancel = useCallback(() => {
     setShouldCancel(true);
   }, []);
 
-  // Part 1: Poll for the transaction hash
   useEffect(() => {
     if (!transactionId || shouldCancel) {
-      console.log("No transaction ID or should cancel");
       setIsLoadingHash(false);
       return;
     }
 
-    console.log("Polling for transaction hash");
-
     let isMounted = true;
-    const failureCountRef = useRef(0);
-    let intervalId;
+    let intervalId: NodeJS.Timeout;
 
-    // Define pollHash before using it
     const pollHash = async () => {
       try {
         const status = await fetchTransactionHash(appConfig, transactionId);
 
         if (!isMounted || shouldCancel) return;
 
-        // Reset failure counter on success
         failureCountRef.current = 0;
 
         if (status.transaction_status === "pending") {
@@ -108,23 +89,18 @@ export function useWaitForTransactionReceipt(
 
         failureCountRef.current += 1;
 
-        if (failureCountRef.current > 4) {
-          console.log("Polling failed more than 4 times. Stopping polling.");
+        if (failureCountRef.current > 3) {
+          console.error("Polling failed more than 3 times. Stopping polling.");
           setIsError(true);
+          setError(new Error("Polling failed repeatedly"));
           setIsLoadingHash(false);
           clearInterval(intervalId);
-          return;
         }
-
-        console.log(
-          `Polling failed ${failureCountRef.current} time(s). Retrying...`
-        );
       }
     };
 
-    // Now assign intervalIdRef after pollHash is defined
     intervalId = setInterval(pollHash, pollingInterval);
-    pollHash(); // Call pollHash after intervalIdRef is assigned
+    pollHash();
 
     return () => {
       isMounted = false;
@@ -132,7 +108,6 @@ export function useWaitForTransactionReceipt(
     };
   }, [appConfig, transactionId, pollingInterval, shouldCancel]);
 
-  // Part 2: Fetch the transaction receipt
   useEffect(() => {
     if (!transactionHash || shouldCancel) {
       setIsLoadingReceipt(false);
@@ -157,7 +132,7 @@ export function useWaitForTransactionReceipt(
       } catch (err: any) {
         if (isMounted && !shouldCancel) {
           setIsError(true);
-          setError(err);
+          setError(err instanceof Error ? err : new Error(String(err)));
           setIsLoadingReceipt(false);
         }
       }
@@ -168,15 +143,15 @@ export function useWaitForTransactionReceipt(
     return () => {
       isMounted = false;
     };
-  }, [transactionHash, confirmations, timeout, shouldCancel]);
+  }, [transactionHash, confirmations, timeout, shouldCancel, client]);
 
   return {
     transactionHash,
     receipt,
-    isError: overallIsError,
+    isError,
     isLoading,
-    isSuccess: overallIsSuccess,
-    error: overallIsError ? error : undefined,
+    isSuccess,
+    error,
     cancel,
   };
 }
