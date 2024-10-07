@@ -54,11 +54,6 @@ export const SendTransaction = () => {
     setSendTransactionPayloadValidationMessage,
   ] = useState<string | null>();
 
-  const [
-    sendTransactionVerificationMessage,
-    setSendTransactionVerificationMessage,
-  ] = useState<string | null>();
-
   const client = createPublicClient({
     chain: worldchain,
     transport: http("https://worldchain-mainnet.g.alchemy.com/public"),
@@ -74,6 +69,11 @@ export const SendTransaction = () => {
       },
       transactionId: transactionId,
     });
+
+  const [
+    sendTransactionVerificationMessage,
+    setSendTransactionVerificationMessage,
+  ] = useState<string | null>();
 
   useEffect(() => {
     if (!MiniKit.isInstalled()) {
@@ -389,6 +389,7 @@ export const SendTransaction = () => {
           <p>Verification:</p>
           <p className="bg-gray-300 p-2">
             {/* {sendTransactionVerificationMessage ?? "No verification yet"} */}
+            {transactionId && <p>Transaction ID: {transactionId}</p>}
             {isConfirming && <p>Waiting for confirmation...</p>}
             {isConfirmed && <p>Transaction confirmed.</p>}
           </p>
