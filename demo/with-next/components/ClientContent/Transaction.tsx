@@ -64,7 +64,7 @@ export const SendTransaction = () => {
     useWaitForTransactionReceipt({
       client: client,
       appConfig: {
-        app_id: "app_7b8d0ff88e9ece4d97febf5097e58d8f",
+        app_id: process.env.NEXT_PUBLIC_STAGING_VERIFY_APP_ID || "",
       },
       transactionId: transactionId,
     });
