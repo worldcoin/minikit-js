@@ -26,7 +26,7 @@ importers:
       '@worldcoin/minikit-js':
         specifier: workspace:*
         version: link:../../packages/core
-      '@worldcoin/minikit-js-react':
+      '@worldcoin/minikit-react':
         specifier: workspace:*
         version: link:../../packages/react
       clsx:
