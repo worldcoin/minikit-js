@@ -72,10 +72,11 @@ export function useWaitForTransactionReceipt(
   // Part 1: Poll for the transaction hash
   useEffect(() => {
     if (!transactionId || shouldCancel) {
+      console.log("No transaction ID or should cancel");
       setIsLoadingHash(false);
       return;
     }
-
+    console.log("Polling for transaction hash");
     let isMounted = true;
     let intervalId;
 
