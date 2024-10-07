@@ -4,7 +4,7 @@ import {
   MiniKit,
   MiniKitInstallErrorCodes,
   MiniKitInstallErrorMessage,
-} from "@worldcoin/minikit-js";
+} from "@worldcoin/minikit-react";
 
 export const Versions = () => {
   const isValid = () => {

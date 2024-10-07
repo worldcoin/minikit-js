@@ -5,7 +5,7 @@ import {
   VerifyCommandInput,
   VerificationLevel,
   ISuccessResult,
-} from "@worldcoin/minikit-js";
+} from "@worldcoin/minikit-react";
 import { useCallback, useEffect, useState } from "react";
 import * as yup from "yup";
 import { validateSchema } from "../helpers/validate-schema";

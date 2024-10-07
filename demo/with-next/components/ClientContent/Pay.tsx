@@ -8,7 +8,7 @@ import {
   ResponseEvent,
   Tokens,
   tokenToDecimals,
-} from "@worldcoin/minikit-js";
+} from "@worldcoin/minikit-react";
 
 const paymentSuccessPayloadSchema = yup.object({
   status: yup.string<"success">().oneOf(["success"]),

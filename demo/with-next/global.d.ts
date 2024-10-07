@@ -11,14 +11,14 @@ interface Window {
     postMessage?: (payload: string) => void;
   };
 
-  MiniKit?: import("@worldcoin/minikit-js").MiniKit;
+  MiniKit?: import("@worldcoin/minikit-react").MiniKit;
 
   WorldApp?: {
     world_app_version: number;
     device_os: "ios" | "android";
 
     supported_commands: Array<{
-      name: import("@worldcoin/minikit-js").Command;
+      name: import("@worldcoin/minikit-react").Command;
       supported_versions: Array<number>;
     }>;
   };
