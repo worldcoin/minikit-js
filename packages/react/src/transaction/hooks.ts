@@ -1,4 +1,3 @@
-"use client";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { PublicClient, TransactionReceipt } from "viem";
 import { fetchTransactionHash } from ".";
@@ -45,32 +44,41 @@ export function useWaitForTransactionReceipt(
   const [isLoadingReceipt, setIsLoadingReceipt] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
   const [error, setError] = useState<Error | undefined>(undefined);
-  const [shouldCancel, setShouldCancel] = useState<boolean>(false);
 
+  const isMountedRef = useRef(true);
+  const shouldCancelRef = useRef(false);
   const failureCountRef = useRef(0);
+  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
 
   const isLoading =
     receipt === undefined && (isLoadingReceipt || isLoadingHash);
   const isSuccess = receipt !== undefined && receipt.status === "success";
 
   const cancel = useCallback(() => {
-    setShouldCancel(true);
+    shouldCancelRef.current = true;
+    if (timeoutIdRef.current) {
+      clearTimeout(timeoutIdRef.current);
+    }
   }, []);
 
   useEffect(() => {
-    if (!transactionId || shouldCancel) {
+    return () => {
+      isMountedRef.current = false;
+      cancel();
+    };
+  }, [cancel]);
+
+  useEffect(() => {
+    if (!transactionId || shouldCancelRef.current) {
       setIsLoadingHash(false);
       return;
     }
-
-    let isMounted = true;
-    let intervalId: NodeJS.Timeout;
 
     const pollHash = async () => {
       try {
         const status = await fetchTransactionHash(appConfig, transactionId);
 
-        if (!isMounted || shouldCancel) return;
+        if (!isMountedRef.current || shouldCancelRef.current) return;
 
         failureCountRef.current = 0;
 
@@ -82,10 +90,9 @@ export function useWaitForTransactionReceipt(
         ) {
           setTransactionHash(status.transaction_hash);
           setIsLoadingHash(false);
-          clearInterval(intervalId);
         }
       } catch (err) {
-        if (!isMounted || shouldCancel) return;
+        if (!isMountedRef.current || shouldCancelRef.current) return;
 
         failureCountRef.current += 1;
 
@@ -94,27 +101,29 @@ export function useWaitForTransactionReceipt(
           setIsError(true);
           setError(new Error("Polling failed repeatedly"));
           setIsLoadingHash(false);
-          clearInterval(intervalId);
+          return;
         }
+      }
+
+      if (isMountedRef.current && !shouldCancelRef.current) {
+        timeoutIdRef.current = setTimeout(pollHash, pollingInterval);
       }
     };
 
-    intervalId = setInterval(pollHash, pollingInterval);
     pollHash();
 
     return () => {
-      isMounted = false;
-      clearInterval(intervalId);
+      if (timeoutIdRef.current) {
+        clearTimeout(timeoutIdRef.current);
+      }
     };
-  }, [appConfig, transactionId, pollingInterval, shouldCancel]);
+  }, [appConfig, transactionId, pollingInterval]);
 
   useEffect(() => {
-    if (!transactionHash || shouldCancel) {
+    if (!transactionHash || shouldCancelRef.current) {
       setIsLoadingReceipt(false);
       return;
     }
-
-    let isMounted = true;
 
     const fetchReceipt = async () => {
       setIsLoadingReceipt(true);
@@ -125,12 +134,12 @@ export function useWaitForTransactionReceipt(
           timeout,
         });
 
-        if (isMounted && !shouldCancel) {
+        if (isMountedRef.current && !shouldCancelRef.current) {
           setReceipt(txnReceipt);
           setIsLoadingReceipt(false);
         }
       } catch (err: any) {
-        if (isMounted && !shouldCancel) {
+        if (isMountedRef.current && !shouldCancelRef.current) {
           setIsError(true);
           setError(err instanceof Error ? err : new Error(String(err)));
           setIsLoadingReceipt(false);
@@ -139,11 +148,7 @@ export function useWaitForTransactionReceipt(
     };
 
     fetchReceipt();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [transactionHash, confirmations, timeout, shouldCancel, client]);
+  }, [transactionHash, confirmations, timeout, client]);
 
   return {
     transactionHash,

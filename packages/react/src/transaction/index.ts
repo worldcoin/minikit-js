@@ -1,4 +1,4 @@
-import { AppConfig } from "types/client";
+import { AppConfig } from "src/types/client";
 
 export interface TransactionStatus {
   transaction_hash: `0x${string}`;
@@ -14,8 +14,7 @@ export async function fetchTransactionHash(
     {
       method: "GET",
       headers: {
-        "Content-Type": "application/json",
-        authorization: `Bearer ${appConfig.api_key}`,
+        Authorization: `Bearer ${appConfig.api_key}`,
       },
     }
   );
