@@ -131,11 +131,13 @@ export function useWaitForTransactionReceipt(
     const fetchReceipt = async () => {
       setIsLoadingReceipt(true);
       try {
+        console.log("Fetching transaction receipt for hash:", transactionHash);
         const txnReceipt = await client.waitForTransactionReceipt({
           hash: transactionHash,
           confirmations,
           timeout,
         });
+        console.log("Received transaction receipt:", txnReceipt);
 
         if (isMountedRef.current && !shouldCancelRef.current) {
           setReceipt(txnReceipt);
