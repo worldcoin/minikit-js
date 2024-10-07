@@ -136,7 +136,7 @@ export const SendTransaction = () => {
     const permitTransfer = {
       permitted: {
         token: testTokens.worldchain.USDCE,
-        amount: "100000",
+        amount: "10000",
       },
       nonce: Date.now().toString(),
       deadline,
@@ -205,7 +205,7 @@ export const SendTransaction = () => {
     const permitTransfer2 = {
       permitted: {
         token: testTokens.worldchain.USDCE,
-        amount: "2000000",
+        amount: "20000",
       },
       nonce: deadline,
       deadline,
