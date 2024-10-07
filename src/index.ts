@@ -11,6 +11,8 @@ export * from "./types/responses";
 export * from "./types/commands";
 export * from "./types/errors";
 
+export { useWaitForTransactionReceipt } from "./helpers/transaction/hooks";
+
 export { Tokens, Network, TokenDecimals } from "./types/payment";
 export { tokenToDecimals } from "helpers/payment/client";
 
