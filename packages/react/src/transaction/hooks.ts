@@ -103,16 +103,6 @@ export function useWaitForTransactionReceipt(
         }
       } catch (err) {
         if (!isMountedRef.current || shouldCancelRef.current) return;
-
-        failureCountRef.current += 1;
-
-        if (failureCountRef.current > 3) {
-          console.error("Polling failed more than 3 times. Stopping polling.");
-          setIsError(true);
-          setError(new Error("Polling failed repeatedly"));
-          setIsLoadingHash(false);
-          return;
-        }
       }
 
       if (isMountedRef.current && !shouldCancelRef.current) {

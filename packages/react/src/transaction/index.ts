@@ -24,6 +24,8 @@ export async function fetchTransactionHash(
       throw new Error("Failed to fetch transaction status");
     }
 
+    console.log("Received response:", response);
+
     const data: TransactionStatus = await response.json();
     return data;
   } catch (error) {
