@@ -4,11 +4,14 @@ import {
   ResponseEvent,
   SendTransactionErrorCodes,
 } from "@worldcoin/minikit-js";
+import { useWaitForTransactionReceipt } from "@worldcoin/minikit-react";
 import { useEffect, useState } from "react";
 import * as yup from "yup";
 import { validateSchema } from "./helpers/validate-schema";
 import DEXABI from "../../abi/DEX.json";
 import ANDYABI from "../../abi/Andy.json";
+import { createPublicClient, http } from "viem";
+import { worldchain } from "viem/chains";
 
 const sendTransactionSuccessPayloadSchema = yup.object({
   status: yup.string<"success">().oneOf(["success"]),
@@ -45,16 +48,26 @@ export const SendTransaction = () => {
   const [receivedSendTransactionPayload, setReceivedSendTransactionPayload] =
     useState<Record<string, any> | null>(null);
   const [tempInstallFix, setTempInstallFix] = useState(0);
-
   const [
     sendTransactionPayloadValidationMessage,
     setSendTransactionPayloadValidationMessage,
   ] = useState<string | null>();
 
-  const [
-    sendTransactionVerificationMessage,
-    setSendTransactionVerificationMessage,
-  ] = useState<string | null>();
+  const [transactionId, setTransactionId] = useState<string>("");
+
+  const client = createPublicClient({
+    chain: worldchain,
+    transport: http("https://worldchain-mainnet.g.alchemy.com/public"),
+  });
+
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      client: client,
+      appConfig: {
+        app_id: "app_7b8d0ff88e9ece4d97febf5097e58d8f",
+      },
+      transactionId: transactionId,
+    });
 
   useEffect(() => {
     if (!MiniKit.isInstalled()) {
@@ -89,17 +102,6 @@ export const SendTransaction = () => {
             setSendTransactionPayloadValidationMessage(errorMessage);
           }
 
-          // // Call the API to verify the message
-          // const response = await fetch("/api/verify-siwe", {
-          //   method: "POST",
-          //   headers: {
-          //     "Content-Type": "application/json",
-          //   },
-          //   body: JSON.stringify({
-          //     siweResponsePayload: payload,
-          //   }),
-          // });
-
           // const responseJson = await response.json();
 
           // setSendTransactionVerificationMessage(
@@ -107,8 +109,8 @@ export const SendTransaction = () => {
           //     ? "Valid! Successful Transaction"
           //     : `Failed: ${responseJson.message}`
           // );
+          setTransactionId(payload.transaction_id);
         }
-        setSendTransactionVerificationMessage("TODO");
 
         setReceivedSendTransactionPayload(payload);
       }
@@ -128,7 +130,7 @@ export const SendTransaction = () => {
     const permitTransfer = {
       permitted: {
         token: testTokens.worldchain.USDCE,
-        amount: "100000",
+        amount: "10000",
       },
       nonce: Date.now().toString(),
       deadline,
@@ -197,7 +199,7 @@ export const SendTransaction = () => {
     const permitTransfer2 = {
       permitted: {
         token: testTokens.worldchain.USDCE,
-        amount: "2000000",
+        amount: "20000",
       },
       nonce: deadline,
       deadline,
@@ -324,7 +326,6 @@ export const SendTransaction = () => {
   return (
     <div className="grid gap-y-2">
       <h2 className="text-2xl font-bold">Transaction</h2>
-
       <div className="grid gap-y-1">
         <p>Raw string:</p>
 
@@ -380,7 +381,10 @@ export const SendTransaction = () => {
         <div className="grid gap-y-1">
           <p>Verification:</p>
           <p className="bg-gray-300 p-2">
-            {sendTransactionVerificationMessage ?? "No verification yet"}
+            {/* {sendTransactionVerificationMessage ?? "No verification yet"} */}
+            {transactionId && <p>Transaction ID: {transactionId}</p>}
+            {isConfirming && <p>Waiting for confirmation...</p>}
+            {isConfirmed && <p>Transaction confirmed.</p>}
           </p>
         </div>
       </div>
