@@ -54,12 +54,19 @@ export function useWaitForTransactionReceipt(
     receipt === undefined && (isLoadingReceipt || isLoadingHash);
   const isSuccess = receipt !== undefined && receipt.status === "success";
 
-  const cancel = useCallback(() => {
-    shouldCancelRef.current = true;
+  const cleanup = useCallback(() => {
     if (timeoutIdRef.current) {
       clearTimeout(timeoutIdRef.current);
+      timeoutIdRef.current = null;
     }
+    shouldCancelRef.current = false;
+    failureCountRef.current = 0;
   }, []);
+
+  const cancel = useCallback(() => {
+    shouldCancelRef.current = true;
+    cleanup();
+  }, [cleanup]);
 
   useEffect(() => {
     return () => {
