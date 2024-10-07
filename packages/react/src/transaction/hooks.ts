@@ -76,7 +76,9 @@ export function useWaitForTransactionReceipt(
     console.log(transactionId);
     const pollHash = async () => {
       try {
+        console.log("Polling for transaction hash:", transactionId);
         const status = await fetchTransactionHash(appConfig, transactionId);
+        console.log("Received status:", status);
 
         if (!isMountedRef.current || shouldCancelRef.current) return;
 
@@ -88,6 +90,7 @@ export function useWaitForTransactionReceipt(
           status.transaction_status === "mined" ||
           status.transaction_status === "failed"
         ) {
+          console.log("Transaction hash received:", status.transaction_hash);
           setTransactionHash(status.transaction_hash);
           setIsLoadingHash(false);
         }
