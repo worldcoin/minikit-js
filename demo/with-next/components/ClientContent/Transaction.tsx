@@ -70,6 +70,18 @@ export const SendTransaction = () => {
       transactionId: transactionId,
     });
 
+  const test = async () => {
+    const response = await fetch(
+      `https://staging-developer.worldcoin.org/api/v2/minikit/transaction/0x51e6d976d6f645f1989fb55a5936914f26cababb7c20a5171b70638a0647f6a6?app_id=app_staging_5748c49d2e6c68849479e0b321bc5257&type=transaction`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer api_a2V5XzRlOGVlNWExYzVmYTAxMDIzNmQ2M2Y2MzQ0ZjE1OGU5OnNrXzA3NWY1NDRhYTE1YTVjYTk4YzhlNDgwMDRjMzg2NDFhMzcyYjI4MDgwMTg2MTc2Yg`,
+        },
+      }
+    );
+    console.log(response);
+  };
   const [
     sendTransactionVerificationMessage,
     setSendTransactionVerificationMessage,
@@ -332,7 +344,7 @@ export const SendTransaction = () => {
   return (
     <div className="grid gap-y-2">
       <h2 className="text-2xl font-bold">Transaction</h2>
-
+      <button onClick={test}>test</button>
       <div className="grid gap-y-1">
         <p>Raw string:</p>
 
