@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { PublicClient, TransactionReceipt } from "viem";
 import { fetchTransactionHash } from ".";
 import { AppConfig } from "../types/client";
@@ -19,7 +19,7 @@ interface UseTransactionReceiptResult {
   isLoading: boolean;
   isSuccess: boolean;
   error?: Error;
-  cancel: () => void;
+  retrigger: () => void;
 }
 
 export function useWaitForTransactionReceipt(
@@ -27,12 +27,14 @@ export function useWaitForTransactionReceipt(
 ): UseTransactionReceiptResult {
   const {
     client,
-    appConfig,
+    appConfig: _appConfig,
     transactionId,
     confirmations = 1,
     timeout,
     pollingInterval = 4000,
   } = options;
+
+  const appConfig = useMemo(() => _appConfig, [_appConfig]);
 
   const [transactionHash, setTransactionHash] = useState<
     `0x${string}` | undefined
@@ -40,117 +42,108 @@ export function useWaitForTransactionReceipt(
   const [receipt, setReceipt] = useState<TransactionReceipt | undefined>(
     undefined
   );
-  const [isLoadingHash, setIsLoadingHash] = useState<boolean>(true);
-  const [isLoadingReceipt, setIsLoadingReceipt] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
   const [error, setError] = useState<Error | undefined>(undefined);
+  const [pollCount, setPollCount] = useState<number>(0);
 
-  const isMountedRef = useRef(true);
-  const shouldCancelRef = useRef(false);
-  const failureCountRef = useRef(0);
-  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
-
-  const isLoading =
-    receipt === undefined && (isLoadingReceipt || isLoadingHash);
-  const isSuccess = receipt !== undefined && receipt.status === "success";
-
-  const cleanup = useCallback(() => {
-    if (timeoutIdRef.current) {
-      clearTimeout(timeoutIdRef.current);
-      timeoutIdRef.current = null;
-    }
-    shouldCancelRef.current = false;
-    failureCountRef.current = 0;
+  const retrigger = useCallback(() => {
+    reset();
+    setIsLoading(false);
+    setPollCount((count) => count + 1);
   }, []);
 
-  const cancel = useCallback(() => {
-    shouldCancelRef.current = true;
-    cleanup();
-  }, [cleanup]);
+  const reset = useCallback(() => {
+    console.log("Reset called");
+    setTransactionHash(undefined);
+    setReceipt(undefined);
+    setIsError(false);
+    setError(undefined);
+  }, []);
+
+  const fetchStatus = useCallback(async () => {
+    return await fetchTransactionHash(appConfig, transactionId);
+  }, [appConfig, transactionId]);
 
   useEffect(() => {
-    return () => {
-      isMountedRef.current = false;
-      cancel();
-    };
-  }, [cancel]);
-
-  useEffect(() => {
-    if (!transactionId || shouldCancelRef.current) {
-      setIsLoadingHash(false);
+    if (!transactionId) {
+      setIsLoading(false);
       return;
     }
-    console.log(transactionId);
+
+    reset();
+    setIsLoading(true);
+
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+    let timeoutId: NodeJS.Timeout | null = null;
+
     const pollHash = async () => {
+      if (signal.aborted) return;
+
       try {
-        console.log("Polling for transaction hash:", transactionId);
-        const status = await fetchTransactionHash(appConfig, transactionId);
+        const status = await fetchStatus();
         console.log("Received status:", status);
 
-        if (!isMountedRef.current || shouldCancelRef.current) return;
+        if (signal.aborted) return;
 
-        failureCountRef.current = 0;
-
-        if (status.transaction_status === "pending") {
-          setIsLoadingHash(true);
-        } else if (
-          status.transaction_status === "mined" ||
-          status.transaction_status === "failed"
-        ) {
-          console.log("Transaction hash received:", status.transaction_hash);
-          setTransactionHash(status.transaction_hash);
-          setIsLoadingHash(false);
+        if (!status.transactionHash) {
+          timeoutId = setTimeout(pollHash, pollingInterval);
+        } else if (status.transactionHash) {
+          setTransactionHash(status.transactionHash);
+          setIsLoading(false);
+        } else {
+          timeoutId = setTimeout(pollHash, pollingInterval);
         }
       } catch (err) {
-        if (!isMountedRef.current || shouldCancelRef.current) return;
-      }
-
-      if (isMountedRef.current && !shouldCancelRef.current) {
-        timeoutIdRef.current = setTimeout(pollHash, pollingInterval);
+        if (signal.aborted) return;
+        setIsError(true);
+        setError(err instanceof Error ? err : new Error(String(err)));
+        setIsLoading(false);
       }
     };
 
     pollHash();
 
     return () => {
-      if (timeoutIdRef.current) {
-        clearTimeout(timeoutIdRef.current);
+      abortController.abort();
+      if (timeoutId) {
+        clearTimeout(timeoutId);
       }
     };
-  }, [appConfig, transactionId, pollingInterval]);
+  }, [transactionId, pollCount]);
 
   useEffect(() => {
-    if (!transactionHash || shouldCancelRef.current) {
-      setIsLoadingReceipt(false);
-      return;
-    }
+    if (!transactionHash) return;
+    if (receipt) return;
+
+    const abortController = new AbortController();
+    const signal = abortController.signal;
 
     const fetchReceipt = async () => {
-      setIsLoadingReceipt(true);
       try {
-        console.log("Fetching transaction receipt for hash:", transactionHash);
         const txnReceipt = await client.waitForTransactionReceipt({
           hash: transactionHash,
           confirmations,
           timeout,
         });
-        console.log("Received transaction receipt:", txnReceipt);
-
-        if (isMountedRef.current && !shouldCancelRef.current) {
-          setReceipt(txnReceipt);
-          setIsLoadingReceipt(false);
-        }
-      } catch (err: any) {
-        if (isMountedRef.current && !shouldCancelRef.current) {
-          setIsError(true);
-          setError(err instanceof Error ? err : new Error(String(err)));
-          setIsLoadingReceipt(false);
-        }
+        if (signal.aborted) return;
+        setReceipt(txnReceipt);
+      } catch (err) {
+        if (signal.aborted) return;
+        setIsError(true);
+        setError(err instanceof Error ? err : new Error(String(err)));
       }
     };
 
     fetchReceipt();
+
+    return () => {
+      abortController.abort();
+    };
   }, [transactionHash, confirmations, timeout, client]);
+
+  const isSuccess = receipt !== undefined && receipt.status === "success";
 
   return {
     transactionHash,
@@ -159,6 +152,6 @@ export function useWaitForTransactionReceipt(
     isLoading,
     isSuccess,
     error,
-    cancel,
+    retrigger,
   };
 }

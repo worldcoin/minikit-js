@@ -79,14 +79,12 @@ export const VerifyAction = () => {
         setVerifyActionAppPayloadValidationMessage(`Payload is valid!`);
 
         setVerifyActionAppPayload(payload);
-
       }
 
       const errorMessage = await validateSchema(
         verifyActionSuccessPayloadSchema,
         payload
       );
-
 
       if (errorMessage) {
         return setVerifyActionAppPayloadValidationMessage(errorMessage);
@@ -103,6 +101,7 @@ export const VerifyAction = () => {
         payload: payload as ISuccessResult,
         app_id: lastUsedAppId,
         action: lastUsedAction,
+        signal: "test",
       });
 
       setDevPortalVerifyResponse(verifyResponse);
@@ -118,6 +117,7 @@ export const VerifyAction = () => {
       app_id: `app_${string}`;
       action: string;
       verification_level?: VerificationLevel;
+      signal?: string;
     }) => {
       setLastUsedAppId(params.app_id);
       setLastUsedAction(params.action);
@@ -131,6 +131,7 @@ export const VerifyAction = () => {
       const verifyPayload: VerifyCommandInput = {
         action: params.action,
         verification_level: params.verification_level,
+        signal: params.signal,
       };
 
       const payload = MiniKit.commands.verify(verifyPayload);
@@ -157,6 +158,7 @@ export const VerifyAction = () => {
           .NEXT_PUBLIC_STAGING_VERIFY_APP_ID as `app_${string}`,
         action: process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION as string,
         verification_level,
+        signal: "test",
       });
     },
     [verifyAction]

@@ -22,6 +22,8 @@ import {
   WalletAuthPayload,
 } from "types/commands";
 import { VerificationLevel } from "@worldcoin/idkit-core";
+import { generateSignal, encodeAction } from "@worldcoin/idkit-core/hashing";
+
 import { validateWalletAuthCommandInput } from "helpers/siwe/validate-wallet-auth-command-input";
 import { generateSiweMessage } from "helpers/siwe/siwe";
 import {
@@ -214,8 +216,8 @@ export class MiniKit {
 
       const timestamp = new Date().toISOString();
       const eventPayload: VerifyCommandPayload = {
-        ...payload,
-        signal: payload.signal || "",
+        action: encodeAction(payload.action),
+        signal: generateSignal(payload.signal).digest,
         verification_level: payload.verification_level || VerificationLevel.Orb,
         timestamp,
       };

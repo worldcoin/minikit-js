@@ -1,31 +1,26 @@
 import { AppConfig } from "src/types/client";
 
 export interface TransactionStatus {
-  transaction_hash: `0x${string}`;
-  transaction_status: "pending" | "mined" | "failed";
+  transactionHash: `0x${string}`;
+  transactionStatus: "pending" | "mined" | "failed";
 }
 
 export async function fetchTransactionHash(
   appConfig: AppConfig,
   transactionId: string
 ): Promise<TransactionStatus> {
-  console.log("Fetching transaction status for:", transactionId);
   try {
     const response = await fetch(
-      `https://staging-developer.worldcoin.org/api/v2/minikit/transaction/${transactionId}?app_id=${appConfig.app_id}&type=transaction`,
+      `https://developer.worldcoin.org/api/v2/minikit/transaction/${transactionId}?app_id=${appConfig.app_id}&type=transaction`,
       {
         method: "GET",
-        headers: {
-          Authorization: `Bearer ${appConfig.api_key}`,
-        },
       }
     );
 
+    console.log("Received response:", response.url);
     if (!response.ok) {
       throw new Error("Failed to fetch transaction status");
     }
-
-    console.log("Received response:", response);
 
     const data: TransactionStatus = await response.json();
     return data;

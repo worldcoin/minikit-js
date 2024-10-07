@@ -65,14 +65,14 @@ export const SendTransaction = () => {
       appConfig: {
         api_key:
           "api_a2V5XzRlOGVlNWExYzVmYTAxMDIzNmQ2M2Y2MzQ0ZjE1OGU5OnNrXzA3NWY1NDRhYTE1YTVjYTk4YzhlNDgwMDRjMzg2NDFhMzcyYjI4MDgwMTg2MTc2Yg",
-        app_id: "app_staging_5748c49d2e6c68849479e0b321bc5257",
+        app_id: "app_7b8d0ff88e9ece4d97febf5097e58d8f",
       },
       transactionId: transactionId,
     });
 
   const test = async () => {
     const response = await fetch(
-      `https://staging-developer.worldcoin.org/api/v2/minikit/transaction/0x51e6d976d6f645f1989fb55a5936914f26cababb7c20a5171b70638a0647f6a6?app_id=app_staging_5748c49d2e6c68849479e0b321bc5257&type=transaction`,
+      `https://developer.worldcoin.org/api/v2/minikit/transaction/0x4f4007990df9d20f0ed389308827fa5564335e94fc9c7b33e77c4688a9723038?app_id=app_7b8d0ff88e9ece4d97febf5097e58d8f&type=transaction`,
       {
         method: "GET",
       }
