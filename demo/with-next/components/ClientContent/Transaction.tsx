@@ -3,7 +3,7 @@ import {
   MiniKit,
   ResponseEvent,
   SendTransactionErrorCodes,
-} from "@worldcoin/minikit-react";
+} from "@worldcoin/minikit-js";
 import { useWaitForTransactionReceipt } from "@worldcoin/minikit-react";
 import { useEffect, useState } from "react";
 import * as yup from "yup";

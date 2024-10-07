@@ -1,7 +1,7 @@
 import {
   MiniAppWalletAuthSuccessPayload,
   verifySiweMessage,
-} from "@worldcoin/minikit-react";
+} from "@worldcoin/minikit-js";
 import { NextRequest } from "next/server";
 import * as yup from "yup";
 

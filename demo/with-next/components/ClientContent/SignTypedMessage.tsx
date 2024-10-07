@@ -3,7 +3,7 @@ import {
   SignTypedDataErrorCodes,
   ResponseEvent,
   MiniAppSignTypedDataPayload,
-} from "@worldcoin/minikit-react";
+} from "@worldcoin/minikit-js";
 import { useCallback, useEffect, useState } from "react";
 import { validateSchema } from "./helpers/validate-schema";
 import * as yup from "yup";

@@ -4,7 +4,7 @@ import {
   ISuccessResult,
   IVerifyResponse,
   verifyCloudProof,
-} from "@worldcoin/minikit-react";
+} from "@worldcoin/minikit-js";
 
 export const verifyProof = async (params: {
   app_id: `app_${string}`;
