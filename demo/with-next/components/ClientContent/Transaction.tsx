@@ -60,14 +60,18 @@ export const SendTransaction = () => {
     transport: http("https://worldchain-mainnet.g.alchemy.com/public"),
   });
 
-  const { isLoading: isConfirming, isSuccess: isConfirmed } =
-    useWaitForTransactionReceipt({
-      client: client,
-      appConfig: {
-        app_id: process.env.NEXT_PUBLIC_STAGING_VERIFY_APP_ID || "",
-      },
-      transactionId: transactionId,
-    });
+  const {
+    isLoading: isConfirming,
+    isSuccess: isConfirmed,
+    error,
+    isError,
+  } = useWaitForTransactionReceipt({
+    client: client,
+    appConfig: {
+      app_id: process.env.NEXT_PUBLIC_STAGING_VERIFY_APP_ID || "",
+    },
+    transactionId: transactionId,
+  });
 
   useEffect(() => {
     if (!MiniKit.isInstalled()) {
@@ -380,12 +384,11 @@ export const SendTransaction = () => {
 
         <div className="grid gap-y-1">
           <p>Verification:</p>
-          <p className="bg-gray-300 p-2">
-            {/* {sendTransactionVerificationMessage ?? "No verification yet"} */}
-            {transactionId && <p>Transaction ID: {transactionId}</p>}
-            {isConfirming && <p>Waiting for confirmation...</p>}
-            {isConfirmed && <p>Transaction confirmed.</p>}
-          </p>
+          {/* {sendTransactionVerificationMessage ?? "No verification yet"} */}
+          {transactionId && <p>Transaction ID: {transactionId}</p>}
+          {isConfirming && <p>Waiting for confirmation...</p>}
+          {isConfirmed && <p>Transaction confirmed.</p>}
+          {isError && <p>{error?.message}</p>}
         </div>
       </div>
     </div>
