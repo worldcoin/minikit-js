@@ -1,7 +1,8 @@
+"use client";
 import { useState, useEffect, useCallback } from "react";
-import { AppConfig } from "types/client";
 import { PublicClient, TransactionReceipt } from "viem";
 import { fetchTransactionHash, TransactionStatus } from ".";
+import { AppConfig } from "../types/client";
 
 /**
  * Arguments for the useTransactionReceipt hook.
@@ -76,7 +77,7 @@ export function useWaitForTransactionReceipt(
     }
 
     let isMounted = true;
-    let intervalId: NodeJS.Timeout;
+    let intervalId;
 
     const pollHash = async () => {
       try {
