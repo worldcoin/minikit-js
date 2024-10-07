@@ -73,7 +73,7 @@ export function useWaitForTransactionReceipt(
       setIsLoadingHash(false);
       return;
     }
-
+    console.log(transactionId);
     const pollHash = async () => {
       try {
         const status = await fetchTransactionHash(appConfig, transactionId);
