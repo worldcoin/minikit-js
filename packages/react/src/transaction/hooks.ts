@@ -54,7 +54,6 @@ export function useWaitForTransactionReceipt(
   }, []);
 
   const reset = useCallback(() => {
-    console.log("Reset called");
     setTransactionHash(undefined);
     setReceipt(undefined);
     setIsError(false);
@@ -83,7 +82,6 @@ export function useWaitForTransactionReceipt(
 
       try {
         const status = await fetchStatus();
-        console.log("Received status:", status);
 
         if (signal.aborted) return;
 

@@ -1,6 +1,6 @@
 {
   "name": "@worldcoin/minikit-react",
-  "version": "0.0.37-internal-alpha",
+  "version": "0.0.38-internal-alpha",
   "homepage": "https://docs.worldcoin.org/id/minikit",
   "description": "Internal Alpha: Mini-kit React is a set of hooks for building mini-apps",
   "license": "MIT",
