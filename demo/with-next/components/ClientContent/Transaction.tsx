@@ -71,6 +71,7 @@ export const SendTransaction = () => {
       app_id: process.env.NEXT_PUBLIC_STAGING_VERIFY_APP_ID || "",
     },
     transactionId: transactionId,
+    pollingInterval: 2000,
   });
 
   useEffect(() => {
