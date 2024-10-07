@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { PublicClient, TransactionReceipt } from "viem";
 import { fetchTransactionHash, TransactionStatus } from ".";
 import { AppConfig } from "../types/client";
@@ -76,18 +76,22 @@ export function useWaitForTransactionReceipt(
       setIsLoadingHash(false);
       return;
     }
+
     console.log("Polling for transaction hash");
+
     let isMounted = true;
+    const failureCountRef = useRef(0);
     let intervalId;
 
+    // Define pollHash before using it
     const pollHash = async () => {
       try {
-        const status: TransactionStatus = await fetchTransactionHash(
-          appConfig,
-          transactionId
-        );
+        const status = await fetchTransactionHash(appConfig, transactionId);
 
         if (!isMounted || shouldCancel) return;
+
+        // Reset failure counter on success
+        failureCountRef.current = 0;
 
         if (status.transaction_status === "pending") {
           setIsLoadingHash(true);
@@ -99,20 +103,29 @@ export function useWaitForTransactionReceipt(
           setIsLoadingHash(false);
           clearInterval(intervalId);
         }
-      } catch (err: any) {
+      } catch (err) {
         if (!isMounted || shouldCancel) return;
-        setIsError(true);
-        setError(err);
-        setIsLoadingHash(false);
-        clearInterval(intervalId);
+
+        failureCountRef.current += 1;
+
+        if (failureCountRef.current > 4) {
+          console.log("Polling failed more than 4 times. Stopping polling.");
+          setIsError(true);
+          setIsLoadingHash(false);
+          clearInterval(intervalId);
+          return;
+        }
+
+        console.log(
+          `Polling failed ${failureCountRef.current} time(s). Retrying...`
+        );
       }
     };
 
-    pollHash();
-
+    // Now assign intervalIdRef after pollHash is defined
     intervalId = setInterval(pollHash, pollingInterval);
+    pollHash(); // Call pollHash after intervalIdRef is assigned
 
-    // Cleanup on unmount or cancellation
     return () => {
       isMounted = false;
       clearInterval(intervalId);
