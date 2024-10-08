@@ -216,7 +216,8 @@ export class MiniKit {
 
       const timestamp = new Date().toISOString();
       const eventPayload: VerifyCommandPayload = {
-        action: payload.action,
+        action: encodeAction(payload.action),
+        signal: generateSignal(payload.signal).digest,
         verification_level: payload.verification_level || VerificationLevel.Orb,
         timestamp,
       };

@@ -101,6 +101,7 @@ export const VerifyAction = () => {
         payload: payload as ISuccessResult,
         app_id: lastUsedAppId,
         action: lastUsedAction,
+        signal: "test",
       });
 
       setDevPortalVerifyResponse(verifyResponse);
@@ -130,6 +131,7 @@ export const VerifyAction = () => {
       const verifyPayload: VerifyCommandInput = {
         action: params.action,
         verification_level: params.verification_level,
+        signal: params.signal,
       };
 
       const payload = MiniKit.commands.verify(verifyPayload);
@@ -156,6 +158,7 @@ export const VerifyAction = () => {
           .NEXT_PUBLIC_STAGING_VERIFY_APP_ID as `app_${string}`,
         action: process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION as string,
         verification_level,
+        signal: "test",
       });
     },
     [verifyAction]
