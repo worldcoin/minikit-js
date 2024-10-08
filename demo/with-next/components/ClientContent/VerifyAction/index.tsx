@@ -101,7 +101,6 @@ export const VerifyAction = () => {
         payload: payload as ISuccessResult,
         app_id: lastUsedAppId,
         action: lastUsedAction,
-        signal: "test",
       });
 
       setDevPortalVerifyResponse(verifyResponse);
