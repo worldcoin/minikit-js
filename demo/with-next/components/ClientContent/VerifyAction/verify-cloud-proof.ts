@@ -9,7 +9,7 @@ import {
 export const verifyProof = async (params: {
   app_id: `app_${string}`;
   action: string;
-  signal: string;
+  signal?: string;
   payload: ISuccessResult;
 }) => {
   const { app_id, action, payload, signal } = params;
