@@ -157,7 +157,6 @@ export const VerifyAction = () => {
           .NEXT_PUBLIC_STAGING_VERIFY_APP_ID as `app_${string}`,
         action: process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION as string,
         verification_level,
-        signal: "test",
       });
     },
     [verifyAction]
