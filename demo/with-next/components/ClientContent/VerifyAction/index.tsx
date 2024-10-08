@@ -130,7 +130,6 @@ export const VerifyAction = () => {
       const verifyPayload: VerifyCommandInput = {
         action: params.action,
         verification_level: params.verification_level,
-        signal: params.signal || "",
       };
 
       const payload = MiniKit.commands.verify(verifyPayload);
