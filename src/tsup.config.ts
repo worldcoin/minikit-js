@@ -4,6 +4,7 @@ export default defineConfig({
   dts: true,
   clean: true,
   outDir: "build",
+  splitting: false,
   format: ["esm", "cjs"],
   external: ["@worldcoin/idkit-core"],
   entry: ["index.ts"],

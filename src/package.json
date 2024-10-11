@@ -40,18 +40,17 @@
     "miniapps"
   ],
   "scripts": {
-    "build": "tsup",
+    "build:default": "tsup --format esm,cjs --out-dir ./build/default --external @worldcoin/idkit-core,abitype",
+    "build:bundled-deps": "tsup --format esm,cjs --out-dir ./build/bundled-deps --external @worldcoin/idkit-core,abitype",
+    "build": "pnpm run build:default && pnpm run build:bundled-deps",
     "dev": "tsup --watch",
     "lint": "eslint ./ --ext .ts",
     "prepublishOnly": "npm run build",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@worldcoin/idkit-core": "^1.3.0",
     "abitype": "^1.0.6",
-    "turbo": "^2.1.1"
-  },
-  "devDependencies": {
+    "turbo": "^2.1.1",
     "@types/node": "^20",
     "@typescript-eslint/eslint-plugin": "^7.7.0",
     "@typescript-eslint/parser": "^7.7.0",
@@ -60,7 +59,9 @@
     "tsup": "^8.0.2",
     "typescript": "^5.4.5"
   },
-  "peerDependencies": {
+  "devDependencies": {
+    "@worldcoin/idkit-core": "^1.3.0",
     "viem": "^2.0.0"
-  }
+  },
+  "peerDependencies": {}
 }
