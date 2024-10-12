@@ -30,7 +30,7 @@ export const ExternalLinks = () => {
           Valid Subdomain (Button)
         </button>
         <Link
-          href="https://worldcoin-developer-portal.eu.auth0.com/u/login/identifier?state=hKFo2SBHakd3VGFGMllRb0E4QVJMY3pDeS04VG5lWGNwTFVkdKFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIEpFNTd0NjdIOTZLVzdVMG5FVXdrQ0dHUV92dHVwaE1ho2NpZNkgbU1vVGJqbFI4RmZYVEJrU05nVzk3d1BxR2tmUmNWUk8"
+          href="https://worldcoin-developer-portal.eu.auth0.com/u/login/identifier"
           className="bg-green-500 text-white text-center rounded-lg p-3"
         >
           Valid double Subdomain (Link)
@@ -38,7 +38,7 @@ export const ExternalLinks = () => {
         <button
           onClick={() =>
             window.open(
-              "https://worldcoin-developer-portal.eu.auth0.com/u/login/identifier?state=hKFo2SBHakd3VGFGMllRb0E4QVJMY3pDeS04VG5lWGNwTFVkdKFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIEpFNTd0NjdIOTZLVzdVMG5FVXdrQ0dHUV92dHVwaE1ho2NpZNkgbU1vVGJqbFI4RmZYVEJrU05nVzk3d1BxR2tmUmNWUk8"
+              "https://worldcoin-developer-portal.eu.auth0.com/u/login/identifier"
             )
           }
           className="text-white bg-green-500 transition p-4 leading-[1] rounded-lg"

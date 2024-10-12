@@ -221,6 +221,7 @@ export class MiniKit {
         verification_level: payload.verification_level || VerificationLevel.Orb,
         timestamp,
       };
+
       sendMiniKitEvent({
         command: Command.Verify,
         version: this.commandVersion[Command.Verify],
