@@ -1,0 +1,30 @@
+[
+  {
+    "type": "function",
+    "name": "mint",
+    "inputs": [
+      {
+        "name": "signal",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "root",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "nullifierHash",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "proof",
+        "type": "uint256[8]",
+        "internalType": "uint256[8]"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  }
+]
