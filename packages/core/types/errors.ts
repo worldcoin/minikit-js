@@ -136,6 +136,7 @@ export enum MiniKitInstallErrorCodes {
   OutsideOfWorldApp = "outside_of_worldapp",
   NotOnClient = "not_on_client",
   AppOutOfDate = "app_out_of_date",
+  AppIdMissing = "app_id_missing",
 }
 
 export const MiniKitInstallErrorMessage = {
@@ -146,4 +147,6 @@ export const MiniKitInstallErrorMessage = {
   [MiniKitInstallErrorCodes.NotOnClient]: "Window object is not available.",
   [MiniKitInstallErrorCodes.AppOutOfDate]:
     "WorldApp is out of date. Please update the app.",
+  [MiniKitInstallErrorCodes.AppIdMissing]:
+    "AppId is missing on install. Please provide the MiniApp id.",
 };

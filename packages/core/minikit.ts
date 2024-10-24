@@ -71,7 +71,11 @@ export class MiniKit {
     [ResponseEvent.MiniAppSignTypedData]: () => {},
   };
 
-  public static walletAddress: string | null = null;
+  public static config: { appId: string | null; walletAddress: string | null } =
+    {
+      appId: null,
+      walletAddress: null,
+    };
 
   private static sendInit() {
     sendWebviewEvent({
@@ -92,7 +96,7 @@ export class MiniKit {
         payload
       ) => {
         if (payload.status === "success") {
-          MiniKit.walletAddress = payload.address;
+          MiniKit.config.walletAddress = payload.address;
         }
 
         originalHandler(payload);
@@ -140,7 +144,16 @@ export class MiniKit {
     );
   }
 
-  public static install(): MiniKitInstallReturnType {
+  public static install(appId: string): MiniKitInstallReturnType {
+    if (!appId) {
+      return {
+        success: false,
+        errorCode: MiniKitInstallErrorCodes.AppIdMissing,
+        errorMessage:
+          MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.AppIdMissing],
+      };
+    }
+
     if (typeof window === "undefined" || Boolean(window.MiniKit)) {
       return {
         success: false,
@@ -149,6 +162,8 @@ export class MiniKit {
           MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.AlreadyInstalled],
       };
     }
+
+    MiniKit.config.appId = appId;
 
     if (!window.WorldApp) {
       return {
