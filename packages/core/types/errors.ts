@@ -147,3 +147,15 @@ export const MiniKitInstallErrorMessage = {
   [MiniKitInstallErrorCodes.AppOutOfDate]:
     "WorldApp is out of date. Please update the app.",
 };
+
+export enum SendHapticFeedbackErrorCodes {
+  InputError = "input_error",
+  GenericError = "generic_error",
+}
+
+export const SendHapticFeedbackErrorMessage = {
+  [SendHapticFeedbackErrorCodes.InputError]:
+    "Invalid payload, could not complete action.",
+  [SendHapticFeedbackErrorCodes.GenericError]:
+    "Something unexpected went wrong.",
+};

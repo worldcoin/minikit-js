@@ -11,6 +11,8 @@ import { ResponseEvent } from "./types/responses";
 import { Network } from "types/payment";
 import {
   PayCommandPayload,
+  SendHapticFeedbackCommandInput,
+  SendHapticFeedbackCommandPayload,
   SendTransactionInput,
   SendTransactionPayload,
   SignMessageInput,
@@ -51,6 +53,7 @@ export class MiniKit {
     [Command.SendTransaction]: 1,
     [Command.SignMessage]: 1,
     [Command.SignTypedData]: 1,
+    [Command.SendHapticFeedback]: 1,
   };
 
   private static isCommandAvailable = {
@@ -60,6 +63,7 @@ export class MiniKit {
     [Command.SendTransaction]: false,
     [Command.SignMessage]: false,
     [Command.SignTypedData]: false,
+    [Command.SendHapticFeedback]: false,
   };
 
   private static listeners: Record<ResponseEvent, EventHandler> = {
@@ -69,6 +73,7 @@ export class MiniKit {
     [ResponseEvent.MiniAppSendTransaction]: () => {},
     [ResponseEvent.MiniAppSignMessage]: () => {},
     [ResponseEvent.MiniAppSignTypedData]: () => {},
+    [ResponseEvent.MiniAppSendHapticFeedback]: () => {},
   };
 
   public static appId: string | null = null;
@@ -389,6 +394,28 @@ export class MiniKit {
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.SignTypedData,
         version: 1,
+        payload,
+      });
+
+      return payload;
+    },
+    sendHapticFeedback: (
+      payload: SendHapticFeedbackCommandInput
+    ): SendHapticFeedbackCommandPayload | null => {
+      if (
+        typeof window === "undefined" ||
+        !this.isCommandAvailable[Command.SendHapticFeedback]
+      ) {
+        console.error(
+          "'send-haptic-feedback' command is unavailable. Check MiniKit.install() or update the app version"
+        );
+
+        return null;
+      }
+
+      sendMiniKitEvent({
+        command: Command.SendHapticFeedback,
+        version: this.commandVersion[Command.SendHapticFeedback],
         payload,
       });
 
