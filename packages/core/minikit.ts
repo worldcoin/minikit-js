@@ -141,16 +141,7 @@ export class MiniKit {
     );
   }
 
-  public static install(appId: string): MiniKitInstallReturnType {
-    if (!appId) {
-      return {
-        success: false,
-        errorCode: MiniKitInstallErrorCodes.AppIdMissing,
-        errorMessage:
-          MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.AppIdMissing],
-      };
-    }
-
+  public static install(appId?: string): MiniKitInstallReturnType {
     if (typeof window === "undefined" || Boolean(window.MiniKit)) {
       return {
         success: false,
@@ -160,7 +151,11 @@ export class MiniKit {
       };
     }
 
-    MiniKit.appId = appId;
+    if (!appId) {
+      console.warn("App ID not provided during install");
+    } else {
+      MiniKit.appId = appId;
+    }
 
     if (!window.WorldApp) {
       return {
