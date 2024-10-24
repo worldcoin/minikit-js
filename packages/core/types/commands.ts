@@ -12,6 +12,7 @@ export enum Command {
   SignMessage = "sign-message",
   SignTypedData = "sign-typed-data",
   ShareContacts = "share-contacts",
+  SendHapticFeedback = "send-haptic-feedback",
 }
 
 export type WebViewBasePayload = {
@@ -100,6 +101,21 @@ export type ShareContactsInput = {
 };
 export type ShareContactsPayload = ShareContactsInput;
 
+export type SendHapticFeedbackCommandInput =
+  | {
+      hapticsType: "notification";
+      style: "error" | "success" | "warning";
+    }
+  | {
+      hapticsType: "selection-changed";
+    }
+  | {
+      hapticsType: "impact";
+      style: "light" | "medium" | "heavy" | "rigid" | "soft";
+    };
+
+export type SendHapticFeedbackCommandPayload = SendHapticFeedbackCommandInput;
+
 type CommandReturnPayloadMap = {
   [Command.Verify]: VerifyCommandPayload;
   [Command.Pay]: PayCommandPayload;
@@ -108,6 +124,8 @@ type CommandReturnPayloadMap = {
   [Command.SignMessage]: SignMessagePayload;
   [Command.SignTypedData]: SignTypedDataPayload;
   [Command.ShareContacts]: ShareContactsPayload;
+  [Command.SendHapticFeedback]: SendHapticFeedbackCommandPayload;
 };
+
 export type CommandReturnPayload<T extends Command> =
   T extends keyof CommandReturnPayloadMap ? CommandReturnPayloadMap[T] : never;

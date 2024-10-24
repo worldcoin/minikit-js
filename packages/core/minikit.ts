@@ -22,6 +22,8 @@ import {
   AsyncHandlerReturn,
   CommandReturnPayload,
   PayCommandPayload,
+  SendHapticFeedbackCommandInput,
+  SendHapticFeedbackCommandPayload,
   SendTransactionInput,
   SendTransactionPayload,
   ShareContactsPayload,
@@ -65,6 +67,7 @@ export class MiniKit {
     [Command.SignMessage]: 1,
     [Command.SignTypedData]: 1,
     [Command.ShareContacts]: 1,
+    [Command.SendHapticFeedback]: 1,
   };
 
   private static isCommandAvailable = {
@@ -75,6 +78,7 @@ export class MiniKit {
     [Command.SignMessage]: false,
     [Command.SignTypedData]: false,
     [Command.ShareContacts]: false,
+    [Command.SendHapticFeedback]: false,
   };
 
   private static listeners: Record<ResponseEvent, EventHandler> = {
@@ -85,6 +89,7 @@ export class MiniKit {
     [ResponseEvent.MiniAppSignMessage]: () => {},
     [ResponseEvent.MiniAppSignTypedData]: () => {},
     [ResponseEvent.MiniAppShareContacts]: () => {},
+    [ResponseEvent.MiniAppSendHapticFeedback]: () => {},
   };
 
   public static appId: string | null = null;
@@ -451,10 +456,31 @@ export class MiniKit {
 
         return null;
       }
-
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.ShareContacts,
         version: 1,
+        payload,
+      });
+
+      return payload;
+    },
+    sendHapticFeedback: (
+      payload: SendHapticFeedbackCommandInput
+    ): SendHapticFeedbackCommandPayload | null => {
+      if (
+        typeof window === "undefined" ||
+        !this.isCommandAvailable[Command.SendHapticFeedback]
+      ) {
+        console.error(
+          "'send-haptic-feedback' command is unavailable. Check MiniKit.install() or update the app version"
+        );
+
+        return null;
+      }
+
+      sendMiniKitEvent({
+        command: Command.SendHapticFeedback,
+        version: this.commandVersion[Command.SendHapticFeedback],
         payload,
       });
 
