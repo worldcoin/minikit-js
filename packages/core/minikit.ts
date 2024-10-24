@@ -71,11 +71,8 @@ export class MiniKit {
     [ResponseEvent.MiniAppSignTypedData]: () => {},
   };
 
-  public static config: { appId: string | null; walletAddress: string | null } =
-    {
-      appId: null,
-      walletAddress: null,
-    };
+  public static appId: string | null = null;
+  public static walletAddress: string | null = null;
 
   private static sendInit() {
     sendWebviewEvent({
@@ -96,7 +93,7 @@ export class MiniKit {
         payload
       ) => {
         if (payload.status === "success") {
-          MiniKit.config.walletAddress = payload.address;
+          MiniKit.walletAddress = payload.address;
         }
 
         originalHandler(payload);
@@ -163,7 +160,7 @@ export class MiniKit {
       };
     }
 
-    MiniKit.config.appId = appId;
+    MiniKit.appId = appId;
 
     if (!window.WorldApp) {
       return {
