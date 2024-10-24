@@ -11,6 +11,7 @@ export enum Command {
   SendTransaction = "send-transaction",
   SignMessage = "sign-message",
   SignTypedData = "sign-typed-data",
+  SendHapticFeedback = "send-haptic-feedback",
 }
 
 export type WebViewBasePayload = {
@@ -87,3 +88,18 @@ export type SignTypedDataInput = {
 };
 
 export type SignTypedDataPayload = SignTypedDataInput;
+
+export type SendHapticFeedbackCommandInput =
+  | {
+      hapticsType: "notification";
+      style: "error" | "success" | "warning";
+    }
+  | {
+      hapticsType: "selection-changed";
+    }
+  | {
+      hapticsType: "impact";
+      style: "light" | "medium" | "heavy" | "rigid" | "soft";
+    };
+
+export type SendHapticFeedbackCommandPayload = SendHapticFeedbackCommandInput;
