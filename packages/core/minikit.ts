@@ -71,6 +71,7 @@ export class MiniKit {
     [ResponseEvent.MiniAppSignTypedData]: () => {},
   };
 
+  public static appId: string | null = null;
   public static walletAddress: string | null = null;
 
   private static sendInit() {
@@ -140,7 +141,7 @@ export class MiniKit {
     );
   }
 
-  public static install(): MiniKitInstallReturnType {
+  public static install(appId?: string): MiniKitInstallReturnType {
     if (typeof window === "undefined" || Boolean(window.MiniKit)) {
       return {
         success: false,
@@ -148,6 +149,12 @@ export class MiniKit {
         errorMessage:
           MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.AlreadyInstalled],
       };
+    }
+
+    if (!appId) {
+      console.warn("App ID not provided during install");
+    } else {
+      MiniKit.appId = appId;
     }
 
     if (!window.WorldApp) {

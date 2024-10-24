@@ -6,6 +6,8 @@ import {
   MiniKitInstallErrorMessage,
 } from "@worldcoin/minikit-js";
 
+const appId = "your-app-id";
+
 export const Versions = () => {
   const isValid = () => {
     if (
@@ -35,7 +37,7 @@ export const Versions = () => {
   };
 
   const reinstall = () => {
-    MiniKit.install();
+    MiniKit.install(appId);
     JSON.stringify(isValid() ?? null, null, 2);
   };
   return (
