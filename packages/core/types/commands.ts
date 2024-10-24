@@ -96,6 +96,8 @@ export type SendHapticFeedbackCommandInput =
     }
   | {
       hapticsType: "selection-changed";
+      // never necessary or used but improves DX
+      style?: never;
     }
   | {
       hapticsType: "impact";
