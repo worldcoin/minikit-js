@@ -1,7 +1,15 @@
 {
   "release-type": "node",
   "packages": {
-    "src": {
+    "packages/react": {
+      "component": "react",
+      "skip-github-release": true
+    },
+    "packages/core": {
+      "component": "core",
+      "skip-github-release": true
+    },
+    ".": {
       "component": "minikit-js",
       "changelog-path": "CHANGELOG.md",
       "bump-minor-pre-major": false,
@@ -14,6 +22,11 @@
     {
       "type": "node-workspace",
       "merge": false
+    },
+    {
+      "type": "linked-versions",
+      "groupName": "group",
+      "components": ["core", "react", "minikit-js"]
     }
   ],
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"

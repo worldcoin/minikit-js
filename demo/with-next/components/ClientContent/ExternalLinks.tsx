@@ -12,10 +12,15 @@ export const ExternalLinks = () => {
           Valid Associated Domain (Link)
         </Link>
         <button
-          onClick={() => window.open("https://worldcoin.org/world-chain")}
+          onClick={() => {
+            window.open(
+              "https://worldcoin.org/mini-app?app_id=app_staging_d3b49eb04b497130e18533b9d8846319",
+              "_blank"
+            );
+          }}
           className="text-white bg-green-500 hover:bg-blue-300 transition p-4 leading-[1] rounded-lg"
         >
-          Valid Associated Domain (Button)
+          Internal Deep Link Test
         </button>
         <Link
           href="https://docs.worldcoin.org"

@@ -60,6 +60,9 @@ export const CameraComponent = () => {
           Open Camera
         </div>
       </label>
+      <button className="grid justify-items-center gap-y-2 bg-green-500 p-4 rounded-lg text-white">
+        Open Universal Link
+      </button>
       <label
         className={
           " items-center justify-center rounded-lg bg-2f2b43/5 hover:bg-2f2b43/10"

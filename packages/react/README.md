@@ -1,12 +1,14 @@
-# Minikit-JS
+# Minikit-React
+
+This package contains helper functions and components for building mini apps with React. This is not required to run a mini app and is only a convenience package for developers as it contains nice abstractions.
 
 ## 🚀 Getting Started
 
 Minikit is currently available on npm. To install, run:
-`pnpm i @worldcoin/minikit-js`
 
-or use the CDN:
-`https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@[version]/+esm`
+```
+pnpm i @worldcoin/minikit-react
+```
 
 For comprehensive setup instructions and usage examples, visit our [developer documentation](https://docs.world.org/mini-apps).
 
