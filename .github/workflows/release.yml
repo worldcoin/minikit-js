@@ -1,4 +1,4 @@
-name: New release
+name: New Release
 
 on:
   push:
@@ -17,12 +17,13 @@ jobs:
         uses: google-github-actions/release-please-action@v3
         with:
           command: manifest
+          release-type: node
 
-  publish:
+  publish-npm:
     needs: release
-    name: Publish
+    name: Publish to npm
     runs-on: ubuntu-latest
-    if: ${{ needs.release.outputs.releases_created }}
+    if: ${{ needs.release.outputs.releases_created == 'true' }}
     steps:
       - uses: actions/checkout@v3
 
@@ -43,7 +44,37 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Publish
-        run: pnpm publish -r --report-summary
+      - name: Publish to npm
+        run: pnpm publish --report-summary
         env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-github:
+    needs: release
+    name: Publish to GitHub Package Registry
+    runs-on: ubuntu-latest
+    if: ${{ needs.release.outputs.releases_created == 'true' }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: pnpm/action-setup@v2.4.0
+        with:
+          version: 9
+
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: "pnpm"
+          registry-url: "https://npm.pkg.github.com"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build
+        run: pnpm build
+
+      - name: Publish to GitHub
+        run: pnpm publish --report-summary
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
