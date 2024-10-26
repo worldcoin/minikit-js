@@ -7,9 +7,19 @@ import {
   WebViewBasePayload,
   Command,
 } from "./types";
-import { ResponseEvent } from "./types/responses";
+import {
+  MiniAppPaymentPayload,
+  MiniAppSendTransactionPayload,
+  MiniAppSignMessagePayload,
+  MiniAppSignTypedDataPayload,
+  MiniAppVerifyActionPayload,
+  MiniAppWalletAuthPayload,
+  ResponseEvent,
+} from "./types/responses";
 import { Network } from "types/payment";
 import {
+  AsyncHandlerReturn,
+  CommandReturnPayload,
   PayCommandPayload,
   SendTransactionInput,
   SendTransactionPayload,
@@ -115,6 +125,26 @@ export class MiniKit {
       return;
     }
     this.listeners[event](payload);
+  }
+
+  private static async awaitCommand<
+    E extends ResponseEvent,
+    C extends Command,
+    T extends EventPayload<E>,
+  >(
+    event: E,
+    command: C,
+    executor: () => CommandReturnPayload<C> | null
+  ): AsyncHandlerReturn<CommandReturnPayload<C> | null, T> {
+    return new Promise((resolve) => {
+      let commandPayload: CommandReturnPayload<C> | null = null;
+      const handleAndUnsubscribe = (payload: EventPayload<E>) => {
+        this.unsubscribe(event);
+        resolve({ commandPayload, finalPayload: payload as T });
+      };
+      this.subscribe(event, handleAndUnsubscribe);
+      commandPayload = executor();
+    });
   }
 
   private static commandsValid(
@@ -237,7 +267,25 @@ export class MiniKit {
 
       return eventPayload;
     },
-
+    verifyAsync: async (
+      payload: VerifyCommandInput
+    ): AsyncHandlerReturn<
+      VerifyCommandPayload | null,
+      MiniAppVerifyActionPayload
+    > => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppVerifyAction,
+            Command.Verify,
+            () => this.commands.verify(payload)
+          );
+          resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
     pay: (payload: PayCommandInput): PayCommandPayload | null => {
       if (
         typeof window === "undefined" ||
@@ -269,7 +317,22 @@ export class MiniKit {
 
       return eventPayload;
     },
-
+    payAsync: async (
+      payload: PayCommandInput
+    ): AsyncHandlerReturn<PayCommandPayload | null, MiniAppPaymentPayload> => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppPayment,
+            Command.Pay,
+            () => this.commands.pay(payload)
+          );
+          resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
     walletAuth: (payload: WalletAuthInput): WalletAuthPayload | null => {
       if (
         typeof window === "undefined" ||
@@ -327,7 +390,25 @@ export class MiniKit {
 
       return walletAuthPayload;
     },
-
+    walletAuthAsync: async (
+      payload: WalletAuthInput
+    ): AsyncHandlerReturn<
+      WalletAuthPayload | null,
+      MiniAppWalletAuthPayload
+    > => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppWalletAuth,
+            Command.WalletAuth,
+            () => this.commands.walletAuth(payload)
+          );
+          return resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
     sendTransaction: (
       payload: SendTransactionInput
     ): SendTransactionPayload | null => {
@@ -350,7 +431,25 @@ export class MiniKit {
 
       return payload;
     },
-
+    sendTransactionAsync: async (
+      payload: SendTransactionInput
+    ): AsyncHandlerReturn<
+      SendTransactionPayload | null,
+      MiniAppSendTransactionPayload
+    > => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppSendTransaction,
+            Command.SendTransaction,
+            () => this.commands.sendTransaction(payload)
+          );
+          return resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
     signMessage: (payload: SignMessageInput): SignMessagePayload | null => {
       if (
         typeof window === "undefined" ||
@@ -371,7 +470,25 @@ export class MiniKit {
 
       return payload;
     },
-
+    signMessageAsync: async (
+      payload: SignMessageInput
+    ): Promise<{
+      commandPayload: SignMessagePayload | null;
+      finalPayload: MiniAppSignMessagePayload | null;
+    }> => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppSignMessage,
+            Command.SignMessage,
+            () => this.commands.signMessage(payload)
+          );
+          return resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
     signTypedData: (
       payload: SignTypedDataInput
     ): SignTypedDataPayload | null => {
@@ -393,6 +510,27 @@ export class MiniKit {
       });
 
       return payload;
+    },
+    signTypedDataAsync: async (
+      payload: SignTypedDataInput
+    ): AsyncHandlerReturn<
+      SignTypedDataPayload | null,
+      MiniAppSignTypedDataPayload
+    > => {
+      return new Promise(async (resolve, reject) => {
+        const response = this.commands.signTypedData(payload);
+
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppSignTypedData,
+            Command.SignTypedData,
+            () => this.commands.signTypedData(payload)
+          );
+          return resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
     },
   };
 }
