@@ -19,6 +19,11 @@ export type WebViewBasePayload = {
   payload: Record<string, any>;
 };
 
+export type AsyncHandlerReturn<CommandPayload, FinalPayload> = Promise<{
+  commandPayload: CommandPayload;
+  finalPayload: FinalPayload;
+}>;
+
 // Values developers can specify
 export type VerifyCommandInput = {
   action: IDKitConfig["action"];
@@ -87,3 +92,14 @@ export type SignTypedDataInput = {
 };
 
 export type SignTypedDataPayload = SignTypedDataInput;
+
+type CommandReturnPayloadMap = {
+  [Command.Verify]: VerifyCommandPayload;
+  [Command.Pay]: PayCommandPayload;
+  [Command.WalletAuth]: WalletAuthPayload;
+  [Command.SendTransaction]: SendTransactionPayload;
+  [Command.SignMessage]: SignMessagePayload;
+  [Command.SignTypedData]: SignTypedDataPayload;
+};
+export type CommandReturnPayload<T extends Command> =
+  T extends keyof CommandReturnPayloadMap ? CommandReturnPayloadMap[T] : never;
