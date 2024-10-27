@@ -472,10 +472,10 @@ export class MiniKit {
     },
     signMessageAsync: async (
       payload: SignMessageInput
-    ): Promise<{
-      commandPayload: SignMessagePayload | null;
-      finalPayload: MiniAppSignMessagePayload | null;
-    }> => {
+    ): AsyncHandlerReturn<
+      SignMessagePayload | null,
+      MiniAppSignMessagePayload
+    > => {
       return new Promise(async (resolve, reject) => {
         try {
           const response = await MiniKit.awaitCommand(
@@ -518,8 +518,6 @@ export class MiniKit {
       MiniAppSignTypedDataPayload
     > => {
       return new Promise(async (resolve, reject) => {
-        const response = this.commands.signTypedData(payload);
-
         try {
           const response = await MiniKit.awaitCommand(
             ResponseEvent.MiniAppSignTypedData,
