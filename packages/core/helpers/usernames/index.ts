@@ -10,5 +10,5 @@ export const getUserProfile = async (address: string) => {
   })
 
   const data = await res.json();
-  return data.usernames[0];
+  return data.usernames[0] ?? { username: null, profilePictureUrl: null };
 };
