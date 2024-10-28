@@ -10,7 +10,7 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     outputs:
-      releases_created: ${{ steps.release.outputs.releases_created }}
+      release_created: ${{ steps.release.outputs.release_created }}
     steps:
       - name: Release
         id: release
@@ -23,7 +23,7 @@ jobs:
     needs: release
     name: Publish to npm
     runs-on: ubuntu-latest
-    if: ${{ needs.release.outputs.releases_created == 'true' }}
+    if: ${{ needs.release.outputs.release_created == 'true' }}
     steps:
       - uses: actions/checkout@v3
 
@@ -53,7 +53,7 @@ jobs:
     needs: release
     name: Publish to GitHub Package Registry
     runs-on: ubuntu-latest
-    if: ${{ needs.release.outputs.releases_created == 'true' }}
+    if: ${{ needs.release.outputs.release_created == 'true' }}
     steps:
       - uses: actions/checkout@v3
 
