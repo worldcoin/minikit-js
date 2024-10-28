@@ -267,25 +267,6 @@ export class MiniKit {
 
       return eventPayload;
     },
-    verifyAsync: async (
-      payload: VerifyCommandInput
-    ): AsyncHandlerReturn<
-      VerifyCommandPayload | null,
-      MiniAppVerifyActionPayload
-    > => {
-      return new Promise(async (resolve, reject) => {
-        try {
-          const response = await MiniKit.awaitCommand(
-            ResponseEvent.MiniAppVerifyAction,
-            Command.Verify,
-            () => this.commands.verify(payload)
-          );
-          resolve(response);
-        } catch (error) {
-          reject(error);
-        }
-      });
-    },
     pay: (payload: PayCommandInput): PayCommandPayload | null => {
       if (
         typeof window === "undefined" ||
@@ -316,22 +297,6 @@ export class MiniKit {
       });
 
       return eventPayload;
-    },
-    payAsync: async (
-      payload: PayCommandInput
-    ): AsyncHandlerReturn<PayCommandPayload | null, MiniAppPaymentPayload> => {
-      return new Promise(async (resolve, reject) => {
-        try {
-          const response = await MiniKit.awaitCommand(
-            ResponseEvent.MiniAppPayment,
-            Command.Pay,
-            () => this.commands.pay(payload)
-          );
-          resolve(response);
-        } catch (error) {
-          reject(error);
-        }
-      });
     },
     walletAuth: (payload: WalletAuthInput): WalletAuthPayload | null => {
       if (
@@ -390,25 +355,6 @@ export class MiniKit {
 
       return walletAuthPayload;
     },
-    walletAuthAsync: async (
-      payload: WalletAuthInput
-    ): AsyncHandlerReturn<
-      WalletAuthPayload | null,
-      MiniAppWalletAuthPayload
-    > => {
-      return new Promise(async (resolve, reject) => {
-        try {
-          const response = await MiniKit.awaitCommand(
-            ResponseEvent.MiniAppWalletAuth,
-            Command.WalletAuth,
-            () => this.commands.walletAuth(payload)
-          );
-          return resolve(response);
-        } catch (error) {
-          reject(error);
-        }
-      });
-    },
     sendTransaction: (
       payload: SendTransactionInput
     ): SendTransactionPayload | null => {
@@ -431,25 +377,6 @@ export class MiniKit {
 
       return payload;
     },
-    sendTransactionAsync: async (
-      payload: SendTransactionInput
-    ): AsyncHandlerReturn<
-      SendTransactionPayload | null,
-      MiniAppSendTransactionPayload
-    > => {
-      return new Promise(async (resolve, reject) => {
-        try {
-          const response = await MiniKit.awaitCommand(
-            ResponseEvent.MiniAppSendTransaction,
-            Command.SendTransaction,
-            () => this.commands.sendTransaction(payload)
-          );
-          return resolve(response);
-        } catch (error) {
-          reject(error);
-        }
-      });
-    },
     signMessage: (payload: SignMessageInput): SignMessagePayload | null => {
       if (
         typeof window === "undefined" ||
@@ -469,25 +396,6 @@ export class MiniKit {
       });
 
       return payload;
-    },
-    signMessageAsync: async (
-      payload: SignMessageInput
-    ): AsyncHandlerReturn<
-      SignMessagePayload | null,
-      MiniAppSignMessagePayload
-    > => {
-      return new Promise(async (resolve, reject) => {
-        try {
-          const response = await MiniKit.awaitCommand(
-            ResponseEvent.MiniAppSignMessage,
-            Command.SignMessage,
-            () => this.commands.signMessage(payload)
-          );
-          return resolve(response);
-        } catch (error) {
-          reject(error);
-        }
-      });
     },
     signTypedData: (
       payload: SignTypedDataInput
@@ -511,7 +419,112 @@ export class MiniKit {
 
       return payload;
     },
-    signTypedDataAsync: async (
+  };
+
+  /**
+   * This object contains async versions of all the commands.
+   * Instead of using event listeners, you can just `await` these.
+   *
+   * They return a standardized object
+   *
+   * commandPayload - object returned by the command function
+   *
+   * finalPayload - object returned by the event listener, or in other words, WorldApp response
+   */
+  public static commandsAsync = {
+    verify: async (
+      payload: VerifyCommandInput
+    ): AsyncHandlerReturn<
+      VerifyCommandPayload | null,
+      MiniAppVerifyActionPayload
+    > => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppVerifyAction,
+            Command.Verify,
+            () => this.commands.verify(payload)
+          );
+          resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
+    pay: async (
+      payload: PayCommandInput
+    ): AsyncHandlerReturn<PayCommandPayload | null, MiniAppPaymentPayload> => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppPayment,
+            Command.Pay,
+            () => this.commands.pay(payload)
+          );
+          resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
+    walletAuth: async (
+      payload: WalletAuthInput
+    ): AsyncHandlerReturn<
+      WalletAuthPayload | null,
+      MiniAppWalletAuthPayload
+    > => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppWalletAuth,
+            Command.WalletAuth,
+            () => this.commands.walletAuth(payload)
+          );
+          return resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
+    sendTransaction: async (
+      payload: SendTransactionInput
+    ): AsyncHandlerReturn<
+      SendTransactionPayload | null,
+      MiniAppSendTransactionPayload
+    > => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppSendTransaction,
+            Command.SendTransaction,
+            () => this.commands.sendTransaction(payload)
+          );
+          return resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
+    signMessage: async (
+      payload: SignMessageInput
+    ): AsyncHandlerReturn<
+      SignMessagePayload | null,
+      MiniAppSignMessagePayload
+    > => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppSignMessage,
+            Command.SignMessage,
+            () => this.commands.signMessage(payload)
+          );
+          return resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
+    signTypedData: async (
       payload: SignTypedDataInput
     ): AsyncHandlerReturn<
       SignTypedDataPayload | null,
