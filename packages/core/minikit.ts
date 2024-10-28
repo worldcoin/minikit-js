@@ -7,9 +7,19 @@ import {
   WebViewBasePayload,
   Command,
 } from "./types";
-import { ResponseEvent } from "./types/responses";
+import {
+  MiniAppPaymentPayload,
+  MiniAppSendTransactionPayload,
+  MiniAppSignMessagePayload,
+  MiniAppSignTypedDataPayload,
+  MiniAppVerifyActionPayload,
+  MiniAppWalletAuthPayload,
+  ResponseEvent,
+} from "./types/responses";
 import { Network } from "types/payment";
 import {
+  AsyncHandlerReturn,
+  CommandReturnPayload,
   PayCommandPayload,
   SendTransactionInput,
   SendTransactionPayload,
@@ -115,6 +125,26 @@ export class MiniKit {
       return;
     }
     this.listeners[event](payload);
+  }
+
+  private static async awaitCommand<
+    E extends ResponseEvent,
+    C extends Command,
+    T extends EventPayload<E>,
+  >(
+    event: E,
+    command: C,
+    executor: () => CommandReturnPayload<C> | null
+  ): AsyncHandlerReturn<CommandReturnPayload<C> | null, T> {
+    return new Promise((resolve) => {
+      let commandPayload: CommandReturnPayload<C> | null = null;
+      const handleAndUnsubscribe = (payload: EventPayload<E>) => {
+        this.unsubscribe(event);
+        resolve({ commandPayload, finalPayload: payload as T });
+      };
+      this.subscribe(event, handleAndUnsubscribe);
+      commandPayload = executor();
+    });
   }
 
   private static commandsValid(
@@ -237,7 +267,6 @@ export class MiniKit {
 
       return eventPayload;
     },
-
     pay: (payload: PayCommandInput): PayCommandPayload | null => {
       if (
         typeof window === "undefined" ||
@@ -269,7 +298,6 @@ export class MiniKit {
 
       return eventPayload;
     },
-
     walletAuth: (payload: WalletAuthInput): WalletAuthPayload | null => {
       if (
         typeof window === "undefined" ||
@@ -327,7 +355,6 @@ export class MiniKit {
 
       return walletAuthPayload;
     },
-
     sendTransaction: (
       payload: SendTransactionInput
     ): SendTransactionPayload | null => {
@@ -350,7 +377,6 @@ export class MiniKit {
 
       return payload;
     },
-
     signMessage: (payload: SignMessageInput): SignMessagePayload | null => {
       if (
         typeof window === "undefined" ||
@@ -371,7 +397,6 @@ export class MiniKit {
 
       return payload;
     },
-
     signTypedData: (
       payload: SignTypedDataInput
     ): SignTypedDataPayload | null => {
@@ -393,6 +418,130 @@ export class MiniKit {
       });
 
       return payload;
+    },
+  };
+
+  /**
+   * This object contains async versions of all the commands.
+   * Instead of using event listeners, you can just `await` these.
+   *
+   * They return a standardized object
+   *
+   * commandPayload - object returned by the command function
+   *
+   * finalPayload - object returned by the event listener, or in other words, WorldApp response
+   */
+  public static commandsAsync = {
+    verify: async (
+      payload: VerifyCommandInput
+    ): AsyncHandlerReturn<
+      VerifyCommandPayload | null,
+      MiniAppVerifyActionPayload
+    > => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppVerifyAction,
+            Command.Verify,
+            () => this.commands.verify(payload)
+          );
+          resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
+    pay: async (
+      payload: PayCommandInput
+    ): AsyncHandlerReturn<PayCommandPayload | null, MiniAppPaymentPayload> => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppPayment,
+            Command.Pay,
+            () => this.commands.pay(payload)
+          );
+          resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
+    walletAuth: async (
+      payload: WalletAuthInput
+    ): AsyncHandlerReturn<
+      WalletAuthPayload | null,
+      MiniAppWalletAuthPayload
+    > => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppWalletAuth,
+            Command.WalletAuth,
+            () => this.commands.walletAuth(payload)
+          );
+          return resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
+    sendTransaction: async (
+      payload: SendTransactionInput
+    ): AsyncHandlerReturn<
+      SendTransactionPayload | null,
+      MiniAppSendTransactionPayload
+    > => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppSendTransaction,
+            Command.SendTransaction,
+            () => this.commands.sendTransaction(payload)
+          );
+          return resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
+    signMessage: async (
+      payload: SignMessageInput
+    ): AsyncHandlerReturn<
+      SignMessagePayload | null,
+      MiniAppSignMessagePayload
+    > => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppSignMessage,
+            Command.SignMessage,
+            () => this.commands.signMessage(payload)
+          );
+          return resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
+    signTypedData: async (
+      payload: SignTypedDataInput
+    ): AsyncHandlerReturn<
+      SignTypedDataPayload | null,
+      MiniAppSignTypedDataPayload
+    > => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppSignTypedData,
+            Command.SignTypedData,
+            () => this.commands.signTypedData(payload)
+          );
+          return resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
     },
   };
 }
