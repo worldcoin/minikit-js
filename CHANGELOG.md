@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/worldcoin/minikit-js/compare/minikit-js-v1.1.0...minikit-js-v1.2.0) (2024-10-29)
+
+
+### Bug Fixes
+
+* test release please fix ([#94](https://github.com/worldcoin/minikit-js/issues/94)) ([bf6b007](https://github.com/worldcoin/minikit-js/commit/bf6b007e02c867ec09c853e07b9edb1ecba0d129))
+
 ## [1.1.0](https://github.com/worldcoin/minikit-js/compare/minikit-js-v1.0.0...minikit-js-v1.1.0) (2024-10-28)
 
 
