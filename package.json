@@ -14,5 +14,11 @@
   "engines": {
     "node": ">=18"
   },
+  "pnpm": {
+    "overrides": {
+      "ws": ">=7.5.10",
+      "rollup": ">=4.22.4"
+    }
+  },
   "packageManager": "pnpm@9.9.0"
 }
