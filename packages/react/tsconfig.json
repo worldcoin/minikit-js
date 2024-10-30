@@ -12,6 +12,7 @@
     "sourceMap": false,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
+    "jsx": "react-jsx",
     "noImplicitAny": false,
     "skipLibCheck": true,
     "baseUrl": ".",
