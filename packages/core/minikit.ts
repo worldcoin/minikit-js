@@ -78,11 +78,7 @@ export class MiniKit {
     walletAddress: string | null;
     username: string | null;
     profilePictureUrl: string | null;
-  } = {
-    walletAddress: null,
-    username: null,
-    profilePictureUrl: null,
-  };
+  } | null = null;
 
   private static sendInit() {
     sendWebviewEvent({
@@ -105,9 +101,11 @@ export class MiniKit {
         if (payload.status === "success") {
           MiniKit.walletAddress = payload.address;
           getUserProfile(payload.address).then((queryResponse) => {
-            MiniKit.user.username = queryResponse.username;
-            MiniKit.user.profilePictureUrl = queryResponse.profilePictureUrl;
-            MiniKit.user.walletAddress = payload.address;
+            MiniKit.user = {
+              username: queryResponse.username,
+              profilePictureUrl: queryResponse.profilePictureUrl,
+              walletAddress: payload.address,
+            };
           });
         }
 
