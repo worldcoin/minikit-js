@@ -14,6 +14,7 @@ import {
   MiniAppSignTypedDataPayload,
   MiniAppVerifyActionPayload,
   MiniAppWalletAuthPayload,
+  MiniAppShareContactsPayload,
   ResponseEvent,
 } from "./types/responses";
 import { Network } from "types/payment";
@@ -23,6 +24,7 @@ import {
   PayCommandPayload,
   SendTransactionInput,
   SendTransactionPayload,
+  ShareContactsPayload,
   SignMessageInput,
   SignMessagePayload,
   SignTypedDataInput,
@@ -62,6 +64,7 @@ export class MiniKit {
     [Command.SendTransaction]: 1,
     [Command.SignMessage]: 1,
     [Command.SignTypedData]: 1,
+    [Command.ShareContacts]: 1,
   };
 
   private static isCommandAvailable = {
@@ -71,6 +74,7 @@ export class MiniKit {
     [Command.SendTransaction]: false,
     [Command.SignMessage]: false,
     [Command.SignTypedData]: false,
+    [Command.ShareContacts]: false,
   };
 
   private static listeners: Record<ResponseEvent, EventHandler> = {
@@ -80,6 +84,7 @@ export class MiniKit {
     [ResponseEvent.MiniAppSendTransaction]: () => {},
     [ResponseEvent.MiniAppSignMessage]: () => {},
     [ResponseEvent.MiniAppSignTypedData]: () => {},
+    [ResponseEvent.MiniAppShareContacts]: () => {},
   };
 
   public static appId: string | null = null;
@@ -432,6 +437,29 @@ export class MiniKit {
 
       return payload;
     },
+
+    shareContacts: (
+      payload: ShareContactsPayload
+    ): ShareContactsPayload | null => {
+      if (
+        typeof window === "undefined" ||
+        !this.isCommandAvailable[Command.SignTypedData]
+      ) {
+        console.error(
+          "'shareContacts' command is unavailable. Check MiniKit.install() or update the app version"
+        );
+
+        return null;
+      }
+
+      sendMiniKitEvent<WebViewBasePayload>({
+        command: Command.ShareContacts,
+        version: 1,
+        payload,
+      });
+
+      return payload;
+    },
   };
 
   /**
@@ -549,6 +577,25 @@ export class MiniKit {
             ResponseEvent.MiniAppSignTypedData,
             Command.SignTypedData,
             () => this.commands.signTypedData(payload)
+          );
+          return resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
+    shareContacts: async (
+      payload: ShareContactsPayload
+    ): AsyncHandlerReturn<
+      ShareContactsPayload | null,
+      MiniAppShareContactsPayload
+    > => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppShareContacts,
+            Command.ShareContacts,
+            () => this.commands.shareContacts(payload)
           );
           return resolve(response);
         } catch (error) {

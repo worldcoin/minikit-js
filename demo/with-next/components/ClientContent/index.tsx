@@ -11,6 +11,7 @@ import { CameraComponent } from "./Camera";
 import { SendTransaction } from "./Transaction";
 import { SignMessage } from "./SignMessage";
 import { SignTypedData } from "./SignTypedMessage";
+import { ShareContacts } from "./ShareContacts";
 
 const VersionsNoSSR = dynamic(
   () => import("./Versions").then((comp) => comp.Versions),
@@ -41,6 +42,8 @@ export const ClientContent = () => {
           <SignMessage />
           <hr />
           <SignTypedData />
+          <hr />
+          <ShareContacts />
           <hr />
           <input className="text-xs border-black border-2" />
           <ExternalLinks />

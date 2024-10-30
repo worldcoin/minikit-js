@@ -147,3 +147,13 @@ export const MiniKitInstallErrorMessage = {
   [MiniKitInstallErrorCodes.AppOutOfDate]:
     "WorldApp is out of date. Please update the app.",
 };
+
+export enum ShareContactsErrorCodes {
+  UserRejected = "user_rejected",
+  GenericError = "generic_error",
+}
+
+export const ShareContactsErrorMessage = {
+  [ShareContactsErrorCodes.UserRejected]: "User rejected the request.",
+  [ShareContactsErrorCodes.GenericError]: "Something unexpected went wrong.",
+};
