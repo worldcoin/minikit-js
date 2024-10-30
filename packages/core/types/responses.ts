@@ -2,6 +2,7 @@ import { Network } from "./payment";
 import {
   PaymentErrorCodes,
   SendTransactionErrorCodes,
+  ShareContactsErrorCodes,
   SignMessageErrorCodes,
   SignTypedDataErrorCodes,
   VerificationErrorCodes,
@@ -17,6 +18,7 @@ export enum ResponseEvent {
   MiniAppSendTransaction = "miniapp-send-transaction",
   MiniAppSignMessage = "miniapp-sign-message",
   MiniAppSignTypedData = "miniapp-sign-typed-data",
+  MiniAppShareContacts = "miniapp-share-contacts",
 }
 
 export type MiniAppVerifyActionSuccessPayload = {
@@ -136,6 +138,30 @@ export type MiniAppSignTypedDataPayload =
   | MiniAppSignTypedDataSuccessPayload
   | MiniAppSignTypedDataErrorPayload;
 
+// Anchor: Share Contacts Payload
+export type Contact = {
+  username: string;
+  walletAddress: string;
+  profilePictureUrl: string | null;
+};
+
+export type MiniAppShareContactsSuccessPayload = {
+  status: "success";
+  contacts: Contact[];
+  version: number;
+  timestamp: string;
+};
+
+export type MiniAppShareContactsErrorPayload = {
+  status: "error";
+  error_code: ShareContactsErrorCodes;
+  version: number;
+};
+
+export type MiniAppShareContactsPayload =
+  | MiniAppShareContactsSuccessPayload
+  | MiniAppShareContactsErrorPayload;
+
 type EventPayloadMap = {
   [ResponseEvent.MiniAppVerifyAction]: MiniAppVerifyActionPayload;
   [ResponseEvent.MiniAppPayment]: MiniAppPaymentPayload;
@@ -143,6 +169,7 @@ type EventPayloadMap = {
   [ResponseEvent.MiniAppSendTransaction]: MiniAppSendTransactionPayload;
   [ResponseEvent.MiniAppSignMessage]: MiniAppSignMessagePayload;
   [ResponseEvent.MiniAppSignTypedData]: MiniAppSignTypedDataPayload;
+  [ResponseEvent.MiniAppShareContacts]: MiniAppShareContactsPayload;
 };
 
 export type EventPayload<T extends ResponseEvent = ResponseEvent> =
