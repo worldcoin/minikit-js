@@ -42,6 +42,7 @@ import {
   MiniKitInstallErrorMessage,
 } from "types";
 import { validatePaymentPayload } from "helpers/payment/client";
+import { getUserProfile } from "helpers/usernames";
 
 export const sendMiniKitEvent = <
   T extends WebViewBasePayload = WebViewBasePayload,
@@ -83,6 +84,11 @@ export class MiniKit {
 
   public static appId: string | null = null;
   public static walletAddress: string | null = null;
+  public static user: {
+    walletAddress: string | null;
+    username: string | null;
+    profilePictureUrl: string | null;
+  } | null = null;
 
   private static sendInit() {
     sendWebviewEvent({
@@ -104,6 +110,13 @@ export class MiniKit {
       ) => {
         if (payload.status === "success") {
           MiniKit.walletAddress = payload.address;
+          getUserProfile(payload.address).then((queryResponse) => {
+            MiniKit.user = {
+              username: queryResponse.username,
+              profilePictureUrl: queryResponse.profilePictureUrl,
+              walletAddress: payload.address,
+            };
+          });
         }
 
         originalHandler(payload);
