@@ -9,6 +9,6 @@ export const getUserProfile = async (address: string) => {
     })
   })
 
-  const data = await res.json();
-  return data.usernames[0] ?? { username: null, profilePictureUrl: null };
+  const usernames = await res.json();
+  return usernames[0] ?? { username: null, profilePictureUrl: null };
 };
