@@ -1,6 +1,6 @@
 {
   "name": "@worldcoin/minikit-js",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "homepage": "https://docs.worldcoin.org/mini-apps",
   "description": "Minikit-js is our SDK for building mini-apps.",
   "license": "MIT",
