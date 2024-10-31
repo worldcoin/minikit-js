@@ -24,7 +24,6 @@ jobs:
         with:
           command: manifest
           release-type: node
-          token: ${{ secrets.GIT_HUB_TOKEN }}
 
       - name: Debug Output
         run: echo "Release Created - ${{ steps.release.outputs.release_created }}"
