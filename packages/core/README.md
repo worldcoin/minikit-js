@@ -1,8 +1,8 @@
-# Minikit-JS
+# minikit-js
 
 ## 🚀 Getting Started
 
-Minikit is currently available on npm. To install, run:
+MiniKit is currently available on npm. To install, run:
 `pnpm i @worldcoin/minikit-js`
 
 or use the CDN:
