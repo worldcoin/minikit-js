@@ -12,6 +12,12 @@ import { SendTransaction } from "./Transaction";
 import { SignMessage } from "./SignMessage";
 import { SignTypedData } from "./SignTypedMessage";
 import { ShareContacts } from "./ShareContacts";
+import {
+  GetSearchedUsernameResult,
+  UsernameSearch,
+} from "@worldcoin/minikit-react";
+import { useState } from "react";
+import Image from "next/image";
 
 const VersionsNoSSR = dynamic(
   () => import("./Versions").then((comp) => comp.Versions),
@@ -19,6 +25,14 @@ const VersionsNoSSR = dynamic(
 );
 
 export const ClientContent = () => {
+  const [searchValue, setSearchValue] = useState("");
+  const [searchResults, setSearchResults] =
+    useState<GetSearchedUsernameResult>();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchValue(e.target.value);
+  };
+
   return (
     <div className="p-2 lg:p-8 grid content-start min-h-[100dvh] gap-y-2">
       <Nav />
@@ -27,6 +41,45 @@ export const ClientContent = () => {
       <div className="grid gap-y-4 content-start">
         <User />
         <hr />
+
+        <UsernameSearch
+          value={searchValue}
+          handleChange={handleChange}
+          setSearchedUsernames={setSearchResults}
+          className="p-2 border rounded"
+          inputProps={{
+            placeholder: "Search usernames...",
+          }}
+        />
+
+        {/* Display search results */}
+        {searchResults && (
+          <div className="mt-4">
+            {searchResults.status === 200 ? (
+              <ul>
+                {searchResults.data?.map((user) => (
+                  <li
+                    key={user.address}
+                    className="grid grid-cols-[auto_1fr] gap-x-2 items-center"
+                  >
+                    {user.profile_picture_url && (
+                      <Image
+                        src={user.profile_picture_url}
+                        alt={user.username}
+                        width={32}
+                        height={32}
+                        className="w-10 h-10 rounded-full"
+                      />
+                    )}
+                    {user.username} - {user.address}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>Error: {searchResults.error}</p>
+            )}
+          </div>
+        )}
 
         <div className="grid gap-y-8">
           <VersionsNoSSR />
