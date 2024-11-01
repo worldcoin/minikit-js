@@ -78,18 +78,21 @@ export const ShareContacts = () => {
     };
   }, [tempInstallFix]);
 
-  const onShareContacts = useCallback(async () => {
-    const shareContactsPayload: ShareContactsPayload = {
-      isMultiSelectEnabled: true,
-    };
+  const onShareContacts = useCallback(
+    async (isMultiSelectEnabled: boolean = false) => {
+      const shareContactsPayload: ShareContactsPayload = {
+        isMultiSelectEnabled,
+      };
 
-    const payload = MiniKit.commands.shareContacts(shareContactsPayload);
-    setSentShareContactsPayload({
-      payload,
-    });
-    console.log("payload", payload);
-    setTempInstallFix((prev) => prev + 1);
-  }, []);
+      const payload = MiniKit.commands.shareContacts(shareContactsPayload);
+      setSentShareContactsPayload({
+        payload,
+      });
+      console.log("payload", payload);
+      setTempInstallFix((prev) => prev + 1);
+    },
+    []
+  );
 
   return (
     <div>
@@ -103,12 +106,20 @@ export const ShareContacts = () => {
             </pre>
           </div>
         </div>
-        <button
-          className="bg-black text-white rounded-lg p-4 w-full"
-          onClick={onShareContacts}
-        >
-          Share Contacts
-        </button>
+        <div className="grid gap-4 grid-cols-2">
+          <button
+            className="bg-black text-white rounded-lg p-4 w-full"
+            onClick={() => onShareContacts(true)}
+          >
+            Share Contacts (Multi enabled)
+          </button>
+          <button
+            className="bg-black text-white rounded-lg p-4 w-full"
+            onClick={() => onShareContacts(false)}
+          >
+            Share Contacts (multi disabled)
+          </button>
+        </div>
       </div>
 
       <hr />
