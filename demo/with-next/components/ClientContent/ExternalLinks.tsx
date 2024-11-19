@@ -20,7 +20,7 @@ export const ExternalLinks = () => {
         <button
           onClick={() => {
             window.open(
-              "https://world.org/mini-app?app_id=app_staging_e387587d26a286fb5bea1d436ba0b2a3",
+              "https://world.org/mini-app?app_id=app_staging_e387587d26a286fb5bea1d436ba0b2a3&path=features",
               "_blank"
             );
           }}
