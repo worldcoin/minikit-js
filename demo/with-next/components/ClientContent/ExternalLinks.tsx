@@ -12,7 +12,7 @@ export const ExternalLinks = () => {
           Valid Associated Domain (Link)
         </Link>
         <Link
-          href="worldapp://mini-app?app_id=app_staging_d3b49eb04b497130e18533b9d8846319&path=features"
+          href="worldapp://mini-app?app_id=app_staging_e387587d26a286fb5bea1d436ba0b2a3&path=features"
           className="bg-green-500 text-white text-center rounded-lg p-3"
         >
           worldapp:// deep link
@@ -20,7 +20,7 @@ export const ExternalLinks = () => {
         <button
           onClick={() => {
             window.open(
-              "https://world.org/mini-app?app_id=app_staging_d3b49eb04b497130e18533b9d8846319",
+              "https://world.org/mini-app?app_id=app_staging_e387587d26a286fb5bea1d436ba0b2a3",
               "_blank"
             );
           }}
