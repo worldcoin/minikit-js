@@ -16,6 +16,7 @@ import {
   MiniAppWalletAuthPayload,
   MiniAppShareContactsPayload,
   ResponseEvent,
+  MiniAppSendHapticFeedbackPayload,
 } from "./types/responses";
 import { Network } from "types/payment";
 import {
@@ -622,6 +623,25 @@ export class MiniKit {
             ResponseEvent.MiniAppShareContacts,
             Command.ShareContacts,
             () => this.commands.shareContacts(payload)
+          );
+          return resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
+    sendHapticFeedback: async (
+      payload: SendHapticFeedbackCommandInput
+    ): AsyncHandlerReturn<
+      SendHapticFeedbackCommandPayload | null,
+      MiniAppSendHapticFeedbackPayload
+    > => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppSendHapticFeedback,
+            Command.SendHapticFeedback,
+            () => this.commands.sendHapticFeedback(payload)
           );
           return resolve(response);
         } catch (error) {

@@ -1,22 +1,22 @@
 import {
   MiniKit,
-  SignTypedDataErrorCodes,
   ResponseEvent,
   MiniAppSendHapticFeedbackPayload,
   SendHapticFeedbackCommandInput,
+  SendHapticFeedbackErrorCodes,
 } from "@worldcoin/minikit-js";
 import { useCallback, useEffect, useState } from "react";
 import { validateSchema } from "./helpers/validate-schema";
 import * as yup from "yup";
 
-const signTypedDataSuccessPayloadSchema = yup.object({
+const sendHapticFeedbackSuccessPayloadSchema = yup.object({
   status: yup.string<"success">().oneOf(["success"]),
 });
 
-const signTypedDataErrorPayloadSchema = yup.object({
+const sendHapticFeedbackErrorPayloadSchema = yup.object({
   error_code: yup
-    .string<SignTypedDataErrorCodes>()
-    .oneOf(Object.values(SignTypedDataErrorCodes))
+    .string<SendHapticFeedbackErrorCodes>()
+    .oneOf(Object.values(SendHapticFeedbackErrorCodes))
     .required(),
   status: yup.string<"error">().equals(["error"]).required(),
   version: yup.number().required(),
@@ -26,8 +26,6 @@ const allPossibleHaptics: SendHapticFeedbackCommandInput[] = [
   { hapticsType: "impact", style: "heavy" },
   { hapticsType: "impact", style: "light" },
   { hapticsType: "impact", style: "medium" },
-  { hapticsType: "impact", style: "rigid" },
-  { hapticsType: "impact", style: "soft" },
   { hapticsType: "notification", style: "error" },
   { hapticsType: "notification", style: "success" },
   { hapticsType: "notification", style: "warning" },
@@ -50,7 +48,7 @@ export const SendHapticFeedback = () => {
 
         if (payload.status === "error") {
           const validationErrorMessage = await validateSchema(
-            signTypedDataErrorPayloadSchema,
+            sendHapticFeedbackErrorPayloadSchema,
             payload
           );
 
@@ -61,7 +59,7 @@ export const SendHapticFeedback = () => {
           }
         } else {
           const validationErrorMessage = await validateSchema(
-            signTypedDataSuccessPayloadSchema,
+            sendHapticFeedbackSuccessPayloadSchema,
             payload
           );
 

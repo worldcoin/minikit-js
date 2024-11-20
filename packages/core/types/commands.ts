@@ -113,7 +113,7 @@ export type SendHapticFeedbackCommandInput =
     }
   | {
       hapticsType: "impact";
-      style: "light" | "medium" | "heavy" | "rigid" | "soft";
+      style: "light" | "medium" | "heavy";
     };
 
 export type SendHapticFeedbackCommandPayload = SendHapticFeedbackCommandInput;
