@@ -18,7 +18,6 @@ import {
 } from "@worldcoin/minikit-react";
 import { useState } from "react";
 import Image from "next/image";
-import { SendHapticFeedback } from "./SendHapticFeedback";
 
 const VersionsNoSSR = dynamic(
   () => import("./Versions").then((comp) => comp.Versions),
@@ -98,8 +97,6 @@ export const ClientContent = () => {
           <SignTypedData />
           <hr />
           <ShareContacts />
-          <hr />
-          <SendHapticFeedback />
           <hr />
           <input className="text-xs border-black border-2" />
           <ExternalLinks />
