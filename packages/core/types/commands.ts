@@ -11,6 +11,7 @@ export enum Command {
   SendTransaction = "send-transaction",
   SignMessage = "sign-message",
   SignTypedData = "sign-typed-data",
+  ShareContacts = "share-contacts",
 }
 
 export type WebViewBasePayload = {
@@ -93,6 +94,12 @@ export type SignTypedDataInput = {
 
 export type SignTypedDataPayload = SignTypedDataInput;
 
+// Anchor: Share Contacts Payload
+export type ShareContactsInput = {
+  isMultiSelectEnabled: boolean;
+};
+export type ShareContactsPayload = ShareContactsInput;
+
 type CommandReturnPayloadMap = {
   [Command.Verify]: VerifyCommandPayload;
   [Command.Pay]: PayCommandPayload;
@@ -100,6 +107,7 @@ type CommandReturnPayloadMap = {
   [Command.SendTransaction]: SendTransactionPayload;
   [Command.SignMessage]: SignMessagePayload;
   [Command.SignTypedData]: SignTypedDataPayload;
+  [Command.ShareContacts]: ShareContactsPayload;
 };
 export type CommandReturnPayload<T extends Command> =
   T extends keyof CommandReturnPayloadMap ? CommandReturnPayloadMap[T] : never;
