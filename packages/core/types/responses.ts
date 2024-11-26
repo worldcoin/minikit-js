@@ -1,7 +1,6 @@
 import { Network } from "./payment";
 import {
   PaymentErrorCodes,
-  SendHapticFeedbackErrorCodes,
   SendTransactionErrorCodes,
   ShareContactsErrorCodes,
   SignMessageErrorCodes,
@@ -20,7 +19,6 @@ export enum ResponseEvent {
   MiniAppSignMessage = "miniapp-sign-message",
   MiniAppSignTypedData = "miniapp-sign-typed-data",
   MiniAppShareContacts = "miniapp-share-contacts",
-  MiniAppSendHapticFeedback = "miniapp-send-haptic-feedback",
 }
 
 export type MiniAppVerifyActionSuccessPayload = {
@@ -164,22 +162,6 @@ export type MiniAppShareContactsPayload =
   | MiniAppShareContactsSuccessPayload
   | MiniAppShareContactsErrorPayload;
 
-export type MiniAppSendHapticFeedbackSuccessPayload = {
-  status: "success";
-  version: number;
-};
-
-export type MiniAppSendHapticFeedbackErrorPayload = {
-  status: "error";
-  error_code: SendHapticFeedbackErrorCodes;
-  details?: Record<string, any>;
-  version: number;
-};
-
-export type MiniAppSendHapticFeedbackPayload =
-  | MiniAppSendHapticFeedbackSuccessPayload
-  | MiniAppSendHapticFeedbackErrorPayload;
-
 type EventPayloadMap = {
   [ResponseEvent.MiniAppVerifyAction]: MiniAppVerifyActionPayload;
   [ResponseEvent.MiniAppPayment]: MiniAppPaymentPayload;
@@ -188,7 +170,6 @@ type EventPayloadMap = {
   [ResponseEvent.MiniAppSignMessage]: MiniAppSignMessagePayload;
   [ResponseEvent.MiniAppSignTypedData]: MiniAppSignTypedDataPayload;
   [ResponseEvent.MiniAppShareContacts]: MiniAppShareContactsPayload;
-  [ResponseEvent.MiniAppSendHapticFeedback]: MiniAppSendHapticFeedbackPayload;
 };
 
 export type EventPayload<T extends ResponseEvent = ResponseEvent> =
