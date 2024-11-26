@@ -157,3 +157,15 @@ export const ShareContactsErrorMessage = {
   [ShareContactsErrorCodes.UserRejected]: "User rejected the request.",
   [ShareContactsErrorCodes.GenericError]: "Something unexpected went wrong.",
 };
+
+export enum SendHapticFeedbackErrorCodes {
+  InputError = "input_error",
+  GenericError = "generic_error",
+}
+
+export const SendHapticFeedbackErrorMessage = {
+  [SendHapticFeedbackErrorCodes.InputError]:
+    "Invalid payload, could not complete action.",
+  [SendHapticFeedbackErrorCodes.GenericError]:
+    "Something unexpected went wrong.",
+};
