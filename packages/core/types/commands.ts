@@ -97,6 +97,7 @@ export type SignTypedDataPayload = SignTypedDataInput;
 // Anchor: Share Contacts Payload
 export type ShareContactsInput = {
   isMultiSelectEnabled: boolean;
+  inviteMessage?: string;
 };
 export type ShareContactsPayload = ShareContactsInput;
 
