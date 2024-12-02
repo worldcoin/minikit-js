@@ -25,3 +25,5 @@ export {
   SAFE_CONTRACT_ABI,
   verifySiweMessage,
 } from "helpers/siwe/siwe";
+
+export { getIsUserVerified } from "helpers/address-book";

@@ -88,6 +88,9 @@ export class MiniKit {
   };
 
   public static appId: string | null = null;
+  /**
+   * @deprecated you should use MiniKit.user.walletAddress instead
+   */
   public static walletAddress: string | null = null;
   public static user: {
     walletAddress: string | null;
