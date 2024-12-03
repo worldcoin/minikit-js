@@ -1,7 +1,5 @@
 import { PayCommandInput, Tokens } from "types";
-import { PaymentErrorMessage } from "types/errors";
 import { TokenDecimals } from "types/payment";
-import { MiniAppPaymentErrorPayload } from "types/responses";
 
 // This is a helper function to convert token amount to decimals for payment
 // Amount should be in expected amount ie $25.12 should be 25.12

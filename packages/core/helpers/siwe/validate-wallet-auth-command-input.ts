@@ -1,5 +1,4 @@
 import { WalletAuthInput } from "types/commands";
-import {} from "types/responses";
 
 type ValidationResult =
   | {
