@@ -141,7 +141,7 @@ export const SendTransaction = () => {
     const permitTransfer = {
       permitted: {
         token: testTokens.worldchain.USDCE,
-        amount: "10000",
+        amount: "1000000000",
       },
       nonce: Date.now().toString(),
       deadline,
@@ -155,7 +155,7 @@ export const SendTransaction = () => {
 
     const transferDetails = {
       to: "0x126f7998Eb44Dd2d097A8AB2eBcb28dEA1646AC8",
-      requestedAmount: "10000",
+      requestedAmount: "1000000000",
     };
 
     const transferDetailsArgsForm = [
@@ -413,7 +413,7 @@ export const SendTransaction = () => {
           className="bg-black text-white rounded-lg p-4 w-full"
           onClick={onSendTransactionClick}
         >
-          Send Transaction
+          Simulation Fails
         </button>
 
         <button
