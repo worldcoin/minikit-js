@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/worldcoin/minikit-js/compare/minikit-js-v1.4.0...minikit-js-v1.5.0) (2024-12-08)
+
+
+### Miscellaneous Chores
+
+* **minikit-js:** Synchronize group versions
+
 ## [1.4.0](https://github.com/worldcoin/minikit-js/compare/minikit-js-v1.3.0...minikit-js-v1.4.0) (2024-12-03)
 
 
