@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/worldcoin/minikit-js/compare/minikit-js-v1.3.0...minikit-js-v1.4.0) (2024-12-03)
+
+
+### Features
+
+* isUserVerified helper & react bindings ([#118](https://github.com/worldcoin/minikit-js/issues/118)) ([ab8ba8d](https://github.com/worldcoin/minikit-js/commit/ab8ba8da23709a7e5ee4fad7620d91f011735c49))
+
 ## [1.3.0](https://github.com/worldcoin/minikit-js/compare/minikit-js-v1.2.0...minikit-js-v1.3.0) (2024-11-26)
 
 
