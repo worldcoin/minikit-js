@@ -3,6 +3,8 @@ import {
   MiniKit,
   ResponseEvent,
   SendTransactionErrorCodes,
+  Tokens,
+  tokenToDecimals,
 } from "@worldcoin/minikit-js";
 import { useWaitForTransactionReceipt } from "@worldcoin/minikit-react";
 import { useEffect, useState } from "react";
@@ -141,7 +143,7 @@ export const SendTransaction = () => {
     const permitTransfer = {
       permitted: {
         token: testTokens.worldchain.USDCE,
-        amount: "1000000000",
+        amount: "100000",
       },
       nonce: Date.now().toString(),
       deadline,
@@ -394,6 +396,25 @@ export const SendTransaction = () => {
     setTransactionData(payload);
   };
 
+  const doubleAction = () => {
+    const payload = MiniKit.commandsAsync.verify({
+      action: process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION || "",
+      signal: "123",
+    });
+    const pay = MiniKit.commandsAsync.pay({
+      to: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+      tokens: [
+        {
+          symbol: Tokens.WLD,
+          token_amount: tokenToDecimals(0.1, Tokens.WLD).toString(),
+        },
+      ],
+      description: "Test Chaining",
+      reference: new Date().toISOString(),
+    });
+    // onSendTransactionClick();
+  };
+
   return (
     <div className="grid gap-y-2">
       <h2 className="text-2xl font-bold">Transaction</h2>
@@ -435,6 +456,14 @@ export const SendTransaction = () => {
           onClick={onSendOrbTransactionClick}
         >
           Send Orb
+        </button>
+      </div>
+      <div className="grid gap-x-2 grid-cols-2">
+        <button
+          className="bg-black text-white rounded-lg p-4 w-full"
+          onClick={doubleAction}
+        >
+          Test Chaining
         </button>
       </div>
 
