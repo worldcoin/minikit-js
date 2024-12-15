@@ -421,6 +421,7 @@ export const SendTransaction = () => {
     const payload = await MiniKit.commandsAsync.verify({
       action: process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION || "",
       signal: "123",
+      verification_level: VerificationLevel.Device,
     });
 
     onSendTransactionClick();
