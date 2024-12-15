@@ -143,7 +143,7 @@ export const SendTransaction = () => {
     const permitTransfer = {
       permitted: {
         token: testTokens.worldchain.USDCE,
-        amount: "100000",
+        amount: "200000",
       },
       nonce: Date.now().toString(),
       deadline,
@@ -157,7 +157,7 @@ export const SendTransaction = () => {
 
     const transferDetails = {
       to: "0x126f7998Eb44Dd2d097A8AB2eBcb28dEA1646AC8",
-      requestedAmount: "1000000000",
+      requestedAmount: "200000",
     };
 
     const transferDetailsArgsForm = [
@@ -415,6 +415,15 @@ export const SendTransaction = () => {
     // onSendTransactionClick();
   };
 
+  const doubleActionTransact = async () => {
+    const payload = await MiniKit.commandsAsync.verify({
+      action: process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION || "",
+      signal: "123",
+    });
+
+    onSendTransactionClick();
+  };
+
   return (
     <div className="grid gap-y-2">
       <h2 className="text-2xl font-bold">Transaction</h2>
@@ -463,7 +472,13 @@ export const SendTransaction = () => {
           className="bg-black text-white rounded-lg p-4 w-full"
           onClick={doubleAction}
         >
-          Test Chaining
+          Test Chaining Pay
+        </button>
+        <button
+          className="bg-black text-white rounded-lg p-4 w-full"
+          onClick={doubleActionTransact}
+        >
+          Test Chaining Transact
         </button>
       </div>
 
