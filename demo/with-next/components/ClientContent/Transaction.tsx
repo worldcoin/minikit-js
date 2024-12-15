@@ -396,12 +396,12 @@ export const SendTransaction = () => {
     setTransactionData(payload);
   };
 
-  const doubleAction = () => {
-    const payload = MiniKit.commandsAsync.verify({
+  const doubleAction = async () => {
+    const payload = await MiniKit.commandsAsync.verify({
       action: process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION || "",
       signal: "123",
     });
-    const pay = MiniKit.commandsAsync.pay({
+    const pay = await MiniKit.commandsAsync.pay({
       to: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
       tokens: [
         {
