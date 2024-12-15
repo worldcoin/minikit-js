@@ -5,6 +5,7 @@ import {
   SendTransactionErrorCodes,
   Tokens,
   tokenToDecimals,
+  VerificationLevel,
 } from "@worldcoin/minikit-js";
 import { useWaitForTransactionReceipt } from "@worldcoin/minikit-react";
 import { useEffect, useState } from "react";
@@ -400,6 +401,7 @@ export const SendTransaction = () => {
     const payload = await MiniKit.commandsAsync.verify({
       action: process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION || "",
       signal: "123",
+      verification_level: VerificationLevel.Device,
     });
     const pay = await MiniKit.commandsAsync.pay({
       to: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
