@@ -1,13 +1,5 @@
 import { sendWebviewEvent } from "./helpers/send-webview-event";
 import {
-  VerifyCommandInput,
-  PayCommandInput,
-  EventPayload,
-  EventHandler,
-  WebViewBasePayload,
-  Command,
-} from "./types";
-import {
   MiniAppPaymentPayload,
   MiniAppSendTransactionPayload,
   MiniAppSignMessagePayload,
@@ -16,12 +8,20 @@ import {
   MiniAppWalletAuthPayload,
   MiniAppShareContactsPayload,
   ResponseEvent,
+  MiniAppRequestPermissionPayload,
+  EventHandler,
+  EventPayload,
 } from "./types/responses";
 import { Network } from "types/payment";
 import {
   AsyncHandlerReturn,
+  Command,
   CommandReturnPayload,
+  MiniKitInstallReturnType,
+  PayCommandInput,
   PayCommandPayload,
+  RequestPermissionInput,
+  RequestPermissionPayload,
   SendTransactionInput,
   SendTransactionPayload,
   ShareContactsPayload,
@@ -29,22 +29,22 @@ import {
   SignMessagePayload,
   SignTypedDataInput,
   SignTypedDataPayload,
+  VerifyCommandInput,
   VerifyCommandPayload,
   WalletAuthInput,
   WalletAuthPayload,
+  WebViewBasePayload,
 } from "types/commands";
 import { VerificationLevel } from "@worldcoin/idkit-core";
 import { generateSignal, encodeAction } from "@worldcoin/idkit-core/hashing";
-
 import { validateWalletAuthCommandInput } from "helpers/siwe/validate-wallet-auth-command-input";
 import { generateSiweMessage } from "helpers/siwe/siwe";
-import {
-  MiniKitInstallErrorCodes,
-  MiniKitInstallReturnType,
-  MiniKitInstallErrorMessage,
-} from "types";
 import { validatePaymentPayload } from "helpers/payment/client";
 import { getUserProfile } from "helpers/usernames";
+import {
+  MiniKitInstallErrorCodes,
+  MiniKitInstallErrorMessage,
+} from "types/errors";
 
 export const sendMiniKitEvent = <
   T extends WebViewBasePayload = WebViewBasePayload,
@@ -65,6 +65,7 @@ export class MiniKit {
     [Command.SignMessage]: 1,
     [Command.SignTypedData]: 1,
     [Command.ShareContacts]: 1,
+    [Command.RequestPermission]: 1,
   };
 
   private static isCommandAvailable = {
@@ -75,6 +76,7 @@ export class MiniKit {
     [Command.SignMessage]: false,
     [Command.SignTypedData]: false,
     [Command.ShareContacts]: false,
+    [Command.RequestPermission]: false,
   };
 
   private static listeners: Record<ResponseEvent, EventHandler> = {
@@ -85,6 +87,7 @@ export class MiniKit {
     [ResponseEvent.MiniAppSignMessage]: () => {},
     [ResponseEvent.MiniAppSignTypedData]: () => {},
     [ResponseEvent.MiniAppShareContacts]: () => {},
+    [ResponseEvent.MiniAppRequestPermission]: () => {},
   };
 
   public static appId: string | null = null;
@@ -285,6 +288,7 @@ export class MiniKit {
 
       return eventPayload;
     },
+
     pay: (payload: PayCommandInput): PayCommandPayload | null => {
       if (
         typeof window === "undefined" ||
@@ -316,6 +320,7 @@ export class MiniKit {
 
       return eventPayload;
     },
+
     walletAuth: (payload: WalletAuthInput): WalletAuthPayload | null => {
       if (
         typeof window === "undefined" ||
@@ -373,6 +378,7 @@ export class MiniKit {
 
       return walletAuthPayload;
     },
+
     sendTransaction: (
       payload: SendTransactionInput
     ): SendTransactionPayload | null => {
@@ -395,6 +401,7 @@ export class MiniKit {
 
       return payload;
     },
+
     signMessage: (payload: SignMessageInput): SignMessagePayload | null => {
       if (
         typeof window === "undefined" ||
@@ -415,6 +422,7 @@ export class MiniKit {
 
       return payload;
     },
+
     signTypedData: (
       payload: SignTypedDataInput
     ): SignTypedDataPayload | null => {
@@ -454,6 +462,28 @@ export class MiniKit {
 
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.ShareContacts,
+        version: 1,
+        payload,
+      });
+
+      return payload;
+    },
+
+    requestPermission: (
+      payload: RequestPermissionInput
+    ): RequestPermissionPayload | null => {
+      if (
+        typeof window === "undefined" ||
+        !this.isCommandAvailable[Command.RequestPermission]
+      ) {
+        console.error(
+          "'requestPermission' command is unavailable. Check MiniKit.install() or update the app version"
+        );
+        return null;
+      }
+
+      sendMiniKitEvent<WebViewBasePayload>({
+        command: Command.RequestPermission,
         version: 1,
         payload,
       });
@@ -598,6 +628,26 @@ export class MiniKit {
             () => this.commands.shareContacts(payload)
           );
           return resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
+
+    requestPermission: async (
+      payload: RequestPermissionInput
+    ): AsyncHandlerReturn<
+      RequestPermissionPayload | null,
+      MiniAppRequestPermissionPayload
+    > => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppRequestPermission,
+            Command.RequestPermission,
+            () => this.commands.requestPermission(payload)
+          );
+          resolve(response);
         } catch (error) {
           reject(error);
         }
