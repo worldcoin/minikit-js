@@ -1,17 +1,10 @@
 export { MiniKit } from "./minikit";
 
-export {
-  VerifyCommandInput,
-  PayCommandInput,
-  Command,
-  SiweMessage,
-} from "./types";
-
 export * from "./types/responses";
 export * from "./types/commands";
 export * from "./types/errors";
+export * from "./types/payment";
 
-export { Tokens, Network, TokenDecimals } from "./types/payment";
 export { tokenToDecimals } from "helpers/payment/client";
 
 export { VerificationLevel, type ISuccessResult } from "@worldcoin/idkit-core";

@@ -1,5 +1,5 @@
-import { PayCommandInput, Tokens } from "types";
-import { TokenDecimals } from "types/payment";
+import { PayCommandInput } from "types/commands";
+import { TokenDecimals, Tokens } from "types/payment";
 
 // This is a helper function to convert token amount to decimals for payment
 // Amount should be in expected amount ie $25.12 should be 25.12

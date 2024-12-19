@@ -12,6 +12,7 @@ import { SendTransaction } from "./Transaction";
 import { SignMessage } from "./SignMessage";
 import { SignTypedData } from "./SignTypedMessage";
 import { ShareContacts } from "./ShareContacts";
+import { RequestPermission } from "./RequestPermissions";
 import {
   GetSearchedUsernameResult,
   UsernameSearch,
@@ -97,6 +98,8 @@ export const ClientContent = () => {
           <SignTypedData />
           <hr />
           <ShareContacts />
+          <hr />
+          <RequestPermission />
           <hr />
           <input className="text-xs border-black border-2" />
           <ExternalLinks />

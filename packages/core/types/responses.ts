@@ -1,6 +1,7 @@
 import { Network } from "./payment";
 import {
   PaymentErrorCodes,
+  RequestPermissionErrorCodes,
   SendTransactionErrorCodes,
   ShareContactsErrorCodes,
   SignMessageErrorCodes,
@@ -10,6 +11,7 @@ import {
   WalletAuthErrorMessage,
 } from "./errors";
 import { VerificationLevel } from "@worldcoin/idkit-core";
+import { Permission } from "./commands";
 
 export enum ResponseEvent {
   MiniAppVerifyAction = "miniapp-verify-action",
@@ -19,6 +21,7 @@ export enum ResponseEvent {
   MiniAppSignMessage = "miniapp-sign-message",
   MiniAppSignTypedData = "miniapp-sign-typed-data",
   MiniAppShareContacts = "miniapp-share-contacts",
+  MiniAppRequestPermission = "miniapp-request-permission",
 }
 
 export type MiniAppVerifyActionSuccessPayload = {
@@ -162,6 +165,25 @@ export type MiniAppShareContactsPayload =
   | MiniAppShareContactsSuccessPayload
   | MiniAppShareContactsErrorPayload;
 
+// Anchor: Request Permission Payload
+export type MiniAppRequestPermissionSuccessPayload = {
+  status: "success";
+  permission: Permission;
+  timestamp: string;
+  version: number;
+};
+
+export type MiniAppRequestPermissionErrorPayload = {
+  status: "error";
+  error_code: RequestPermissionErrorCodes;
+  description: string;
+  version: number;
+};
+
+export type MiniAppRequestPermissionPayload =
+  | MiniAppRequestPermissionSuccessPayload
+  | MiniAppRequestPermissionErrorPayload;
+
 type EventPayloadMap = {
   [ResponseEvent.MiniAppVerifyAction]: MiniAppVerifyActionPayload;
   [ResponseEvent.MiniAppPayment]: MiniAppPaymentPayload;
@@ -170,6 +192,7 @@ type EventPayloadMap = {
   [ResponseEvent.MiniAppSignMessage]: MiniAppSignMessagePayload;
   [ResponseEvent.MiniAppSignTypedData]: MiniAppSignTypedDataPayload;
   [ResponseEvent.MiniAppShareContacts]: MiniAppShareContactsPayload;
+  [ResponseEvent.MiniAppRequestPermission]: MiniAppRequestPermissionPayload;
 };
 
 export type EventPayload<T extends ResponseEvent = ResponseEvent> =
