@@ -115,7 +115,7 @@ export const RequestPermission = () => {
             className="bg-black text-white rounded-lg p-4 w-full"
             onClick={() => onRequestPermission(Permission.Notifications)}
           >
-            Request Notifications Permission
+            Request Notifications
           </button>
         </div>
       </div>
