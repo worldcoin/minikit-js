@@ -45,6 +45,7 @@ import {
 } from "types";
 import { validatePaymentPayload } from "helpers/payment/client";
 import { getUserProfile } from "helpers/usernames";
+import { validateSendTransactionPayload } from "helpers/transaction/validate-payload";
 import { User } from "./types/user";
 
 export const sendMiniKitEvent = <
@@ -390,6 +391,13 @@ export class MiniKit {
           "'sendTransaction' command is unavailable. Check MiniKit.install() or update the app version"
         );
 
+        return null;
+      }
+
+      if (!validateSendTransactionPayload(payload).isValid) {
+        console.error(
+          "Invalid sendTransaction payload - some object properties are not strings"
+        );
         return null;
       }
 
