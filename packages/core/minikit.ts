@@ -46,6 +46,7 @@ import {
 import { validatePaymentPayload } from "helpers/payment/client";
 import { getUserProfile } from "helpers/usernames";
 import { validateSendTransactionPayload } from "helpers/transaction/validate-payload";
+import { User } from "./types/user";
 
 export const sendMiniKitEvent = <
   T extends WebViewBasePayload = WebViewBasePayload,
@@ -93,11 +94,7 @@ export class MiniKit {
    * @deprecated you should use MiniKit.user.walletAddress instead
    */
   public static walletAddress: string | null = null;
-  public static user: {
-    walletAddress: string | null;
-    username: string | null;
-    profilePictureUrl: string | null;
-  } | null = null;
+  public static user: User | null = null;
 
   private static sendInit() {
     sendWebviewEvent({
@@ -119,12 +116,8 @@ export class MiniKit {
       ) => {
         if (payload.status === "success") {
           MiniKit.walletAddress = payload.address;
-          getUserProfile(payload.address).then((queryResponse) => {
-            MiniKit.user = {
-              username: queryResponse.username,
-              profilePictureUrl: queryResponse.profilePictureUrl,
-              walletAddress: payload.address,
-            };
+          MiniKit.getUserByAddress(payload.address).then((user) => {
+            MiniKit.user = user;
           });
         }
 
@@ -259,6 +252,16 @@ export class MiniKit {
       );
     return isInstalled;
   }
+
+  public static getUserByAddress = async (address: string): Promise<User> => {
+    const userProfile = await getUserProfile(address);
+
+    return {
+      walletAddress: address,
+      username: userProfile.username,
+      profilePictureUrl: userProfile.profilePictureUrl,
+    };
+  };
 
   public static commands = {
     verify: (payload: VerifyCommandInput): VerifyCommandPayload | null => {
