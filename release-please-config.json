@@ -1,33 +1,25 @@
 {
-  "release-type": "node",
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "packages": {
-    "packages/react": {
-      "component": "react",
-      "skip-github-release": true
-    },
     "packages/core": {
-      "component": "core",
-      "skip-github-release": true
-    },
-    ".": {
       "component": "minikit-js",
-      "changelog-path": "CHANGELOG.md",
-      "bump-minor-pre-major": false,
-      "bump-patch-for-minor-pre-major": false,
-      "draft": false,
-      "prerelease": false
+      "skip-github-release": false
+    },
+    "packages/react": {
+      "component": "minikit-react",
+      "skip-github-release": false
     }
   },
   "plugins": [
     {
-      "type": "node-workspace",
-      "merge": false
+      "merge": false,
+      "type": "node-workspace"
     },
     {
-      "type": "linked-versions",
-      "groupName": "group",
-      "components": ["core", "react", "minikit-js"]
+      "components": ["minikit-react", "minikit-js"],
+      "groupwhatName": "minikit-packages",
+      "type": "linked-versions"
     }
   ],
-  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
+  "release-type": "node"
 }
