@@ -7,7 +7,7 @@ import {
   getContract,
   Client,
 } from "viem";
-import { optimism, worldchain } from "viem/chains";
+import { worldchain } from "viem/chains";
 
 const PREAMBLE = " wants you to sign in with your Ethereum account:";
 const URI_TAG = "URI: ";
@@ -189,7 +189,8 @@ export const verifySiweMessage = async (
 
   // Check ERC-191 Signature Matches
   let provider =
-    userProvider || createPublicClient({ chain: worldchain, transport: http() });
+    userProvider ||
+    createPublicClient({ chain: worldchain, transport: http() });
   const signedMessage = `${ERC_191_PREFIX}${message.length}${message}`;
   const messageBytes = Buffer.from(signedMessage, "utf8").toString("hex");
   const hashedMessage = hashMessage(signedMessage);

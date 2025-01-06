@@ -79,9 +79,10 @@ export const ShareContacts = () => {
   }, [tempInstallFix]);
 
   const onShareContacts = useCallback(
-    async (isMultiSelectEnabled: boolean = false) => {
+    async (isMultiSelectEnabled: boolean = false, inviteMessage?: string) => {
       const shareContactsPayload: ShareContactsPayload = {
         isMultiSelectEnabled,
+        inviteMessage,
       };
 
       const payload = MiniKit.commands.shareContacts(shareContactsPayload);
@@ -118,6 +119,14 @@ export const ShareContacts = () => {
             onClick={() => onShareContacts(false)}
           >
             Share Contacts (multi disabled)
+          </button>
+        </div>
+        <div className="grid gap-4 grid-cols-2">
+          <button
+            className="bg-black text-white rounded-lg p-4 w-full"
+            onClick={() => onShareContacts(false, "hello join worldcoin!")}
+          >
+            Share Contacts Invite Message
           </button>
         </div>
       </div>

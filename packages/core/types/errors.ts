@@ -157,3 +157,26 @@ export const ShareContactsErrorMessage = {
   [ShareContactsErrorCodes.UserRejected]: "User rejected the request.",
   [ShareContactsErrorCodes.GenericError]: "Something unexpected went wrong.",
 };
+
+export enum RequestPermissionErrorCodes {
+  UserRejected = "user_rejected",
+  GenericError = "generic_error",
+  AlreadyRequested = "already_requested",
+  PermissionDisabled = "permission_disabled",
+  AlreadyGranted = "already_granted",
+  UnsupportedPermission = "unsupported_permission",
+}
+
+export const RequestPermissionErrorMessage = {
+  [RequestPermissionErrorCodes.UserRejected]: "User declined sharing contacts",
+  [RequestPermissionErrorCodes.GenericError]:
+    "Request failed for unknown reason.",
+  [RequestPermissionErrorCodes.AlreadyRequested]:
+    "User has already declined turning on notifications once",
+  [RequestPermissionErrorCodes.PermissionDisabled]:
+    "User does not have this permission enabled in World App",
+  [RequestPermissionErrorCodes.AlreadyGranted]:
+    "If the user has already granted this mini app permission",
+  [RequestPermissionErrorCodes.UnsupportedPermission]:
+    "The permission requested is not supported by this mini app",
+};

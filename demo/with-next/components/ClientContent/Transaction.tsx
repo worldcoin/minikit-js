@@ -3,6 +3,9 @@ import {
   MiniKit,
   ResponseEvent,
   SendTransactionErrorCodes,
+  Tokens,
+  tokenToDecimals,
+  VerificationLevel,
 } from "@worldcoin/minikit-js";
 import { useWaitForTransactionReceipt } from "@worldcoin/minikit-react";
 import { useEffect, useState } from "react";
@@ -141,7 +144,7 @@ export const SendTransaction = () => {
     const permitTransfer = {
       permitted: {
         token: testTokens.worldchain.USDCE,
-        amount: "10000",
+        amount: "200000",
       },
       nonce: Date.now().toString(),
       deadline,
@@ -155,7 +158,7 @@ export const SendTransaction = () => {
 
     const transferDetails = {
       to: "0x126f7998Eb44Dd2d097A8AB2eBcb28dEA1646AC8",
-      requestedAmount: "10000",
+      requestedAmount: "200000",
     };
 
     const transferDetailsArgsForm = [
@@ -394,6 +397,36 @@ export const SendTransaction = () => {
     setTransactionData(payload);
   };
 
+  const doubleAction = async () => {
+    const payload = await MiniKit.commandsAsync.verify({
+      action: process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION || "",
+      signal: "123",
+      verification_level: VerificationLevel.Device,
+    });
+    const pay = await MiniKit.commandsAsync.pay({
+      to: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+      tokens: [
+        {
+          symbol: Tokens.WLD,
+          token_amount: tokenToDecimals(0.1, Tokens.WLD).toString(),
+        },
+      ],
+      description: "Test Chaining",
+      reference: new Date().toISOString(),
+    });
+    // onSendTransactionClick();
+  };
+
+  const doubleActionTransact = async () => {
+    const payload = await MiniKit.commandsAsync.verify({
+      action: process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION || "",
+      signal: "123",
+      verification_level: VerificationLevel.Device,
+    });
+
+    onSendTransactionClick();
+  };
+
   return (
     <div className="grid gap-y-2">
       <h2 className="text-2xl font-bold">Transaction</h2>
@@ -413,7 +446,7 @@ export const SendTransaction = () => {
           className="bg-black text-white rounded-lg p-4 w-full"
           onClick={onSendTransactionClick}
         >
-          Send Transaction
+          Simulation Fails
         </button>
 
         <button
@@ -435,6 +468,20 @@ export const SendTransaction = () => {
           onClick={onSendOrbTransactionClick}
         >
           Send Orb
+        </button>
+      </div>
+      <div className="grid gap-x-2 grid-cols-2">
+        <button
+          className="bg-black text-white rounded-lg p-4 w-full"
+          onClick={doubleAction}
+        >
+          Test Chaining Pay
+        </button>
+        <button
+          className="bg-black text-white rounded-lg p-4 w-full"
+          onClick={doubleActionTransact}
+        >
+          Test Chaining Transact
         </button>
       </div>
 

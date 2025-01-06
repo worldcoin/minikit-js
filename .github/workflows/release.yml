@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      
+
 permissions:
   contents: write
   pull-requests: write
@@ -53,8 +53,15 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Publish to npm
-        run: pnpm publish --report-summary
+      - name: Publish Core to npm
+        working-directory: ./packages/core
+        run: pnpm publish --report-summary --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish React to npm
+        working-directory: ./packages/react
+        run: pnpm publish --report-summary --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -83,7 +90,14 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Publish to GitHub
-        run: pnpm publish --report-summary
+      - name: Publish Core to GitHub
+        working-directory: ./packages/core
+        run: pnpm publish --report-summary --no-git-checks
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish React to GitHub
+        working-directory: ./packages/react
+        run: pnpm publish --report-summary --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
