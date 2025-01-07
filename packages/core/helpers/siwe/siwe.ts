@@ -187,7 +187,7 @@ export const verifySiweMessage = async (
     );
   }
 
-  // Check ERC-191 Signature Matches
+  // Check ERC-191 Signature Matches not recovery
   let provider =
     userProvider ||
     createPublicClient({ chain: worldchain, transport: http() });
