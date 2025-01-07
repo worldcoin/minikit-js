@@ -366,7 +366,7 @@ export class MiniKit {
         statement: payload.statement ?? undefined,
         uri: window.location.href,
         version: 1,
-        chain_id: 10,
+        chain_id: 480,
         nonce: payload.nonce,
         issued_at: new Date().toISOString(),
         expiration_time: payload.expirationTime?.toISOString() ?? undefined,
