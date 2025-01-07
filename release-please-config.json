@@ -17,7 +17,7 @@
     },
     {
       "components": ["minikit-react", "minikit-js"],
-      "groupwhatName": "minikit-packages",
+      "groupName": "minikit-packages",
       "type": "linked-versions"
     }
   ],
