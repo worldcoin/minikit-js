@@ -71,5 +71,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: List installed packages
+        run: pnpm list @worldcoin/minikit-js
+
       - name: Run typecheck
         run: pnpm --loglevel debug --recursive type-check
