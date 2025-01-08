@@ -4,7 +4,7 @@ on:
 
 jobs:
   run-tests:
-    name: API Tests
+    name: Run Tests
     runs-on: ubuntu-20.04
     defaults:
       run:
@@ -23,7 +23,6 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
-        working-directory: ./tests
         run: pnpm install --frozen-lockfile
 
       - name: Run tests
