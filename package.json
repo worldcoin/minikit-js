@@ -7,7 +7,8 @@
     "lint": "prettier --check .",
     "format": "prettier --write .",
     "build": "turbo run build",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "typecheck": ""
   },
   "devDependencies": {
     "prettier-plugin-organize-imports": "^4.1.0",
