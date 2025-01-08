@@ -4,11 +4,13 @@
   "name": "minikit-monorepo",
   "scripts": {
     "dev": "turbo run dev",
-    "lint": "turbo run lint",
+    "lint": "prettier --check .",
+    "format": "prettier --write .",
     "build": "turbo run build",
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
+    "prettier-plugin-organize-imports": "^4.1.0",
     "turbo": "^2.1.1"
   },
   "engines": {

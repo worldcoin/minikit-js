@@ -1,6 +1,6 @@
 export enum Tokens {
-  USDCE = "USDCE",
-  WLD = "WLD",
+  USDCE = 'USDCE',
+  WLD = 'WLD',
 }
 
 export const TokenDecimals: { [key in Tokens]: number } = {
@@ -9,6 +9,6 @@ export const TokenDecimals: { [key in Tokens]: number } = {
 };
 
 export enum Network {
-  Optimism = "optimism",
-  WorldChain = "worldchain",
+  Optimism = 'optimism',
+  WorldChain = 'worldchain',
 }

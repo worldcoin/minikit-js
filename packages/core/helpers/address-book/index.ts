@@ -1,38 +1,38 @@
-import { createPublicClient, http } from "viem";
-import { worldchain } from "viem/chains";
+import { createPublicClient, http } from 'viem';
+import { worldchain } from 'viem/chains';
 
 const worldIdAddressBookContractAddress =
-  "0x57b930D551e677CC36e2fA036Ae2fe8FdaE0330D";
+  '0x57b930D551e677CC36e2fA036Ae2fe8FdaE0330D';
 const addressVerifiedUntilAbi = [
   {
     inputs: [
       {
-        internalType: "address",
-        name: "",
-        type: "address",
+        internalType: 'address',
+        name: '',
+        type: 'address',
       },
     ],
-    name: "addressVerifiedUntil",
+    name: 'addressVerifiedUntil',
     outputs: [
       {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
       },
     ],
-    stateMutability: "view",
-    type: "function",
+    stateMutability: 'view',
+    type: 'function',
   },
 ];
 
 export const getIsUserVerified = async (
   walletAddress: string,
-  rpcUrl?: string
+  rpcUrl?: string,
 ): Promise<boolean> => {
   const publicClient = createPublicClient({
     chain: worldchain,
     transport: http(
-      rpcUrl || "https://worldchain-mainnet.g.alchemy.com/public"
+      rpcUrl || 'https://worldchain-mainnet.g.alchemy.com/public',
     ),
   });
 
@@ -40,21 +40,21 @@ export const getIsUserVerified = async (
     const verifiedUntilResponse = (await publicClient.readContract({
       address: worldIdAddressBookContractAddress,
       abi: addressVerifiedUntilAbi,
-      functionName: "addressVerifiedUntil",
+      functionName: 'addressVerifiedUntil',
       args: [walletAddress],
     })) as BigInt;
 
     const verifiedUntil = Number(verifiedUntilResponse.toString());
 
     if (!Number.isFinite(verifiedUntil)) {
-      console.warn("Invalid verifiedUntil value:", verifiedUntil);
+      console.warn('Invalid verifiedUntil value:', verifiedUntil);
       return false;
     }
 
     const currentTime = Math.floor(Date.now() / 1000);
     return verifiedUntil > currentTime;
   } catch (error) {
-    console.error("Error verifying user:", error);
+    console.error('Error verifying user:', error);
     return false;
   }
 };

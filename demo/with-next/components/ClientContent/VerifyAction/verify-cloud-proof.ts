@@ -1,10 +1,10 @@
-"use server";
+'use server';
 
 import {
   ISuccessResult,
   IVerifyResponse,
   verifyCloudProof,
-} from "@worldcoin/minikit-js";
+} from '@worldcoin/minikit-js';
 
 export const verifyProof = async (params: {
   app_id: `app_${string}`;
@@ -23,14 +23,14 @@ export const verifyProof = async (params: {
       action,
       signal,
 
-      process.env.NEXT_DEPLOYMENT_ENVIRONMENT === "staging"
+      process.env.NEXT_DEPLOYMENT_ENVIRONMENT === 'staging'
         ? stagingEndpoint
-        : undefined
+        : undefined,
     );
 
-    console.log("verifyResponse", verifyResponse);
+    console.log('verifyResponse', verifyResponse);
   } catch (error) {
-    console.log("Error in verifyCloudProof", error);
+    console.log('Error in verifyCloudProof', error);
   }
 
   return verifyResponse;

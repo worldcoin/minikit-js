@@ -3,3 +3,6 @@ build/**
 CHANGELOG.md
 pnpm-lock.yaml
 node_modules/**
+.vscode/**
+**/.next/**
+**/.turbo/**

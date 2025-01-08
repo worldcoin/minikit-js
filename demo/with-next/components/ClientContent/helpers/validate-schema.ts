@@ -1,8 +1,8 @@
-import * as yup from "yup";
+import * as yup from 'yup';
 
 export const validateSchema = async (
   schema: yup.ObjectSchema<any>,
-  payload: any
+  payload: any,
 ): Promise<string | null> => {
   let errorMessage: string | null = null;
 
@@ -10,7 +10,7 @@ export const validateSchema = async (
     await schema.validate(payload);
   } catch (error) {
     if (!(error instanceof yup.ValidationError)) {
-      errorMessage = "Unknown error";
+      errorMessage = 'Unknown error';
       return errorMessage;
     }
 

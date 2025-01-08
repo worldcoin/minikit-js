@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { getIsUserVerified } from "@worldcoin/minikit-js";
+import { getIsUserVerified } from '@worldcoin/minikit-js';
+import { useEffect, useState } from 'react';
 
 /**
  * Checks if a user is Orb verified

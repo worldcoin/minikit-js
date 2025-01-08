@@ -1,5 +1,5 @@
-import { useSession } from "next-auth/react";
-import { useMemo } from "react";
+import { useSession } from 'next-auth/react';
+import { useMemo } from 'react';
 
 export const User = () => {
   const { data: session } = useSession();
@@ -10,7 +10,7 @@ export const User = () => {
       <h2>Session User:</h2>
       {user?.name ? (
         <p className="truncate">
-          User name:{" "}
+          User name:{' '}
           <span className="font-bold max-w-full truncate break-all whitespace-break-spaces">
             {user?.name}
           </span>

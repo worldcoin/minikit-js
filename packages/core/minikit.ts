@@ -1,18 +1,10 @@
-import { sendWebviewEvent } from "./helpers/send-webview-event";
-import {
-  MiniAppPaymentPayload,
-  MiniAppSendTransactionPayload,
-  MiniAppSignMessagePayload,
-  MiniAppSignTypedDataPayload,
-  MiniAppVerifyActionPayload,
-  MiniAppWalletAuthPayload,
-  MiniAppShareContactsPayload,
-  ResponseEvent,
-  MiniAppRequestPermissionPayload,
-  EventHandler,
-  EventPayload,
-} from "./types/responses";
-import { Network } from "types/payment";
+import { VerificationLevel } from '@worldcoin/idkit-core';
+import { encodeAction, generateSignal } from '@worldcoin/idkit-core/hashing';
+import { validatePaymentPayload } from 'helpers/payment/client';
+import { generateSiweMessage } from 'helpers/siwe/siwe';
+import { validateWalletAuthCommandInput } from 'helpers/siwe/validate-wallet-auth-command-input';
+import { validateSendTransactionPayload } from 'helpers/transaction/validate-payload';
+import { getUserProfile } from 'helpers/usernames';
 import {
   AsyncHandlerReturn,
   Command,
@@ -34,24 +26,32 @@ import {
   WalletAuthInput,
   WalletAuthPayload,
   WebViewBasePayload,
-} from "types/commands";
-import { VerificationLevel } from "@worldcoin/idkit-core";
-import { generateSignal, encodeAction } from "@worldcoin/idkit-core/hashing";
-import { validateWalletAuthCommandInput } from "helpers/siwe/validate-wallet-auth-command-input";
-import { generateSiweMessage } from "helpers/siwe/siwe";
-import { validatePaymentPayload } from "helpers/payment/client";
-import { getUserProfile } from "helpers/usernames";
-import { validateSendTransactionPayload } from "helpers/transaction/validate-payload";
-import { User } from "./types/user";
+} from 'types/commands';
 import {
   MiniKitInstallErrorCodes,
   MiniKitInstallErrorMessage,
-} from "types/errors";
+} from 'types/errors';
+import { Network } from 'types/payment';
+import { sendWebviewEvent } from './helpers/send-webview-event';
+import {
+  EventHandler,
+  EventPayload,
+  MiniAppPaymentPayload,
+  MiniAppRequestPermissionPayload,
+  MiniAppSendTransactionPayload,
+  MiniAppShareContactsPayload,
+  MiniAppSignMessagePayload,
+  MiniAppSignTypedDataPayload,
+  MiniAppVerifyActionPayload,
+  MiniAppWalletAuthPayload,
+  ResponseEvent,
+} from './types/responses';
+import { User } from './types/user';
 
 export const sendMiniKitEvent = <
   T extends WebViewBasePayload = WebViewBasePayload,
 >(
-  payload: T
+  payload: T,
 ) => {
   sendWebviewEvent(payload);
 };
@@ -101,23 +101,23 @@ export class MiniKit {
 
   private static sendInit() {
     sendWebviewEvent({
-      command: "init",
+      command: 'init',
       payload: { version: this.MINIKIT_VERSION },
     });
   }
 
   public static subscribe<E extends ResponseEvent>(
     event: E,
-    handler: EventHandler<E>
+    handler: EventHandler<E>,
   ) {
     if (event === ResponseEvent.MiniAppWalletAuth) {
       const originalHandler =
         handler as EventHandler<ResponseEvent.MiniAppWalletAuth>;
 
       const wrappedHandler: EventHandler<ResponseEvent.MiniAppWalletAuth> = (
-        payload
+        payload,
       ) => {
-        if (payload.status === "success") {
+        if (payload.status === 'success') {
           MiniKit.walletAddress = payload.address;
           MiniKit.getUserByAddress(payload.address).then((user) => {
             MiniKit.user = user;
@@ -152,7 +152,7 @@ export class MiniKit {
   >(
     event: E,
     command: C,
-    executor: () => CommandReturnPayload<C> | null
+    executor: () => CommandReturnPayload<C> | null,
   ): AsyncHandlerReturn<CommandReturnPayload<C> | null, T> {
     return new Promise((resolve) => {
       let commandPayload: CommandReturnPayload<C> | null = null;
@@ -166,17 +166,17 @@ export class MiniKit {
   }
 
   private static commandsValid(
-    input: NonNullable<typeof window.WorldApp>["supported_commands"]
+    input: NonNullable<typeof window.WorldApp>['supported_commands'],
   ) {
     return Object.entries(this.commandVersion).every(
       ([commandName, version]) => {
         const commandInput = input.find(
-          (command) => command.name === commandName
+          (command) => command.name === commandName,
         );
 
         if (!commandInput) {
           console.error(
-            `Command ${commandName} is not supported by the app. Try updating the app version`
+            `Command ${commandName} is not supported by the app. Try updating the app version`,
           );
         } else {
           MiniKit.isCommandAvailable[commandName] = true;
@@ -185,12 +185,12 @@ export class MiniKit {
         return commandInput
           ? commandInput.supported_versions.includes(version)
           : false;
-      }
+      },
     );
   }
 
   public static install(appId?: string): MiniKitInstallReturnType {
-    if (typeof window === "undefined" || Boolean(window.MiniKit)) {
+    if (typeof window === 'undefined' || Boolean(window.MiniKit)) {
       return {
         success: false,
         errorCode: MiniKitInstallErrorCodes.AlreadyInstalled,
@@ -200,7 +200,7 @@ export class MiniKit {
     }
 
     if (!appId) {
-      console.warn("App ID not provided during install");
+      console.warn('App ID not provided during install');
     } else {
       MiniKit.appId = appId;
     }
@@ -222,7 +222,7 @@ export class MiniKit {
     } catch (error) {
       console.error(
         MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.Unknown],
-        error
+        error,
       );
 
       return {
@@ -247,11 +247,11 @@ export class MiniKit {
   }
 
   public static isInstalled(debug?: boolean) {
-    if (debug) console.log("MiniKit is alive!");
+    if (debug) console.log('MiniKit is alive!');
     const isInstalled = Boolean(window.MiniKit);
     if (!isInstalled)
       console.error(
-        "MiniKit is not installed. Make sure you're running the application inside of World App"
+        "MiniKit is not installed. Make sure you're running the application inside of World App",
       );
     return isInstalled;
   }
@@ -269,11 +269,11 @@ export class MiniKit {
   public static commands = {
     verify: (payload: VerifyCommandInput): VerifyCommandPayload | null => {
       if (
-        typeof window === "undefined" ||
+        typeof window === 'undefined' ||
         !this.isCommandAvailable[Command.Verify]
       ) {
         console.error(
-          "'verify' command is unavailable. Check MiniKit.install() or update the app version"
+          "'verify' command is unavailable. Check MiniKit.install() or update the app version",
         );
 
         return null;
@@ -298,11 +298,11 @@ export class MiniKit {
 
     pay: (payload: PayCommandInput): PayCommandPayload | null => {
       if (
-        typeof window === "undefined" ||
+        typeof window === 'undefined' ||
         !this.isCommandAvailable[Command.Pay]
       ) {
         console.error(
-          "'pay' command is unavailable. Check MiniKit.install() or update the app version"
+          "'pay' command is unavailable. Check MiniKit.install() or update the app version",
         );
         return null;
       }
@@ -330,11 +330,11 @@ export class MiniKit {
 
     walletAuth: (payload: WalletAuthInput): WalletAuthPayload | null => {
       if (
-        typeof window === "undefined" ||
+        typeof window === 'undefined' ||
         !this.isCommandAvailable[Command.WalletAuth]
       ) {
         console.error(
-          "'walletAuth' command is unavailable. Check MiniKit.install() or update the app version"
+          "'walletAuth' command is unavailable. Check MiniKit.install() or update the app version",
         );
 
         return null;
@@ -344,8 +344,8 @@ export class MiniKit {
 
       if (!validationResult.valid) {
         console.error(
-          "Failed to validate wallet auth input:\n\n -->",
-          validationResult.message
+          'Failed to validate wallet auth input:\n\n -->',
+          validationResult.message,
         );
 
         return null;
@@ -355,9 +355,9 @@ export class MiniKit {
 
       try {
         const currentUrl = new URL(window.location.href);
-        protocol = currentUrl.protocol.split(":")[0];
+        protocol = currentUrl.protocol.split(':')[0];
       } catch (error) {
-        console.error("Failed to get current URL", error);
+        console.error('Failed to get current URL', error);
         return null;
       }
 
@@ -387,14 +387,14 @@ export class MiniKit {
     },
 
     sendTransaction: (
-      payload: SendTransactionInput
+      payload: SendTransactionInput,
     ): SendTransactionPayload | null => {
       if (
-        typeof window === "undefined" ||
+        typeof window === 'undefined' ||
         !this.isCommandAvailable[Command.SendTransaction]
       ) {
         console.error(
-          "'sendTransaction' command is unavailable. Check MiniKit.install() or update the app version"
+          "'sendTransaction' command is unavailable. Check MiniKit.install() or update the app version",
         );
 
         return null;
@@ -402,7 +402,7 @@ export class MiniKit {
 
       if (!validateSendTransactionPayload(payload).isValid) {
         console.error(
-          "Invalid sendTransaction payload - some object properties are not strings"
+          'Invalid sendTransaction payload - some object properties are not strings',
         );
         return null;
       }
@@ -418,11 +418,11 @@ export class MiniKit {
 
     signMessage: (payload: SignMessageInput): SignMessagePayload | null => {
       if (
-        typeof window === "undefined" ||
+        typeof window === 'undefined' ||
         !this.isCommandAvailable[Command.SignMessage]
       ) {
         console.error(
-          "'signMessage' command is unavailable. Check MiniKit.install() or update the app version"
+          "'signMessage' command is unavailable. Check MiniKit.install() or update the app version",
         );
 
         return null;
@@ -438,14 +438,14 @@ export class MiniKit {
     },
 
     signTypedData: (
-      payload: SignTypedDataInput
+      payload: SignTypedDataInput,
     ): SignTypedDataPayload | null => {
       if (
-        typeof window === "undefined" ||
+        typeof window === 'undefined' ||
         !this.isCommandAvailable[Command.SignTypedData]
       ) {
         console.error(
-          "'signTypedData' command is unavailable. Check MiniKit.install() or update the app version"
+          "'signTypedData' command is unavailable. Check MiniKit.install() or update the app version",
         );
 
         return null;
@@ -461,14 +461,14 @@ export class MiniKit {
     },
 
     shareContacts: (
-      payload: ShareContactsPayload
+      payload: ShareContactsPayload,
     ): ShareContactsPayload | null => {
       if (
-        typeof window === "undefined" ||
+        typeof window === 'undefined' ||
         !this.isCommandAvailable[Command.SignTypedData]
       ) {
         console.error(
-          "'shareContacts' command is unavailable. Check MiniKit.install() or update the app version"
+          "'shareContacts' command is unavailable. Check MiniKit.install() or update the app version",
         );
 
         return null;
@@ -484,14 +484,14 @@ export class MiniKit {
     },
 
     requestPermission: (
-      payload: RequestPermissionInput
+      payload: RequestPermissionInput,
     ): RequestPermissionPayload | null => {
       if (
-        typeof window === "undefined" ||
+        typeof window === 'undefined' ||
         !this.isCommandAvailable[Command.RequestPermission]
       ) {
         console.error(
-          "'requestPermission' command is unavailable. Check MiniKit.install() or update the app version"
+          "'requestPermission' command is unavailable. Check MiniKit.install() or update the app version",
         );
         return null;
       }
@@ -518,7 +518,7 @@ export class MiniKit {
    */
   public static commandsAsync = {
     verify: async (
-      payload: VerifyCommandInput
+      payload: VerifyCommandInput,
     ): AsyncHandlerReturn<
       VerifyCommandPayload | null,
       MiniAppVerifyActionPayload
@@ -528,7 +528,7 @@ export class MiniKit {
           const response = await MiniKit.awaitCommand(
             ResponseEvent.MiniAppVerifyAction,
             Command.Verify,
-            () => this.commands.verify(payload)
+            () => this.commands.verify(payload),
           );
           resolve(response);
         } catch (error) {
@@ -537,14 +537,14 @@ export class MiniKit {
       });
     },
     pay: async (
-      payload: PayCommandInput
+      payload: PayCommandInput,
     ): AsyncHandlerReturn<PayCommandPayload | null, MiniAppPaymentPayload> => {
       return new Promise(async (resolve, reject) => {
         try {
           const response = await MiniKit.awaitCommand(
             ResponseEvent.MiniAppPayment,
             Command.Pay,
-            () => this.commands.pay(payload)
+            () => this.commands.pay(payload),
           );
           resolve(response);
         } catch (error) {
@@ -553,7 +553,7 @@ export class MiniKit {
       });
     },
     walletAuth: async (
-      payload: WalletAuthInput
+      payload: WalletAuthInput,
     ): AsyncHandlerReturn<
       WalletAuthPayload | null,
       MiniAppWalletAuthPayload
@@ -563,7 +563,7 @@ export class MiniKit {
           const response = await MiniKit.awaitCommand(
             ResponseEvent.MiniAppWalletAuth,
             Command.WalletAuth,
-            () => this.commands.walletAuth(payload)
+            () => this.commands.walletAuth(payload),
           );
           return resolve(response);
         } catch (error) {
@@ -572,7 +572,7 @@ export class MiniKit {
       });
     },
     sendTransaction: async (
-      payload: SendTransactionInput
+      payload: SendTransactionInput,
     ): AsyncHandlerReturn<
       SendTransactionPayload | null,
       MiniAppSendTransactionPayload
@@ -582,7 +582,7 @@ export class MiniKit {
           const response = await MiniKit.awaitCommand(
             ResponseEvent.MiniAppSendTransaction,
             Command.SendTransaction,
-            () => this.commands.sendTransaction(payload)
+            () => this.commands.sendTransaction(payload),
           );
           return resolve(response);
         } catch (error) {
@@ -591,7 +591,7 @@ export class MiniKit {
       });
     },
     signMessage: async (
-      payload: SignMessageInput
+      payload: SignMessageInput,
     ): AsyncHandlerReturn<
       SignMessagePayload | null,
       MiniAppSignMessagePayload
@@ -601,7 +601,7 @@ export class MiniKit {
           const response = await MiniKit.awaitCommand(
             ResponseEvent.MiniAppSignMessage,
             Command.SignMessage,
-            () => this.commands.signMessage(payload)
+            () => this.commands.signMessage(payload),
           );
           return resolve(response);
         } catch (error) {
@@ -610,7 +610,7 @@ export class MiniKit {
       });
     },
     signTypedData: async (
-      payload: SignTypedDataInput
+      payload: SignTypedDataInput,
     ): AsyncHandlerReturn<
       SignTypedDataPayload | null,
       MiniAppSignTypedDataPayload
@@ -620,7 +620,7 @@ export class MiniKit {
           const response = await MiniKit.awaitCommand(
             ResponseEvent.MiniAppSignTypedData,
             Command.SignTypedData,
-            () => this.commands.signTypedData(payload)
+            () => this.commands.signTypedData(payload),
           );
           return resolve(response);
         } catch (error) {
@@ -629,7 +629,7 @@ export class MiniKit {
       });
     },
     shareContacts: async (
-      payload: ShareContactsPayload
+      payload: ShareContactsPayload,
     ): AsyncHandlerReturn<
       ShareContactsPayload | null,
       MiniAppShareContactsPayload
@@ -639,7 +639,7 @@ export class MiniKit {
           const response = await MiniKit.awaitCommand(
             ResponseEvent.MiniAppShareContacts,
             Command.ShareContacts,
-            () => this.commands.shareContacts(payload)
+            () => this.commands.shareContacts(payload),
           );
           return resolve(response);
         } catch (error) {
@@ -649,7 +649,7 @@ export class MiniKit {
     },
 
     requestPermission: async (
-      payload: RequestPermissionInput
+      payload: RequestPermissionInput,
     ): AsyncHandlerReturn<
       RequestPermissionPayload | null,
       MiniAppRequestPermissionPayload
@@ -659,7 +659,7 @@ export class MiniKit {
           const response = await MiniKit.awaitCommand(
             ResponseEvent.MiniAppRequestPermission,
             Command.RequestPermission,
-            () => this.commands.requestPermission(payload)
+            () => this.commands.requestPermission(payload),
           );
           resolve(response);
         } catch (error) {

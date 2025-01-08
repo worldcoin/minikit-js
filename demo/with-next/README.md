@@ -15,7 +15,8 @@ bun dev
 ```
 
 ### Usage
+
 1. Recommended usage to test is to use the corresponding android folder, ask Andy for permission
-2. `pnpm dev` 
+2. `pnpm dev`
 3. `ngrok 3000`
 4. Set the Ngrok url to the ngrok generated url

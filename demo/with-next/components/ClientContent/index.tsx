@@ -1,32 +1,32 @@
-"use client";
+'use client';
 
-import { VerifyAction } from "./VerifyAction";
-import { Pay } from "./Pay";
-import { User } from "./User";
-import { Nav } from "./Nav";
-import { WalletAuth } from "./WalletAuth";
-import { ExternalLinks } from "./ExternalLinks";
-import dynamic from "next/dynamic";
-import { CameraComponent } from "./Camera";
-import { SendTransaction } from "./Transaction";
-import { SignMessage } from "./SignMessage";
-import { SignTypedData } from "./SignTypedMessage";
-import { ShareContacts } from "./ShareContacts";
-import { RequestPermission } from "./RequestPermissions";
 import {
   GetSearchedUsernameResult,
   UsernameSearch,
-} from "@worldcoin/minikit-react";
-import { useState } from "react";
-import Image from "next/image";
+} from '@worldcoin/minikit-react';
+import dynamic from 'next/dynamic';
+import Image from 'next/image';
+import { useState } from 'react';
+import { CameraComponent } from './Camera';
+import { ExternalLinks } from './ExternalLinks';
+import { Nav } from './Nav';
+import { Pay } from './Pay';
+import { RequestPermission } from './RequestPermissions';
+import { ShareContacts } from './ShareContacts';
+import { SignMessage } from './SignMessage';
+import { SignTypedData } from './SignTypedMessage';
+import { SendTransaction } from './Transaction';
+import { User } from './User';
+import { VerifyAction } from './VerifyAction';
+import { WalletAuth } from './WalletAuth';
 
 const VersionsNoSSR = dynamic(
-  () => import("./Versions").then((comp) => comp.Versions),
-  { ssr: false }
+  () => import('./Versions').then((comp) => comp.Versions),
+  { ssr: false },
 );
 
 export const ClientContent = () => {
-  const [searchValue, setSearchValue] = useState("");
+  const [searchValue, setSearchValue] = useState('');
   const [searchResults, setSearchResults] =
     useState<GetSearchedUsernameResult>();
 
@@ -49,7 +49,7 @@ export const ClientContent = () => {
           setSearchedUsernames={setSearchResults}
           className="p-2 border rounded"
           inputProps={{
-            placeholder: "Search usernames...",
+            placeholder: 'Search usernames...',
           }}
         />
 

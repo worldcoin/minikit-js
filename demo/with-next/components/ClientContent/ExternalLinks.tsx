@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from 'next/link';
 
 export const ExternalLinks = () => {
   return (
@@ -20,8 +20,8 @@ export const ExternalLinks = () => {
         <button
           onClick={() => {
             window.open(
-              "https://world.org/mini-app?app_id=app_staging_e387587d26a286fb5bea1d436ba0b2a3&path=features",
-              "_blank"
+              'https://world.org/mini-app?app_id=app_staging_e387587d26a286fb5bea1d436ba0b2a3&path=features',
+              '_blank',
             );
           }}
           className="text-white bg-green-500 hover:bg-blue-300 transition p-4 leading-[1] rounded-lg"
@@ -35,7 +35,7 @@ export const ExternalLinks = () => {
           Valid Subdomain (Link)
         </Link>
         <button
-          onClick={() => window.open("https://docs.worldcoin.org")}
+          onClick={() => window.open('https://docs.worldcoin.org')}
           className="text-white bg-green-500 transition p-4 leading-[1] rounded-lg"
         >
           Valid Subdomain (Button)
@@ -49,7 +49,7 @@ export const ExternalLinks = () => {
         <button
           onClick={() =>
             window.open(
-              "https://worldcoin-developer-portal.eu.auth0.com/u/login/identifier"
+              'https://worldcoin-developer-portal.eu.auth0.com/u/login/identifier',
             )
           }
           className="text-white bg-green-500 transition p-4 leading-[1] rounded-lg"
@@ -58,7 +58,7 @@ export const ExternalLinks = () => {
         </button>
 
         <button
-          onClick={() => window.open("https://google.com", "_blank")}
+          onClick={() => window.open('https://google.com', '_blank')}
           className="text-white bg-red-500 transition p-4 leading-[1] rounded-lg"
         >
           Invalid External Link (Button)

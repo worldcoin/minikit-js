@@ -1,9 +1,9 @@
 // import { validateSendTransactionPayload } from "@worldcoin/minikit-js/core/helpers/transaction/validate-transaction";
 const validate = (payload) => {
-  if (typeof payload === "string") return { isValid: true };
-  if (typeof payload === "object") {
+  if (typeof payload === 'string') return { isValid: true };
+  if (typeof payload === 'object') {
     const isValid = Object.values(payload).every(
-      (value) => validate(value).isValid
+      (value) => validate(value).isValid,
     );
     return { isValid };
   }
@@ -16,14 +16,14 @@ const validate = (payload) => {
 
 export const validateSendTransactionPayload = (payload) => validate(payload);
 
-describe("validateSendTransactionPayload", () => {
-  it("should validate simple string values", () => {
+describe('validateSendTransactionPayload', () => {
+  it('should validate simple string values', () => {
     const payload = {
       transaction: [
         {
-          address: "0x123",
-          functionName: "transfer",
-          args: ["0x456", "1000000000000000000"],
+          address: '0x123',
+          functionName: 'transfer',
+          args: ['0x456', '1000000000000000000'],
         },
       ],
     };
@@ -32,23 +32,23 @@ describe("validateSendTransactionPayload", () => {
     });
   });
 
-  it("should validate nested objects", () => {
+  it('should validate nested objects', () => {
     const payload = {
       transaction: [
         {
-          address: "0x123",
+          address: '0x123',
           abi: [
             {
-              name: "transfer",
-              type: "function",
+              name: 'transfer',
+              type: 'function',
               inputs: [
-                { name: "recipient", type: "address" },
-                { name: "amount", type: "uint256" },
+                { name: 'recipient', type: 'address' },
+                { name: 'amount', type: 'uint256' },
               ],
             },
           ],
-          functionName: "transfer",
-          args: ["0x456", "1000000000000000000"],
+          functionName: 'transfer',
+          args: ['0x456', '1000000000000000000'],
         },
       ],
     };
@@ -57,24 +57,24 @@ describe("validateSendTransactionPayload", () => {
     });
   });
 
-  it("should validate with permit2 data", () => {
+  it('should validate with permit2 data', () => {
     const payload = {
       transaction: [
         {
-          address: "0x123",
-          functionName: "transfer",
-          args: ["0x456", "1000000000000000000"],
+          address: '0x123',
+          functionName: 'transfer',
+          args: ['0x456', '1000000000000000000'],
         },
       ],
       permit2: [
         {
           permitted: {
-            token: "0x789",
-            amount: "1000000000000000000",
+            token: '0x789',
+            amount: '1000000000000000000',
           },
-          spender: "0xabc",
-          nonce: "1",
-          deadline: "1234567890",
+          spender: '0xabc',
+          nonce: '1',
+          deadline: '1234567890',
         },
       ],
     };
@@ -83,13 +83,13 @@ describe("validateSendTransactionPayload", () => {
     });
   });
 
-  it("should reject invalid values like numbers", () => {
+  it('should reject invalid values like numbers', () => {
     const payload = {
       transaction: [
         {
-          address: "0x123",
-          functionName: "transfer",
-          args: [123, "1000000000000000000"], // number instead of string
+          address: '0x123',
+          functionName: 'transfer',
+          args: [123, '1000000000000000000'], // number instead of string
         },
       ],
     };
@@ -98,13 +98,13 @@ describe("validateSendTransactionPayload", () => {
     });
   });
 
-  it("should reject invalid values like booleans", () => {
+  it('should reject invalid values like booleans', () => {
     const payload = {
       transaction: [
         {
-          address: "0x123",
-          functionName: "transfer",
-          args: [true, "1000000000000000000"], // boolean instead of string
+          address: '0x123',
+          functionName: 'transfer',
+          args: [true, '1000000000000000000'], // boolean instead of string
         },
       ],
     };

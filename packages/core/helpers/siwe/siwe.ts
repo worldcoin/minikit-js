@@ -1,29 +1,29 @@
-import { SiweMessage } from "types/wallet-auth";
-import { MiniAppWalletAuthSuccessPayload } from "types/responses";
+import { MiniAppWalletAuthSuccessPayload } from 'types/responses';
+import { SiweMessage } from 'types/wallet-auth';
 import {
-  hashMessage,
-  createPublicClient,
-  http,
-  getContract,
   Client,
+  createPublicClient,
+  getContract,
+  hashMessage,
+  http,
   recoverAddress,
-} from "viem";
-import { worldchain } from "viem/chains";
+} from 'viem';
+import { worldchain } from 'viem/chains';
 
-const PREAMBLE = " wants you to sign in with your Ethereum account:";
-const URI_TAG = "URI: ";
-const VERSION_TAG = "Version: ";
-const CHAIN_TAG = "Chain ID: ";
-const NONCE_TAG = "Nonce: ";
-const IAT_TAG = "Issued At: ";
-const EXP_TAG = "Expiration Time: ";
-const NBF_TAG = "Not Before: ";
-const RID_TAG = "Request ID: ";
-const ERC_191_PREFIX = "\x19Ethereum Signed Message:\n";
+const PREAMBLE = ' wants you to sign in with your Ethereum account:';
+const URI_TAG = 'URI: ';
+const VERSION_TAG = 'Version: ';
+const CHAIN_TAG = 'Chain ID: ';
+const NONCE_TAG = 'Nonce: ';
+const IAT_TAG = 'Issued At: ';
+const EXP_TAG = 'Expiration Time: ';
+const NBF_TAG = 'Not Before: ';
+const RID_TAG = 'Request ID: ';
+const ERC_191_PREFIX = '\x19Ethereum Signed Message:\n';
 
 const tagged = (line, tag) => {
   if (line && line.includes(tag)) {
-    return line.replace(tag, ""); // This removes the exact tag content from the line
+    return line.replace(tag, ''); // This removes the exact tag content from the line
   } else {
     throw new Error(`Missing '${tag}'`);
   }
@@ -31,7 +31,7 @@ const tagged = (line, tag) => {
 
 // TODO: Refactor this into a class
 export const parseSiweMessage = (inputString: string) => {
-  const lines = inputString.split("\n")[Symbol.iterator]();
+  const lines = inputString.split('\n')[Symbol.iterator]();
   const domain = tagged(lines.next()?.value, PREAMBLE);
   const address = lines.next()?.value;
   lines.next();
@@ -62,7 +62,7 @@ export const parseSiweMessage = (inputString: string) => {
   }
 
   if (lines.next().done === false) {
-    throw new Error("Extra lines in the input");
+    throw new Error('Extra lines in the input');
   }
 
   const siweMessageData: SiweMessage = {
@@ -83,7 +83,7 @@ export const parseSiweMessage = (inputString: string) => {
 };
 
 export const generateSiweMessage = (siweMessageData: SiweMessage) => {
-  let siweMessage = "";
+  let siweMessage = '';
 
   if (siweMessageData.scheme) {
     siweMessage += `${siweMessageData.scheme}://${siweMessageData.domain} wants you to sign in with your Ethereum account:\n`;
@@ -95,15 +95,15 @@ export const generateSiweMessage = (siweMessageData: SiweMessage) => {
   if (siweMessageData.address) {
     siweMessage += `${siweMessageData.address}\n`;
   } else {
-    siweMessage += "{address}\n";
+    siweMessage += '{address}\n';
   }
-  siweMessage += "\n";
+  siweMessage += '\n';
 
   if (siweMessageData.statement) {
     siweMessage += `${siweMessageData.statement}\n`;
   }
 
-  siweMessage += "\n";
+  siweMessage += '\n';
 
   siweMessage += `URI: ${siweMessageData.uri}\n`;
   siweMessage += `Version: ${siweMessageData.version}\n`;
@@ -130,21 +130,21 @@ export const SAFE_CONTRACT_ABI = [
   {
     inputs: [
       {
-        internalType: "address",
-        name: "owner",
-        type: "address",
+        internalType: 'address',
+        name: 'owner',
+        type: 'address',
       },
     ],
-    name: "isOwner",
+    name: 'isOwner',
     outputs: [
       {
-        internalType: "bool",
-        name: "",
-        type: "bool",
+        internalType: 'bool',
+        name: '',
+        type: 'bool',
       },
     ],
-    stateMutability: "view",
-    type: "function",
+    stateMutability: 'view',
+    type: 'function',
   },
 ];
 
@@ -154,10 +154,10 @@ export const verifySiweMessage = async (
   nonce: string,
   statement?: string,
   requestId?: string,
-  userProvider?: Client
+  userProvider?: Client,
 ) => {
-  if (typeof window !== "undefined") {
-    throw new Error("Verify can only be called in the backend");
+  if (typeof window !== 'undefined') {
+    throw new Error('Verify can only be called in the backend');
   }
 
   const { message, signature, address } = payload;
@@ -167,32 +167,32 @@ export const verifySiweMessage = async (
   if (siweMessageData.expiration_time) {
     const expirationTime = new Date(siweMessageData.expiration_time);
     if (expirationTime < new Date()) {
-      throw new Error("Expired message");
+      throw new Error('Expired message');
     }
   }
 
   if (siweMessageData.not_before) {
     const notBefore = new Date(siweMessageData.not_before);
     if (notBefore > new Date()) {
-      throw new Error("Not Before time has not passed");
+      throw new Error('Not Before time has not passed');
     }
   }
 
   if (nonce && siweMessageData.nonce !== nonce) {
     throw new Error(
-      `Nonce mismatch. Got: ${siweMessageData.nonce}, Expected: ${nonce}`
+      `Nonce mismatch. Got: ${siweMessageData.nonce}, Expected: ${nonce}`,
     );
   }
 
   if (statement && siweMessageData.statement !== statement) {
     throw new Error(
-      `Statement mismatch. Got: ${siweMessageData.statement}, Expected: ${statement}`
+      `Statement mismatch. Got: ${siweMessageData.statement}, Expected: ${statement}`,
     );
   }
 
   if (requestId && siweMessageData.request_id !== requestId) {
     throw new Error(
-      `Request ID mismatch. Got: ${siweMessageData.request_id}, Expected: ${requestId}`
+      `Request ID mismatch. Got: ${siweMessageData.request_id}, Expected: ${requestId}`,
     );
   }
 
@@ -215,15 +215,15 @@ export const verifySiweMessage = async (
     });
 
     if (recoveredAddress !== address) {
-      throw new Error("Signature verification failed");
+      throw new Error('Signature verification failed');
     }
 
     const isOwner = await contract.read.isOwner([recoveredAddress]);
     if (!isOwner) {
-      throw new Error("Signature verification failed");
+      throw new Error('Signature verification failed');
     }
   } catch (error) {
-    throw new Error("Signature verification failed");
+    throw new Error('Signature verification failed');
   }
   return { isValid: true, siweMessageData: siweMessageData };
 };

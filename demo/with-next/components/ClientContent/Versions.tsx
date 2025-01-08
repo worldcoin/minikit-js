@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
 import {
   MiniKit,
   MiniKitInstallErrorCodes,
   MiniKitInstallErrorMessage,
-} from "@worldcoin/minikit-js";
+} from '@worldcoin/minikit-js';
 
-const appId = "your-app-id";
+const appId = 'your-app-id';
 
 export const Versions = () => {
   const isValid = () => {
     if (
-      typeof window === "undefined" ||
-      typeof window.WorldApp === "undefined"
+      typeof window === 'undefined' ||
+      typeof window.WorldApp === 'undefined'
     ) {
-      return { isValid: false, error: "window.WorldApp is undefined" };
+      return { isValid: false, error: 'window.WorldApp is undefined' };
     }
 
     try {
@@ -31,7 +31,7 @@ export const Versions = () => {
     } catch (error) {
       return {
         isValid: false,
-        error: "Something went wrong on version validation",
+        error: 'Something went wrong on version validation',
       };
     }
   };

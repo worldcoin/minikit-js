@@ -1,23 +1,23 @@
-export { MiniKit } from "./minikit";
+export { MiniKit } from './minikit';
 
-export * from "./types/responses";
-export * from "./types/commands";
-export * from "./types/errors";
-export * from "./types/payment";
-export * from "./types/wallet-auth";
+export * from './types/commands';
+export * from './types/errors';
+export * from './types/payment';
+export * from './types/responses';
+export * from './types/wallet-auth';
 
-export { tokenToDecimals } from "helpers/payment/client";
+export { tokenToDecimals } from 'helpers/payment/client';
 
-export { VerificationLevel, type ISuccessResult } from "@worldcoin/idkit-core";
+export { VerificationLevel, type ISuccessResult } from '@worldcoin/idkit-core';
 export {
   verifyCloudProof,
   type IVerifyResponse,
-} from "@worldcoin/idkit-core/backend";
+} from '@worldcoin/idkit-core/backend';
 
 export {
-  parseSiweMessage,
   SAFE_CONTRACT_ABI,
+  parseSiweMessage,
   verifySiweMessage,
-} from "helpers/siwe/siwe";
+} from 'helpers/siwe/siwe';
 
-export { getIsUserVerified } from "helpers/address-book";
+export { getIsUserVerified } from 'helpers/address-book';

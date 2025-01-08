@@ -28,7 +28,7 @@ export type GetSearchedUsernameResult = Awaited<
 
 const getSearchedUsername = async (username: string) => {
   const response = await fetch(
-    `https://usernames.worldcoin.org/api/v1/search/${username}`
+    `https://usernames.worldcoin.org/api/v1/search/${username}`,
   );
 
   if (response.status === 200) {
@@ -36,7 +36,7 @@ const getSearchedUsername = async (username: string) => {
     return { status: response.status, data: json };
   }
 
-  return { status: response.status, error: "Error fetching data" };
+  return { status: response.status, error: 'Error fetching data' };
 };
 
 type Props = {
@@ -69,7 +69,7 @@ export const UsernameSearch = ({
 
       setSearchedUsernames(data);
     },
-    DEBOUNCE_DELAY_MS
+    DEBOUNCE_DELAY_MS,
   );
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,7 +82,7 @@ export const UsernameSearch = ({
       type="text"
       value={value}
       onChange={onChange}
-      className={className || "rounded-md border-black border-2"}
+      className={className || 'rounded-md border-black border-2'}
       {...inputProps}
     />
   );

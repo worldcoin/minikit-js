@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useCallback, useState } from "react";
+import { ChangeEvent, useCallback, useState } from 'react';
 
 export const CameraComponent = () => {
   const [isMicOn, setIsMicOn] = useState(false);
@@ -11,11 +11,11 @@ export const CameraComponent = () => {
         return;
       }
     },
-    []
+    [],
   );
 
   const playSound = useCallback(() => {
-    const audio = new Audio("/money.mp3");
+    const audio = new Audio('/money.mp3');
     audio.play();
   }, []);
 
@@ -36,7 +36,7 @@ export const CameraComponent = () => {
         setStream(newStream);
         setIsMicOn(true);
       } catch (error) {
-        console.error("Error accessing microphone:", error);
+        console.error('Error accessing microphone:', error);
       }
     }
   }, [isMicOn, stream]);
@@ -46,7 +46,7 @@ export const CameraComponent = () => {
       <p className="font-bold text-lg">Permissions</p>
       <label
         className={
-          "items-center justify-center rounded-lg bg-2f2b43/5 hover:bg-2f2b43/10"
+          'items-center justify-center rounded-lg bg-2f2b43/5 hover:bg-2f2b43/10'
         }
       >
         <input
@@ -54,7 +54,7 @@ export const CameraComponent = () => {
           accept="image/*"
           className="hidden"
           capture="user"
-          onChange={(event) => handleChange(event, "camera")}
+          onChange={(event) => handleChange(event, 'camera')}
         />
         <div className="grid justify-items-center gap-y-2 bg-green-500 p-4 rounded-lg text-white">
           Open Camera
@@ -65,7 +65,7 @@ export const CameraComponent = () => {
       </button>
       <label
         className={
-          " items-center justify-center rounded-lg bg-2f2b43/5 hover:bg-2f2b43/10"
+          ' items-center justify-center rounded-lg bg-2f2b43/5 hover:bg-2f2b43/10'
         }
       >
         <input
@@ -73,7 +73,7 @@ export const CameraComponent = () => {
           accept="video/*"
           className="hidden"
           capture="user"
-          onChange={(event) => handleChange(event, "camera")}
+          onChange={(event) => handleChange(event, 'camera')}
         />
         <div className="grid justify-items-center gap-y-2 bg-green-500 p-4 rounded-lg text-white">
           Open Video
@@ -85,7 +85,7 @@ export const CameraComponent = () => {
           accept="image/*"
           className="hidden"
           multiple
-          onChange={(event) => handleChange(event, "gallery")}
+          onChange={(event) => handleChange(event, 'gallery')}
         />
         <div className="grid justify-items-center bg-green-500 p-4 rounded-lg text-white">
           Open Gallery
@@ -96,7 +96,7 @@ export const CameraComponent = () => {
           className="grid justify-items-center bg-green-500 p-4 rounded-lg text-white w-full"
           onClick={handleMicAccess}
         >
-          {isMicOn ? "Stop microphone" : "Activate microphone"}
+          {isMicOn ? 'Stop microphone' : 'Activate microphone'}
         </button>
       </label>
       <label className="items-center justify-center rounded-lg bg-2f2b43/5 hover:bg-2f2b43/10">
