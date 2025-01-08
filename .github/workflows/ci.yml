@@ -28,3 +28,14 @@ jobs:
 
       - name: Run tests
         run: pnpm test
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-20.04
+    defaults:
+      run:
+        working-directory: packages/core
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run lint
+        run: pnpm lint
