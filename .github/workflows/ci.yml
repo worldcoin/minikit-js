@@ -32,9 +32,7 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-20.04
-    defaults:
-      run:
-        working-directory: packages/core
+
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
