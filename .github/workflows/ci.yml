@@ -47,7 +47,6 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
-        working-directory: ./
         run: pnpm install --frozen-lockfile
 
       - name: Run lint
@@ -70,7 +69,6 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
-        working-directory: ./
         run: pnpm install --frozen-lockfile
 
       - name: Run typecheck
