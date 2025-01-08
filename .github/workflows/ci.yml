@@ -37,6 +37,9 @@ jobs:
         working-directory: packages/core
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.9.0
       - name: Run lint
         run: pnpm lint
 
@@ -45,5 +48,8 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.9.0
       - name: Run typecheck
         run: pnpm --loglevel debug --recursive type-check
