@@ -19,7 +19,7 @@
       "@/*": ["."]
     }
   },
-  "include": ["."],
+  "include": [".", "jest.config.ts"],
   "exclude": ["node_modules/**", "build"],
   "watchOptions": {
     "watchFile": "useFsEvents",

@@ -1,4 +1,5 @@
-import { parseSiweMessage, verifySiweMessage } from "@worldcoin/minikit-js";
+import { verifySiweMessage, parseSiweMessage } from "helpers/siwe/siwe";
+import { MiniAppWalletAuthSuccessPayload } from "types/responses";
 
 const siweMessage = `https://test.com wants you to sign in with your Ethereum account:\n\
 {{address}}\n\n\
@@ -68,11 +69,12 @@ describe("Test SIWE Message Verification", () => {
   });
 
   test("Verify SIWE Message with invalid signature", async () => {
-    const payload = {
+    const payload: MiniAppWalletAuthSuccessPayload = {
       status: "success",
       message: signatureSiweMessage(new Date(), 7, -1),
       signature: "random_signature",
       address: "0xd809de3086ea4f53ed3979cead25e1ff72b564a3",
+      version: 1,
     };
     await expect(
       verifySiweMessage(payload, "814434bd-ed2c-412e-aa2c-c4b266a42027")
@@ -80,11 +82,12 @@ describe("Test SIWE Message Verification", () => {
   });
 
   test("Verify SIWE Message with invalid address", async () => {
-    const payload = {
-      status: "success",
+    const payload: MiniAppWalletAuthSuccessPayload = {
+      status: "success" as const,
       message: signatureSiweMessage(new Date(), 7, -1),
       signature: signature,
       address: "0x0000000000000000000000000000000000000000",
+      version: 1,
     };
 
     await expect(
