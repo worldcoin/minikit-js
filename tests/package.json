@@ -1,14 +1,6 @@
 {
-  "name": "minikit-tests",
-  "version": "1.0.0",
-  "description": "",
-  "main": "siwe.test.js",
-  "scripts": {
-    "test": "jest"
-  },
-  "keywords": [],
   "author": "",
-  "license": "ISC",
+  "description": "",
   "devDependencies": {
     "@babel/core": "^7.24.5",
     "@babel/preset-env": "^7.24.5",
@@ -16,5 +8,13 @@
     "@worldcoin/minikit-js": "workspace:*",
     "babel-jest": "^29.7.0",
     "jest": "^29.7.0"
-  }
+  },
+  "keywords": [],
+  "license": "ISC",
+  "main": "siwe.test.js",
+  "name": "minikit-tests",
+  "scripts": {
+    "test": "jest --watchAll"
+  },
+  "version": "1.0.0"
 }

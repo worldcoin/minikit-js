@@ -6,6 +6,7 @@ import {
   http,
   getContract,
   Client,
+  recoverAddress,
 } from "viem";
 import { worldchain } from "viem/chains";
 
@@ -127,15 +128,23 @@ export const generateSiweMessage = (siweMessageData: SiweMessage) => {
 
 export const SAFE_CONTRACT_ABI = [
   {
-    name: "checkSignatures",
-    type: "function",
-    stateMutability: "view",
     inputs: [
-      { name: "dataHash", type: "bytes32" },
-      { name: "data", type: "bytes" },
-      { name: "signature", type: "bytes" },
+      {
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
     ],
-    outputs: [],
+    name: "isOwner",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
   },
 ];
 
@@ -192,7 +201,6 @@ export const verifySiweMessage = async (
     userProvider ||
     createPublicClient({ chain: worldchain, transport: http() });
   const signedMessage = `${ERC_191_PREFIX}${message.length}${message}`;
-  const messageBytes = Buffer.from(signedMessage, "utf8").toString("hex");
   const hashedMessage = hashMessage(signedMessage);
   const contract = getContract({
     address: address as `0x${string}`,
@@ -201,11 +209,19 @@ export const verifySiweMessage = async (
   });
 
   try {
-    await contract.read.checkSignatures([
-      hashedMessage,
-      `0x${messageBytes}`,
-      `0x${signature}`,
-    ]);
+    const recoveredAddress = await recoverAddress({
+      hash: hashedMessage,
+      signature: signature as `0x${string}`,
+    });
+
+    if (recoveredAddress !== address) {
+      throw new Error("Signature verification failed");
+    }
+
+    const isOwner = await contract.read.isOwner([recoveredAddress]);
+    if (!isOwner) {
+      throw new Error("Signature verification failed");
+    }
   } catch (error) {
     throw new Error("Signature verification failed");
   }
