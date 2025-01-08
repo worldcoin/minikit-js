@@ -14,7 +14,7 @@
   "main": "siwe.test.js",
   "name": "minikit-tests",
   "scripts": {
-    "test": "jest --watchAll"
+    "test": "jest"
   },
   "version": "1.0.0"
 }
