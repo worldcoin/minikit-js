@@ -45,8 +45,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: List installed packages
-        run: pnpm list
+      - name: Debug workspace
+        run: |
+          echo "Workspace packages:"
+          pnpm recursive list
+          echo "Package contents:"
+          ls -la packages/react/node_modules/@worldcoin || true
 
       - name: Run typecheck
         run: pnpm --loglevel debug --recursive type-check
