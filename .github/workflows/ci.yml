@@ -46,7 +46,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build
-        run: turbo run build
+        run: pnpm turbo run build
 
       - name: Run typecheck
         run: pnpm type-check
