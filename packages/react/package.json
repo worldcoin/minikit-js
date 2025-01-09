@@ -47,7 +47,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@worldcoin/minikit-js": "workspace:^1.4.0",
+    "@worldcoin/minikit-js": "workspace:*",
     "abitype": "^1.0.6",
     "turbo": "^2.3.3"
   },
