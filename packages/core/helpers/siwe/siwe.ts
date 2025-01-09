@@ -211,7 +211,7 @@ export const verifySiweMessage = async (
   try {
     const recoveredAddress = await recoverAddress({
       hash: hashedMessage,
-      signature: signature as `0x${string}`,
+      signature: `0x${signature}`,
     });
 
     if (recoveredAddress !== address) {
