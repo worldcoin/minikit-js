@@ -1,6 +1,3 @@
-import { useCallback, useEffect, useState } from "react";
-import { validateSchema } from "./helpers/validate-schema";
-import * as yup from "yup";
 import {
   MiniKit,
   PayCommandInput,
@@ -8,11 +5,14 @@ import {
   ResponseEvent,
   Tokens,
   tokenToDecimals,
-} from "@worldcoin/minikit-js";
+} from '@worldcoin/minikit-js';
+import { useCallback, useEffect, useState } from 'react';
+import * as yup from 'yup';
+import { validateSchema } from './helpers/validate-schema';
 
 const paymentSuccessPayloadSchema = yup.object({
-  status: yup.string<"success">().oneOf(["success"]),
-  transaction_status: yup.string<"submitted">().oneOf(["submitted"]),
+  status: yup.string<'success'>().oneOf(['success']),
+  transaction_status: yup.string<'submitted'>().oneOf(['submitted']),
   transaction_id: yup.string().required(),
   reference: yup.string().required(),
   from: yup.string().optional(),
@@ -25,7 +25,7 @@ const paymentErrorPayloadSchema = yup.object({
     .string<PaymentErrorCodes>()
     .oneOf(Object.values(PaymentErrorCodes))
     .required(),
-  status: yup.string<"error">().equals(["error"]).required(),
+  status: yup.string<'error'>().equals(['error']).required(),
 });
 
 export const Pay = () => {
@@ -47,27 +47,27 @@ export const Pay = () => {
     }
 
     MiniKit.subscribe(ResponseEvent.MiniAppPayment, async (payload) => {
-      console.log("MiniAppPayment, SUBSCRIBE PAYLOAD", payload);
+      console.log('MiniAppPayment, SUBSCRIBE PAYLOAD', payload);
 
-      if (payload.status === "error") {
+      if (payload.status === 'error') {
         const errorMessage = await validateSchema(
           paymentErrorPayloadSchema,
-          payload
+          payload,
         );
 
         if (!errorMessage) {
-          setPaymentPayloadValidationMessage("Payload is valid");
+          setPaymentPayloadValidationMessage('Payload is valid');
         } else {
           setPaymentPayloadValidationMessage(errorMessage);
         }
       } else {
         const errorMessage = await validateSchema(
           paymentSuccessPayloadSchema,
-          payload
+          payload,
         );
 
         if (!errorMessage) {
-          setPaymentPayloadValidationMessage("Payload is valid");
+          setPaymentPayloadValidationMessage('Payload is valid');
         } else {
           setPaymentPayloadValidationMessage(errorMessage);
         }
@@ -110,7 +110,7 @@ export const Pay = () => {
               },
             ]
           : tokenPayload,
-        description: "Test example payment for minikit on Worldchain",
+        description: 'Test example payment for minikit on Worldchain',
         reference: new Date().toISOString(),
       };
 
@@ -120,7 +120,7 @@ export const Pay = () => {
         payload,
       });
     },
-    []
+    [],
   );
 
   return (
@@ -141,7 +141,7 @@ export const Pay = () => {
           <button
             className="bg-black text-white rounded-lg p-4 w-full"
             onClick={() =>
-              onPayClick(0.1, "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045")
+              onPayClick(0.1, '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045')
             }
           >
             Pay (USDCE + WLD)
@@ -151,8 +151,8 @@ export const Pay = () => {
             onClick={() =>
               onPayClick(
                 0.1,
-                "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-                Tokens.WLD
+                '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
+                Tokens.WLD,
               )
             }
           >
@@ -163,8 +163,8 @@ export const Pay = () => {
             onClick={() =>
               onPayClick(
                 0.1,
-                "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-                Tokens.USDCE
+                '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
+                Tokens.USDCE,
               )
             }
           >
@@ -187,7 +187,7 @@ export const Pay = () => {
         <div className="grid gap-y-2">
           <p>Validation message:</p>
           <p className="bg-gray-300 p-2">
-            {paymentPayloadValidationMessage ?? "No validation"}
+            {paymentPayloadValidationMessage ?? 'No validation'}
           </p>
         </div>
       </div>

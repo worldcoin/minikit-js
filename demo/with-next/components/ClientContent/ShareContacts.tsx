@@ -1,16 +1,16 @@
 import {
-  MiniKit,
-  ShareContactsErrorCodes,
-  ResponseEvent,
   Contact,
+  MiniKit,
+  ResponseEvent,
+  ShareContactsErrorCodes,
   ShareContactsPayload,
-} from "@worldcoin/minikit-js";
-import { useCallback, useEffect, useState } from "react";
-import { validateSchema } from "./helpers/validate-schema";
-import * as yup from "yup";
+} from '@worldcoin/minikit-js';
+import { useCallback, useEffect, useState } from 'react';
+import * as yup from 'yup';
+import { validateSchema } from './helpers/validate-schema';
 
 const shareContactsSuccessPayloadSchema = yup.object({
-  status: yup.string<"success">().equals(["success"]).required(),
+  status: yup.string<'success'>().equals(['success']).required(),
   version: yup.number().required(),
   contacts: yup.array().of(yup.object<Contact>().required()),
 });
@@ -20,7 +20,7 @@ const shareContactsErrorPayloadSchema = yup.object({
     .string<ShareContactsErrorCodes>()
     .oneOf(Object.values(ShareContactsErrorCodes))
     .required(),
-  status: yup.string<"error">().equals(["error"]).required(),
+  status: yup.string<'error'>().equals(['error']).required(),
   version: yup.number().required(),
 });
 
@@ -45,28 +45,28 @@ export const ShareContacts = () => {
     }
 
     MiniKit.subscribe(ResponseEvent.MiniAppShareContacts, async (payload) => {
-      console.log("MiniAppShareContacts, SUBSCRIBE PAYLOAD", payload);
+      console.log('MiniAppShareContacts, SUBSCRIBE PAYLOAD', payload);
       setShareContactsAppPayload(JSON.stringify(payload, null, 2));
-      if (payload.status === "error") {
+      if (payload.status === 'error') {
         const errorMessage = await validateSchema(
           shareContactsErrorPayloadSchema,
-          payload
+          payload,
         );
 
         if (!errorMessage) {
-          setShareContactsPayloadValidationMessage("Payload is valid");
+          setShareContactsPayloadValidationMessage('Payload is valid');
         } else {
           setShareContactsPayloadValidationMessage(errorMessage);
         }
       } else {
         const errorMessage = await validateSchema(
           shareContactsSuccessPayloadSchema,
-          payload
+          payload,
         );
 
         // This checks if the response format is correct
         if (!errorMessage) {
-          setShareContactsPayloadValidationMessage("Payload is valid");
+          setShareContactsPayloadValidationMessage('Payload is valid');
         } else {
           setShareContactsPayloadValidationMessage(errorMessage);
         }
@@ -89,10 +89,10 @@ export const ShareContacts = () => {
       setSentShareContactsPayload({
         payload,
       });
-      console.log("payload", payload);
+      console.log('payload', payload);
       setTempInstallFix((prev) => prev + 1);
     },
-    []
+    [],
   );
 
   return (
@@ -124,7 +124,7 @@ export const ShareContacts = () => {
         <div className="grid gap-4 grid-cols-2">
           <button
             className="bg-black text-white rounded-lg p-4 w-full"
-            onClick={() => onShareContacts(false, "hello join worldcoin!")}
+            onClick={() => onShareContacts(false, 'hello join worldcoin!')}
           >
             Share Contacts Invite Message
           </button>
@@ -145,7 +145,7 @@ export const ShareContacts = () => {
         <div className="grid gap-y-2">
           <p>Response Validation:</p>
           <p className="bg-gray-300 p-2">
-            {shareContactsPayloadValidationMessage ?? "No validation"}
+            {shareContactsPayloadValidationMessage ?? 'No validation'}
           </p>
         </div>
       </div>

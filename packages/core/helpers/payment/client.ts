@@ -1,5 +1,5 @@
-import { PayCommandInput } from "types/commands";
-import { TokenDecimals, Tokens } from "types/payment";
+import { PayCommandInput } from 'types/commands';
+import { TokenDecimals, Tokens } from 'types/payment';
 
 // This is a helper function to convert token amount to decimals for payment
 // Amount should be in expected amount ie $25.12 should be 25.12
@@ -19,15 +19,16 @@ export const tokenToDecimals = (amount: number, token: Tokens): number => {
 export const validatePaymentPayload = (payload: PayCommandInput): boolean => {
   if (
     payload.tokens.some(
-      (token) => token.symbol == "USDCE" && parseFloat(token.token_amount) < 0.1
+      (token) =>
+        token.symbol == 'USDCE' && parseFloat(token.token_amount) < 0.1,
     )
   ) {
-    console.error("USDCE amount should be greater than $0.1");
+    console.error('USDCE amount should be greater than $0.1');
     return false; // reject
   }
 
   if (payload.reference.length > 36) {
-    console.error("Reference must not exceed 36 characters");
+    console.error('Reference must not exceed 36 characters');
     return false;
   }
 

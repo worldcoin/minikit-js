@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { MiniKit } from "@worldcoin/minikit-js";
-import { useEffect, ReactNode } from "react";
+import { MiniKit } from '@worldcoin/minikit-js';
+import { ReactNode, useEffect } from 'react';
 
-const appId = "your-app-id";
+const appId = 'your-app-id';
 
 export const MiniKitProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {

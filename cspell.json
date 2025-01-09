@@ -12,5 +12,5 @@
     "yaml",
     "json"
   ],
-  "words": ["idkit", "merkle", "OIDC", "SIWE", "USDCE"]
+  "words": ["idkit", "merkle", "OIDC", "SIWE", "USDCE", "viem"]
 }

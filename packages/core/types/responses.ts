@@ -1,4 +1,5 @@
-import { Network } from "./payment";
+import { VerificationLevel } from '@worldcoin/idkit-core';
+import { Permission } from './commands';
 import {
   PaymentErrorCodes,
   RequestPermissionErrorCodes,
@@ -9,23 +10,22 @@ import {
   VerificationErrorCodes,
   WalletAuthErrorCodes,
   WalletAuthErrorMessage,
-} from "./errors";
-import { VerificationLevel } from "@worldcoin/idkit-core";
-import { Permission } from "./commands";
+} from './errors';
+import { Network } from './payment';
 
 export enum ResponseEvent {
-  MiniAppVerifyAction = "miniapp-verify-action",
-  MiniAppPayment = "miniapp-payment",
-  MiniAppWalletAuth = "miniapp-wallet-auth",
-  MiniAppSendTransaction = "miniapp-send-transaction",
-  MiniAppSignMessage = "miniapp-sign-message",
-  MiniAppSignTypedData = "miniapp-sign-typed-data",
-  MiniAppShareContacts = "miniapp-share-contacts",
-  MiniAppRequestPermission = "miniapp-request-permission",
+  MiniAppVerifyAction = 'miniapp-verify-action',
+  MiniAppPayment = 'miniapp-payment',
+  MiniAppWalletAuth = 'miniapp-wallet-auth',
+  MiniAppSendTransaction = 'miniapp-send-transaction',
+  MiniAppSignMessage = 'miniapp-sign-message',
+  MiniAppSignTypedData = 'miniapp-sign-typed-data',
+  MiniAppShareContacts = 'miniapp-share-contacts',
+  MiniAppRequestPermission = 'miniapp-request-permission',
 }
 
 export type MiniAppVerifyActionSuccessPayload = {
-  status: "success";
+  status: 'success';
   proof: string;
   merkle_root: string;
   nullifier_hash: string;
@@ -34,7 +34,7 @@ export type MiniAppVerifyActionSuccessPayload = {
 };
 
 export type MiniAppVerifyActionErrorPayload = {
-  status: "error";
+  status: 'error';
   error_code: VerificationErrorCodes;
   version: number;
 };
@@ -44,8 +44,8 @@ export type MiniAppVerifyActionPayload =
   | MiniAppVerifyActionErrorPayload;
 
 export type MiniAppPaymentSuccessPayload = {
-  status: "success";
-  transaction_status: "submitted";
+  status: 'success';
+  transaction_status: 'submitted';
   transaction_id: string;
   reference: string;
   from: string;
@@ -55,7 +55,7 @@ export type MiniAppPaymentSuccessPayload = {
 };
 
 export type MiniAppPaymentErrorPayload = {
-  status: "error";
+  status: 'error';
   error_code: PaymentErrorCodes;
   version: number;
 };
@@ -65,7 +65,7 @@ export type MiniAppPaymentPayload =
   | MiniAppPaymentErrorPayload;
 
 export type MiniAppWalletAuthSuccessPayload = {
-  status: "success";
+  status: 'success';
   message: string;
   signature: string;
   address: string;
@@ -73,7 +73,7 @@ export type MiniAppWalletAuthSuccessPayload = {
 };
 
 export type MiniAppWalletAuthErrorPayload = {
-  status: "error";
+  status: 'error';
   error_code: WalletAuthErrorCodes;
   details: (typeof WalletAuthErrorMessage)[WalletAuthErrorCodes];
   version: number;
@@ -84,8 +84,8 @@ export type MiniAppWalletAuthPayload =
   | MiniAppWalletAuthErrorPayload;
 
 export type MiniAppSendTransactionSuccessPayload = {
-  status: "success";
-  transaction_status: "submitted";
+  status: 'success';
+  transaction_status: 'submitted';
   transaction_id: string;
   reference: string;
   from: string;
@@ -95,7 +95,7 @@ export type MiniAppSendTransactionSuccessPayload = {
 };
 
 export type MiniAppSendTransactionErrorPayload = {
-  status: "error";
+  status: 'error';
   error_code: SendTransactionErrorCodes;
   details?: Record<string, any>;
   version: number;
@@ -106,14 +106,14 @@ export type MiniAppSendTransactionPayload =
   | MiniAppSendTransactionErrorPayload;
 
 export type MiniAppSignMessageSuccessPayload = {
-  status: "success";
+  status: 'success';
   signature: string;
   address: string;
   version: number;
 };
 
 export type MiniAppSignMessageErrorPayload = {
-  status: "error";
+  status: 'error';
   error_code: SignMessageErrorCodes;
   details?: Record<string, any>;
   version: number;
@@ -124,14 +124,14 @@ export type MiniAppSignMessagePayload =
   | MiniAppSignMessageErrorPayload;
 
 export type MiniAppSignTypedDataSuccessPayload = {
-  status: "success";
+  status: 'success';
   signature: string;
   address: string;
   version: number;
 };
 
 export type MiniAppSignTypedDataErrorPayload = {
-  status: "error";
+  status: 'error';
   error_code: SignTypedDataErrorCodes;
   details?: Record<string, any>;
   version: number;
@@ -149,14 +149,14 @@ export type Contact = {
 };
 
 export type MiniAppShareContactsSuccessPayload = {
-  status: "success";
+  status: 'success';
   contacts: Contact[];
   version: number;
   timestamp: string;
 };
 
 export type MiniAppShareContactsErrorPayload = {
-  status: "error";
+  status: 'error';
   error_code: ShareContactsErrorCodes;
   version: number;
 };
@@ -167,14 +167,14 @@ export type MiniAppShareContactsPayload =
 
 // Anchor: Request Permission Payload
 export type MiniAppRequestPermissionSuccessPayload = {
-  status: "success";
+  status: 'success';
   permission: Permission;
   timestamp: string;
   version: number;
 };
 
 export type MiniAppRequestPermissionErrorPayload = {
-  status: "error";
+  status: 'error';
   error_code: RequestPermissionErrorCodes;
   description: string;
   version: number;
@@ -201,5 +201,5 @@ export type EventPayload<T extends ResponseEvent = ResponseEvent> =
 export type EventHandler<E extends ResponseEvent = ResponseEvent> = <
   T extends EventPayload<E>,
 >(
-  data: T
+  data: T,
 ) => void;

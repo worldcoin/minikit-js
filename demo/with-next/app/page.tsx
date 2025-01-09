@@ -1,7 +1,7 @@
-import { ClientContent } from "@/components/ClientContent";
+import { ClientContent } from '@/components/ClientContent';
 
 const Home = async () => {
-  console.log("Server Rendering Works!");
+  console.log('Server Rendering Works!');
   return (
     <div className="bg-white text-black min-h-full p-5">
       <ClientContent />

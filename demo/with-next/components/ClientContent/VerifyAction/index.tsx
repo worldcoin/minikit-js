@@ -1,21 +1,21 @@
 import {
+  ISuccessResult,
   MiniKit,
   ResponseEvent,
   VerificationErrorCodes,
-  VerifyCommandInput,
   VerificationLevel,
-  ISuccessResult,
-} from "@worldcoin/minikit-js";
-import { useCallback, useEffect, useState } from "react";
-import * as yup from "yup";
-import { validateSchema } from "../helpers/validate-schema";
-import { verifyProof } from "./verify-cloud-proof";
-import { clsx } from "clsx";
+  VerifyCommandInput,
+} from '@worldcoin/minikit-js';
+import { clsx } from 'clsx';
+import { useCallback, useEffect, useState } from 'react';
+import * as yup from 'yup';
+import { validateSchema } from '../helpers/validate-schema';
+import { verifyProof } from './verify-cloud-proof';
 
 const verifyActionSuccessPayloadSchema = yup.object({
   status: yup
-    .string<"success" | "error">()
-    .oneOf(["success", "error"])
+    .string<'success' | 'error'>()
+    .oneOf(['success', 'error'])
     .required(),
   proof: yup.string().required(),
   merkle_root: yup.string().required(),
@@ -27,7 +27,7 @@ const verifyActionSuccessPayloadSchema = yup.object({
 });
 
 const verifyActionErrorPayloadSchema = yup.object({
-  status: yup.string().equals(["error"]).required(),
+  status: yup.string().equals(['error']).required(),
   error_code: yup
     .string<VerificationErrorCodes>()
     .oneOf(Object.values(VerificationErrorCodes))
@@ -55,7 +55,7 @@ export const VerifyAction = () => {
   > | null>(null);
 
   const [lastUsedAppId, setLastUsedAppId] = useState<`app_${string}` | null>(
-    null
+    null,
   );
 
   const [lastUsedAction, setLastUsedAction] = useState<string | null>(null);
@@ -66,12 +66,12 @@ export const VerifyAction = () => {
     }
 
     MiniKit.subscribe(ResponseEvent.MiniAppVerifyAction, async (payload) => {
-      console.log("MiniAppVerifyAction, SUBSCRIBE PAYLOAD", payload);
+      console.log('MiniAppVerifyAction, SUBSCRIBE PAYLOAD', payload);
 
-      if (payload.status === "error") {
+      if (payload.status === 'error') {
         const errorMessage = await validateSchema(
           verifyActionErrorPayloadSchema,
-          payload
+          payload,
         );
         if (errorMessage) {
           return setVerifyActionAppPayloadValidationMessage(errorMessage);
@@ -83,25 +83,25 @@ export const VerifyAction = () => {
 
       const errorMessage = await validateSchema(
         verifyActionSuccessPayloadSchema,
-        payload
+        payload,
       );
 
       if (errorMessage) {
         return setVerifyActionAppPayloadValidationMessage(errorMessage);
       }
 
-      setVerifyActionAppPayloadValidationMessage("Payload is valid");
+      setVerifyActionAppPayloadValidationMessage('Payload is valid');
       setVerifyActionAppPayload(payload);
 
       if (!lastUsedAppId || !lastUsedAction) {
-        return console.log("lastUsedAppId or lastUsedAction is not set");
+        return console.log('lastUsedAppId or lastUsedAction is not set');
       }
 
       const verifyResponse = await verifyProof({
         payload: payload as ISuccessResult,
         app_id: lastUsedAppId,
         action: lastUsedAction,
-        signal: "test",
+        signal: 'test',
       });
 
       setDevPortalVerifyResponse(verifyResponse);
@@ -137,7 +137,7 @@ export const VerifyAction = () => {
       const payload = MiniKit.commands.verify(verifyPayload);
       setSentVerifyPayload(payload);
     },
-    []
+    [],
   );
 
   const onProdVerifyClick = useCallback(
@@ -146,10 +146,10 @@ export const VerifyAction = () => {
         app_id: process.env.NEXT_PUBLIC_PROD_VERIFY_APP_ID as `app_${string}`,
         action: process.env.NEXT_PUBLIC_PROD_VERIFY_ACTION as string,
         verification_level,
-        signal: "test",
+        signal: 'test',
       });
     },
-    [verifyAction]
+    [verifyAction],
   );
 
   const onStagingVerifyClick = useCallback(
@@ -159,10 +159,10 @@ export const VerifyAction = () => {
           .NEXT_PUBLIC_STAGING_VERIFY_APP_ID as `app_${string}`,
         action: process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION as string,
         verification_level,
-        signal: "test",
+        signal: 'test',
       });
     },
-    [verifyAction]
+    [verifyAction],
   );
 
   return (
@@ -171,7 +171,7 @@ export const VerifyAction = () => {
 
       <p className="border p-1 border-gray-400">
         <span className="font-bold block">App ID:</span>
-        <span className="text-[12px] break-all">{lastUsedAppId ?? ""}</span>
+        <span className="text-[12px] break-all">{lastUsedAppId ?? ''}</span>
       </p>
 
       <div className="grid gap-y-12">
@@ -205,7 +205,7 @@ export const VerifyAction = () => {
             <div className="grid grid-cols-2 gap-x-2">
               <button
                 className={clsx(
-                  "bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
+                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
                 )}
                 onClick={() => onProdVerifyClick(VerificationLevel.Device)}
               >
@@ -234,7 +234,7 @@ export const VerifyAction = () => {
           <div className="grid gap-y-2">
             <p>Validation message:</p>
             <p className="bg-gray-300 p-2">
-              {verifyActionAppPayloadValidationMessage ?? "No validation"}
+              {verifyActionAppPayloadValidationMessage ?? 'No validation'}
             </p>
           </div>
 
@@ -242,7 +242,7 @@ export const VerifyAction = () => {
             <p>`DEV_PORTAL/api/v2/verify` Response:</p>
             <pre className="break-all whitespace-break-spaces bg-gray-300 p-2">
               {JSON.stringify(devPortalVerifyResponse, null, 2) ??
-                "No validation"}
+                'No validation'}
             </pre>
           </div>
         </div>

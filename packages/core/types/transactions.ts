@@ -4,7 +4,7 @@ import type {
   AbiStateMutability,
   ExtractAbiFunction,
   ExtractAbiFunctionNames,
-} from "abitype";
+} from 'abitype';
 
 export type Permit2 = {
   permitted: {
@@ -21,12 +21,12 @@ export type Transaction = {
   abi: Abi | readonly unknown[];
   functionName: ContractFunctionName<
     Abi | readonly unknown[],
-    "payable" | "nonpayable"
+    'payable' | 'nonpayable'
   >;
   args: ContractFunctionArgs<
     Abi | readonly unknown[],
-    "payable" | "nonpayable",
-    ContractFunctionName<Abi | readonly unknown[], "payable" | "nonpayable">
+    'payable' | 'nonpayable',
+    ContractFunctionName<Abi | readonly unknown[], 'payable' | 'nonpayable'>
   >;
 };
 
@@ -56,8 +56,8 @@ export type ContractFunctionArgs<
       abi extends Abi ? abi : Abi,
       functionName,
       mutability
-    >["inputs"],
-    "inputs"
+    >['inputs'],
+    'inputs'
   > extends infer args
     ? [args] extends [never]
       ? readonly unknown[]

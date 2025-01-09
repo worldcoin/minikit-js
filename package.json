@@ -4,16 +4,23 @@
   "name": "minikit-monorepo",
   "scripts": {
     "dev": "turbo run dev",
-    "lint": "turbo run lint",
+    "lint": "prettier --check .",
+    "format": "prettier --write .",
     "build": "turbo run build",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "type-check": "pnpm --recursive type-check"
   },
   "devDependencies": {
+    "prettier-plugin-organize-imports": "^4.1.0",
     "turbo": "^2.1.1"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=16"
   },
+  "workspaces": [
+    "packages/*",
+    "demo/*"
+  ],
   "pnpm": {
     "overrides": {
       "ws": ">=7.5.10",

@@ -1,11 +1,11 @@
-import { SendTransactionInput } from "types/commands";
+import { SendTransactionInput } from 'types/commands';
 type ValidationReturn = { isValid: true } | { isValid: false };
 
 const validate = (payload: any): ValidationReturn => {
-  if (typeof payload === "string") return { isValid: true };
-  if (typeof payload === "object") {
+  if (typeof payload === 'string') return { isValid: true };
+  if (typeof payload === 'object') {
     const isValid = Object.values(payload).every(
-      (value) => validate(value).isValid
+      (value) => validate(value).isValid,
     );
     return { isValid };
   }

@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ["static.usernames.app-backend.toolsforhumanity.com"],
+    domains: ['static.usernames.app-backend.toolsforhumanity.com'],
   },
 };
 

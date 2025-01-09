@@ -1,1 +1,1 @@
-export { useIsUserVerified } from "./is-verified";
+export { useIsUserVerified } from './is-verified';

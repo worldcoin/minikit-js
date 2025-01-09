@@ -1,5 +1,5 @@
-import { http, createConfig } from '@wagmi/core'
-import { mainnet, optimism, sepolia } from '@wagmi/core/chains'
+import { createConfig, http } from '@wagmi/core';
+import { mainnet, optimism, sepolia } from '@wagmi/core/chains';
 
 export const config = createConfig({
   chains: [mainnet, sepolia, optimism],
@@ -8,4 +8,4 @@ export const config = createConfig({
     [sepolia.id]: http(),
     [optimism.id]: http(),
   },
-})
+});

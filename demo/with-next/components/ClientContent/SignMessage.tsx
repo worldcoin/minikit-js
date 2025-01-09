@@ -1,16 +1,16 @@
+import Safe, { hashSafeMessage } from '@safe-global/protocol-kit';
 import {
   MiniKit,
-  SignMessageErrorCodes,
   ResponseEvent,
+  SignMessageErrorCodes,
   SignMessageInput,
-} from "@worldcoin/minikit-js";
-import { useCallback, useEffect, useState } from "react";
-import { validateSchema } from "./helpers/validate-schema";
-import * as yup from "yup";
-import Safe, { hashSafeMessage } from "@safe-global/protocol-kit";
+} from '@worldcoin/minikit-js';
+import { useCallback, useEffect, useState } from 'react';
+import * as yup from 'yup';
+import { validateSchema } from './helpers/validate-schema';
 
 const signMessageSuccessPayloadSchema = yup.object({
-  status: yup.string<"success">().oneOf(["success"]),
+  status: yup.string<'success'>().oneOf(['success']),
   signature: yup.string().required(),
   address: yup.string().required(),
 });
@@ -20,7 +20,7 @@ const signMessageErrorPayloadSchema = yup.object({
     .string<SignMessageErrorCodes>()
     .oneOf(Object.values(SignMessageErrorCodes))
     .required(),
-  status: yup.string<"error">().equals(["error"]).required(),
+  status: yup.string<'error'>().equals(['error']).required(),
   version: yup.number().required(),
 });
 
@@ -44,7 +44,7 @@ export const SignMessage = () => {
     any
   > | null>(null);
   const [tempInstallFix, setTempInstallFix] = useState(0);
-  const messageToSign = "hello world";
+  const messageToSign = 'hello world';
 
   useEffect(() => {
     if (!MiniKit.isInstalled()) {
@@ -52,28 +52,28 @@ export const SignMessage = () => {
     }
 
     MiniKit.subscribe(ResponseEvent.MiniAppSignMessage, async (payload) => {
-      console.log("MiniAppSignMessage, SUBSCRIBE PAYLOAD", payload);
+      console.log('MiniAppSignMessage, SUBSCRIBE PAYLOAD', payload);
       setSignMessageAppPayload(JSON.stringify(payload, null, 2));
-      if (payload.status === "error") {
+      if (payload.status === 'error') {
         const errorMessage = await validateSchema(
           signMessageErrorPayloadSchema,
-          payload
+          payload,
         );
 
         if (!errorMessage) {
-          setSignMessagePayloadValidationMessage("Payload is valid");
+          setSignMessagePayloadValidationMessage('Payload is valid');
         } else {
           setSignMessagePayloadValidationMessage(errorMessage);
         }
       } else {
         const errorMessage = await validateSchema(
           signMessageSuccessPayloadSchema,
-          payload
+          payload,
         );
 
         // This checks if the response format is correct
         if (!errorMessage) {
-          setSignMessagePayloadValidationMessage("Payload is valid");
+          setSignMessagePayloadValidationMessage('Payload is valid');
         } else {
           setSignMessagePayloadValidationMessage(errorMessage);
         }
@@ -83,17 +83,17 @@ export const SignMessage = () => {
         const isValid = await (
           await Safe.init({
             provider:
-              "https://opt-mainnet.g.alchemy.com/v2/Ha76ahWcm6iDVBU7GNr5n-ONLgzWnkWc",
+              'https://opt-mainnet.g.alchemy.com/v2/Ha76ahWcm6iDVBU7GNr5n-ONLgzWnkWc',
             safeAddress: payload.address,
           })
         ).isValidSignature(messageHash, payload.signature);
 
         // Checks functionally if the signature is correct
         if (isValid) {
-          setSignMessagePayloadVerificationMessage("Signature is valid");
+          setSignMessagePayloadVerificationMessage('Signature is valid');
         } else {
           setSignMessagePayloadVerificationMessage(
-            "Signature is invalid (We are verifying on optimism, if you are using worldchain message andy"
+            'Signature is invalid (We are verifying on optimism, if you are using worldchain message andy',
           );
         }
       }
@@ -150,13 +150,13 @@ export const SignMessage = () => {
         <div className="grid gap-y-2">
           <p>Response Validation:</p>
           <p className="bg-gray-300 p-2">
-            {signMessagePayloadValidationMessage ?? "No validation"}
+            {signMessagePayloadValidationMessage ?? 'No validation'}
           </p>
         </div>
         <div>
           <p>Check does signature verify:</p>
           <p className="bg-gray-300 p-2">
-            {signMessagePayloadVerificationMessage ?? "No verification"}
+            {signMessagePayloadVerificationMessage ?? 'No verification'}
           </p>
         </div>
       </div>

@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { PublicClient, TransactionReceipt } from "viem";
-import { fetchTransactionHash } from ".";
-import { AppConfig } from "../types/client";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { PublicClient, TransactionReceipt } from 'viem';
+import { fetchTransactionHash } from '.';
+import { AppConfig } from '../types/client';
 
 interface UseTransactionReceiptOptions {
   client: PublicClient;
@@ -23,7 +23,7 @@ interface UseTransactionReceiptResult {
 }
 
 export function useWaitForTransactionReceipt(
-  options: UseTransactionReceiptOptions
+  options: UseTransactionReceiptOptions,
 ): UseTransactionReceiptResult {
   const {
     client,
@@ -40,7 +40,7 @@ export function useWaitForTransactionReceipt(
     `0x${string}` | undefined
   >(undefined);
   const [receipt, setReceipt] = useState<TransactionReceipt | undefined>(
-    undefined
+    undefined,
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
@@ -141,7 +141,7 @@ export function useWaitForTransactionReceipt(
     };
   }, [transactionHash, confirmations, timeout, client]);
 
-  const isSuccess = receipt !== undefined && receipt.status === "success";
+  const isSuccess = receipt !== undefined && receipt.status === 'success';
 
   return {
     transactionHash,

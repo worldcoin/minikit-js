@@ -1,18 +1,18 @@
-import { IDKitConfig, VerificationLevel } from "@worldcoin/idkit-core";
-import { Network, Tokens } from "./payment";
-import { Permit2, Transaction } from "./transactions";
-import type { TypedData, TypedDataDomain } from "abitype";
-import { MiniKitInstallErrorCodes, MiniKitInstallErrorMessage } from "./errors";
+import { IDKitConfig, VerificationLevel } from '@worldcoin/idkit-core';
+import type { TypedData, TypedDataDomain } from 'abitype';
+import { MiniKitInstallErrorCodes, MiniKitInstallErrorMessage } from './errors';
+import { Network, Tokens } from './payment';
+import { Permit2, Transaction } from './transactions';
 
 export enum Command {
-  Verify = "verify",
-  Pay = "pay",
-  WalletAuth = "wallet-auth",
-  SendTransaction = "send-transaction",
-  SignMessage = "sign-message",
-  SignTypedData = "sign-typed-data",
-  ShareContacts = "share-contacts",
-  RequestPermission = "request-permission",
+  Verify = 'verify',
+  Pay = 'pay',
+  WalletAuth = 'wallet-auth',
+  SendTransaction = 'send-transaction',
+  SignMessage = 'sign-message',
+  SignTypedData = 'sign-typed-data',
+  ShareContacts = 'share-contacts',
+  RequestPermission = 'request-permission',
 }
 
 export type WebViewBasePayload = {
@@ -28,8 +28,8 @@ export type AsyncHandlerReturn<CommandPayload, FinalPayload> = Promise<{
 
 // Values developers can specify
 export type VerifyCommandInput = {
-  action: IDKitConfig["action"];
-  signal?: IDKitConfig["signal"];
+  action: IDKitConfig['action'];
+  signal?: IDKitConfig['signal'];
   verification_level?: VerificationLevel;
 };
 
@@ -104,7 +104,7 @@ export type ShareContactsPayload = ShareContactsInput;
 
 // Anchor: Request Permission Payload
 export enum Permission {
-  Notifications = "notifications",
+  Notifications = 'notifications',
 }
 
 export type RequestPermissionInput = {

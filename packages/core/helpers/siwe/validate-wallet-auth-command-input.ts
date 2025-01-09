@@ -1,4 +1,4 @@
-import { WalletAuthInput } from "types/commands";
+import { WalletAuthInput } from 'types/commands';
 
 type ValidationResult =
   | {
@@ -10,7 +10,7 @@ type ValidationResult =
     };
 
 export const validateWalletAuthCommandInput = (
-  params: WalletAuthInput
+  params: WalletAuthInput,
 ): ValidationResult => {
   if (!params.nonce) {
     return { valid: false, message: "'nonce' is required" };
@@ -20,7 +20,7 @@ export const validateWalletAuthCommandInput = (
     return { valid: false, message: "'nonce' must be at least 8 characters" };
   }
 
-  if (params.statement && params.statement.includes("\n")) {
+  if (params.statement && params.statement.includes('\n')) {
     return { valid: false, message: "'statement' must not contain newlines" };
   }
 

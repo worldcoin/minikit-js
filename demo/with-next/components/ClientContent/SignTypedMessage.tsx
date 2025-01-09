@@ -1,16 +1,16 @@
+import Safe, { hashSafeMessage } from '@safe-global/protocol-kit';
 import {
-  MiniKit,
-  SignTypedDataErrorCodes,
-  ResponseEvent,
   MiniAppSignTypedDataPayload,
-} from "@worldcoin/minikit-js";
-import { useCallback, useEffect, useState } from "react";
-import { validateSchema } from "./helpers/validate-schema";
-import * as yup from "yup";
-import Safe, { hashSafeMessage } from "@safe-global/protocol-kit";
+  MiniKit,
+  ResponseEvent,
+  SignTypedDataErrorCodes,
+} from '@worldcoin/minikit-js';
+import { useCallback, useEffect, useState } from 'react';
+import * as yup from 'yup';
+import { validateSchema } from './helpers/validate-schema';
 
 const signTypedDataSuccessPayloadSchema = yup.object({
-  status: yup.string<"success">().oneOf(["success"]),
+  status: yup.string<'success'>().oneOf(['success']),
   signature: yup.string().required(),
   address: yup.string().required(),
 });
@@ -20,7 +20,7 @@ const signTypedDataErrorPayloadSchema = yup.object({
     .string<SignTypedDataErrorCodes>()
     .oneOf(Object.values(SignTypedDataErrorCodes))
     .required(),
-  status: yup.string<"error">().equals(["error"]).required(),
+  status: yup.string<'error'>().equals(['error']).required(),
   version: yup.number().required(),
 });
 
@@ -28,110 +28,110 @@ const signTypedDataPayload = {
   types: {
     EIP712Domain: [
       {
-        type: "uint256",
-        name: "chainId",
+        type: 'uint256',
+        name: 'chainId',
       },
       {
-        type: "address",
-        name: "verifyingContract",
+        type: 'address',
+        name: 'verifyingContract',
       },
     ],
     SafeTx: [
       {
-        type: "address",
-        name: "to",
+        type: 'address',
+        name: 'to',
       },
       {
-        type: "uint256",
-        name: "value",
+        type: 'uint256',
+        name: 'value',
       },
       {
-        type: "bytes",
-        name: "data",
+        type: 'bytes',
+        name: 'data',
       },
       {
-        type: "uint8",
-        name: "operation",
+        type: 'uint8',
+        name: 'operation',
       },
       {
-        type: "uint256",
-        name: "safeTxGas",
+        type: 'uint256',
+        name: 'safeTxGas',
       },
       {
-        type: "uint256",
-        name: "baseGas",
+        type: 'uint256',
+        name: 'baseGas',
       },
       {
-        type: "uint256",
-        name: "gasPrice",
+        type: 'uint256',
+        name: 'gasPrice',
       },
       {
-        type: "address",
-        name: "gasToken",
+        type: 'address',
+        name: 'gasToken',
       },
       {
-        type: "address",
-        name: "refundReceiver",
+        type: 'address',
+        name: 'refundReceiver',
       },
       {
-        type: "uint256",
-        name: "nonce",
+        type: 'uint256',
+        name: 'nonce',
       },
     ],
   },
   domain: {
-    verifyingContract: "0xd809de3086Ea4f53ed3979CEad25e1Ff72b564a3",
+    verifyingContract: '0xd809de3086Ea4f53ed3979CEad25e1Ff72b564a3',
     chainId: 480,
   },
-  primaryType: "SafeTx",
+  primaryType: 'SafeTx',
   message: {
-    to: "0xFC637b77f1aF17fdfEE457bd6fbe2F785FF870a5",
-    value: "0",
-    data: "0xa9059cbb000000000000000000000000deaddeaddeaddeaddeaddeaddeaddeaddead00010000000000000000000000000000000000000000000000010001000001000001",
+    to: '0xFC637b77f1aF17fdfEE457bd6fbe2F785FF870a5',
+    value: '0',
+    data: '0xa9059cbb000000000000000000000000deaddeaddeaddeaddeaddeaddeaddeaddead00010000000000000000000000000000000000000000000000010001000001000001',
     operation: 0,
-    baseGas: "0",
-    gasPrice: "0",
-    gasToken: "0x0000000000000000000000000000000000000000",
-    refundReceiver: "0x0000000000000000000000000000000000000000",
+    baseGas: '0',
+    gasPrice: '0',
+    gasToken: '0x0000000000000000000000000000000000000000',
+    refundReceiver: '0x0000000000000000000000000000000000000000',
     nonce: 0,
-    safeTxGas: "0",
+    safeTxGas: '0',
   },
 };
 
 const stateChangesPayload = {
   types: {
     EIP712Domain: [
-      { type: "uint256", name: "chainId" },
-      { type: "address", name: "verifyingContract" },
+      { type: 'uint256', name: 'chainId' },
+      { type: 'address', name: 'verifyingContract' },
     ],
     SafeTx: [
-      { type: "address", name: "to" },
-      { type: "uint256", name: "value" },
-      { type: "bytes", name: "data" },
-      { type: "uint8", name: "operation" },
-      { type: "uint256", name: "safeTxGas" },
-      { type: "uint256", name: "baseGas" },
-      { type: "uint256", name: "gasPrice" },
-      { type: "address", name: "gasToken" },
-      { type: "address", name: "refundReceiver" },
-      { type: "uint256", name: "nonce" },
+      { type: 'address', name: 'to' },
+      { type: 'uint256', name: 'value' },
+      { type: 'bytes', name: 'data' },
+      { type: 'uint8', name: 'operation' },
+      { type: 'uint256', name: 'safeTxGas' },
+      { type: 'uint256', name: 'baseGas' },
+      { type: 'uint256', name: 'gasPrice' },
+      { type: 'address', name: 'gasToken' },
+      { type: 'address', name: 'refundReceiver' },
+      { type: 'uint256', name: 'nonce' },
     ],
   },
   domain: {
-    verifyingContract: "0xd809de3086Ea4f53ed3979CEad25e1Ff72b564a3",
+    verifyingContract: '0xd809de3086Ea4f53ed3979CEad25e1Ff72b564a3',
     chainId: 480,
   },
-  primaryType: "SafeTx",
+  primaryType: 'SafeTx',
   message: {
-    to: "0xd809de3086Ea4f53ed3979CEad25e1Ff72b564a3",
+    to: '0xd809de3086Ea4f53ed3979CEad25e1Ff72b564a3',
     value: 0,
-    data: "0x0d582f13000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000002",
+    data: '0x0d582f13000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000002',
     operation: 0,
     safeTxGas: 0,
     baseGas: 0,
     gasPrice: 0,
-    gasToken: "0x0000000000000000000000000000000000000000",
-    refundReceiver: "0x0000000000000000000000000000000000000000",
+    gasToken: '0x0000000000000000000000000000000000000000',
+    refundReceiver: '0x0000000000000000000000000000000000000000',
     nonce: 0,
   },
 };
@@ -163,29 +163,29 @@ export const SignTypedData = () => {
     MiniKit.subscribe(
       ResponseEvent.MiniAppSignTypedData,
       async (payload: MiniAppSignTypedDataPayload) => {
-        console.log("MiniAppSignTypedData, SUBSCRIBE PAYLOAD", payload);
+        console.log('MiniAppSignTypedData, SUBSCRIBE PAYLOAD', payload);
         setSignTypedDataAppPayload(JSON.stringify(payload, null, 2));
 
-        if (payload.status === "error") {
+        if (payload.status === 'error') {
           const errorMessage = await validateSchema(
             signTypedDataErrorPayloadSchema,
-            payload
+            payload,
           );
 
           if (!errorMessage) {
-            setSignTypedDataPayloadValidationMessage("Payload is valid");
+            setSignTypedDataPayloadValidationMessage('Payload is valid');
           } else {
             setSignTypedDataPayloadValidationMessage(errorMessage);
           }
         } else {
           const errorMessage = await validateSchema(
             signTypedDataSuccessPayloadSchema,
-            payload
+            payload,
           );
 
           // This checks if the response format is correct
           if (!errorMessage) {
-            setSignTypedDataPayloadValidationMessage("Payload is valid");
+            setSignTypedDataPayloadValidationMessage('Payload is valid');
           } else {
             setSignTypedDataPayloadValidationMessage(errorMessage);
           }
@@ -195,21 +195,21 @@ export const SignTypedData = () => {
           const isValid = await (
             await Safe.init({
               provider:
-                "https://opt-mainnet.g.alchemy.com/v2/Ha76ahWcm6iDVBU7GNr5n-ONLgzWnkWc",
+                'https://opt-mainnet.g.alchemy.com/v2/Ha76ahWcm6iDVBU7GNr5n-ONLgzWnkWc',
               safeAddress: payload.address,
             })
           ).isValidSignature(messageHash, payload.signature);
 
           // Checks functionally if the signature is correct
           if (isValid) {
-            setSignTypedDataPayloadVerificationMessage("Signature is valid");
+            setSignTypedDataPayloadVerificationMessage('Signature is valid');
           } else {
             setSignTypedDataPayloadVerificationMessage(
-              "Signature is invalid (We are verifying on optimism, if you are using worldchain message andy"
+              'Signature is invalid (We are verifying on optimism, if you are using worldchain message andy',
             );
           }
         }
-      }
+      },
     );
 
     return () => {
@@ -219,7 +219,7 @@ export const SignTypedData = () => {
 
   const onSignTypedData = useCallback(async (stateChanges?: boolean) => {
     const payload = MiniKit.commands.signTypedData(
-      stateChanges ? stateChangesPayload : signTypedDataPayload
+      stateChanges ? stateChangesPayload : signTypedDataPayload,
     );
 
     setSentSignTypedDataPayload({
@@ -270,13 +270,13 @@ export const SignTypedData = () => {
         <div className="grid gap-y-2">
           <p>Validation message:</p>
           <p className="bg-gray-300 p-2">
-            {signTypedDataPayloadValidationMessage ?? "No validation"}
+            {signTypedDataPayloadValidationMessage ?? 'No validation'}
           </p>
         </div>
         <div>
           <p>Check does signature verify:</p>
           <p className="bg-gray-300 p-2">
-            {signTypedDataPayloadVerificationMessage ?? "No verification"}
+            {signTypedDataPayloadVerificationMessage ?? 'No verification'}
           </p>
         </div>
       </div>

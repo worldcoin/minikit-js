@@ -1,9 +1,9 @@
 import {
   MiniAppWalletAuthSuccessPayload,
   verifySiweMessage,
-} from "@worldcoin/minikit-js";
-import { NextRequest } from "next/server";
-import * as yup from "yup";
+} from '@worldcoin/minikit-js';
+import { NextRequest } from 'next/server';
+import * as yup from 'yup';
 
 const schema = yup.object({
   siweResponsePayload: yup.object({
@@ -22,38 +22,38 @@ export const POST = async (req: NextRequest) => {
 
     const validData = await schema.validate(body);
     if (!validData) {
-      throw new Error("Invalid data");
+      throw new Error('Invalid data');
     }
 
     const { siweResponsePayload, nonce } = validData;
     const validMessage = await verifySiweMessage(
       siweResponsePayload as MiniAppWalletAuthSuccessPayload,
-      nonce
+      nonce,
     );
 
     return new Response(
-      JSON.stringify({ status: "success", isValid: validMessage.isValid }),
+      JSON.stringify({ status: 'success', isValid: validMessage.isValid }),
       {
         status: 200,
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-      }
+      },
     );
   } catch (error: any) {
     // Handle errors in validation or processing
     return new Response(
       JSON.stringify({
-        status: "error",
+        status: 'error',
         isValid: false,
         message: error.message,
       }),
       {
         status: 400,
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-      }
+      },
     );
   }
 };

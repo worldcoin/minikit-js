@@ -1,4 +1,4 @@
 export {
   UsernameSearch,
   type GetSearchedUsernameResult,
-} from "./username-search";
+} from './username-search';

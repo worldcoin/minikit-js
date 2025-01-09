@@ -1,5 +1,5 @@
-import { signIn, signOut, useSession } from "next-auth/react";
-import { useMemo } from "react";
+import { signIn, signOut, useSession } from 'next-auth/react';
+import { useMemo } from 'react';
 
 export const Nav = () => {
   const { data: session } = useSession();
@@ -10,10 +10,10 @@ export const Nav = () => {
       <h1 className="text-2xl font-bold">MiniKit V1</h1>
 
       <button
-        onClick={user?.name ? () => signOut() : () => signIn("worldcoin")}
+        onClick={user?.name ? () => signOut() : () => signIn('worldcoin')}
         className="text-white bg-blue-500 hover:bg-blue-300 transition p-4 leading-[1]"
       >
-        {user?.name ? "Sign Out" : "Sign In"}
+        {user?.name ? 'Sign Out' : 'Sign In'}
       </button>
     </header>
   );

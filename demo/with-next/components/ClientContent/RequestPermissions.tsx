@@ -1,17 +1,16 @@
 import {
   MiniKit,
-  RequestPermissionErrorCodes,
-  ResponseEvent,
-  Contact,
-  RequestPermissionPayload,
   Permission,
-} from "@worldcoin/minikit-js";
-import { useCallback, useEffect, useState } from "react";
-import { validateSchema } from "./helpers/validate-schema";
-import * as yup from "yup";
+  RequestPermissionErrorCodes,
+  RequestPermissionPayload,
+  ResponseEvent,
+} from '@worldcoin/minikit-js';
+import { useCallback, useEffect, useState } from 'react';
+import * as yup from 'yup';
+import { validateSchema } from './helpers/validate-schema';
 
 const requestPermissionSuccessPayloadSchema = yup.object({
-  status: yup.string<"success">().equals(["success"]).required(),
+  status: yup.string<'success'>().equals(['success']).required(),
   version: yup.number().required(),
   permission: yup.string<Permission>().oneOf(Object.values(Permission)),
   timestamp: yup.string().required(),
@@ -23,7 +22,7 @@ const requestPermissionErrorPayloadSchema = yup.object({
     .oneOf(Object.values(RequestPermissionErrorCodes))
     .required(),
   description: yup.string().required(),
-  status: yup.string<"error">().equals(["error"]).required(),
+  status: yup.string<'error'>().equals(['error']).required(),
   version: yup.number().required(),
 });
 
@@ -49,33 +48,33 @@ export const RequestPermission = () => {
     MiniKit.subscribe(
       ResponseEvent.MiniAppRequestPermission,
       async (payload) => {
-        console.log("MiniAppRequestPermission, SUBSCRIBE PAYLOAD", payload);
+        console.log('MiniAppRequestPermission, SUBSCRIBE PAYLOAD', payload);
         setRequestPermissionAppPayload(JSON.stringify(payload, null, 2));
-        if (payload.status === "error") {
+        if (payload.status === 'error') {
           const errorMessage = await validateSchema(
             requestPermissionErrorPayloadSchema,
-            payload
+            payload,
           );
 
           if (!errorMessage) {
-            setRequestPermissionPayloadValidationMessage("Payload is valid");
+            setRequestPermissionPayloadValidationMessage('Payload is valid');
           } else {
             setRequestPermissionPayloadValidationMessage(errorMessage);
           }
         } else {
           const errorMessage = await validateSchema(
             requestPermissionSuccessPayloadSchema,
-            payload
+            payload,
           );
 
           // This checks if the response format is correct
           if (!errorMessage) {
-            setRequestPermissionPayloadValidationMessage("Payload is valid");
+            setRequestPermissionPayloadValidationMessage('Payload is valid');
           } else {
             setRequestPermissionPayloadValidationMessage(errorMessage);
           }
         }
-      }
+      },
     );
 
     return () => {
@@ -89,12 +88,12 @@ export const RequestPermission = () => {
     };
 
     const payload = MiniKit.commands.requestPermission(
-      requestPermissionPayload
+      requestPermissionPayload,
     );
     setSentRequestPermissionPayload({
       payload,
     });
-    console.log("payload", payload);
+    console.log('payload', payload);
     setTempInstallFix((prev) => prev + 1);
   }, []);
 
@@ -124,7 +123,7 @@ export const RequestPermission = () => {
 
       <div className="w-full grid gap-y-2">
         <p>
-          Message from &quot;{ResponseEvent.MiniAppRequestPermission}&quot;{" "}
+          Message from &quot;{ResponseEvent.MiniAppRequestPermission}&quot;{' '}
         </p>
 
         <div className="bg-gray-300 min-h-[100px] p-2">
@@ -136,7 +135,7 @@ export const RequestPermission = () => {
         <div className="grid gap-y-2">
           <p>Response Validation:</p>
           <p className="bg-gray-300 p-2">
-            {requestPermissionPayloadValidationMessage ?? "No validation"}
+            {requestPermissionPayloadValidationMessage ?? 'No validation'}
           </p>
         </div>
       </div>
