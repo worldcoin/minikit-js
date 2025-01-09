@@ -17,7 +17,8 @@
     "node": ">=16"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "demo/*"
   ],
   "pnpm": {
     "overrides": {
