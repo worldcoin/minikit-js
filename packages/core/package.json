@@ -24,12 +24,12 @@
   "exports": {
     ".": {
       "import": {
-        "default": "./build/index.js",
-        "types": "./build/index.d.ts"
+        "types": "./build/index.d.ts",
+        "default": "./build/index.js"
       },
       "require": {
-        "default": "./build/index.cjs",
-        "types": "./build/index.d.cts"
+        "types": "./build/index.d.cts",
+        "default": "./build/index.cjs"
       }
     }
   },
