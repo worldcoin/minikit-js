@@ -42,15 +42,11 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Debug workspace
+      - name: Clean install
         run: |
-          echo "Workspace packages:"
+          pnpm store path
+          pnpm install --frozen-lockfile
           pnpm recursive list
-          echo "Package contents:"
-          ls -la packages/react/node_modules/@worldcoin || true
 
       - name: Run typecheck
         run: pnpm --loglevel debug --recursive type-check
