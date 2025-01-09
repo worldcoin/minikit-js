@@ -214,13 +214,9 @@ export const verifySiweMessage = async (
       signature: `0x${signature}`,
     });
 
-    if (recoveredAddress !== address) {
-      throw new Error('Signature verification failed');
-    }
-
     const isOwner = await contract.read.isOwner([recoveredAddress]);
     if (!isOwner) {
-      throw new Error('Signature verification failed');
+      throw new Error('Signature verification failed, invalid owner');
     }
   } catch (error) {
     throw new Error('Signature verification failed');
