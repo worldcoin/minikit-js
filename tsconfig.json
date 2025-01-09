@@ -1,8 +1,6 @@
 {
   "compilerOptions": {
     "strict": true,
-    "rootDir": "src",
-    "outDir": "build",
     "declaration": true,
     "declarationDir": "build",
     "module": "ESNext",

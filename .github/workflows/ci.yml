@@ -42,11 +42,8 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
 
-      - name: Clean install
-        run: |
-          pnpm store path
-          pnpm install --frozen-lockfile
-          pnpm recursive list
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Run typecheck
         run: pnpm type-check
