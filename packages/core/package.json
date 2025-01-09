@@ -6,7 +6,7 @@
   "description": "minikit-js is our SDK for building mini-apps.",
   "devDependencies": {
     "@types/jest": "^29.5.14",
-    "@types/node": "^20",
+    "@types/node": "^22",
     "@typescript-eslint/eslint-plugin": "^7.7.0",
     "@typescript-eslint/parser": "^7.7.0",
     "jest": "^29.7.0",
