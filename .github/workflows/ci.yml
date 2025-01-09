@@ -49,7 +49,7 @@ jobs:
           pnpm recursive list
 
       - name: Run typecheck
-        run: pnpm --loglevel debug --recursive type-check
+        run: pnpm type-check
 
   run-tests:
     name: Run Tests
