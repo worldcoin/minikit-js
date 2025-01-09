@@ -141,7 +141,7 @@ importers:
   packages/react:
     dependencies:
       '@worldcoin/minikit-js':
-        specifier: workspace:*
+        specifier: workspace:^1.4.0
         version: link:../core
       abitype:
         specifier: ^1.0.6
