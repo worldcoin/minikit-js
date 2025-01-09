@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.5.0](https://github.com/worldcoin/minikit-js/compare/minikit-js-v1.4.0...minikit-js-v1.5.0) (2025-01-09)
+
+
+### Features
+
+* add transaction payload validation ([#121](https://github.com/worldcoin/minikit-js/issues/121)) ([00cb744](https://github.com/worldcoin/minikit-js/commit/00cb7444797f487be595ab706bb60b51f0da289d))
+* expose method to fetch user details ([#122](https://github.com/worldcoin/minikit-js/issues/122)) ([02875a1](https://github.com/worldcoin/minikit-js/commit/02875a1fdcd870b2bfc5ab86ccb48db175631c2c))
+* Notifications, contacts, bug fixes ([#117](https://github.com/worldcoin/minikit-js/issues/117)) ([5cc1849](https://github.com/worldcoin/minikit-js/commit/5cc1849b2d556e419e3e00ff76167b54a65427c1))
+
 ## [1.4.0](https://github.com/worldcoin/minikit-js/compare/core-v1.3.0...core-v1.4.0) (2024-12-03)
 
 ### Features
