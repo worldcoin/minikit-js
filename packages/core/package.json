@@ -46,7 +46,7 @@
   "main": "index.ts",
   "name": "@worldcoin/minikit-js",
   "peerDependencies": {
-    "viem": "^2.0.0"
+    "viem": "^2.21.10"
   },
   "private": false,
   "scripts": {
