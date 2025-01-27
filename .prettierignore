@@ -7,3 +7,4 @@ node_modules/**
 **/.next/**
 **/.turbo/**
 packages/core/package.json 
+.github/**
