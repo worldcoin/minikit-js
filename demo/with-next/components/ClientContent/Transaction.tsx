@@ -446,7 +446,7 @@ export const SendTransaction = () => {
           className="bg-black text-white rounded-lg p-4 w-full"
           onClick={onSendTransactionClick}
         >
-          Send Transaction
+          Send Transaction (0.1 USDC)
         </button>
 
         <button
