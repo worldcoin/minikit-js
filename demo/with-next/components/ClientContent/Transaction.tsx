@@ -158,7 +158,7 @@ export const SendTransaction = () => {
 
     const transferDetails = {
       to: '0x126f7998Eb44Dd2d097A8AB2eBcb28dEA1646AC8',
-      requestedAmount: '200000',
+      requestedAmount: '100000',
     };
 
     const transferDetailsArgsForm = [
