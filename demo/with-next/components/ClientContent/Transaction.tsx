@@ -427,6 +427,20 @@ export const SendTransaction = () => {
     onSendTransactionClick();
   };
 
+  const testEthTransaction = async () => {
+    const payload = await MiniKit.commandsAsync.sendTransaction({
+      transaction: [
+        {
+          address: '0x0000000000000000000000000000000000000000',
+          abi: DEXABI,
+          functionName: 'transfer',
+          args: ['0x0000000000000000000000000000000000000000', '1000000'],
+          value: '0x2386f26fc10000', // 0.01 ETH
+        },
+      ],
+    });
+  };
+
   return (
     <div className="grid gap-y-2">
       <h2 className="text-2xl font-bold">Transaction</h2>
@@ -482,6 +496,12 @@ export const SendTransaction = () => {
           onClick={doubleActionTransact}
         >
           Test Chaining Transact
+        </button>
+        <button
+          className="bg-black text-white rounded-lg p-4 w-full"
+          onClick={testEthTransaction}
+        >
+          Test ETH
         </button>
       </div>
 
