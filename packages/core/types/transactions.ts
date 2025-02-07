@@ -23,7 +23,7 @@ export type Transaction = {
     Abi | readonly unknown[],
     'payable' | 'nonpayable'
   >;
-  value: string | undefined;
+  value?: string | undefined;
   args: ContractFunctionArgs<
     Abi | readonly unknown[],
     'payable' | 'nonpayable',

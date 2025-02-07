@@ -19,6 +19,7 @@ import { worldchain } from 'viem/chains';
 import * as yup from 'yup';
 import ANDYABI from '../../abi/Andy.json';
 import DEXABI from '../../abi/DEX.json';
+import ForwardABI from '../../abi/Forward.json';
 import ORBABI from '../../abi/orb.json';
 import { validateSchema } from './helpers/validate-schema';
 
@@ -431,14 +432,16 @@ export const SendTransaction = () => {
     const payload = await MiniKit.commandsAsync.sendTransaction({
       transaction: [
         {
-          address: '0x0000000000000000000000000000000000000000',
-          abi: DEXABI,
-          functionName: 'transfer',
-          args: ['0x0000000000000000000000000000000000000000', '1000000'],
-          value: '0x2386f26fc10000', // 0.01 ETH
+          address: '0x2E7BeBAB990076A10fBb5e8C2Ff16Fc1434387ad',
+          abi: ForwardABI,
+          functionName: 'pay',
+          args: ['0x377da9cab87c04a1d6f19d8b4be9aef8df26fcdd'], // Andy
+          value: '0x2386f26fc10000',
         },
       ],
     });
+    setTempInstallFix((prev) => prev + 1);
+    setTransactionData(payload);
   };
 
   return (
