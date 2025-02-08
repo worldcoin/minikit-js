@@ -441,7 +441,8 @@ export const SendTransaction = () => {
       ],
     });
     setTempInstallFix((prev) => prev + 1);
-    setTransactionData(payload);
+    setTransactionData(payload.commandPayload);
+    setReceivedSendTransactionPayload(payload.finalPayload);
   };
 
   return (
