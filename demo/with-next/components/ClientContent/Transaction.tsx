@@ -500,6 +500,9 @@ export const SendTransaction = () => {
         >
           Test Chaining Transact
         </button>
+      </div>
+
+      <div className="grid gap-x-2 grid-cols-2">
         <button
           className="bg-black text-white rounded-lg p-4 w-full"
           onClick={testEthTransaction}
