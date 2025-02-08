@@ -13,7 +13,6 @@
     "type": "function"
   },
   {
-    "anonymous": false,
     "inputs": [
       {
         "internalType": "address",
@@ -26,7 +25,6 @@
         "type": "uint256"
       },
       {
-        "indexed": true,
         "internalType": "address",
         "name": "recipient",
         "type": "address"
