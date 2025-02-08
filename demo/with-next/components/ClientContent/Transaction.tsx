@@ -436,7 +436,7 @@ export const SendTransaction = () => {
           abi: ForwardABI,
           functionName: 'pay',
           args: ['0x377da9cab87c04a1d6f19d8b4be9aef8df26fcdd'], // Andy
-          value: '0x2386f26fc10000',
+          value: '0x9184E72A000', // Send 0.00001 ETH
         },
       ],
     });
