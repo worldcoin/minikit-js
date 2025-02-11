@@ -19,6 +19,7 @@ import { worldchain } from 'viem/chains';
 import * as yup from 'yup';
 import ANDYABI from '../../abi/Andy.json';
 import DEXABI from '../../abi/DEX.json';
+import ForwardABI from '../../abi/Forward.json';
 import ORBABI from '../../abi/orb.json';
 import { validateSchema } from './helpers/validate-schema';
 
@@ -144,7 +145,7 @@ export const SendTransaction = () => {
     const permitTransfer = {
       permitted: {
         token: testTokens.worldchain.USDCE,
-        amount: '200000',
+        amount: '100000',
       },
       nonce: Date.now().toString(),
       deadline,
@@ -158,7 +159,7 @@ export const SendTransaction = () => {
 
     const transferDetails = {
       to: '0x126f7998Eb44Dd2d097A8AB2eBcb28dEA1646AC8',
-      requestedAmount: '200000',
+      requestedAmount: '100000',
     };
 
     const transferDetailsArgsForm = [
@@ -427,6 +428,23 @@ export const SendTransaction = () => {
     onSendTransactionClick();
   };
 
+  const testEthTransaction = async () => {
+    const payload = await MiniKit.commandsAsync.sendTransaction({
+      transaction: [
+        {
+          address: '0x2E7BeBAB990076A10fBb5e8C2Ff16Fc1434387ad',
+          abi: ForwardABI,
+          functionName: 'pay',
+          args: ['0x377da9cab87c04a1d6f19d8b4be9aef8df26fcdd'], // Andy
+          value: '0x9184E72A000', // Send 0.00001 ETH
+        },
+      ],
+    });
+    setTempInstallFix((prev) => prev + 1);
+    setTransactionData(payload.commandPayload);
+    setReceivedSendTransactionPayload(payload.finalPayload);
+  };
+
   return (
     <div className="grid gap-y-2">
       <h2 className="text-2xl font-bold">Transaction</h2>
@@ -446,7 +464,7 @@ export const SendTransaction = () => {
           className="bg-black text-white rounded-lg p-4 w-full"
           onClick={onSendTransactionClick}
         >
-          Simulation Fails
+          Send Transaction (0.1 USDC)
         </button>
 
         <button
@@ -482,6 +500,15 @@ export const SendTransaction = () => {
           onClick={doubleActionTransact}
         >
           Test Chaining Transact
+        </button>
+      </div>
+
+      <div className="grid gap-x-2 grid-cols-2">
+        <button
+          className="bg-black text-white rounded-lg p-4 w-full"
+          onClick={testEthTransaction}
+        >
+          Test ETH
         </button>
       </div>
 

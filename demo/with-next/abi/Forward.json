@@ -1,0 +1,36 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address payable",
+        "name": "recipient",
+        "type": "address"
+      }
+    ],
+    "name": "pay",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "recipient",
+        "type": "address"
+      }
+    ],
+    "name": "Paid",
+    "type": "event"
+  }
+]

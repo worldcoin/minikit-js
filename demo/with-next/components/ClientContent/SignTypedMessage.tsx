@@ -85,7 +85,7 @@ const signTypedDataPayload = {
   },
   primaryType: 'SafeTx',
   message: {
-    to: '0xFC637b77f1aF17fdfEE457bd6fbe2F785FF870a5',
+    to: '0x163f8c2467924be0ae7b5347228cabf260318753',
     value: '0',
     data: '0xa9059cbb000000000000000000000000deaddeaddeaddeaddeaddeaddeaddeaddead00010000000000000000000000000000000000000000000000010001000001000001',
     operation: 0,

@@ -32,5 +32,9 @@ export const validatePaymentPayload = (payload: PayCommandInput): boolean => {
     return false;
   }
 
+  if (typeof payload.reference !== 'string') {
+    throw new Error('Reference must be a string');
+  }
+
   return true; // accept
 };
