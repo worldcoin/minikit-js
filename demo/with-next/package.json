@@ -23,7 +23,7 @@
     "prettier-plugin-sort-imports-desc": "^1.0.0",
     "react": "^18",
     "react-dom": "^18",
-    "viem": "^2.21.18",
+    "viem": "^2.23.1",
     "yup": "^1.4.0"
   },
   "devDependencies": {
