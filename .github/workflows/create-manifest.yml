@@ -1,0 +1,27 @@
+name: Create Manifest PR
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  create-manifest-pr:
+    name: Create or Update Manifest PR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Create/Update Manifest PR
+        id: manifest
+        uses: google-github-actions/release-please-action@v3
+        with:
+          command: manifest
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          monorepo-tags: true
+          release-type: node

@@ -11,20 +11,18 @@ permissions:
 
 jobs:
   release:
-    name: Release
+    name: Create GitHub Release
     runs-on: ubuntu-latest
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
-      - name: Release
+      - name: Create Release
         id: release
         uses: google-github-actions/release-please-action@v3
         with:
-          command: manifest
+          command: release        # Use release to actually create the release
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
           monorepo-tags: true
@@ -43,14 +41,14 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9.9.0
+          version: "9.9.0"
 
       - name: Set up Node
         uses: actions/setup-node@v3
         with:
-          node-version: 20
-          cache: 'pnpm'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: "20"
+          cache: pnpm
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies
         run: pnpm install
@@ -80,14 +78,14 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9.9.0
+          version: "9.9.0"
 
       - name: Set up Node
         uses: actions/setup-node@v3
         with:
-          node-version: 20
-          cache: 'pnpm'
-          registry-url: 'https://npm.pkg.github.com'
+          node-version: "20"
+          cache: pnpm
+          registry-url: "https://npm.pkg.github.com"
 
       - name: Install dependencies
         run: pnpm install
