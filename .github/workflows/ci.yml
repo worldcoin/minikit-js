@@ -5,7 +5,7 @@ on:
 jobs:
   lint:
     name: Lint
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v4
@@ -28,7 +28,7 @@ jobs:
 
   typecheck:
     name: Typecheck
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -53,7 +53,7 @@ jobs:
 
   run-tests:
     name: Run Tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: packages/core
