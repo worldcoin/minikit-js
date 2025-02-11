@@ -23,7 +23,7 @@ jobs:
         uses: google-github-actions/release-please-action@v3
         with:
           command: manifest
-          config-file: .release-please-config.json
+          config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
           monorepo-tags: true
           release-type: node
