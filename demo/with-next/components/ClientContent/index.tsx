@@ -9,6 +9,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { CameraComponent } from './Camera';
 import { ExternalLinks } from './ExternalLinks';
+import { GetPermissions } from './GetPermissions';
 import { Nav } from './Nav';
 import { Pay } from './Pay';
 import { RequestPermission } from './RequestPermissions';
@@ -100,6 +101,8 @@ export const ClientContent = () => {
           <ShareContacts />
           <hr />
           <RequestPermission />
+          <hr />
+          <GetPermissions />
           <hr />
           <input className="text-xs border-black border-2" />
           <ExternalLinks />

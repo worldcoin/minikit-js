@@ -13,6 +13,7 @@ export enum Command {
   SignTypedData = 'sign-typed-data',
   ShareContacts = 'share-contacts',
   RequestPermission = 'request-permission',
+  GetPermissions = 'get-permissions',
 }
 
 export type WebViewBasePayload = {
@@ -113,6 +114,11 @@ export type RequestPermissionInput = {
 
 export type RequestPermissionPayload = RequestPermissionInput;
 
+// Anchor: Get Permissions Payload
+export type GetPermissionsInput = {};
+
+export type GetPermissionsPayload = GetPermissionsInput;
+
 type CommandReturnPayloadMap = {
   [Command.Verify]: VerifyCommandPayload;
   [Command.Pay]: PayCommandPayload;
@@ -122,6 +128,7 @@ type CommandReturnPayloadMap = {
   [Command.SignTypedData]: SignTypedDataPayload;
   [Command.ShareContacts]: ShareContactsPayload;
   [Command.RequestPermission]: RequestPermissionPayload;
+  [Command.GetPermissions]: GetPermissionsPayload;
 };
 export type CommandReturnPayload<T extends Command> =
   T extends keyof CommandReturnPayloadMap ? CommandReturnPayloadMap[T] : never;
