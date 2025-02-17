@@ -92,6 +92,7 @@ export type MiniAppSendTransactionSuccessPayload = {
   chain: Network;
   timestamp: string;
   version: number;
+  mini_app_id?: string;
 };
 
 export type MiniAppSendTransactionErrorPayload = {
@@ -99,6 +100,7 @@ export type MiniAppSendTransactionErrorPayload = {
   error_code: SendTransactionErrorCodes;
   details?: Record<string, any>;
   version: number;
+  mini_app_id?: string;
 };
 
 export type MiniAppSendTransactionPayload =
