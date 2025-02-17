@@ -1,6 +1,7 @@
 import { VerificationLevel } from '@worldcoin/idkit-core';
 import { Permission } from './commands';
 import {
+  GetPermissionsErrorCodes,
   PaymentErrorCodes,
   RequestPermissionErrorCodes,
   SendTransactionErrorCodes,
@@ -22,6 +23,7 @@ export enum ResponseEvent {
   MiniAppSignTypedData = 'miniapp-sign-typed-data',
   MiniAppShareContacts = 'miniapp-share-contacts',
   MiniAppRequestPermission = 'miniapp-request-permission',
+  MiniAppGetPermissions = 'miniapp-get-permissions',
 }
 
 export type MiniAppVerifyActionSuccessPayload = {
@@ -186,6 +188,30 @@ export type MiniAppRequestPermissionPayload =
   | MiniAppRequestPermissionSuccessPayload
   | MiniAppRequestPermissionErrorPayload;
 
+// Anchor: Get Permissions Payload
+
+export type PermissionSettings = {
+  [K in Permission]?: any;
+};
+
+export type MiniAppGetPermissionsSuccessPayload = {
+  status: 'success';
+  permissions: PermissionSettings;
+  version: number;
+  timestamp: string;
+};
+
+export type MiniAppGetPermissionsErrorPayload = {
+  status: 'error';
+  error_code: GetPermissionsErrorCodes;
+  details: string;
+  version: number;
+};
+
+export type MiniAppGetPermissionsPayload =
+  | MiniAppGetPermissionsSuccessPayload
+  | MiniAppGetPermissionsErrorPayload;
+
 type EventPayloadMap = {
   [ResponseEvent.MiniAppVerifyAction]: MiniAppVerifyActionPayload;
   [ResponseEvent.MiniAppPayment]: MiniAppPaymentPayload;
@@ -195,6 +221,7 @@ type EventPayloadMap = {
   [ResponseEvent.MiniAppSignTypedData]: MiniAppSignTypedDataPayload;
   [ResponseEvent.MiniAppShareContacts]: MiniAppShareContactsPayload;
   [ResponseEvent.MiniAppRequestPermission]: MiniAppRequestPermissionPayload;
+  [ResponseEvent.MiniAppGetPermissions]: MiniAppGetPermissionsPayload;
 };
 
 export type EventPayload<T extends ResponseEvent = ResponseEvent> =

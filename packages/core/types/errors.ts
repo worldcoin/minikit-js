@@ -180,3 +180,12 @@ export const RequestPermissionErrorMessage = {
   [RequestPermissionErrorCodes.UnsupportedPermission]:
     'The permission requested is not supported by this mini app',
 };
+
+export enum GetPermissionsErrorCodes {
+  GenericError = 'generic_error',
+}
+
+export const GetPermissionsErrorMessage = {
+  [GetPermissionsErrorCodes.GenericError]:
+    'Something unexpected went wrong. Please try again.',
+};
