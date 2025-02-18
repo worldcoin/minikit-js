@@ -5,6 +5,7 @@ import { generateSiweMessage } from 'helpers/siwe/siwe';
 import { validateWalletAuthCommandInput } from 'helpers/siwe/validate-wallet-auth-command-input';
 import { validateSendTransactionPayload } from 'helpers/transaction/validate-payload';
 import { getUserProfile } from 'helpers/usernames';
+import { compressProof } from 'semaphore-rs-bundler';
 import {
   AsyncHandlerReturn,
   Command,
@@ -32,6 +33,7 @@ import {
   MiniKitInstallErrorMessage,
 } from 'types/errors';
 import { Network } from 'types/payment';
+import { decodeAbiParameters, encodeAbiParameters } from 'viem';
 import { sendWebviewEvent } from './helpers/send-webview-event';
 import {
   EventHandler,
@@ -127,6 +129,52 @@ export class MiniKit {
         originalHandler(payload);
       };
 
+      this.listeners[event] = wrappedHandler as EventHandler<E>;
+    } else if (event === ResponseEvent.MiniAppVerifyAction) {
+      const originalHandler =
+        handler as EventHandler<ResponseEvent.MiniAppVerifyAction>;
+      const wrappedHandler: EventHandler<ResponseEvent.MiniAppVerifyAction> = (
+        payload,
+      ) => {
+        if (payload.status === 'success') {
+          // Decode the hex proof to array of 8 uints
+          const decodedProof = decodeAbiParameters(
+            [{ type: 'uint256[8]' }],
+            payload.proof as `0x${string}`,
+          )[0] as readonly [
+            bigint,
+            bigint,
+            bigint,
+            bigint,
+            bigint,
+            bigint,
+            bigint,
+            bigint,
+          ];
+
+          // Convert to hex strings for compression
+          const proofHexStrings = [...decodedProof].map(
+            (p) => '0x' + p.toString(16).padStart(64, '0'),
+          ) as [string, string, string, string, string, string, string, string];
+
+          // Compress and pad the proof
+          const compressedProof = compressProof(proofHexStrings);
+          const paddedProof = [
+            ...compressedProof.map(BigInt),
+            0n,
+            0n,
+            0n,
+            0n,
+          ] as [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint];
+
+          // Encode back to hex string
+          payload.proof = encodeAbiParameters(
+            [{ type: 'uint256[8]' }],
+            [paddedProof],
+          );
+        }
+        originalHandler(payload);
+      };
       this.listeners[event] = wrappedHandler as EventHandler<E>;
     } else {
       this.listeners[event] = handler;

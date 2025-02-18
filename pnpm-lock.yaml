@@ -100,6 +100,9 @@ importers:
       abitype:
         specifier: ^1.0.6
         version: 1.0.6(typescript@5.5.4)
+      semaphore-rs-bundler:
+        specifier: ^0.1.4
+        version: 0.1.4
     devDependencies:
       '@types/jest':
         specifier: ^29.5.14
@@ -2919,6 +2922,9 @@ packages:
 
   scrypt-js@3.0.1:
     resolution: {integrity: sha512-cdwTTnqPu0Hyvf5in5asVdZocVDTNRmR7XEcJuIzMjJeSHybHl7vpB66AzwTaIg6CLSbtjcxc8fqcySfnTkccA==}
+
+  semaphore-rs-bundler@0.1.4:
+    resolution: {integrity: sha512-+UZkwfHS+1IxVuPMXNppkZUwLJXGTRujlFFXc/GMTBbPdyWhlO7RcsQC7mF/r+9jOnkJ1i2gSfX3AX13BaIdhw==}
 
   semver@6.3.1:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
@@ -6823,6 +6829,8 @@ snapshots:
       loose-envify: 1.4.0
 
   scrypt-js@3.0.1: {}
+
+  semaphore-rs-bundler@0.1.4: {}
 
   semver@6.3.1: {}
 
