@@ -15,7 +15,7 @@ import { AppConfig } from '../types/client';
 interface UseTransactionReceiptOptions<
   transport extends Transport = Transport,
   chain extends Chain | undefined = Chain | undefined,
-  accountOrAddress extends Account | undefined = undefined,
+  accountOrAddress extends Account | Address | undefined = undefined,
   rpcSchema extends RpcSchema | undefined = undefined,
 > {
   client: PublicClient<
@@ -46,7 +46,14 @@ export function useWaitForTransactionReceipt<
   chain extends Chain | undefined = Chain | undefined,
   accountOrAddress extends Account | Address | undefined = undefined,
   rpcSchema extends RpcSchema | undefined = undefined,
->(options: UseTransactionReceiptOptions): UseTransactionReceiptResult {
+>(
+  options: UseTransactionReceiptOptions<
+    transport,
+    chain,
+    accountOrAddress,
+    rpcSchema
+  >,
+): UseTransactionReceiptResult {
   const {
     client,
     appConfig: _appConfig,
