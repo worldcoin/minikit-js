@@ -46,14 +46,7 @@ export function useWaitForTransactionReceipt<
   chain extends Chain | undefined = Chain | undefined,
   accountOrAddress extends Account | Address | undefined = undefined,
   rpcSchema extends RpcSchema | undefined = undefined,
->(
-  options: UseTransactionReceiptOptions<
-    transport,
-    chain,
-    accountOrAddress,
-    rpcSchema
-  >,
-): UseTransactionReceiptResult {
+>(options: UseTransactionReceiptOptions): UseTransactionReceiptResult {
   const {
     client,
     appConfig: _appConfig,

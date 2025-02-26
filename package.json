@@ -4,7 +4,8 @@
   "name": "minikit-monorepo",
   "scripts": {
     "dev": "turbo run dev",
-    "lint": "prettier --check .",
+    "lint": "turbo run lint",
+    "lint:prettier": "prettier --check .",
     "format": "prettier --write .",
     "build": "turbo run build",
     "prepublishOnly": "npm run build",
