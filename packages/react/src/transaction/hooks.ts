@@ -1,10 +1,29 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { PublicClient, TransactionReceipt } from 'viem';
+import {
+  type Account,
+  type Address,
+  type Chain,
+  type ParseAccount,
+  type PublicClient,
+  type RpcSchema,
+  type TransactionReceipt,
+  type Transport,
+} from 'viem';
 import { fetchTransactionHash } from '.';
 import { AppConfig } from '../types/client';
 
-interface UseTransactionReceiptOptions {
-  client: PublicClient;
+interface UseTransactionReceiptOptions<
+  transport extends Transport = Transport,
+  chain extends Chain | undefined = Chain | undefined,
+  accountOrAddress extends Account | undefined = undefined,
+  rpcSchema extends RpcSchema | undefined = undefined,
+> {
+  client: PublicClient<
+    transport,
+    chain,
+    ParseAccount<accountOrAddress>,
+    rpcSchema
+  >;
   appConfig: AppConfig;
   transactionId: string;
   confirmations?: number;
@@ -22,9 +41,12 @@ interface UseTransactionReceiptResult {
   retrigger: () => void;
 }
 
-export function useWaitForTransactionReceipt(
-  options: UseTransactionReceiptOptions,
-): UseTransactionReceiptResult {
+export function useWaitForTransactionReceipt<
+  transport extends Transport = Transport,
+  chain extends Chain | undefined = Chain | undefined,
+  accountOrAddress extends Account | Address | undefined = undefined,
+  rpcSchema extends RpcSchema | undefined = undefined,
+>(options: UseTransactionReceiptOptions): UseTransactionReceiptResult {
   const {
     client,
     appConfig: _appConfig,
