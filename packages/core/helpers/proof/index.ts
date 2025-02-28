@@ -1,4 +1,4 @@
-import { compressProof } from 'semaphore-rs-bundler';
+import { compressProof } from 'semaphore-rs-js';
 import { decodeAbiParameters, encodeAbiParameters } from 'viem';
 
 export const compressAndPadProof = (proof: `0x${string}`) => {
