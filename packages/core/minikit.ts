@@ -1,6 +1,7 @@
 import { VerificationLevel } from '@worldcoin/idkit-core';
 import { encodeAction, generateSignal } from '@worldcoin/idkit-core/hashing';
 import { validatePaymentPayload } from 'helpers/payment/client';
+import { compressAndPadProof } from 'helpers/proof';
 import { generateSiweMessage } from 'helpers/siwe/siwe';
 import { validateWalletAuthCommandInput } from 'helpers/siwe/validate-wallet-auth-command-input';
 import { validateSendTransactionPayload } from 'helpers/transaction/validate-payload';
@@ -138,6 +139,18 @@ export class MiniKit {
         originalHandler(payload);
       };
 
+      this.listeners[event] = wrappedHandler as EventHandler<E>;
+    } else if (event === ResponseEvent.MiniAppVerifyAction) {
+      const originalHandler =
+        handler as EventHandler<ResponseEvent.MiniAppVerifyAction>;
+      const wrappedHandler: EventHandler<ResponseEvent.MiniAppVerifyAction> = (
+        payload,
+      ) => {
+        if (payload.status === 'success') {
+          payload.proof = compressAndPadProof(payload.proof as `0x${string}`);
+        }
+        originalHandler(payload);
+      };
       this.listeners[event] = wrappedHandler as EventHandler<E>;
     } else {
       this.listeners[event] = handler;
@@ -580,6 +593,11 @@ export class MiniKit {
             Command.Verify,
             () => this.commands.verify(payload),
           );
+          if (response.finalPayload.status === 'success') {
+            response.finalPayload.proof = compressAndPadProof(
+              response.finalPayload.proof as `0x${string}`,
+            );
+          }
           resolve(response);
         } catch (error) {
           reject(error);
