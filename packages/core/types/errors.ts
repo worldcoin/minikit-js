@@ -216,3 +216,14 @@ export const GetPermissionsErrorMessage = {
   [GetPermissionsErrorCodes.GenericError]:
     'Something unexpected went wrong. Please try again.',
 };
+
+export enum SendHapticFeedbackErrorCodes {
+  GenericError = 'generic_error',
+  UserRejected = 'user_rejected',
+}
+
+export const SendHapticFeedbackErrorMessage = {
+  [SendHapticFeedbackErrorCodes.GenericError]:
+    'Something unexpected went wrong.',
+  [SendHapticFeedbackErrorCodes.UserRejected]: 'User rejected the request.',
+};

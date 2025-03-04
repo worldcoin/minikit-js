@@ -15,6 +15,8 @@ import {
   PayCommandPayload,
   RequestPermissionInput,
   RequestPermissionPayload,
+  SendHapticFeedbackInput,
+  SendHapticFeedbackPayload,
   SendTransactionInput,
   SendTransactionPayload,
   ShareContactsPayload,
@@ -40,6 +42,7 @@ import {
   MiniAppGetPermissionsPayload,
   MiniAppPaymentPayload,
   MiniAppRequestPermissionPayload,
+  MiniAppSendHapticFeedbackPayload,
   MiniAppSendTransactionPayload,
   MiniAppShareContactsPayload,
   MiniAppSignMessagePayload,
@@ -71,6 +74,7 @@ export class MiniKit {
     [Command.ShareContacts]: 1,
     [Command.RequestPermission]: 1,
     [Command.GetPermissions]: 1,
+    [Command.SendHapticFeedback]: 1,
   };
 
   private static isCommandAvailable = {
@@ -83,6 +87,7 @@ export class MiniKit {
     [Command.ShareContacts]: false,
     [Command.RequestPermission]: false,
     [Command.GetPermissions]: false,
+    [Command.SendHapticFeedback]: false,
   };
 
   private static listeners: Record<ResponseEvent, EventHandler> = {
@@ -95,6 +100,7 @@ export class MiniKit {
     [ResponseEvent.MiniAppShareContacts]: () => {},
     [ResponseEvent.MiniAppRequestPermission]: () => {},
     [ResponseEvent.MiniAppGetPermissions]: () => {},
+    [ResponseEvent.MiniAppSendHapticFeedback]: () => {},
   };
 
   public static appId: string | null = null;
@@ -526,6 +532,28 @@ export class MiniKit {
         status: 'sent',
       };
     },
+
+    sendHapticFeedback: (
+      payload: SendHapticFeedbackInput,
+    ): SendHapticFeedbackPayload | null => {
+      if (
+        typeof window === 'undefined' ||
+        !this.isCommandAvailable[Command.SendHapticFeedback]
+      ) {
+        console.error(
+          "'sendHapticFeedback' command is unavailable. Check MiniKit.install() or update the app version",
+        );
+        return null;
+      }
+
+      sendMiniKitEvent<WebViewBasePayload>({
+        command: Command.SendHapticFeedback,
+        version: 1,
+        payload,
+      });
+
+      return payload;
+    },
   };
 
   /**
@@ -699,6 +727,25 @@ export class MiniKit {
             ResponseEvent.MiniAppGetPermissions,
             Command.GetPermissions,
             () => this.commands.getPermissions(),
+          );
+          resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
+    sendHapticFeedback: async (
+      payload: SendHapticFeedbackInput,
+    ): AsyncHandlerReturn<
+      SendHapticFeedbackPayload | null,
+      MiniAppSendHapticFeedbackPayload
+    > => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppSendHapticFeedback,
+            Command.SendHapticFeedback,
+            () => this.commands.sendHapticFeedback(payload),
           );
           resolve(response);
         } catch (error) {
