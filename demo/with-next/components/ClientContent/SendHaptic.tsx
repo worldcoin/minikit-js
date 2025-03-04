@@ -2,8 +2,8 @@ import {
   MiniAppSendHapticFeedbackPayload,
   MiniKit,
   ResponseEvent,
-  SendHapticFeedbackCommandInput,
   SendHapticFeedbackErrorCodes,
+  SendHapticFeedbackInput,
 } from '@worldcoin/minikit-js';
 import { useCallback, useEffect, useState } from 'react';
 import * as yup from 'yup';
@@ -22,7 +22,7 @@ const sendHapticFeedbackErrorPayloadSchema = yup.object({
   version: yup.number().required(),
 });
 
-const allPossibleHaptics: SendHapticFeedbackCommandInput[] = [
+const allPossibleHaptics: SendHapticFeedbackInput[] = [
   { hapticsType: 'impact', style: 'heavy' },
   { hapticsType: 'impact', style: 'light' },
   { hapticsType: 'impact', style: 'medium' },
@@ -79,7 +79,7 @@ export const SendHapticFeedback = () => {
   }, []);
 
   const onSendHapticFeedback = useCallback(
-    async (input: SendHapticFeedbackCommandInput) => {
+    async (input: SendHapticFeedbackInput) => {
       const payload = MiniKit.commands.sendHapticFeedback(input);
 
       setSentHapticFeedbackPayload({
