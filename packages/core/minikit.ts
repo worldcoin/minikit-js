@@ -405,20 +405,15 @@ export class MiniKit {
         return null;
       }
 
-      if (!validateSendTransactionPayload(payload).isValid) {
-        console.error(
-          'Invalid sendTransaction payload - some object properties are not strings',
-        );
-        return null;
-      }
+      const validatedPayload = validateSendTransactionPayload(payload);
 
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.SendTransaction,
         version: 1,
-        payload,
+        payload: validatedPayload,
       });
 
-      return payload;
+      return validatedPayload;
     },
 
     signMessage: (payload: SignMessageInput): SignMessagePayload | null => {
