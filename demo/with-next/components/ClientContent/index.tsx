@@ -8,7 +8,9 @@ import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useState } from 'react';
 import { CameraComponent } from './Camera';
+import CheckRequests from './CheckRequests';
 import { ExternalLinks } from './ExternalLinks';
+import { GetPermissions } from './GetPermissions';
 import { Nav } from './Nav';
 import { Pay } from './Pay';
 import { RequestPermission } from './RequestPermissions';
@@ -19,7 +21,6 @@ import { SendTransaction } from './Transaction';
 import { User } from './User';
 import { VerifyAction } from './VerifyAction';
 import { WalletAuth } from './WalletAuth';
-
 const VersionsNoSSR = dynamic(
   () => import('./Versions').then((comp) => comp.Versions),
   { ssr: false },
@@ -101,10 +102,15 @@ export const ClientContent = () => {
           <hr />
           <RequestPermission />
           <hr />
+          <GetPermissions />
+          <hr />
+          <CheckRequests />
+          <hr />
           <input className="text-xs border-black border-2" />
           <ExternalLinks />
           <hr />
           <CameraComponent />
+          <hr />
         </div>
       </div>
     </div>

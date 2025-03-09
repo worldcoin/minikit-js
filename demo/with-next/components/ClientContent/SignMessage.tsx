@@ -44,7 +44,7 @@ export const SignMessage = () => {
     any
   > | null>(null);
   const [tempInstallFix, setTempInstallFix] = useState(0);
-  const messageToSign = 'hello world';
+  const [messageToSign, setMessageToSign] = useState('hello world');
 
   useEffect(() => {
     if (!MiniKit.isInstalled()) {
@@ -128,12 +128,23 @@ export const SignMessage = () => {
             </pre>
           </div>
         </div>
-        <button
-          className="bg-black text-white rounded-lg p-4 w-full"
-          onClick={onSignMessage}
-        >
-          Sign Message
-        </button>
+        <div className="grid gap-y-2">
+          <button
+            className="bg-black text-white rounded-lg p-4 w-full"
+            onClick={onSignMessage}
+          >
+            Sign Message
+          </button>
+          <button
+            className="bg-black text-white rounded-lg p-4 w-full"
+            onClick={async () => {
+              setMessageToSign('world-chat-authentication:test');
+              await onSignMessage();
+            }}
+          >
+            Fail Message
+          </button>
+        </div>
       </div>
 
       <hr />

@@ -9,6 +9,7 @@ import {
   AsyncHandlerReturn,
   Command,
   CommandReturnPayload,
+  GetPermissionsPayload,
   MiniKitInstallReturnType,
   PayCommandInput,
   PayCommandPayload,
@@ -36,6 +37,7 @@ import { sendWebviewEvent } from './helpers/send-webview-event';
 import {
   EventHandler,
   EventPayload,
+  MiniAppGetPermissionsPayload,
   MiniAppPaymentPayload,
   MiniAppRequestPermissionPayload,
   MiniAppSendTransactionPayload,
@@ -68,6 +70,7 @@ export class MiniKit {
     [Command.SignTypedData]: 1,
     [Command.ShareContacts]: 1,
     [Command.RequestPermission]: 1,
+    [Command.GetPermissions]: 1,
   };
 
   private static isCommandAvailable = {
@@ -79,6 +82,7 @@ export class MiniKit {
     [Command.SignTypedData]: false,
     [Command.ShareContacts]: false,
     [Command.RequestPermission]: false,
+    [Command.GetPermissions]: false,
   };
 
   private static listeners: Record<ResponseEvent, EventHandler> = {
@@ -90,6 +94,7 @@ export class MiniKit {
     [ResponseEvent.MiniAppSignTypedData]: () => {},
     [ResponseEvent.MiniAppShareContacts]: () => {},
     [ResponseEvent.MiniAppRequestPermission]: () => {},
+    [ResponseEvent.MiniAppGetPermissions]: () => {},
   };
 
   public static appId: string | null = null;
@@ -400,20 +405,15 @@ export class MiniKit {
         return null;
       }
 
-      if (!validateSendTransactionPayload(payload).isValid) {
-        console.error(
-          'Invalid sendTransaction payload - some object properties are not strings',
-        );
-        return null;
-      }
+      const validatedPayload = validateSendTransactionPayload(payload);
 
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.SendTransaction,
         version: 1,
-        payload,
+        payload: validatedPayload,
       });
 
-      return payload;
+      return validatedPayload;
     },
 
     signMessage: (payload: SignMessageInput): SignMessagePayload | null => {
@@ -503,6 +503,28 @@ export class MiniKit {
       });
 
       return payload;
+    },
+
+    getPermissions: (): GetPermissionsPayload | null => {
+      if (
+        typeof window === 'undefined' ||
+        !this.isCommandAvailable[Command.GetPermissions]
+      ) {
+        console.error(
+          "'getPermissions' command is unavailable. Check MiniKit.install() or update the app version",
+        );
+        return null;
+      }
+
+      sendMiniKitEvent<WebViewBasePayload>({
+        command: Command.GetPermissions,
+        version: 1,
+        payload: {},
+      });
+
+      return {
+        status: 'sent',
+      };
     },
   };
 
@@ -660,6 +682,23 @@ export class MiniKit {
             ResponseEvent.MiniAppRequestPermission,
             Command.RequestPermission,
             () => this.commands.requestPermission(payload),
+          );
+          resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
+    getPermissions: async (): AsyncHandlerReturn<
+      GetPermissionsPayload | null,
+      MiniAppGetPermissionsPayload
+    > => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppGetPermissions,
+            Command.GetPermissions,
+            () => this.commands.getPermissions(),
           );
           resolve(response);
         } catch (error) {

@@ -4,7 +4,7 @@ export { AppErrorCodes as VerificationErrorCodes } from '@worldcoin/idkit-core';
 
 export const VerificationErrorMessage: Record<AppErrorCodes, string> = {
   [AppErrorCodes.VerificationRejected]:
-    'You’ve cancelled the request in World App.',
+    "You've cancelled the request in World App.",
   [AppErrorCodes.MaxVerificationsReached]:
     'You have already verified the maximum number of times for this action.',
   [AppErrorCodes.CredentialUnavailable]:
@@ -41,7 +41,7 @@ export const PaymentErrorMessage: Record<PaymentErrorCodes, string> = {
   [PaymentErrorCodes.InputError]:
     'There was a problem with this request. Please try again or contact the app owner.',
   [PaymentErrorCodes.PaymentRejected]:
-    'You’ve cancelled the payment in World App.',
+    "You've cancelled the payment in World App.",
   [PaymentErrorCodes.InvalidReceiver]:
     'The receiver address is invalid. Please contact the app owner.',
   [PaymentErrorCodes.InsufficientBalance]:
@@ -84,9 +84,15 @@ export enum SendTransactionErrorCodes {
   DisallowedOperation = 'disallowed_operation',
   InvalidContract = 'invalid_contract',
   MaliciousOperation = 'malicious_operation',
+  DailyTxLimitReached = 'daily_tx_limit_reached',
+  PermittedAmountExceedsSlippage = 'permitted_amount_exceeds_slippage',
+  PermittedAmountNotFound = 'permitted_amount_not_found',
 }
 
-export const SendTransactionErrorMessage = {
+export const SendTransactionErrorMessage: Record<
+  SendTransactionErrorCodes,
+  string
+> = {
   [SendTransactionErrorCodes.InvalidOperation]:
     'Transaction included an operation that was invalid',
   [SendTransactionErrorCodes.UserRejected]: 'User rejected the request.',
@@ -103,6 +109,12 @@ export const SendTransactionErrorMessage = {
     'The contract address is not allowed for your application. Please check your developer portal configurations',
   [SendTransactionErrorCodes.MaliciousOperation]:
     'The operation requested is considered malicious.',
+  [SendTransactionErrorCodes.DailyTxLimitReached]:
+    'Daily transaction limit reached. Max 100 transactions per day. Wait until the next day.',
+  [SendTransactionErrorCodes.PermittedAmountExceedsSlippage]:
+    'Permitted amount exceeds slippage. You must spend at least 90% of the permitted amount.',
+  [SendTransactionErrorCodes.PermittedAmountNotFound]:
+    'Permitted amount not found in permit2 payload.',
 };
 
 export enum SignMessageErrorCodes {
@@ -128,7 +140,22 @@ export enum SignTypedDataErrorCodes {
   MaliciousOperation = 'malicious_operation',
 }
 
-export const SignTypedDataErrorMessage = SendTransactionErrorMessage;
+export const SignTypedDataErrorMessage = {
+  [SignTypedDataErrorCodes.InvalidOperation]:
+    'Transaction included an operation that was invalid',
+  [SignTypedDataErrorCodes.UserRejected]: 'User rejected the request.',
+  [SignTypedDataErrorCodes.InputError]: 'Invalid payload.',
+  [SignTypedDataErrorCodes.SimulationFailed]:
+    'The transaction simulation failed.',
+  [SignTypedDataErrorCodes.GenericError]:
+    'Something unexpected went wrong. Please try again.',
+  [SignTypedDataErrorCodes.DisallowedOperation]:
+    'The operation requested is not allowed. Please refer to the docs.',
+  [SignTypedDataErrorCodes.InvalidContract]:
+    'The contract address is not allowed for your application. Please check your developer portal configurations',
+  [SignTypedDataErrorCodes.MaliciousOperation]:
+    'The operation requested is considered malicious.',
+};
 
 export enum MiniKitInstallErrorCodes {
   Unknown = 'unknown',
@@ -179,4 +206,13 @@ export const RequestPermissionErrorMessage = {
     'If the user has already granted this mini app permission',
   [RequestPermissionErrorCodes.UnsupportedPermission]:
     'The permission requested is not supported by this mini app',
+};
+
+export enum GetPermissionsErrorCodes {
+  GenericError = 'generic_error',
+}
+
+export const GetPermissionsErrorMessage = {
+  [GetPermissionsErrorCodes.GenericError]:
+    'Something unexpected went wrong. Please try again.',
 };
