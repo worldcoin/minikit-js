@@ -129,7 +129,7 @@ export const SignMessage = () => {
         <div className="grid gap-y-2">
           <button
             className="bg-black text-white rounded-lg p-4 w-full"
-            onClick={() => onSignMessage(messageToSign)}
+            onClick={() => onSignMessage('hello world')}
           >
             Sign Message
           </button>
