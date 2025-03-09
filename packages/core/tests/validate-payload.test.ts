@@ -1,14 +1,53 @@
 import { validateSendTransactionPayload } from '../helpers/transaction/validate-payload';
-
+const ABI = [
+  {
+    inputs: [
+      {
+        internalType: 'address payable',
+        name: 'recipient',
+        type: 'address',
+      },
+    ],
+    name: 'pay',
+    outputs: [],
+    stateMutability: 'payable',
+    type: 'function',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'sender',
+        type: 'address',
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'amount',
+        type: 'uint256',
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'recipient',
+        type: 'address',
+      },
+    ],
+    name: 'Paid',
+    type: 'event',
+  },
+];
 describe('validateSendTransactionPayload', () => {
-  it('should validate simple string values', () => {
+  it('should validate simple string values and preserve ABI', () => {
     const payload = {
       transaction: [
         {
           address: '0x123',
           functionName: 'transfer',
           args: ['0x456', '1000000000000000000'],
-          abi: [],
+          abi: ABI,
         },
       ],
     };
@@ -31,7 +70,7 @@ describe('validateSendTransactionPayload', () => {
             },
           ],
           functionName: 'transfer',
-          args: ['0x456', 1000000000000000000],
+          args: ['0x456', [1000000000000000000, '1', [true]]],
         },
       ],
     };
@@ -51,7 +90,7 @@ describe('validateSendTransactionPayload', () => {
             },
           ],
           functionName: 'transfer',
-          args: ['0x456', '1000000000000000000'],
+          args: ['0x456', ['1000000000000000000', '1', [true]]],
         },
       ],
     };
@@ -92,7 +131,7 @@ describe('validateSendTransactionPayload', () => {
           address: '0x123',
           functionName: 'transfer',
           args: [123, '1000000000000000000'], // number instead of string
-          abi: [],
+          abi: ABI,
         },
       ],
     };
@@ -102,7 +141,7 @@ describe('validateSendTransactionPayload', () => {
           address: '0x123',
           functionName: 'transfer',
           args: ['123', '1000000000000000000'], // number instead of string
-          abi: [],
+          abi: ABI,
         },
       ],
     };
