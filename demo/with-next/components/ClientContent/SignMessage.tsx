@@ -5,7 +5,7 @@ import {
   SignMessageErrorCodes,
   SignMessageInput,
 } from '@worldcoin/minikit-js';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import * as yup from 'yup';
 import { validateSchema } from './helpers/validate-schema';
 
@@ -101,17 +101,18 @@ export const SignMessage = () => {
     };
   }, [messageToSign, tempInstallFix]);
 
-  const onSignMessage = useCallback(async () => {
+  const onSignMessage = async (message: string) => {
     const signMessagePayload: SignMessageInput = {
-      message: messageToSign,
+      message,
     };
 
+    setMessageToSign(message);
     const payload = MiniKit.commands.signMessage(signMessagePayload);
     setSentSignMessagePayload({
       payload,
     });
     setTempInstallFix((prev) => prev + 1);
-  }, [messageToSign]);
+  };
 
   return (
     <div>
@@ -128,15 +129,14 @@ export const SignMessage = () => {
         <div className="grid gap-y-2">
           <button
             className="bg-black text-white rounded-lg p-4 w-full"
-            onClick={onSignMessage}
+            onClick={() => onSignMessage(messageToSign)}
           >
             Sign Message
           </button>
           <button
             className="bg-black text-white rounded-lg p-4 w-full"
             onClick={async () => {
-              setMessageToSign('world-chat-authentication:test');
-              await onSignMessage();
+              await onSignMessage('world-chat-authentication:test');
             }}
           >
             Fail Message
