@@ -82,8 +82,7 @@ export const SignMessage = () => {
 
         const isValid = await (
           await Safe.init({
-            provider:
-              'https://opt-mainnet.g.alchemy.com/v2/Ha76ahWcm6iDVBU7GNr5n-ONLgzWnkWc',
+            provider: 'https://worldchain-mainnet.g.alchemy.com/public',
             safeAddress: payload.address,
           })
         ).isValidSignature(messageHash, payload.signature);
@@ -92,9 +91,7 @@ export const SignMessage = () => {
         if (isValid) {
           setSignMessagePayloadVerificationMessage('Signature is valid');
         } else {
-          setSignMessagePayloadVerificationMessage(
-            'Signature is invalid (We are verifying on optimism, if you are using worldchain message andy',
-          );
+          setSignMessagePayloadVerificationMessage('Signature is invalid');
         }
       }
     });
@@ -102,7 +99,7 @@ export const SignMessage = () => {
     return () => {
       MiniKit.unsubscribe(ResponseEvent.MiniAppSignMessage);
     };
-  }, [tempInstallFix]);
+  }, [messageToSign, tempInstallFix]);
 
   const onSignMessage = useCallback(async () => {
     const signMessagePayload: SignMessageInput = {
