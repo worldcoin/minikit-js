@@ -532,10 +532,12 @@ export const SendTransaction = () => {
         <div className="grid gap-y-1">
           <p>Verification:</p>
           {/* {sendTransactionVerificationMessage ?? "No verification yet"} */}
-          {transactionId && <p>Transaction ID: {transactionId}</p>}
-          {isConfirming && <p>Waiting for confirmation...</p>}
-          {isConfirmed && <p>Transaction confirmed.</p>}
-          {isError && <p>{error?.message}</p>}
+          <div className="grid gap-y-1 bg-gray-300 p-2">
+            {transactionId && <p>Transaction ID: {transactionId}</p>}
+            {isConfirming && <p>Waiting for confirmation...</p>}
+            {isConfirmed && <p>Transaction confirmed.</p>}
+            {isError && <p>{error?.message}</p>}
+          </div>
         </div>
       </div>
     </div>
