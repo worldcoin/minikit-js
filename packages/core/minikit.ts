@@ -1,6 +1,7 @@
 import { VerificationLevel } from '@worldcoin/idkit-core';
 import { encodeAction, generateSignal } from '@worldcoin/idkit-core/hashing';
 import { validatePaymentPayload } from 'helpers/payment/client';
+import { compressAndPadProof } from 'helpers/proof';
 import { generateSiweMessage } from 'helpers/siwe/siwe';
 import { validateWalletAuthCommandInput } from 'helpers/siwe/validate-wallet-auth-command-input';
 import { validateSendTransactionPayload } from 'helpers/transaction/validate-payload';
@@ -15,6 +16,8 @@ import {
   PayCommandPayload,
   RequestPermissionInput,
   RequestPermissionPayload,
+  SendHapticFeedbackInput,
+  SendHapticFeedbackPayload,
   SendTransactionInput,
   SendTransactionPayload,
   ShareContactsPayload,
@@ -40,6 +43,7 @@ import {
   MiniAppGetPermissionsPayload,
   MiniAppPaymentPayload,
   MiniAppRequestPermissionPayload,
+  MiniAppSendHapticFeedbackPayload,
   MiniAppSendTransactionPayload,
   MiniAppShareContactsPayload,
   MiniAppSignMessagePayload,
@@ -71,6 +75,7 @@ export class MiniKit {
     [Command.ShareContacts]: 1,
     [Command.RequestPermission]: 1,
     [Command.GetPermissions]: 1,
+    [Command.SendHapticFeedback]: 1,
   };
 
   private static isCommandAvailable = {
@@ -83,6 +88,7 @@ export class MiniKit {
     [Command.ShareContacts]: false,
     [Command.RequestPermission]: false,
     [Command.GetPermissions]: false,
+    [Command.SendHapticFeedback]: false,
   };
 
   private static listeners: Record<ResponseEvent, EventHandler> = {
@@ -95,6 +101,7 @@ export class MiniKit {
     [ResponseEvent.MiniAppShareContacts]: () => {},
     [ResponseEvent.MiniAppRequestPermission]: () => {},
     [ResponseEvent.MiniAppGetPermissions]: () => {},
+    [ResponseEvent.MiniAppSendHapticFeedback]: () => {},
   };
 
   public static appId: string | null = null;
@@ -132,6 +139,18 @@ export class MiniKit {
         originalHandler(payload);
       };
 
+      this.listeners[event] = wrappedHandler as EventHandler<E>;
+    } else if (event === ResponseEvent.MiniAppVerifyAction) {
+      const originalHandler =
+        handler as EventHandler<ResponseEvent.MiniAppVerifyAction>;
+      const wrappedHandler: EventHandler<ResponseEvent.MiniAppVerifyAction> = (
+        payload,
+      ) => {
+        if (payload.status === 'success') {
+          payload.proof = compressAndPadProof(payload.proof as `0x${string}`);
+        }
+        originalHandler(payload);
+      };
       this.listeners[event] = wrappedHandler as EventHandler<E>;
     } else {
       this.listeners[event] = handler;
@@ -526,6 +545,28 @@ export class MiniKit {
         status: 'sent',
       };
     },
+
+    sendHapticFeedback: (
+      payload: SendHapticFeedbackInput,
+    ): SendHapticFeedbackPayload | null => {
+      if (
+        typeof window === 'undefined' ||
+        !this.isCommandAvailable[Command.SendHapticFeedback]
+      ) {
+        console.error(
+          "'sendHapticFeedback' command is unavailable. Check MiniKit.install() or update the app version",
+        );
+        return null;
+      }
+
+      sendMiniKitEvent<WebViewBasePayload>({
+        command: Command.SendHapticFeedback,
+        version: 1,
+        payload,
+      });
+
+      return payload;
+    },
   };
 
   /**
@@ -552,6 +593,11 @@ export class MiniKit {
             Command.Verify,
             () => this.commands.verify(payload),
           );
+          if (response.finalPayload.status === 'success') {
+            response.finalPayload.proof = compressAndPadProof(
+              response.finalPayload.proof as `0x${string}`,
+            );
+          }
           resolve(response);
         } catch (error) {
           reject(error);
@@ -699,6 +745,25 @@ export class MiniKit {
             ResponseEvent.MiniAppGetPermissions,
             Command.GetPermissions,
             () => this.commands.getPermissions(),
+          );
+          resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
+    sendHapticFeedback: async (
+      payload: SendHapticFeedbackInput,
+    ): AsyncHandlerReturn<
+      SendHapticFeedbackPayload | null,
+      MiniAppSendHapticFeedbackPayload
+    > => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppSendHapticFeedback,
+            Command.SendHapticFeedback,
+            () => this.commands.sendHapticFeedback(payload),
           );
           resolve(response);
         } catch (error) {
