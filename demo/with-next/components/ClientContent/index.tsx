@@ -35,6 +35,7 @@ export const ClientContent = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);
   };
+  console.log('temp');
 
   return (
     <div className="p-2 lg:p-8 grid content-start min-h-[100dvh] gap-y-2">
@@ -85,7 +86,7 @@ export const ClientContent = () => {
         )}
 
         <div className="grid gap-y-8">
-          test cache
+          test 2
           <VersionsNoSSR />
           <hr />
           <VerifyAction />
