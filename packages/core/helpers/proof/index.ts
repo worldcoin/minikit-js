@@ -1,45 +1,32 @@
-import __wbg_init, {
+import {
+  base64Wasm,
+  initSync,
   compressProof as originalCompressProof,
 } from 'semaphore-rs-js';
 import { decodeAbiParameters, encodeAbiParameters } from 'viem';
 
-// Create a wrapper that ensures WASM is initialized
-let wasmInitialized = false;
-let wasmInitializing = false;
-let wasmInitPromise: Promise<void> | null = null;
-
-const WASM_URL = 'https://cdn.jsdelivr.net/npm/wasm@1.0.0/wasm.min.js';
-
-const ensureWasmInitialized = async () => {
-  if (wasmInitialized) return;
-
-  if (wasmInitializing) {
-    // Wait for existing initialization to complete
-    await wasmInitPromise;
-    return;
+function base64ToUint8Array(base64) {
+  if (typeof atob === 'function') {
+    const binaryString = atob(base64);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes;
+  } else if (typeof Buffer === 'function') {
+    return new Uint8Array(Buffer.from(base64, 'base64'));
+  } else {
+    throw new Error('No base64 decoder available');
   }
+}
 
-  wasmInitializing = true;
+const wasmBytes = base64ToUint8Array(base64Wasm);
 
-  // Initialize WASM module with URL
-  wasmInitPromise = __wbg_init(WASM_URL)
-    .then(() => {
-      console.log('✅ WASM initialized from URL');
-      wasmInitialized = true;
-      wasmInitializing = false;
-    })
-    .catch((error) => {
-      console.error('Failed to initialize WASM module:', error);
-      wasmInitializing = false;
-      throw error;
-    });
+// Initialize the generated bindings with the inlined wasm instance.
+initSync({ module: wasmBytes });
 
-  await wasmInitPromise;
-};
-
-export const compressAndPadProof = async (
-  proof: `0x${string}`,
-): Promise<`0x${string}`> => {
+export const compressAndPadProof = (proof: `0x${string}`): `0x${string}` => {
   try {
     // // Ensure WASM is initialized
     // await ensureWasmInitialized();
