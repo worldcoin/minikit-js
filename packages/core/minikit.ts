@@ -147,8 +147,11 @@ export class MiniKit {
         payload,
       ) => {
         if (payload.status === 'success') {
-          console.log("payload.status === 'success'", payload);
-          payload.proof = compressAndPadProof(payload.proof as `0x${string}`);
+          try {
+            payload.proof = compressAndPadProof(payload.proof as `0x${string}`);
+          } catch (error) {
+            console.error('Error compressing proof:', error);
+          }
         }
         originalHandler(payload);
       };
@@ -595,10 +598,13 @@ export class MiniKit {
             () => this.commands.verify(payload),
           );
           if (response.finalPayload.status === 'success') {
-            console.log("payload.status === 'success'", payload);
-            response.finalPayload.proof = compressAndPadProof(
-              response.finalPayload.proof as `0x${string}`,
-            );
+            try {
+              response.finalPayload.proof = compressAndPadProof(
+                response.finalPayload.proof as `0x${string}`,
+              );
+            } catch (error) {
+              console.error('Error compressing proof:', error);
+            }
           }
           resolve(response);
         } catch (error) {
