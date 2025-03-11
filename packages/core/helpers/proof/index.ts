@@ -1,33 +1,48 @@
-import {
-  initSync,
+import __wbg_init, {
   compressProof as originalCompressProof,
 } from 'semaphore-rs-js';
 import { decodeAbiParameters, encodeAbiParameters } from 'viem';
 
 // Create a wrapper that ensures WASM is initialized
 let wasmInitialized = false;
+let wasmInitializing = false;
+let wasmInitPromise: Promise<void> | null = null;
 
-const ensureWasmInitialized = () => {
+const WASM_URL = 'https://cdn.jsdelivr.net/npm/wasm@1.0.0/wasm.min.js';
+
+const ensureWasmInitialized = async () => {
   if (wasmInitialized) return;
 
-  // Try different initialization approaches
-  try {
-    // Try with an empty object with module property
-    initSync({ module: new WebAssembly.Module(new Uint8Array()) });
-    console.log('✅ initSync with empty module worked!');
-    wasmInitialized = true;
+  if (wasmInitializing) {
+    // Wait for existing initialization to complete
+    await wasmInitPromise;
     return;
-  } catch (e1) {
-    console.log('Trying alternative initialization method...');
   }
 
-  wasmInitialized = true;
+  wasmInitializing = true;
+
+  // Initialize WASM module with URL
+  wasmInitPromise = __wbg_init(WASM_URL)
+    .then(() => {
+      console.log('✅ WASM initialized from URL');
+      wasmInitialized = true;
+      wasmInitializing = false;
+    })
+    .catch((error) => {
+      console.error('Failed to initialize WASM module:', error);
+      wasmInitializing = false;
+      throw error;
+    });
+
+  await wasmInitPromise;
 };
 
-export const compressAndPadProof = (proof: `0x${string}`): `0x${string}` => {
+export const compressAndPadProof = async (
+  proof: `0x${string}`,
+): Promise<`0x${string}`> => {
   try {
-    // Ensure WASM is initialized
-    ensureWasmInitialized();
+    // // Ensure WASM is initialized
+    // await ensureWasmInitialized();
 
     // Decode the hex proof to array of 8 uints
     const decodedProof = decodeAbiParameters(
