@@ -1,8 +1,4 @@
-import {
-  base64Wasm,
-  initSync,
-  compressProof as originalCompressProof,
-} from 'semaphore-rs-js';
+import { base64Wasm, compressProof, initSync } from 'semaphore-rs-js';
 
 import { decodeAbiParameters, encodeAbiParameters } from 'viem';
 
@@ -29,10 +25,6 @@ initSync({ module: wasmBytes });
 
 export const compressAndPadProof = (proof: `0x${string}`): `0x${string}` => {
   try {
-    // // Ensure WASM is initialized
-    // await ensureWasmInitialized();
-
-    // Decode the hex proof to array of 8 uints
     const decodedProof = decodeAbiParameters(
       [{ type: 'uint256[8]' }],
       proof,
@@ -47,15 +39,12 @@ export const compressAndPadProof = (proof: `0x${string}`): `0x${string}` => {
       bigint,
     ];
 
-    // Convert bigints to hex strings for compression
     const proofHexStrings = [...decodedProof].map(
       (p) => '0x' + p.toString(16).padStart(64, '0'),
     ) as [string, string, string, string, string, string, string, string];
 
-    // Compress the proof
-    const compressedProof = originalCompressProof(proofHexStrings);
+    const compressedProof = compressProof(proofHexStrings);
 
-    // Convert back to bigints and add padding
     const paddedProof = [...compressedProof.map(BigInt), 0n, 0n, 0n, 0n] as [
       bigint,
       bigint,
