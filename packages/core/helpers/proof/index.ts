@@ -2,6 +2,8 @@ import { compressProof } from 'semaphore-rs-js';
 import { decodeAbiParameters, encodeAbiParameters } from 'viem';
 
 export const compressAndPadProof = (proof: `0x${string}`) => {
+  console.log('INSIDE COMPRESS AND PAD PROOF', proof);
+
   try {
     // Decode the hex proof to array of 8 uints
     const decodedProof = decodeAbiParameters(
