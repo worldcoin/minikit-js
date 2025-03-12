@@ -20,7 +20,6 @@ export const CameraComponent = () => {
   }, []);
 
   const handleMicAccess = useCallback(async () => {
-    console.log('handleMicAccess');
     if (isMicOn) {
       // Stop microphone access
       if (stream) {
