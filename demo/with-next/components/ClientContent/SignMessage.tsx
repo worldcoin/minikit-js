@@ -5,7 +5,7 @@ import {
   SignMessageErrorCodes,
   SignMessageInput,
 } from '@worldcoin/minikit-js';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import * as yup from 'yup';
 import { validateSchema } from './helpers/validate-schema';
 
@@ -82,8 +82,7 @@ export const SignMessage = () => {
 
         const isValid = await (
           await Safe.init({
-            provider:
-              'https://opt-mainnet.g.alchemy.com/v2/Ha76ahWcm6iDVBU7GNr5n-ONLgzWnkWc',
+            provider: 'https://worldchain-mainnet.g.alchemy.com/public',
             safeAddress: payload.address,
           })
         ).isValidSignature(messageHash, payload.signature);
@@ -92,9 +91,7 @@ export const SignMessage = () => {
         if (isValid) {
           setSignMessagePayloadVerificationMessage('Signature is valid');
         } else {
-          setSignMessagePayloadVerificationMessage(
-            'Signature is invalid (We are verifying on optimism, if you are using worldchain message andy',
-          );
+          setSignMessagePayloadVerificationMessage('Signature is invalid');
         }
       }
     });
@@ -102,19 +99,20 @@ export const SignMessage = () => {
     return () => {
       MiniKit.unsubscribe(ResponseEvent.MiniAppSignMessage);
     };
-  }, [tempInstallFix]);
+  }, [messageToSign, tempInstallFix]);
 
-  const onSignMessage = useCallback(async () => {
+  const onSignMessage = async (message: string) => {
     const signMessagePayload: SignMessageInput = {
-      message: messageToSign,
+      message,
     };
 
+    setMessageToSign(message);
     const payload = MiniKit.commands.signMessage(signMessagePayload);
     setSentSignMessagePayload({
       payload,
     });
     setTempInstallFix((prev) => prev + 1);
-  }, [messageToSign]);
+  };
 
   return (
     <div>
@@ -131,15 +129,14 @@ export const SignMessage = () => {
         <div className="grid gap-y-2">
           <button
             className="bg-black text-white rounded-lg p-4 w-full"
-            onClick={onSignMessage}
+            onClick={() => onSignMessage('hello world')}
           >
             Sign Message
           </button>
           <button
             className="bg-black text-white rounded-lg p-4 w-full"
             onClick={async () => {
-              setMessageToSign('world-chat-authentication:test');
-              await onSignMessage();
+              await onSignMessage('world-chat-authentication:test');
             }}
           >
             Fail Message

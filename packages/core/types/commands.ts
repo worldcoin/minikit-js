@@ -14,6 +14,7 @@ export enum Command {
   ShareContacts = 'share-contacts',
   RequestPermission = 'request-permission',
   GetPermissions = 'get-permissions',
+  SendHapticFeedback = 'send-haptic-feedback',
 }
 
 export type WebViewBasePayload = {
@@ -119,6 +120,24 @@ export type GetPermissionsInput = {};
 
 export type GetPermissionsPayload = GetPermissionsInput;
 
+// Anchor: Send Haptic Feedback Payload
+export type SendHapticFeedbackInput =
+  | {
+      hapticsType: 'notification';
+      style: 'error' | 'success' | 'warning';
+    }
+  | {
+      hapticsType: 'selection-changed';
+      // never necessary or used but improves DX
+      style?: never;
+    }
+  | {
+      hapticsType: 'impact';
+      style: 'light' | 'medium' | 'heavy';
+    };
+
+export type SendHapticFeedbackPayload = SendHapticFeedbackInput;
+
 type CommandReturnPayloadMap = {
   [Command.Verify]: VerifyCommandPayload;
   [Command.Pay]: PayCommandPayload;
@@ -129,6 +148,7 @@ type CommandReturnPayloadMap = {
   [Command.ShareContacts]: ShareContactsPayload;
   [Command.RequestPermission]: RequestPermissionPayload;
   [Command.GetPermissions]: GetPermissionsPayload;
+  [Command.SendHapticFeedback]: SendHapticFeedbackPayload;
 };
 export type CommandReturnPayload<T extends Command> =
   T extends keyof CommandReturnPayloadMap ? CommandReturnPayloadMap[T] : never;

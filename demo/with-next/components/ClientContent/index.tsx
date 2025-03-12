@@ -14,6 +14,7 @@ import { GetPermissions } from './GetPermissions';
 import { Nav } from './Nav';
 import { Pay } from './Pay';
 import { RequestPermission } from './RequestPermissions';
+import { SendHapticFeedback } from './SendHaptic';
 import { ShareContacts } from './ShareContacts';
 import { SignMessage } from './SignMessage';
 import { SignTypedData } from './SignTypedMessage';
@@ -84,6 +85,7 @@ export const ClientContent = () => {
         )}
 
         <div className="grid gap-y-8">
+          test 2
           <VersionsNoSSR />
           <hr />
           <VerifyAction />
@@ -105,6 +107,8 @@ export const ClientContent = () => {
           <GetPermissions />
           <hr />
           <CheckRequests />
+          <hr />
+          <SendHapticFeedback />
           <hr />
           <input className="text-xs border-black border-2" />
           <ExternalLinks />
