@@ -97,10 +97,10 @@ jobs:
         working-directory: ./packages/core
         run: pnpm publish --report-summary --no-git-checks
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
 
       - name: Publish React to GitHub
         working-directory: ./packages/react
         run: pnpm publish --report-summary --no-git-checks
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
