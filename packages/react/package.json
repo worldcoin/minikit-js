@@ -53,7 +53,7 @@
   },
   "devDependencies": {
     "@types/node": "^20",
-    "@typescript-eslint/eslint-plugin": "^7.7.0",
+    "@typescript-eslint/eslint-plugin": "^8.25.0",
     "@typescript-eslint/parser": "^7.7.0",
     "prettier": "^3.2.5",
     "prettier-plugin-sort-imports-desc": "^1.0.0",
