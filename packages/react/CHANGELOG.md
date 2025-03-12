@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.7.0](https://github.com/worldcoin/minikit-js/compare/minikit-react-v1.6.2...minikit-react-v1.7.0) (2025-03-12)
+
+
+### Features
+
+* 1.6 Release (viem upgrade and eth support) ([#142](https://github.com/worldcoin/minikit-js/issues/142)) ([37175d8](https://github.com/worldcoin/minikit-js/commit/37175d8dfff7430d40e07193f8dbb148182dfb66))
+* isUserVerified helper & react bindings ([#118](https://github.com/worldcoin/minikit-js/issues/118)) ([ab8ba8d](https://github.com/worldcoin/minikit-js/commit/ab8ba8da23709a7e5ee4fad7620d91f011735c49))
+
+
+### Bug Fixes
+
+* Add Readmes to prepare for open source ([#84](https://github.com/worldcoin/minikit-js/issues/84)) ([4d2f5a0](https://github.com/worldcoin/minikit-js/commit/4d2f5a01a392d8ab7743747ce3ca5ba481999db5))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @worldcoin/minikit-js bumped to 1.7.0
+
 ## [1.6.0](https://github.com/worldcoin/minikit-js/compare/minikit-react-v1.5.0...minikit-react-v1.6.0) (2025-02-11)
 
 
