@@ -18,7 +18,7 @@
     "clsx": "^2.1.1",
     "eruda": "^3.4.1",
     "next": "14.2.10",
-    "next-auth": "^4.24.7",
+    "next-auth": "^4.24.11",
     "permit2-sdk": "link:@uniswap/v3-sdk/permit2-sdk",
     "prettier-plugin-sort-imports-desc": "^1.0.0",
     "react": "^18",
