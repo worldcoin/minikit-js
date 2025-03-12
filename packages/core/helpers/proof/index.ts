@@ -1,3 +1,4 @@
+// @ts-ignore import works as expected
 import { base64Wasm, compressProof, initSync } from 'semaphore-rs-js';
 import { decodeAbiParameters, encodeAbiParameters } from 'viem';
 function base64ToUint8Array(base64) {
