@@ -1,5 +1,9 @@
 import { VerificationLevel } from '@worldcoin/idkit-core';
-import { encodeAction, generateSignal } from '@worldcoin/idkit-core/hashing';
+import {
+  encodeAction,
+  generateSignal,
+  hashToField,
+} from '@worldcoin/idkit-core/hashing';
 import { validatePaymentPayload } from 'helpers/payment/client';
 import { compressAndPadProof } from 'helpers/proof';
 import { generateSiweMessage } from 'helpers/siwe/siwe';
@@ -310,6 +314,11 @@ export class MiniKit {
         verification_level: payload.verification_level || VerificationLevel.Orb,
         timestamp,
       };
+
+      console.log('eventPayload');
+      console.log(eventPayload);
+
+      console.log(hashToField(payload.action as string));
 
       sendMiniKitEvent({
         command: Command.Verify,
