@@ -69,6 +69,12 @@ export const ExternalLinks = () => {
         >
           Invalid External Link (Link)
         </Link>
+        <button
+          onClick={() => navigator.share({ url: 'https://google.com' })}
+          className="text-white bg-red-500 transition p-4 leading-[1] rounded-lg"
+        >
+          Open Share Page
+        </button>
       </div>
     </>
   );
