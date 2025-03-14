@@ -143,12 +143,15 @@ export const VerifyAction = () => {
   const onProdVerifyClick = useCallback(
     (verification_level: VerificationLevel) => {
 
-      verifyAction({
-        app_id: process.env.NEXT_PUBLIC_PROD_VERIFY_APP_ID as `app_${string}`,
+      const verifyPayload = {
+        app_id: `app_1234`,
         action: 'test',
         verification_level,
-        signal: 'test',
-      });
+        signal: 'fake-signal',
+      }
+
+      // @ts-ignore skip
+      verifyAction(verifyPayload);
     },
     [verifyAction],
   );

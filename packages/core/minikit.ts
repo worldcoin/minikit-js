@@ -1,9 +1,5 @@
 import { VerificationLevel } from '@worldcoin/idkit-core';
-import {
-  encodeAction,
-  generateSignal,
-  hashToField,
-} from '@worldcoin/idkit-core/hashing';
+import { encodeAction, generateSignal } from '@worldcoin/idkit-core/hashing';
 import { validatePaymentPayload } from 'helpers/payment/client';
 import { compressAndPadProof } from 'helpers/proof';
 import { generateSiweMessage } from 'helpers/siwe/siwe';
@@ -307,6 +303,9 @@ export class MiniKit {
         return null;
       }
 
+      console.log('payload');
+      console.log(payload);
+
       const timestamp = new Date().toISOString();
       const eventPayload: VerifyCommandPayload = {
         action: encodeAction(payload.action),
@@ -317,8 +316,6 @@ export class MiniKit {
 
       console.log('eventPayload');
       console.log(eventPayload);
-
-      console.log(hashToField(payload.action as string));
 
       sendMiniKitEvent({
         command: Command.Verify,
