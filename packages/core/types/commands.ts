@@ -107,6 +107,7 @@ export type ShareContactsPayload = ShareContactsInput;
 // Anchor: Request Permission Payload
 export enum Permission {
   Notifications = 'notifications',
+  Contacts = 'contacts',
 }
 
 export type RequestPermissionInput = {
