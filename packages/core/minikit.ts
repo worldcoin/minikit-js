@@ -314,6 +314,9 @@ export class MiniKit {
         timestamp,
       };
 
+      console.log('test externalNullifier');
+      console.log(BigInt(generateSignal(payload.action).digest).toString());
+
       console.log('eventPayload');
       console.log(eventPayload);
 

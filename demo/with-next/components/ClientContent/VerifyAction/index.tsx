@@ -68,6 +68,12 @@ export const VerifyAction = () => {
     MiniKit.subscribe(ResponseEvent.MiniAppVerifyAction, async (payload) => {
       console.log('MiniAppVerifyAction, SUBSCRIBE PAYLOAD', payload);
 
+      // @ts-ignore
+      console.log('Merkle Root as BigInt:', BigInt(payload.merkle_root).toString());
+      // @ts-ignore
+      console.log('nullifier_hash as BigInt:', BigInt(payload.nullifier_hash).toString());
+
+
       if (payload.status === 'error') {
         const errorMessage = await validateSchema(
           verifyActionErrorPayloadSchema,
