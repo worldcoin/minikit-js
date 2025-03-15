@@ -597,6 +597,9 @@ export class MiniKit {
     > => {
       return new Promise(async (resolve, reject) => {
         try {
+          console.log('request payload');
+          console.log(payload);
+
           const response = await MiniKit.awaitCommand(
             ResponseEvent.MiniAppVerifyAction,
             Command.Verify,
