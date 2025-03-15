@@ -17,4 +17,4 @@ console.log(
   'Nullifier Hash as decimal string:',
   nullifierHashBigInt.toString(),
 );
-console.log('Nullifier Hash as decimal string:', signalHashBigInt.toString());
+console.log('signalHashBigInt as decimal string:', signalHashBigInt.toString());

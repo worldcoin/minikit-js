@@ -602,6 +602,10 @@ export class MiniKit {
             Command.Verify,
             () => this.commands.verify(payload),
           );
+
+          console.log('response.finalPayload');
+          console.log(response.finalPayload);
+
           if (response.finalPayload.status === 'success') {
             response.finalPayload.proof = compressAndPadProof(
               response.finalPayload.proof as `0x${string}`,
