@@ -150,10 +150,10 @@ export const VerifyAction = () => {
     (verification_level: VerificationLevel) => {
 
       const verifyPayload = {
-        app_id: `app_1234`,
-        action: 'test',
+        app_id: ``,
+        action: '',
         verification_level,
-        signal: 'fake-signal',
+        signal: '',
       }
 
       // @ts-ignore skip
