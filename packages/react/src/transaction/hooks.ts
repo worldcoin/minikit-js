@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   type Account,
   type Address,
@@ -6,8 +6,8 @@ import {
   type ParseAccount,
   type PublicClient,
   type RpcSchema,
-  type Transport,
   type TransactionReceipt,
+  type Transport,
 } from 'viem';
 import { fetchTransactionHash, TransactionStatus } from '.';
 import { AppConfig } from '../types/client';
@@ -95,9 +95,12 @@ export function useWaitForTransactionReceipt<
     setIsError(false);
     setError(undefined);
     setWebSocketFailed(false);
-    
+
     // Close WebSocket if it exists
-    if (webSocketRef.current && webSocketRef.current.readyState === WebSocket.OPEN) {
+    if (
+      webSocketRef.current &&
+      webSocketRef.current.readyState === WebSocket.OPEN
+    ) {
       webSocketRef.current.close();
       webSocketRef.current = null;
     }
@@ -115,18 +118,18 @@ export function useWaitForTransactionReceipt<
 
     // Create WebSocket URL
     const wsUrl = `wss://developer.worldcoin.org/api/v2/minikit/transaction/${transactionId}/ws?app_id=${appConfig.app_id}&type=transaction`;
-    
+
     try {
       webSocketRef.current = new WebSocket(wsUrl);
-      
+
       webSocketRef.current.onopen = () => {
         console.log('WebSocket connection established for transaction updates');
       };
-      
+
       webSocketRef.current.onmessage = (event) => {
         try {
           const data: TransactionStatus = JSON.parse(event.data);
-          
+
           if (data.transactionHash) {
             setTransactionHash(data.transactionHash);
             setIsLoading(false);
@@ -136,12 +139,12 @@ export function useWaitForTransactionReceipt<
           setWebSocketFailed(true);
         }
       };
-      
+
       webSocketRef.current.onerror = (event) => {
         console.error('WebSocket error:', event);
         setWebSocketFailed(true);
       };
-      
+
       webSocketRef.current.onclose = () => {
         console.log('WebSocket connection closed');
         // Only set as failed if it closed unexpectedly
@@ -153,7 +156,7 @@ export function useWaitForTransactionReceipt<
       console.error('Failed to create WebSocket connection:', err);
       setWebSocketFailed(true);
     }
-    
+
     return () => {
       if (webSocketRef.current) {
         webSocketRef.current.close();
@@ -164,7 +167,11 @@ export function useWaitForTransactionReceipt<
 
   // Fallback to polling if WebSocket fails or if not using WebSocket
   useEffect(() => {
-    if (!transactionId || (useWebSocket && !webSocketFailed) || !fallbackToPolling) {
+    if (
+      !transactionId ||
+      (useWebSocket && !webSocketFailed) ||
+      !fallbackToPolling
+    ) {
       return;
     }
 
@@ -207,7 +214,13 @@ export function useWaitForTransactionReceipt<
         clearTimeout(timeoutId);
       }
     };
-  }, [transactionId, pollCount, useWebSocket, webSocketFailed, fallbackToPolling]);
+  }, [
+    transactionId,
+    pollCount,
+    useWebSocket,
+    webSocketFailed,
+    fallbackToPolling,
+  ]);
 
   useEffect(() => {
     if (!transactionId) {
