@@ -150,7 +150,7 @@ export class MiniKit {
           payload.status === 'success' &&
           payload.verification_level === VerificationLevel.Orb
         ) {
-           // Note: On Chain Proofs won't work on staging with this change
+          // Note: On Chain Proofs won't work on staging with this change
           compressAndPadProof(payload.proof as `0x${string}`).then(
             (compressedProof) => {
               payload.proof = compressedProof;
