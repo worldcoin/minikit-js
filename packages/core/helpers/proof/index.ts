@@ -1,8 +1,29 @@
-import { compressProof } from 'semaphore-rs-js';
+// @ts-ignore import works as expected
+import { base64Wasm, compressProof, initSync } from 'semaphore-rs-js';
 import { decodeAbiParameters, encodeAbiParameters } from 'viem';
+function base64ToUint8Array(base64) {
+  if (typeof atob === 'function') {
+    const binaryString = atob(base64);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes;
+  } else if (typeof Buffer === 'function') {
+    return new Uint8Array(Buffer.from(base64, 'base64'));
+  } else {
+    throw new Error('No base64 decoder available');
+  }
+}
+
+const wasmBytes = base64ToUint8Array(base64Wasm);
 
 export const compressAndPadProof = (proof: `0x${string}`) => {
   try {
+    // Initialize the generated bindings with the inlined wasm instance.
+    initSync({ module: wasmBytes });
+
     // Decode the hex proof to array of 8 uints
     const decodedProof = decodeAbiParameters(
       [{ type: 'uint256[8]' }],
@@ -17,6 +38,9 @@ export const compressAndPadProof = (proof: `0x${string}`) => {
       bigint,
       bigint,
     ];
+
+    console.log('decodedProof');
+    console.log(decodedProof);
 
     // Convert to hex strings for compression
     const proofHexStrings = [...decodedProof].map(
@@ -35,6 +59,8 @@ export const compressAndPadProof = (proof: `0x${string}`) => {
       bigint,
       bigint,
     ];
+
+    console.log(paddedProof);
 
     // Encode back to hex string
     return encodeAbiParameters([{ type: 'uint256[8]' }], [paddedProof]);
