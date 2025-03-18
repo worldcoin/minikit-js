@@ -26,9 +26,9 @@ export const verifyProof = async (params: {
       action,
       signal,
 
-      process.env.NEXT_DEPLOYMENT_ENVIRONMENT === 'staging'
-        ? stagingEndpoint
-        : undefined,
+      // process.env.NEXT_DEPLOYMENT_ENVIRONMENT === 'staging'
+      //   ? stagingEndpoint
+      //   : undefined,
     );
 
     console.log('verifyResponse', verifyResponse);
