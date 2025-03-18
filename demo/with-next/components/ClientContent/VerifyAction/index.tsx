@@ -113,7 +113,7 @@ export const VerifyAction = () => {
       const verifyResponse = await verifyProof({
         payload: payload as ISuccessResult,
         app_id: 'app_472be995d8ccf7421f7c793186c13c02',
-        action: 'test',
+        action: 'test2',
         signal: '',
       });
 
@@ -159,7 +159,7 @@ export const VerifyAction = () => {
     (verification_level: VerificationLevel) => {
       verifyAction({
         app_id: 'app_472be995d8ccf7421f7c793186c13c02',
-        action: 'test',
+        action: 'test2',
         verification_level,
         signal: '',
       });
