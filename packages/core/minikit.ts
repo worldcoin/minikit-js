@@ -146,9 +146,10 @@ export class MiniKit {
       const wrappedHandler: EventHandler<ResponseEvent.MiniAppVerifyAction> = (
         payload,
       ) => {
-        if (payload.status === 'success') {
-          payload.proof = compressAndPadProof(payload.proof as `0x${string}`);
-        }
+        // TODO: ?!?
+        // if (payload.status === 'success') {
+        //   payload.proof = compressAndPadProof(payload.proof as `0x${string}`);
+        // }
         originalHandler(payload);
       };
       this.listeners[event] = wrappedHandler as EventHandler<E>;
@@ -596,7 +597,7 @@ export class MiniKit {
             () => this.commands.verify(payload),
           );
           if (response.finalPayload.status === 'success') {
-            response.finalPayload.proof = compressAndPadProof(
+            response.finalPayload.proof = await compressAndPadProof(
               response.finalPayload.proof as `0x${string}`,
             );
           }
