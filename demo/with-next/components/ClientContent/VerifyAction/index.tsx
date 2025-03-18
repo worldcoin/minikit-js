@@ -102,7 +102,13 @@ export const VerifyAction = () => {
         return console.log('lastUsedAppId or lastUsedAction is not set');
       }
 
-
+      console.log("VERIFY CLOUD PROOF params")
+      console.log({
+        payload: payload as ISuccessResult,
+        app_id: 'app_472be995d8ccf7421f7c793186c13c02',
+        action: 'test',
+        signal: '',
+      })
 
       const verifyResponse = await verifyProof({
         payload: payload as ISuccessResult,
@@ -110,6 +116,8 @@ export const VerifyAction = () => {
         action: 'test',
         signal: '',
       });
+
+      console.log(verifyResponse)
 
       setDevPortalVerifyResponse(verifyResponse);
     });
