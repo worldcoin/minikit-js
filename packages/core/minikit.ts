@@ -146,11 +146,19 @@ export class MiniKit {
       const wrappedHandler: EventHandler<ResponseEvent.MiniAppVerifyAction> = (
         payload,
       ) => {
-        // TODO: ?!?
-        // if (payload.status === 'success') {
-        //   payload.proof = compressAndPadProof(payload.proof as `0x${string}`);
-        // }
-        originalHandler(payload);
+        if (payload.status === 'success') {
+          compressAndPadProof(payload.proof as `0x${string}`)
+            .then((compressedProof) => {
+              payload.proof = compressedProof;
+              originalHandler(payload);
+            })
+            .catch((err) => {
+              console.error('Failed to compress and pad proof:', err);
+              originalHandler(payload); // fallback with original proof
+            });
+        } else {
+          originalHandler(payload);
+        }
       };
       this.listeners[event] = wrappedHandler as EventHandler<E>;
     } else {
