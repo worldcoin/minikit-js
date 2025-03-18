@@ -39,9 +39,6 @@ export const compressAndPadProof = (proof: `0x${string}`) => {
       bigint,
     ];
 
-    console.log('decodedProof');
-    console.log(decodedProof);
-
     // Convert to hex strings for compression
     const proofHexStrings = [...decodedProof].map(
       (p) => '0x' + p.toString(16).padStart(64, '0'),
@@ -59,8 +56,6 @@ export const compressAndPadProof = (proof: `0x${string}`) => {
       bigint,
       bigint,
     ];
-
-    console.log(paddedProof);
 
     // Encode back to hex string
     return encodeAbiParameters([{ type: 'uint256[8]' }], [paddedProof]);
