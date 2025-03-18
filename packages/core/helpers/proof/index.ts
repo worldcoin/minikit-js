@@ -1,4 +1,9 @@
-import { createPublicClient, decodeAbiParameters, http } from 'viem';
+import {
+  createPublicClient,
+  decodeAbiParameters,
+  encodeAbiParameters,
+  http,
+} from 'viem';
 import { worldchain } from 'viem/chains';
 
 const semaphoreVerifierAddress = '0x79f46b94d134109EbcbbddBAeD0E88790409A0e4';
@@ -70,8 +75,8 @@ export const compressAndPadProof = async (
 
     console.log(paddedProof);
 
-    // return encodeAbiParameters([{ type: 'uint256[8]' }], [paddedProof]);
-    return proof;
+    return encodeAbiParameters([{ type: 'uint256[8]' }], [paddedProof]);
+    // return proof;
   } catch (e) {
     console.log('Failed to compress proof', {
       e,
