@@ -77,6 +77,8 @@ export const compressAndPadProof = async (
       (p) => '0x' + p.toString(16).padStart(64, '0'),
     ) as [string, string, string, string, string, string, string, string];
 
+    console.log(paddedProof);
+
     return encodeAbiParameters([{ type: 'uint256[8]' }], [paddedProof]);
   } catch (e) {
     console.log('Failed to compress proof', {
