@@ -196,6 +196,23 @@ export const VerifyAction = () => {
               </button>
               <button
                 className="bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
+                onClick={() => onStagingVerifyClick(VerificationLevel.Document)}
+              >
+                Send staging app verify (Document)
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-x-2">
+              <button
+                className="bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
+                onClick={() =>
+                  onStagingVerifyClick(VerificationLevel.SecureDocument)
+                }
+              >
+                Send staging app verify (SecureDocument)
+              </button>
+              <button
+                className="bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
                 onClick={() => onStagingVerifyClick(VerificationLevel.Orb)}
               >
                 Send staging app verify (Orb)
@@ -213,11 +230,27 @@ export const VerifyAction = () => {
               </button>
               <button
                 className="bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
+                onClick={() => onProdVerifyClick(VerificationLevel.Document)}
+              >
+                Send production app verify (Document)
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-x-2">
+              <button
+                className="bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
+                onClick={() =>
+                  onProdVerifyClick(VerificationLevel.SecureDocument)
+                }
+              >
+                Send production app verify (SecureDocument)
+              </button>
+              <button
+                className="bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
                 onClick={() => onProdVerifyClick(VerificationLevel.Orb)}
               >
                 Send production app verify (Orb)
               </button>
-              
             </div>
           </div>
         </div>
