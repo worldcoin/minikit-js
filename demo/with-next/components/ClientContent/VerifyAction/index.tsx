@@ -102,11 +102,13 @@ export const VerifyAction = () => {
         return console.log('lastUsedAppId or lastUsedAction is not set');
       }
 
+
+
       const verifyResponse = await verifyProof({
         payload: payload as ISuccessResult,
-        app_id: lastUsedAppId,
-        action: lastUsedAction,
-        signal: 'test',
+        app_id: 'app_472be995d8ccf7421f7c793186c13c02',
+        action: 'test',
+        signal: '',
       });
 
       setDevPortalVerifyResponse(verifyResponse);

@@ -72,10 +72,6 @@ export const compressAndPadProof = async (
       bigint,
       bigint,
     ] = [...compressedProof, 0n, 0n, 0n, 0n];
-    // Convert to hex strings for compression
-    const proofHexStrings = [...decodedProof].map(
-      (p) => '0x' + p.toString(16).padStart(64, '0'),
-    ) as [string, string, string, string, string, string, string, string];
 
     console.log(paddedProof);
 
