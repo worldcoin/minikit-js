@@ -149,12 +149,12 @@ export const VerifyAction = () => {
   const onProdVerifyClick = useCallback(
     (verification_level: VerificationLevel) => {
 
-      const verifyPayload = {
-        app_id: ``,
-        action: '',
+      verifyAction({
+        app_id: 'app_472be995d8ccf7421f7c793186c13c02',
+        action: 'test',
         verification_level,
         signal: '',
-      }
+      });
 
       // @ts-ignore skip
       verifyAction(verifyPayload);
