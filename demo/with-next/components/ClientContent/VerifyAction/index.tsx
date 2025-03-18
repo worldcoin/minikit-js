@@ -68,6 +68,11 @@ export const VerifyAction = () => {
     MiniKit.subscribe(ResponseEvent.MiniAppVerifyAction, async (payload) => {
       console.log('MiniAppVerifyAction, SUBSCRIBE PAYLOAD', payload);
 
+      // @ts-ignore
+      console.log('Merkle Root as BigInt:', BigInt(payload.merkle_root).toString());
+      // @ts-ignore
+      console.log('nullifier_hash as BigInt:', BigInt(payload.nullifier_hash).toString());
+
       if (payload.status === 'error') {
         const errorMessage = await validateSchema(
           verifyActionErrorPayloadSchema,
@@ -143,10 +148,10 @@ export const VerifyAction = () => {
   const onProdVerifyClick = useCallback(
     (verification_level: VerificationLevel) => {
       verifyAction({
-        app_id: process.env.NEXT_PUBLIC_PROD_VERIFY_APP_ID as `app_${string}`,
-        action: process.env.NEXT_PUBLIC_PROD_VERIFY_ACTION as string,
+        app_id: 'app_472be995d8ccf7421f7c793186c13c02',
+        action: 'test',
         verification_level,
-        signal: 'test',
+        signal: '',
       });
     },
     [verifyAction],

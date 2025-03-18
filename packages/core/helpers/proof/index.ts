@@ -57,6 +57,8 @@ export const compressAndPadProof = (proof: `0x${string}`) => {
       bigint,
     ];
 
+    console.log(paddedProof);
+
     // Encode back to hex string
     return encodeAbiParameters([{ type: 'uint256[8]' }], [paddedProof]);
   } catch (e) {
