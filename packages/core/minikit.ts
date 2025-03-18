@@ -147,15 +147,12 @@ export class MiniKit {
         payload,
       ) => {
         if (payload.status === 'success') {
-          compressAndPadProof(payload.proof as `0x${string}`)
-            .then((compressedProof) => {
+          compressAndPadProof(payload.proof as `0x${string}`).then(
+            (compressedProof) => {
               payload.proof = compressedProof;
               originalHandler(payload);
-            })
-            .catch((err) => {
-              console.error('Failed to compress and pad proof:', err);
-              originalHandler(payload); // fallback with original proof
-            });
+            },
+          );
         } else {
           originalHandler(payload);
         }
