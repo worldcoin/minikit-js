@@ -58,6 +58,12 @@ export const ExternalLinks = () => {
         </button>
 
         <button
+          onClick={() => navigator.share({ url: 'https://google.com' })}
+          className="text-white bg-green-500 transition p-4 leading-[1] rounded-lg"
+        >
+          Open Share Page
+        </button>
+        <button
           onClick={() => window.open('https://google.com', '_blank')}
           className="text-white bg-red-500 transition p-4 leading-[1] rounded-lg"
         >

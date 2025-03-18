@@ -29,6 +29,7 @@ export const VerificationErrorMessage: Record<AppErrorCodes, string> = {
 
 export enum PaymentErrorCodes {
   InputError = 'input_error',
+  UserRejected = 'user_rejected',
   PaymentRejected = 'payment_rejected',
   InvalidReceiver = 'invalid_receiver',
   InsufficientBalance = 'insufficient_balance',
@@ -40,6 +41,8 @@ export enum PaymentErrorCodes {
 export const PaymentErrorMessage: Record<PaymentErrorCodes, string> = {
   [PaymentErrorCodes.InputError]:
     'There was a problem with this request. Please try again or contact the app owner.',
+  [PaymentErrorCodes.UserRejected]:
+    'You have cancelled the payment in World App.',
   [PaymentErrorCodes.PaymentRejected]:
     "You've cancelled the payment in World App.",
   [PaymentErrorCodes.InvalidReceiver]:

@@ -1,6 +1,7 @@
 import { VerificationLevel } from '@worldcoin/idkit-core';
 import { encodeAction, generateSignal } from '@worldcoin/idkit-core/hashing';
 import { validatePaymentPayload } from 'helpers/payment/client';
+import { compressAndPadProof } from 'helpers/proof';
 import { generateSiweMessage } from 'helpers/siwe/siwe';
 import { validateWalletAuthCommandInput } from 'helpers/siwe/validate-wallet-auth-command-input';
 import { validateSendTransactionPayload } from 'helpers/transaction/validate-payload';
@@ -64,7 +65,7 @@ export const sendMiniKitEvent = <
 export class MiniKit {
   private static readonly MINIKIT_VERSION = 1;
 
-  private static readonly commandVersion = {
+  private static readonly miniKitCommandVersion: Record<Command, number> = {
     [Command.Verify]: 1,
     [Command.Pay]: 1,
     [Command.WalletAuth]: 1,
@@ -139,6 +140,27 @@ export class MiniKit {
       };
 
       this.listeners[event] = wrappedHandler as EventHandler<E>;
+    } else if (event === ResponseEvent.MiniAppVerifyAction) {
+      const originalHandler =
+        handler as EventHandler<ResponseEvent.MiniAppVerifyAction>;
+      const wrappedHandler: EventHandler<ResponseEvent.MiniAppVerifyAction> = (
+        payload,
+      ) => {
+        if (payload.status === 'success') {
+          compressAndPadProof(payload.proof as `0x${string}`)
+            .then((compressedProof) => {
+              payload.proof = compressedProof;
+              originalHandler(payload);
+            })
+            .catch((err) => {
+              console.error('Failed to compress and pad proof:', err);
+              originalHandler(payload); // fallback with original proof
+            });
+        } else {
+          originalHandler(payload);
+        }
+      };
+      this.listeners[event] = wrappedHandler as EventHandler<E>;
     } else {
       this.listeners[event] = handler;
     }
@@ -177,20 +199,22 @@ export class MiniKit {
   }
 
   private static commandsValid(
-    input: NonNullable<typeof window.WorldApp>['supported_commands'],
+    worldAppSupportedCommands: NonNullable<
+      typeof window.WorldApp
+    >['supported_commands'],
   ) {
-    return Object.entries(this.commandVersion).every(
-      ([commandName, version]) => {
-        const commandInput = input.find(
-          (command) => command.name === commandName,
+    return Object.entries(this.miniKitCommandVersion).every(
+      ([minikitCommandName, version]) => {
+        const commandInput = worldAppSupportedCommands.find(
+          (command) => command.name === minikitCommandName,
         );
 
         if (!commandInput) {
           console.error(
-            `Command ${commandName} is not supported by the app. Try updating the app version`,
+            `Command ${minikitCommandName} is not supported by the app. Try updating the app version`,
           );
         } else {
-          MiniKit.isCommandAvailable[commandName] = true;
+          MiniKit.isCommandAvailable[minikitCommandName] = true;
         }
 
         return commandInput
@@ -300,7 +324,7 @@ export class MiniKit {
 
       sendMiniKitEvent({
         command: Command.Verify,
-        version: this.commandVersion[Command.Verify],
+        version: this.miniKitCommandVersion[Command.Verify],
         payload: eventPayload,
       });
 
@@ -332,7 +356,7 @@ export class MiniKit {
 
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.Pay,
-        version: this.commandVersion[Command.Pay],
+        version: this.miniKitCommandVersion[Command.Pay],
         payload: eventPayload,
       });
 
@@ -390,7 +414,7 @@ export class MiniKit {
 
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.WalletAuth,
-        version: this.commandVersion[Command.WalletAuth],
+        version: this.miniKitCommandVersion[Command.WalletAuth],
         payload: walletAuthPayload,
       });
 
@@ -415,7 +439,7 @@ export class MiniKit {
 
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.SendTransaction,
-        version: 1,
+        version: this.miniKitCommandVersion[Command.SendTransaction],
         payload: validatedPayload,
       });
 
@@ -436,7 +460,7 @@ export class MiniKit {
 
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.SignMessage,
-        version: 1,
+        version: this.miniKitCommandVersion[Command.SignMessage],
         payload,
       });
 
@@ -459,7 +483,7 @@ export class MiniKit {
 
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.SignTypedData,
-        version: 1,
+        version: this.miniKitCommandVersion[Command.SignTypedData],
         payload,
       });
 
@@ -482,7 +506,7 @@ export class MiniKit {
 
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.ShareContacts,
-        version: 1,
+        version: this.miniKitCommandVersion[Command.ShareContacts],
         payload,
       });
 
@@ -504,7 +528,7 @@ export class MiniKit {
 
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.RequestPermission,
-        version: 1,
+        version: this.miniKitCommandVersion[Command.RequestPermission],
         payload,
       });
 
@@ -524,7 +548,7 @@ export class MiniKit {
 
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.GetPermissions,
-        version: 1,
+        version: this.miniKitCommandVersion[Command.GetPermissions],
         payload: {},
       });
 
@@ -548,7 +572,7 @@ export class MiniKit {
 
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.SendHapticFeedback,
-        version: 1,
+        version: this.miniKitCommandVersion[Command.SendHapticFeedback],
         payload,
       });
 
@@ -580,6 +604,11 @@ export class MiniKit {
             Command.Verify,
             () => this.commands.verify(payload),
           );
+          if (response.finalPayload.status === 'success') {
+            response.finalPayload.proof = await compressAndPadProof(
+              response.finalPayload.proof as `0x${string}`,
+            );
+          }
           resolve(response);
         } catch (error) {
           reject(error);

@@ -107,6 +107,22 @@ export const CameraComponent = () => {
           Play Sound
         </button>
       </label>
+      <label className="items-center justify-center rounded-lg bg-2f2b43/5 hover:bg-2f2b43/10">
+        <button
+          className="grid justify-items-center bg-blue-500 p-4 rounded-lg text-white w-full mt-4"
+          onClick={() => {
+            navigator.geolocation.getCurrentPosition(
+              (position) =>
+                alert(
+                  `Location: ${position.coords.latitude}, ${position.coords.longitude}`,
+                ),
+              (error) => alert(`Error: ${error.message}`),
+            );
+          }}
+        >
+          Get Location
+        </button>
+      </label>
     </div>
   );
 };
