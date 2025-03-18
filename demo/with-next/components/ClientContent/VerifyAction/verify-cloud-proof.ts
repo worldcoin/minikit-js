@@ -16,6 +16,9 @@ export const verifyProof = async (params: {
   let verifyResponse: IVerifyResponse | null = null;
   const stagingEndpoint = `${process.env.NEXT_SERVER_STAGING_DEV_PORTAL_URL}/api/v2/verify/${app_id}`;
 
+  console.log('STAGING ENDPOINT');
+  console.log(stagingEndpoint);
+
   try {
     verifyResponse = await verifyCloudProof(
       payload,
