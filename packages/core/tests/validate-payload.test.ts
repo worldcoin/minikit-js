@@ -175,4 +175,52 @@ describe('validateSendTransactionPayload', () => {
       formattedPayload,
     );
   });
+
+  it('should catch bigints ', () => {
+    const payload = {
+      transaction: [
+        {
+          address: '0x123',
+          functionName: 'transfer',
+          args: [true, '1000000000000000000'], // boolean instead of string
+          abi: [],
+        },
+      ],
+      permit2: [
+        {
+          permitted: {
+            token: '0x789',
+            amount: BigInt('1000000000000000000'),
+          },
+          spender: '0xabc',
+          nonce: '1',
+          deadline: '1234567890',
+        },
+      ],
+    };
+    const formattedPayload = {
+      transaction: [
+        {
+          address: '0x123',
+          functionName: 'transfer',
+          args: [true, '1000000000000000000'], // boolean instead of string
+          abi: [],
+        },
+      ],
+      permit2: [
+        {
+          permitted: {
+            token: '0x789',
+            amount: '1000000000000000000',
+          },
+          spender: '0xabc',
+          nonce: '1',
+          deadline: '1234567890',
+        },
+      ],
+    };
+    expect(validateSendTransactionPayload(payload)).toMatchObject(
+      formattedPayload,
+    );
+  });
 });

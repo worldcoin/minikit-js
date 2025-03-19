@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@worldcoin/idkit-core": "^1.3.0",
+    "@worldcoin/idkit-core": "^2.0.2",
     "abitype": "^1.0.6"
   },
   "description": "minikit-js is our SDK for building mini-apps.",
@@ -46,7 +46,7 @@
   "main": "index.ts",
   "name": "@worldcoin/minikit-js",
   "peerDependencies": {
-    "viem": "2.23.5"
+    "viem": "^2.23.5"
   },
   "private": false,
   "scripts": {

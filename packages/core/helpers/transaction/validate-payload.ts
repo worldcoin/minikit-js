@@ -16,7 +16,7 @@ const processPayload = <T>(payload: T): T => {
   }
 
   // Convert numbers to strings to prevent overflow issues
-  if (typeof payload === 'number') {
+  if (typeof payload === 'number' || typeof payload === 'bigint') {
     return String(payload) as unknown as T;
   }
 
