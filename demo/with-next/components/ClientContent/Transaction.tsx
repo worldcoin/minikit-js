@@ -445,6 +445,78 @@ export const SendTransaction = () => {
     setReceivedSendTransactionPayload(payload.finalPayload);
   };
 
+  const sendTransactionError = async () => {
+    if (!MiniKit.isInstalled()) {
+      return;
+    }
+
+    const deadline = Math.floor(
+      (Date.now() + 30 * 60 * 1000) / 1000,
+    ).toString();
+
+    const permitTransfer = {
+      permitted: {
+        token: testTokens.worldchain.USDCE,
+        amount: '10000',
+      },
+      nonce: Date.now().toString(),
+      deadline,
+    };
+
+    const permitTransferArgsForm = [
+      [permitTransfer.permitted.token, permitTransfer.permitted.amount],
+      permitTransfer.nonce,
+      permitTransfer.deadline,
+    ];
+
+    const transferDetails = {
+      to: '0x126f7998Eb44Dd2d097A8AB2eBcb28dEA1646AC8',
+      requestedAmount: '10000',
+    };
+
+    const transferDetailsArgsForm = [
+      transferDetails.to,
+      transferDetails.requestedAmount,
+    ];
+
+    try {
+      // Following the exact documentation approach
+      const result = await MiniKit.commandsAsync.sendTransaction({
+        transaction: [
+          {
+            // Using DEX contract address from documentation, update if needed
+            address: '0x640487Ce2c45bD05D03b65783c15aa1ac694cDb6',
+            abi: ANDYABI,
+            functionName: 'nonExistentFunction',
+            args: [
+              permitTransferArgsForm,
+              transferDetailsArgsForm,
+              'PERMIT2_SIGNATURE_PLACEHOLDER_0',
+            ],
+          },
+        ],
+        permit2: [
+          {
+            ...permitTransfer,
+            spender: '0x34afd47fbdcc37344d1eb6a2ed53b253d4392a2f',
+          },
+        ],
+      });
+
+      console.log('Transaction result:', result);
+      setTempInstallFix((prev) => prev + 1);
+      setTransactionData(result.commandPayload);
+      setReceivedSendTransactionPayload(result.finalPayload);
+    } catch (error: any) {
+      console.error('Transaction failed:', error);
+      setReceivedSendTransactionPayload({
+        status: 'error',
+        error_code: error?.code || 'unknown_error',
+        message: error?.message || 'Transaction failed',
+      });
+    }
+  };
+
   return (
     <div className="grid gap-y-2">
       <h2 className="text-2xl font-bold">Transaction</h2>
@@ -509,6 +581,15 @@ export const SendTransaction = () => {
           onClick={testEthTransaction}
         >
           Test ETH
+        </button>
+      </div>
+
+      <div className="grid gap-x-2 grid-cols-2">
+        <button
+          className="bg-black text-white rounded-lg p-4 w-full"
+          onClick={sendTransactionError}
+        >
+          Send Transaction Error
         </button>
       </div>
 
