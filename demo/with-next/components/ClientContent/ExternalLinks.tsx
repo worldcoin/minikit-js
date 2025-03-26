@@ -64,6 +64,27 @@ export const ExternalLinks = () => {
           Open Share Page
         </button>
         <button
+          onClick={async () => {
+            try {
+              const response = await fetch(
+                'https://world-id-assets.com/app_e8288209fbe1fc4a1b80619e925a79bd/e158c5b5-de0b-4ffa-a06e-bad6180c0698.png',
+              );
+              const blob = await response.blob();
+              const file = new File([blob], 'image.png', { type: blob.type });
+
+              await navigator.share({
+                url: 'https://google.com',
+                files: [file],
+              });
+            } catch (error) {
+              console.error('Error sharing:', error);
+            }
+          }}
+          className="text-white bg-green-500 transition p-4 leading-[1] rounded-lg"
+        >
+          Share Image
+        </button>
+        <button
           onClick={() => window.open('https://google.com', '_blank')}
           className="text-white bg-red-500 transition p-4 leading-[1] rounded-lg"
         >
