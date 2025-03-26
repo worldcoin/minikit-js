@@ -66,12 +66,9 @@ export const ExternalLinks = () => {
         <button
           onClick={async () => {
             try {
-              const response = await fetch(
-                'https://world-id-assets.com/app_e8288209fbe1fc4a1b80619e925a79bd/e158c5b5-de0b-4ffa-a06e-bad6180c0698.png',
-              );
+              const response = await fetch('/800.jpeg');
               const blob = await response.blob();
-              const file = new File([blob], 'image.png', { type: blob.type });
-
+              const file = new File([blob], '800.jpeg', { type: 'image/jpeg' });
               await navigator.share({
                 url: 'https://google.com',
                 files: [file],
