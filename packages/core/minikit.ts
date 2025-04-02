@@ -298,7 +298,7 @@ export class MiniKit {
     return {
       walletAddress: address,
       username: userProfile.username,
-      profilePictureUrl: userProfile.profilePictureUrl,
+      profilePictureUrl: userProfile.profile_picture_url,
     };
   };
 
