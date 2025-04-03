@@ -136,6 +136,32 @@ const stateChangesPayload = {
   },
 };
 
+const benignPayload = {
+  types: {
+    EIP712Domain: [
+      { type: 'string', name: 'name' },
+      { type: 'string', name: 'version' },
+      { type: 'uint256', name: 'chainId' },
+      { type: 'address', name: 'verifyingContract' },
+    ],
+    Message: [
+      { type: 'string', name: 'content' },
+      { type: 'uint256', name: 'timestamp' },
+    ],
+  },
+  domain: {
+    name: 'Simple Message',
+    version: '1',
+    chainId: 480,
+    verifyingContract: '0x0000000000000000000000000000000000000000',
+  },
+  primaryType: 'Message',
+  message: {
+    content: 'This is a benign message for testing signature verification',
+    timestamp: Math.floor(Date.now() / 1000),
+  },
+};
+
 export const SignTypedData = () => {
   const [signTypedDataAppPayload, setSignTypedDataAppPayload] = useState<
     string | undefined
@@ -228,6 +254,14 @@ export const SignTypedData = () => {
     setTempInstallFix((prev) => prev + 1);
   }, []);
 
+  const signBenignPayload = () => {
+    const payload = MiniKit.commands.signTypedData(benignPayload);
+    setSentSignTypedDataPayload({
+      payload,
+    });
+    setTempInstallFix((prev) => prev + 1);
+  };
+
   return (
     <div>
       <div className="grid gap-y-2">
@@ -243,15 +277,25 @@ export const SignTypedData = () => {
         <div className="grid grid-cols-2 gap-x-3">
           <button
             className="bg-black text-white rounded-lg p-4 w-full"
+            onClick={signBenignPayload}
+          >
+            Sign Benign Payload
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-x-3">
+          <button
+            className="bg-red-700 text-white rounded-lg p-4 w-full"
             onClick={() => onSignTypedData()}
           >
-            Sign Typed Data
+            Sign Transaction
           </button>
           <button
-            className="bg-black text-white rounded-lg p-4 w-full"
+            className="bg-red-700 text-white rounded-lg p-4 w-full"
             onClick={() => onSignTypedData(true)}
           >
-            Sign Typed Data State Changes
+            State Changes <br />
+            (Change ownership of safe)
           </button>
         </div>
       </div>
