@@ -15,10 +15,6 @@ export {
   type IVerifyResponse,
 } from '@worldcoin/idkit-core/backend';
 
-export {
-  SAFE_CONTRACT_ABI,
-  parseSiweMessage,
-  verifySiweMessage,
-} from 'helpers/siwe/siwe';
+export { parseSiweMessage, verifySiweMessage } from 'helpers/siwe/siwe';
 
 export { getIsUserVerified } from 'helpers/address-book';
