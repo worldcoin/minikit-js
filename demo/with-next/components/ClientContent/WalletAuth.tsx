@@ -1,8 +1,10 @@
 import {
   MiniKit,
   ResponseEvent,
+  User,
   WalletAuthErrorCodes,
 } from '@worldcoin/minikit-js';
+import Image from 'next/image';
 import { useCallback, useEffect, useState } from 'react';
 import * as yup from 'yup';
 import { validateSchema } from './helpers/validate-schema';
@@ -28,6 +30,7 @@ export const WalletAuth = () => {
   const [nonce, setNonce] = useState<string | null>(null);
   const [receivedWalletAuthPayload, setReceivedWalletAuthPayload] =
     useState<Record<string, any> | null>(null);
+  const [profile, setProfile] = useState<User | null>(null);
 
   const [
     walletAuthPayloadValidationMessage,
@@ -85,6 +88,8 @@ export const WalletAuth = () => {
             ? 'Valid! Successfully Signed In'
             : `Failed: ${responseJson.message}`,
         );
+
+        setProfile(MiniKit.user);
       }
 
       setReceivedWalletAuthPayload(payload);
@@ -172,6 +177,17 @@ export const WalletAuth = () => {
           <p className="bg-gray-300 p-2">
             {walletAuthVerificationMessage ?? 'No verification yet'}
           </p>
+        </div>
+
+        <div className="grid gap-y-1">
+          <p>Profile:</p>
+          <p className="bg-gray-300 p-2">{profile?.username}</p>
+          <Image
+            src={profile?.profilePictureUrl ?? ''}
+            alt="Profile"
+            width={100}
+            height={100}
+          />
         </div>
       </div>
     </div>
