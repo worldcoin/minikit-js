@@ -88,8 +88,32 @@ export const WalletAuth = () => {
             ? 'Valid! Successfully Signed In'
             : `Failed: ${responseJson.message}`,
         );
-        const user = await MiniKit.getUserByAddress(payload.address);
-        setProfile(user);
+        if (process.env.NEXT_DEPLOYMENT_ENVIRONMENT !== 'production') {
+          const res = await fetch(
+            'https://usernames.worldcoin.org/api/v1/query',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                addresses: [payload.address],
+              }),
+            },
+          );
+
+          const usernames = await res.json();
+          setProfile(
+            usernames?.[0] ?? {
+              username: null,
+              profilePictureUrl: null,
+            },
+          );
+        } else {
+          const user = await MiniKit.getUserByAddress(payload.address);
+          console.log(user);
+          setProfile(user);
+        }
       }
 
       setReceivedWalletAuthPayload(payload);

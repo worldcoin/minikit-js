@@ -99,7 +99,12 @@ export const ClientContent = () => {
         )}
 
         <div className="grid gap-y-8">
-          <button onClick={sendNotification}>Send Notification</button>
+          <button
+            className="bg-black text-white p-2 rounded-lg"
+            onClick={sendNotification}
+          >
+            Send Notification
+          </button>
           <VersionsNoSSR />
           <hr />
           <VerifyAction />
