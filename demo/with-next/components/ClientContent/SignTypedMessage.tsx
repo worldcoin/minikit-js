@@ -139,23 +139,23 @@ const stateChangesPayload = {
 const benignPayload = {
   types: {
     EIP712Domain: [
-      { type: 'string', name: 'name' },
-      { type: 'string', name: 'version' },
-      { type: 'uint256', name: 'chainId' },
-      { type: 'address', name: 'verifyingContract' },
+      { name: 'name', type: 'string' },
+      { name: 'version', type: 'string' },
+      { name: 'chainId', type: 'uint256' },
+      { name: 'verifyingContract', type: 'address' },
     ],
     Message: [
-      { type: 'string', name: 'content' },
-      { type: 'uint256', name: 'timestamp' },
+      { name: 'content', type: 'string' },
+      { name: 'timestamp', type: 'uint256' },
     ],
   },
+  primaryType: 'Message',
   domain: {
     name: 'Simple Message',
     version: '1',
     chainId: 480,
     verifyingContract: '0x0000000000000000000000000000000000000000',
   },
-  primaryType: 'Message',
   message: {
     content: 'This is a benign message for testing signature verification',
     timestamp: Math.floor(Date.now() / 1000),
