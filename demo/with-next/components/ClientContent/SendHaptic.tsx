@@ -101,7 +101,7 @@ export const SendHapticFeedback = () => {
             </pre>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-x-3">
+        <div className="grid grid-cols-2 gap-2">
           {allPossibleHaptics.map((haptic, i) => (
             <button
               key={i}

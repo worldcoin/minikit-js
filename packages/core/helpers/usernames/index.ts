@@ -10,5 +10,5 @@ export const getUserProfile = async (address: string) => {
   });
 
   const usernames = await res.json();
-  return usernames?.[0] ?? { username: null, profilePictureUrl: null };
+  return usernames?.[0] ?? { username: null, profile_picture_url: null };
 };
