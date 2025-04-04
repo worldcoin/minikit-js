@@ -130,7 +130,6 @@ export class MiniKit {
         payload,
       ) => {
         if (payload.status === 'success') {
-          MiniKit.walletAddress = payload.address;
           MiniKit.getUserByAddress(payload.address).then((user) => {
             MiniKit.user = user;
           });

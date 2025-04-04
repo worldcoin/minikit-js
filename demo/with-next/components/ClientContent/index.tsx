@@ -1,5 +1,6 @@
 'use client';
 
+import { MiniKit } from '@worldcoin/minikit-js';
 import {
   GetSearchedUsernameResult,
   UsernameSearch,
@@ -36,6 +37,19 @@ export const ClientContent = () => {
     setSearchValue(e.target.value);
   };
 
+  const sendNotification = async () => {
+    if (!MiniKit.user?.walletAddress) {
+      console.error('No wallet address found, do wallet auth first');
+      return;
+    }
+    const response = await fetch('/api/notifications', {
+      method: 'POST',
+      body: JSON.stringify({
+        walletAddress: MiniKit.user?.walletAddress ?? '',
+      }),
+    });
+    console.log(response);
+  };
   return (
     <div className="p-2 lg:p-8 grid content-start min-h-[100dvh] gap-y-2">
       <Nav />
@@ -85,7 +99,7 @@ export const ClientContent = () => {
         )}
 
         <div className="grid gap-y-8">
-          test 2
+          <button onClick={sendNotification}>Send Notification</button>
           <VersionsNoSSR />
           <hr />
           <VerifyAction />

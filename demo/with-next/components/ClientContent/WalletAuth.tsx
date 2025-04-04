@@ -88,8 +88,8 @@ export const WalletAuth = () => {
             ? 'Valid! Successfully Signed In'
             : `Failed: ${responseJson.message}`,
         );
-
-        setProfile(MiniKit.user);
+        const user = await MiniKit.getUserByAddress(payload.address);
+        setProfile(user);
       }
 
       setReceivedWalletAuthPayload(payload);
@@ -180,7 +180,7 @@ export const WalletAuth = () => {
         </div>
 
         <div className="grid gap-y-1">
-          <p>Profile:</p>
+          <p>Profile</p>
           <p className="bg-gray-300 p-2">{profile?.username}</p>
           <Image
             src={profile?.profilePictureUrl ?? ''}
