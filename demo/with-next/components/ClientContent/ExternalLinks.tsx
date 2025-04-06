@@ -64,6 +64,14 @@ export const ExternalLinks = () => {
           Open Share Page
         </button>
         <button
+          onClick={() =>
+            window.open('https://reddit.com?open_out_of_window=true', '_blank')
+          }
+          className="text-white bg-green-500 transition p-4 leading-[1] rounded-lg"
+        >
+          Open Outside App
+        </button>
+        <button
           onClick={async () => {
             try {
               const response = await fetch('/800.jpeg');
