@@ -15,6 +15,7 @@ import { GetPermissions } from './GetPermissions';
 import { Nav } from './Nav';
 import { Pay } from './Pay';
 import { RequestPermission } from './RequestPermissions';
+import { SearchParams } from './SearchParams';
 import { SendHapticFeedback } from './SendHaptic';
 import { ShareContacts } from './ShareContacts';
 import { SignMessage } from './SignMessage';
@@ -105,6 +106,7 @@ export const ClientContent = () => {
           >
             Send Notification
           </button>
+          <SearchParams />
           <VersionsNoSSR />
           <hr />
           <VerifyAction />
