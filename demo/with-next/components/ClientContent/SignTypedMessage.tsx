@@ -137,6 +137,12 @@ const stateChangesPayload = {
 };
 
 const benignPayload = {
+  domain: {
+    name: 'Ether Mail',
+    version: '1',
+    chainId: 1,
+    verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
+  },
   types: {
     EIP712Domain: [
       { name: 'name', type: 'string' },
@@ -144,21 +150,27 @@ const benignPayload = {
       { name: 'chainId', type: 'uint256' },
       { name: 'verifyingContract', type: 'address' },
     ],
-    Message: [
-      { name: 'content', type: 'string' },
-      { name: 'timestamp', type: 'uint256' },
+    Person: [
+      { name: 'name', type: 'string' },
+      { name: 'wallet', type: 'address' },
+    ],
+    Mail: [
+      { name: 'from', type: 'Person' },
+      { name: 'to', type: 'Person' },
+      { name: 'contents', type: 'string' },
     ],
   },
-  primaryType: 'Message',
-  domain: {
-    name: 'Simple Message',
-    version: '1',
-    chainId: 480,
-    verifyingContract: '0x0000000000000000000000000000000000000000',
-  },
+  primaryType: 'Mail',
   message: {
-    content: 'This is a benign message for testing signature verification',
-    timestamp: Math.floor(Date.now() / 1000),
+    from: {
+      name: 'Cow',
+      wallet: '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
+    },
+    to: {
+      name: 'Bob',
+      wallet: '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
+    },
+    contents: 'Hello, Bob!',
   },
 };
 
