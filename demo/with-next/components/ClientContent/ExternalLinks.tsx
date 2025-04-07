@@ -65,7 +65,10 @@ export const ExternalLinks = () => {
         </button>
         <button
           onClick={() =>
-            window.open('https://reddit.com?open_out_of_window=true', '_blank')
+            window.open(
+              'https://docs.worldcoin.org?open_out_of_window=true',
+              '_blank',
+            )
           }
           className="text-white bg-green-500 transition p-4 leading-[1] rounded-lg"
         >
