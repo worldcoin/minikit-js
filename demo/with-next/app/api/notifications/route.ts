@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST(request: Request) {
+export const POST = async (request: NextRequest) => {
   try {
     console.log('request: here');
     const { walletAddress } = await request.json();
@@ -50,4 +50,4 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
-}
+};
