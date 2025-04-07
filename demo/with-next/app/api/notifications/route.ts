@@ -43,8 +43,8 @@ export const POST = async (request: NextRequest) => {
 
     const data = await response.json();
     return NextResponse.json(data);
-  } catch (error) {
-    console.error('Error sending notification:', error);
+  } catch (error: any) {
+    console.error('Error sending notification:', error.message);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 },
