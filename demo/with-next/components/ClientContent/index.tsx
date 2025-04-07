@@ -43,12 +43,15 @@ export const ClientContent = () => {
       console.error('No wallet address found, do wallet auth first');
       return;
     }
-    const response = await fetch('/api/notifications', {
-      method: 'POST',
-      body: JSON.stringify({
-        walletAddress: MiniKit.user?.walletAddress ?? '',
-      }),
-    });
+    const response = await fetch(
+      `${process.env.NEXTAUTH_URL}api/notifications`,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          walletAddress: MiniKit.user?.walletAddress ?? '',
+        }),
+      },
+    );
     console.log(response);
   };
   return (

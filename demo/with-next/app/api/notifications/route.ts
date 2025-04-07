@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
+    console.log('request: here');
     const { walletAddress } = await request.json();
     const title = 'test';
     const message = 'test notification';
