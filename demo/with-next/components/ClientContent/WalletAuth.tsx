@@ -88,7 +88,7 @@ export const WalletAuth = () => {
             ? 'Valid! Successfully Signed In'
             : `Failed: ${responseJson.message}`,
         );
-        if (process.env.NEXT_DEPLOYMENT_ENVIRONMENT !== 'production') {
+        if (process.env.NEXT_PUBLIC_ENVIRONMENT !== 'production') {
           const res = await fetch(
             'https://usernames.worldcoin.org/api/v1/query',
             {

@@ -33,7 +33,7 @@ export const ClientContent = () => {
   const [searchValue, setSearchValue] = useState('');
   const [searchResults, setSearchResults] =
     useState<GetSearchedUsernameResult>();
-  const isProduction = process.env.NEXT_DEPLOYMENT_ENVIRONMENT === 'production';
+  const isProduction = process.env.NEXT_PUBLIC_ENVIRONMENT === 'production';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);

@@ -39,7 +39,7 @@ export const VerifyAction = () => {
     verifyActionAppPayloadValidationMessage,
     setVerifyActionAppPayloadValidationMessage,
   ] = useState<string | null>(null);
-  const isProduction = process.env.NEXT_DEPLOYMENT_ENVIRONMENT === 'production';
+  const isProduction = process.env.NEXT_PUBLIC_ENVIRONMENT === 'production';
   const [verifyActionAppPayload, setVerifyActionAppPayload] = useState<
     Record<string, any> | undefined
   >();

@@ -23,7 +23,7 @@ export const verifyProof = async (params: {
       action,
       signal,
 
-      process.env.NEXT_DEPLOYMENT_ENVIRONMENT === 'staging'
+      process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging'
         ? stagingEndpoint
         : undefined,
     );

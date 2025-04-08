@@ -10,7 +10,7 @@ export const authOptions: NextAuthOptions = {
       name: 'Worldcoin',
       type: 'oauth',
       wellKnown:
-        process.env.NEXT_DEPLOYMENT_ENVIRONMENT === 'staging'
+        process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging'
           ? 'https://staging.id.worldcoin.org/.well-known/openid-configuration'
           : 'https://id.worldcoin.org/.well-known/openid-configuration',
       authorization: { params: { scope: 'openid' } },

@@ -46,7 +46,7 @@ const testTokens = {
 };
 
 const mainContract =
-  process.env.NEXT_DEPLOYMENT_ENVIRONMENT === 'production'
+  process.env.NEXT_PUBLIC_ENVIRONMENT === 'production'
     ? ''
     : '0x9Cf4F011F55Add3ECC1B1B497A3e9bd32183D6e8';
 
