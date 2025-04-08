@@ -8,7 +8,7 @@ import {
   VerificationLevel,
 } from '@worldcoin/minikit-js';
 import { useWaitForTransactionReceipt } from '@worldcoin/minikit-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { createPublicClient, http } from 'viem';
 import { worldchain } from 'viem/chains';
 import * as yup from 'yup';
@@ -50,6 +50,11 @@ const mainContract =
     ? '0x9Cf4F011F55Add3ECC1B1B497A3e9bd32183D6e8' // same contract for now since I didn't add proofs
     : '0x9Cf4F011F55Add3ECC1B1B497A3e9bd32183D6e8';
 
+/* Asynchronous Implementation
+For the purpose of variability some of these commands use async handlers
+and some of the commands user synchronous responses. 
+*/
+
 export const SendTransaction = () => {
   const [transactionData, setTransactionData] = useState<Record<
     string,
@@ -57,7 +62,6 @@ export const SendTransaction = () => {
   > | null>(null);
   const [receivedSendTransactionPayload, setReceivedSendTransactionPayload] =
     useState<Record<string, any> | null>(null);
-  const [tempInstallFix, setTempInstallFix] = useState(0);
   const [
     sendTransactionPayloadValidationMessage,
     setSendTransactionPayloadValidationMessage,
@@ -84,59 +88,46 @@ export const SendTransaction = () => {
     pollingInterval: 2000,
   });
 
-  useEffect(() => {
-    if (!MiniKit.isInstalled()) {
-      return;
+  const parseResponse = async (payload: MiniAppSendTransactionPayload) => {
+    console.log('MiniAppSendTransaction, SUBSCRIBE PAYLOAD', payload);
+
+    if (payload.status === 'error') {
+      const errorMessage = await validateSchema(
+        sendTransactionErrorPayloadSchema,
+        payload,
+      );
+
+      if (!errorMessage) {
+        setSendTransactionPayloadValidationMessage('Payload is valid');
+      } else {
+        setSendTransactionPayloadValidationMessage(errorMessage);
+      }
+    } else {
+      const errorMessage = await validateSchema(
+        sendTransactionSuccessPayloadSchema,
+        payload,
+      );
+
+      if (!errorMessage) {
+        setSendTransactionPayloadValidationMessage('Payload is valid');
+      } else {
+        setSendTransactionPayloadValidationMessage(errorMessage);
+      }
+
+      // const responseJson = await response.json();
+
+      // setSendTransactionVerificationMessage(
+      //   responseJson.isValid
+      //     ? "Valid! Successful Transaction"
+      //     : `Failed: ${responseJson.message}`
+      // );
+      setTransactionId(payload.transaction_id);
     }
 
-    MiniKit.subscribe(
-      ResponseEvent.MiniAppSendTransaction,
-      async (payload: MiniAppSendTransactionPayload) => {
-        console.log('MiniAppSendTransaction, SUBSCRIBE PAYLOAD', payload);
+    setReceivedSendTransactionPayload(payload);
+  };
 
-        if (payload.status === 'error') {
-          const errorMessage = await validateSchema(
-            sendTransactionErrorPayloadSchema,
-            payload,
-          );
-
-          if (!errorMessage) {
-            setSendTransactionPayloadValidationMessage('Payload is valid');
-          } else {
-            setSendTransactionPayloadValidationMessage(errorMessage);
-          }
-        } else {
-          const errorMessage = await validateSchema(
-            sendTransactionSuccessPayloadSchema,
-            payload,
-          );
-
-          if (!errorMessage) {
-            setSendTransactionPayloadValidationMessage('Payload is valid');
-          } else {
-            setSendTransactionPayloadValidationMessage(errorMessage);
-          }
-
-          // const responseJson = await response.json();
-
-          // setSendTransactionVerificationMessage(
-          //   responseJson.isValid
-          //     ? "Valid! Successful Transaction"
-          //     : `Failed: ${responseJson.message}`
-          // );
-          setTransactionId(payload.transaction_id);
-        }
-
-        setReceivedSendTransactionPayload(payload);
-      },
-    );
-
-    return () => {
-      MiniKit.unsubscribe(ResponseEvent.MiniAppSendTransaction);
-    };
-  }, [tempInstallFix]);
-
-  const onSendTransactionClick = () => {
+  const onSendTransactionClick = async () => {
     const deadline = Math.floor(
       (Date.now() + 30 * 60 * 1000) / 1000,
     ).toString();
@@ -167,31 +158,32 @@ export const SendTransaction = () => {
       transferDetails.requestedAmount,
     ];
 
-    const payload = MiniKit.commands.sendTransaction({
-      transaction: [
-        {
-          address: '0x78c9b378b47c1700838c599e42edd4ffd1865ccd',
-          abi: DEXABI,
-          functionName: 'signatureTransfer',
-          args: [
-            permitTransferArgsForm,
-            transferDetailsArgsForm,
-            'PERMIT2_SIGNATURE_PLACEHOLDER_0',
-          ],
-        },
-      ],
-      permit2: [
-        {
-          ...permitTransfer,
-          spender: '0x78c9b378b47c1700838c599e42edd4ffd1865ccd',
-        },
-      ],
-    });
-    setTempInstallFix((prev) => prev + 1);
-    setTransactionData(payload);
+    const { commandPayload, finalPayload } =
+      await MiniKit.commandsAsync.sendTransaction({
+        transaction: [
+          {
+            address: '0x78c9b378b47c1700838c599e42edd4ffd1865ccd',
+            abi: DEXABI,
+            functionName: 'signatureTransfer',
+            args: [
+              permitTransferArgsForm,
+              transferDetailsArgsForm,
+              'PERMIT2_SIGNATURE_PLACEHOLDER_0',
+            ],
+          },
+        ],
+        permit2: [
+          {
+            ...permitTransfer,
+            spender: '0x78c9b378b47c1700838c599e42edd4ffd1865ccd',
+          },
+        ],
+      });
+    setTransactionData(commandPayload);
+    await parseResponse(finalPayload);
   };
 
-  const onSendNestedTransactionClick = () => {
+  const onSendNestedTransactionClick = async () => {
     const deadline = Math.floor(
       (Date.now() + 30 * 60 * 1000) / 1000,
     ).toString();
@@ -246,45 +238,46 @@ export const SendTransaction = () => {
       transferDetails2.requestedAmount,
     ];
 
-    const payload = MiniKit.commands.sendTransaction({
-      transaction: [
-        {
-          address: '0x78c9b378b47c1700838c599e42edd4ffd1865ccd',
-          abi: DEXABI,
-          functionName: 'signatureTransfer',
-          args: [
-            permitTransferArgsForm,
-            transferDetailsArgsForm,
-            'PERMIT2_SIGNATURE_PLACEHOLDER_0',
-          ],
-        },
-        {
-          address: '0x78c9b378b47c1700838c599e42edd4ffd1865ccd',
-          abi: DEXABI,
-          functionName: 'signatureTransfer',
-          args: [
-            permitTransferArgsForm2,
-            transferDetailsArgsForm2,
-            'PERMIT2_SIGNATURE_PLACEHOLDER_1',
-          ],
-        },
-      ],
-      permit2: [
-        {
-          ...permitTransfer,
-          spender: '0x78c9b378b47c1700838c599e42edd4ffd1865ccd',
-        },
-        {
-          ...permitTransfer2,
-          spender: '0x78c9b378b47c1700838c599e42edd4ffd1865ccd',
-        },
-      ],
-    });
-    setTempInstallFix((prev) => prev + 1);
-    setTransactionData(payload);
+    const { commandPayload, finalPayload } =
+      await MiniKit.commandsAsync.sendTransaction({
+        transaction: [
+          {
+            address: '0x78c9b378b47c1700838c599e42edd4ffd1865ccd',
+            abi: DEXABI,
+            functionName: 'signatureTransfer',
+            args: [
+              permitTransferArgsForm,
+              transferDetailsArgsForm,
+              'PERMIT2_SIGNATURE_PLACEHOLDER_0',
+            ],
+          },
+          {
+            address: '0x78c9b378b47c1700838c599e42edd4ffd1865ccd',
+            abi: DEXABI,
+            functionName: 'signatureTransfer',
+            args: [
+              permitTransferArgsForm2,
+              transferDetailsArgsForm2,
+              'PERMIT2_SIGNATURE_PLACEHOLDER_1',
+            ],
+          },
+        ],
+        permit2: [
+          {
+            ...permitTransfer,
+            spender: '0x78c9b378b47c1700838c599e42edd4ffd1865ccd',
+          },
+          {
+            ...permitTransfer2,
+            spender: '0x78c9b378b47c1700838c599e42edd4ffd1865ccd',
+          },
+        ],
+      });
+    setTransactionData(commandPayload);
+    await parseResponse(finalPayload);
   };
 
-  const testNFTPurchase = () => {
+  const testNFTPurchase = async () => {
     const deadline = Math.floor(
       (Date.now() + 30 * 60 * 1000) / 1000,
     ).toString();
@@ -314,37 +307,39 @@ export const SendTransaction = () => {
       transferDetails.requestedAmount,
     ];
 
-    const payload = MiniKit.commands.sendTransaction({
-      transaction: [
-        {
-          address: '0x640487Ce2c45bD05D03b65783c15aa1ac694cDb6',
-          abi: ANDYABI,
-          functionName: 'buyNFTWithPermit2',
-          args: [
-            permitTransferArgsForm,
-            transferDetailsArgsForm,
-            'PERMIT2_SIGNATURE_PLACEHOLDER_0',
-          ],
-        },
-      ],
-      permit2: [
-        {
-          ...permitTransfer,
-          spender: '0x640487Ce2c45bD05D03b65783c15aa1ac694cDb6',
-        },
-      ],
-    });
-    setTempInstallFix((prev) => prev + 1);
-    setTransactionData(payload);
+    const { commandPayload, finalPayload } =
+      await MiniKit.commandsAsync.sendTransaction({
+        transaction: [
+          {
+            address: '0x640487Ce2c45bD05D03b65783c15aa1ac694cDb6',
+            abi: ANDYABI,
+            functionName: 'buyNFTWithPermit2',
+            args: [
+              permitTransferArgsForm,
+              transferDetailsArgsForm,
+              'PERMIT2_SIGNATURE_PLACEHOLDER_0',
+            ],
+          },
+        ],
+        permit2: [
+          {
+            ...permitTransfer,
+            spender: '0x640487Ce2c45bD05D03b65783c15aa1ac694cDb6',
+          },
+        ],
+      });
+    setTransactionData(commandPayload);
+    await parseResponse(finalPayload);
   };
 
   const doubleAction = async () => {
-    const payload = await MiniKit.commandsAsync.verify({
+    await MiniKit.commandsAsync.verify({
       action: process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION || '',
       signal: '123',
       verification_level: VerificationLevel.Device,
     });
-    const pay = await MiniKit.commandsAsync.pay({
+
+    await MiniKit.commandsAsync.pay({
       to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
       tokens: [
         {
@@ -355,108 +350,113 @@ export const SendTransaction = () => {
       description: 'Test Chaining',
       reference: new Date().toISOString(),
     });
-    // onSendTransactionClick();
   };
 
   const doubleActionTransact = async () => {
-    const payload = await MiniKit.commandsAsync.verify({
+    await MiniKit.commandsAsync.verify({
       action: process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION || '',
       signal: '123',
       verification_level: VerificationLevel.Device,
     });
 
-    onSendTransactionClick();
+    await onSendTransactionClick();
   };
 
-  const mintToken = () => {
-    const payload = MiniKit.commands.sendTransaction({
-      transaction: [
-        {
-          address: mainContract,
-          abi: MinikitStaging,
-          functionName: 'mintToken',
-          args: [],
-        },
-      ],
-    });
-    setTempInstallFix((prev) => prev + 1);
-    setTransactionData(payload);
+  const mintToken = async () => {
+    const { commandPayload, finalPayload } =
+      await MiniKit.commandsAsync.sendTransaction({
+        transaction: [
+          {
+            address: mainContract,
+            abi: MinikitStaging,
+            functionName: 'mintToken',
+            args: [],
+          },
+        ],
+      });
+    setTransactionData(commandPayload);
+    await parseResponse(finalPayload);
   };
 
-  const bumpFunctionCalls = () => {
-    const payload = MiniKit.commands.sendTransaction({
-      transaction: [
-        {
-          address: mainContract,
-          abi: MinikitStaging,
-          functionName: 'trackCalls',
-          args: [],
-        },
-      ],
-    });
-    setTempInstallFix((prev) => prev + 1);
-    setTransactionData(payload);
+  const bumpFunctionCalls = async () => {
+    const { commandPayload, finalPayload } =
+      await MiniKit.commandsAsync.sendTransaction({
+        transaction: [
+          {
+            address: mainContract,
+            abi: MinikitStaging,
+            functionName: 'trackCalls',
+            args: [],
+          },
+        ],
+      });
+    setTransactionData(commandPayload);
+    await parseResponse(finalPayload);
   };
 
-  const getTotalTokensMinted = () => {
-    const payload = MiniKit.commands.sendTransaction({
-      transaction: [
-        {
-          address: mainContract,
-          abi: MinikitStaging,
-          functionName: 'getTotalTokensMinted',
-          args: [],
-        },
-      ],
-    });
-    setTempInstallFix((prev) => prev + 1);
-    setTransactionData(payload);
+  const getTotalTokensMinted = async () => {
+    const { commandPayload, finalPayload } =
+      await MiniKit.commandsAsync.sendTransaction({
+        transaction: [
+          {
+            address: mainContract,
+            abi: MinikitStaging,
+            functionName: 'getTotalTokensMinted',
+            args: [],
+          },
+        ],
+      });
+    setTransactionData(commandPayload);
+    await parseResponse(finalPayload);
   };
 
-  const intentionallyRevert = () => {
-    const payload = MiniKit.commands.sendTransaction({
-      transaction: [
-        {
-          address: mainContract,
-          abi: MinikitStaging,
-          functionName: 'intentionallyRevert',
-          args: [],
-        },
-      ],
-    });
-    setTempInstallFix((prev) => prev + 1);
-    setTransactionData(payload);
+  const intentionallyRevert = async () => {
+    const { commandPayload, finalPayload } =
+      await MiniKit.commandsAsync.sendTransaction({
+        transaction: [
+          {
+            address: mainContract,
+            abi: MinikitStaging,
+            functionName: 'intentionallyRevert',
+            args: [],
+          },
+        ],
+      });
+    setTransactionData(commandPayload);
+    await parseResponse(finalPayload);
   };
 
-  const nonExistantFunction = () => {
-    const payload = MiniKit.commands.sendTransaction({
-      transaction: [
-        {
-          address: mainContract,
-          abi: MinikitStaging,
-          functionName: 'functionDoesNotExist',
-          args: [],
-        },
-      ],
-    });
-    setTempInstallFix((prev) => prev + 1);
-    setTransactionData(payload);
+  const nonExistantFunction = async () => {
+    const { commandPayload, finalPayload } =
+      await MiniKit.commandsAsync.sendTransaction({
+        transaction: [
+          {
+            address: mainContract,
+            abi: MinikitStaging,
+            functionName: 'functionDoesNotExist',
+            args: [],
+          },
+        ],
+      });
+    setTransactionData(commandPayload);
+    await parseResponse(finalPayload);
   };
 
-  const testEthTransaction = () => {
-    const payload = MiniKit.commands.sendTransaction({
-      transaction: [
-        {
-          address: '0x2E7BeBAB990076A10fBb5e8C2Ff16Fc1434387ad',
-          abi: ForwardABI,
-          functionName: 'pay',
-          args: ['0x377da9cab87c04a1d6f19d8b4be9aef8df26fcdd'], // Andy
-          value: '0x9184E72A000', // Send 0.00001 ETH
-        },
-      ],
-    });
-    setTempInstallFix((prev) => prev + 1);
-    setTransactionData(payload);
+  const testEthTransaction = async () => {
+    const { commandPayload, finalPayload } =
+      await MiniKit.commandsAsync.sendTransaction({
+        transaction: [
+          {
+            address: '0x2E7BeBAB990076A10fBb5e8C2Ff16Fc1434387ad',
+            abi: ForwardABI,
+            functionName: 'pay',
+            args: ['0x377da9cab87c04a1d6f19d8b4be9aef8df26fcdd'], // Andy
+            value: '0x9184E72A000', // Send 0.00001 ETH
+          },
+        ],
+      });
+    setTransactionData(commandPayload);
+    await parseResponse(finalPayload);
   };
 
   return (
