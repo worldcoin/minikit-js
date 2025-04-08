@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const POST = async (request: NextRequest) => {
   try {
-    console.log('request: here');
     const { walletAddress } = await request.json();
     const title = 'test';
     const message = 'test notification';
@@ -14,7 +13,6 @@ export const POST = async (request: NextRequest) => {
         { status: 400 },
       );
     }
-    console.log('1');
 
     const response = await fetch(
       `${process.env.NEXT_SERVER_DEV_PORTAL_URL}/api/v2/minikit/send-notification`,
@@ -25,7 +23,7 @@ export const POST = async (request: NextRequest) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          app_id: process.env.WORLDCOIN_APP_ID,
+          app_id: process.env.WLD_CLIENT_ID,
           wallet_addresses: [walletAddress],
           title,
           message,
@@ -37,6 +35,7 @@ export const POST = async (request: NextRequest) => {
 
     if (!response.ok) {
       const error = await response.json();
+      console.log('error');
       return NextResponse.json(
         { error: error.message || 'Failed to send notification' },
         { status: response.status },

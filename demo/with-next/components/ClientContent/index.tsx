@@ -49,7 +49,8 @@ export const ClientContent = () => {
         walletAddress: MiniKit.user?.walletAddress ?? '',
       }),
     });
-    console.log(response);
+    const data = await response.json();
+    console.log(data);
   };
   return (
     <div className="p-2 lg:p-8 grid content-start min-h-[100dvh] gap-y-2">
