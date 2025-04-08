@@ -191,7 +191,7 @@ export const VerifyAction = () => {
               <button
                 className={clsx(
                   'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  isProduction && 'hidden',
+                  isProduction ? 'hidden' : '',
                 )}
                 onClick={() => onStagingVerifyClick(VerificationLevel.Device)}
               >
@@ -200,7 +200,7 @@ export const VerifyAction = () => {
               <button
                 className={clsx(
                   'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  isProduction && 'hidden',
+                  isProduction ? 'hidden' : '',
                 )}
                 onClick={() => onStagingVerifyClick(VerificationLevel.Document)}
               >
@@ -212,7 +212,7 @@ export const VerifyAction = () => {
               <button
                 className={clsx(
                   'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  isProduction && 'hidden',
+                  isProduction ? 'hidden' : '',
                 )}
                 onClick={() =>
                   onStagingVerifyClick(VerificationLevel.SecureDocument)
@@ -223,7 +223,7 @@ export const VerifyAction = () => {
               <button
                 className={clsx(
                   'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  isProduction && 'hidden',
+                  isProduction ? 'hidden' : '',
                 )}
                 onClick={() => onStagingVerifyClick(VerificationLevel.Orb)}
               >
@@ -235,7 +235,7 @@ export const VerifyAction = () => {
               <button
                 className={clsx(
                   'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  !isProduction && 'hidden',
+                  isProduction ? '' : 'hidden',
                 )}
                 onClick={() => onProdVerifyClick(VerificationLevel.Device)}
               >
@@ -244,7 +244,7 @@ export const VerifyAction = () => {
               <button
                 className={clsx(
                   'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  !isProduction && 'hidden',
+                  isProduction ? '' : 'hidden',
                 )}
                 onClick={() => onProdVerifyClick(VerificationLevel.Document)}
               >
@@ -256,7 +256,7 @@ export const VerifyAction = () => {
               <button
                 className={clsx(
                   'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  !isProduction && 'hidden',
+                  isProduction ? '' : 'hidden',
                 )}
                 onClick={() =>
                   onProdVerifyClick(VerificationLevel.SecureDocument)
@@ -267,7 +267,7 @@ export const VerifyAction = () => {
               <button
                 className={clsx(
                   'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  !isProduction && 'hidden',
+                  isProduction ? '' : 'hidden',
                 )}
                 onClick={() => onProdVerifyClick(VerificationLevel.Orb)}
               >
