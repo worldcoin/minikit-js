@@ -140,7 +140,7 @@ const benignPayload = {
   domain: {
     name: 'Ether Mail',
     version: '1',
-    chainId: 1,
+    chainId: 480,
     verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
   },
   types: {
