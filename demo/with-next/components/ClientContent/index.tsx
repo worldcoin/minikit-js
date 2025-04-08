@@ -1,5 +1,6 @@
 'use client';
 
+import { MiniKit } from '@worldcoin/minikit-js';
 import {
   GetSearchedUsernameResult,
   UsernameSearch,
@@ -14,6 +15,7 @@ import { GetPermissions } from './GetPermissions';
 import { Nav } from './Nav';
 import { Pay } from './Pay';
 import { RequestPermission } from './RequestPermissions';
+import { SearchParams } from './SearchParams';
 import { SendHapticFeedback } from './SendHaptic';
 import { ShareContacts } from './ShareContacts';
 import { SignMessage } from './SignMessage';
@@ -31,11 +33,26 @@ export const ClientContent = () => {
   const [searchValue, setSearchValue] = useState('');
   const [searchResults, setSearchResults] =
     useState<GetSearchedUsernameResult>();
+  const isProduction = process.env.NEXT_PUBLIC_ENVIRONMENT === 'production';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);
   };
 
+  const sendNotification = async () => {
+    if (!MiniKit.user?.walletAddress) {
+      console.error('No wallet address found, do wallet auth first');
+      return;
+    }
+    const response = await fetch(`/api/notifications`, {
+      method: 'POST',
+      body: JSON.stringify({
+        walletAddress: MiniKit.user?.walletAddress ?? '',
+      }),
+    });
+    const data = await response.json();
+    console.log(data);
+  };
   return (
     <div className="p-2 lg:p-8 grid content-start min-h-[100dvh] gap-y-2">
       <Nav />
@@ -85,7 +102,15 @@ export const ClientContent = () => {
         )}
 
         <div className="grid gap-y-8">
-          test 2
+          {isProduction && (
+            <button
+              className="bg-black text-white p-2 rounded-lg"
+              onClick={sendNotification}
+            >
+              Send Notification (auth and turn on notifications first)
+            </button>
+          )}
+          <SearchParams />
           <VersionsNoSSR />
           <hr />
           <VerifyAction />

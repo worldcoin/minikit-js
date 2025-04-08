@@ -9,18 +9,13 @@ import {
 } from '@worldcoin/minikit-js';
 import { useWaitForTransactionReceipt } from '@worldcoin/minikit-react';
 import { useEffect, useState } from 'react';
-import {
-  createPublicClient,
-  decodeAbiParameters,
-  http,
-  parseAbiParameters,
-} from 'viem';
+import { createPublicClient, http } from 'viem';
 import { worldchain } from 'viem/chains';
 import * as yup from 'yup';
 import ANDYABI from '../../abi/Andy.json';
 import DEXABI from '../../abi/DEX.json';
 import ForwardABI from '../../abi/Forward.json';
-import ORBABI from '../../abi/orb.json';
+import MinikitStaging from '../../abi/MinikitStaging.json';
 import { validateSchema } from './helpers/validate-schema';
 
 const sendTransactionSuccessPayloadSchema = yup.object({
@@ -49,6 +44,11 @@ const testTokens = {
     USDCE: '0x79A02482A880bCE3F13e09Da970dC34db4CD24d1',
   },
 };
+
+const mainContract =
+  process.env.NEXT_PUBLIC_ENVIRONMENT === 'production'
+    ? ''
+    : '0x9Cf4F011F55Add3ECC1B1B497A3e9bd32183D6e8';
 
 export const SendTransaction = () => {
   const [transactionData, setTransactionData] = useState<Record<
@@ -189,66 +189,6 @@ export const SendTransaction = () => {
     });
     setTempInstallFix((prev) => prev + 1);
     setTransactionData(payload);
-  };
-
-  const onSendOrbTransactionClick = () => {
-    const deadline = Math.floor(
-      (Date.now() + 30 * 60 * 1000) / 1000,
-    ).toString();
-
-    const address = '0xf3f92a60e6004f3982f0fde0d43602fc0a30a0db';
-    const permitTransfer = {
-      permitted: {
-        token: testTokens.worldchain.USDCE,
-        amount: '1000000',
-      },
-      nonce: Date.now().toString(),
-      deadline,
-    };
-
-    console.log(
-      decodeAbiParameters(
-        parseAbiParameters('uint256[8]'),
-        '0x0ee140e3516f1ca89a95ac6960af057157447001e0009196d9617e5794d1394d04713410762300e0c8e5238f5faa1adde5a07da079aa4a5b9bf3fdafe61374131149c5f57bb5c9209fc34f04bf558f929d271a7c9511c4a9207a5bdc851f000b1c16b42ec819f6dbc70d041ddf34aed6b7104750c59094edd9ae3f043ae9e3290e173a4f750b8de4498fccbf3e769a04e122f92f60c5ca5a156b6ca73d9cb1571148d2ffd954a3feedc9a398fa197e7a6a64a2ee712e2b5ac43892ea9ec816c6083d1aea790eefba30eff83ce233c6472ad4f48417bde2d2b38c1494de22efed1cec8897a4ef913334967ffbf94102d95b70ae6d6578c66fdbf64c55418b5ac3' as `0x${string}`,
-      )[0],
-    );
-
-    const permitTransferArgsForm = [
-      [permitTransfer.permitted.token, permitTransfer.permitted.amount],
-      permitTransfer.nonce,
-      permitTransfer.deadline,
-    ];
-
-    const transferDetails = {
-      to: '0x640487Ce2c45bD05D03b65783c15aa1ac694cDb6',
-      requestedAmount: '1000000',
-    };
-
-    const transferDetailsArgsForm = [
-      transferDetails.to,
-      transferDetails.requestedAmount,
-    ];
-
-    const payload = MiniKit.commands.sendTransaction({
-      transaction: [
-        {
-          address: '0xF3F92A60e6004f3982F0FdE0d43602fC0a30a0dB',
-          abi: ORBABI,
-          functionName: 'mint',
-          args: [
-            address,
-            '0x7548694f0144d414a064e50b83655679567706d5570055a63058c2a3e77e763',
-            '0x1a07348bdd01a39b3e4d6b0e50539b56639f1b173dfb1ec845251f319d33817a',
-            decodeAbiParameters(
-              parseAbiParameters('uint256[8]'),
-              '0x0f5af932c5ba8960596f1b2f668742d3618092318353318ec5166fe9eaaf44381893a22e5ab311bd9853f4832eb76f6020519b6e13bfa2f3e097d37435261bca066bc6cea60df41dbd0a91f2c6758c95e29c5b430108f0bdacf73f2401f2cdd90bf5f5bfac2ca6eacf15a11c6d1a15aa3da5ebd920771739fd1afbbbc948b6f505408f2293b1a1d719a48d6606af0ab7cbe2d368f8a3b1a464725b5e680a94c204079b1b7ba5508e852b3c7575ac41decb06fe39e335255bd1a5f04268eb560b269b0ee009fac478068465a6c9cf68541317d15180a57c31323569ed83c634df1c880ae470127f807c1ff7a3dc5d815a55fd95a463bf03810c82594e7c6ee02d' as `0x${string}`,
-            )[0].map(String),
-          ],
-        },
-      ],
-    });
-
-    console.log(JSON.stringify(payload, null, 2));
   };
 
   const onSendNestedTransactionClick = () => {
@@ -428,8 +368,83 @@ export const SendTransaction = () => {
     onSendTransactionClick();
   };
 
-  const testEthTransaction = async () => {
-    const payload = await MiniKit.commandsAsync.sendTransaction({
+  const mintToken = () => {
+    const payload = MiniKit.commands.sendTransaction({
+      transaction: [
+        {
+          address: mainContract,
+          abi: MinikitStaging,
+          functionName: 'mintToken',
+          args: [],
+        },
+      ],
+    });
+    setTempInstallFix((prev) => prev + 1);
+    setTransactionData(payload);
+  };
+
+  const bumpFunctionCalls = () => {
+    const payload = MiniKit.commands.sendTransaction({
+      transaction: [
+        {
+          address: mainContract,
+          abi: MinikitStaging,
+          functionName: 'trackCalls',
+          args: [],
+        },
+      ],
+    });
+    setTempInstallFix((prev) => prev + 1);
+    setTransactionData(payload);
+  };
+
+  const getTotalTokensMinted = () => {
+    const payload = MiniKit.commands.sendTransaction({
+      transaction: [
+        {
+          address: mainContract,
+          abi: MinikitStaging,
+          functionName: 'getTotalTokensMinted',
+          args: [],
+        },
+      ],
+    });
+    setTempInstallFix((prev) => prev + 1);
+    setTransactionData(payload);
+  };
+
+  const intentionallyRevert = () => {
+    const payload = MiniKit.commands.sendTransaction({
+      transaction: [
+        {
+          address: mainContract,
+          abi: MinikitStaging,
+          functionName: 'intentionallyRevert',
+          args: [],
+        },
+      ],
+    });
+    setTempInstallFix((prev) => prev + 1);
+    setTransactionData(payload);
+  };
+
+  const nonExistantFunction = () => {
+    const payload = MiniKit.commands.sendTransaction({
+      transaction: [
+        {
+          address: mainContract,
+          abi: MinikitStaging,
+          functionName: 'functionDoesNotExist',
+          args: [],
+        },
+      ],
+    });
+    setTempInstallFix((prev) => prev + 1);
+    setTransactionData(payload);
+  };
+
+  const testEthTransaction = () => {
+    const payload = MiniKit.commands.sendTransaction({
       transaction: [
         {
           address: '0x2E7BeBAB990076A10fBb5e8C2Ff16Fc1434387ad',
@@ -441,13 +456,36 @@ export const SendTransaction = () => {
       ],
     });
     setTempInstallFix((prev) => prev + 1);
-    setTransactionData(payload.commandPayload);
-    setReceivedSendTransactionPayload(payload.finalPayload);
+    setTransactionData(payload);
   };
 
   return (
     <div className="grid gap-y-2">
-      <h2 className="text-2xl font-bold">Transaction</h2>
+      <h2 className="text-2xl font-bold">Send Transaction</h2>
+      <div className="bg-gray-50 border-l-4 border-gray-400 p-4 mb-4">
+        <div className="flex">
+          <div className="flex-shrink-0">
+            <svg
+              className="h-5 w-5 text-gray-400"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+          <div className="ml-3">
+            <p className="text-sm text-gray-700">
+              <span className="font-medium">Note:</span> Green buttons should
+              always work, red should fail, and black works if the conditions
+              are met.
+            </p>
+          </div>
+        </div>
+      </div>
       <div className="grid gap-y-1">
         <p>Raw string:</p>
 
@@ -461,33 +499,56 @@ export const SendTransaction = () => {
       </div>
       <div className="grid gap-x-2 grid-cols-2">
         <button
+          className="bg-green-500 text-white rounded-lg p-4 w-full"
+          onClick={mintToken}
+        >
+          Mint Token
+        </button>
+        <button
+          className="bg-green-500 text-white rounded-lg p-4 w-full"
+          onClick={bumpFunctionCalls}
+        >
+          No Response
+        </button>
+      </div>
+      <div className="grid gap-x-2 grid-cols-2">
+        <button
+          className="bg-green-500 text-white rounded-lg p-4 w-full"
+          onClick={getTotalTokensMinted}
+        >
+          No preview just response
+        </button>
+      </div>
+      <div className="grid gap-x-2 grid-cols-2">
+        <button
+          className="bg-red-700 text-white rounded-lg p-4 w-full"
+          onClick={nonExistantFunction}
+        >
+          Non Existant Function
+        </button>
+        <button
+          className="bg-red-700 text-white rounded-lg p-4 w-full"
+          onClick={intentionallyRevert}
+        >
+          Intentionally Revert
+        </button>
+      </div>
+      <div className="grid gap-x-2 grid-cols-2">
+        <button
           className="bg-black text-white rounded-lg p-4 w-full"
           onClick={onSendTransactionClick}
         >
-          Send Transaction (0.1 USDC)
+          Permit 2 Testing (0.1 USDC)
         </button>
 
         <button
           className="bg-black text-white rounded-lg p-4 w-full"
           onClick={onSendNestedTransactionClick}
         >
-          Send Nested Transaction
+          Nested Transaction (0.3 USDC)
         </button>
       </div>
-      <div className="grid gap-x-2 grid-cols-2">
-        <button
-          className="bg-black text-white rounded-lg p-4 w-full"
-          onClick={testNFTPurchase}
-        >
-          Purchase NFT Permit2
-        </button>
-        <button
-          className="bg-black text-white rounded-lg p-4 w-full"
-          onClick={onSendOrbTransactionClick}
-        >
-          Send Orb
-        </button>
-      </div>
+
       <div className="grid gap-x-2 grid-cols-2">
         <button
           className="bg-black text-white rounded-lg p-4 w-full"
@@ -509,6 +570,12 @@ export const SendTransaction = () => {
           onClick={testEthTransaction}
         >
           Test ETH
+        </button>
+        <button
+          className="bg-black text-white rounded-lg p-4 w-full"
+          onClick={testNFTPurchase}
+        >
+          Purchase NFT Permit2 (0.1 USDC)
         </button>
       </div>
 

@@ -68,7 +68,7 @@
     "eslint-plugin-react-hooks": "^4.6.2"
   },
   "peerDependencies": {
-    "viem": "2.23.5",
+    "viem": "^2.23.5",
     "react": ">=18"
   }
 }

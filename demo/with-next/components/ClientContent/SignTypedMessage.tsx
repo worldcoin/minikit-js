@@ -136,6 +136,40 @@ const stateChangesPayload = {
   },
 };
 
+const benignPayload = {
+  types: {
+    EIP712Domain: [
+      { name: 'name', type: 'string' },
+      { name: 'version', type: 'string' },
+      { name: 'chainId', type: 'uint256' },
+      { name: 'verifyingContract', type: 'address' },
+    ],
+    TransferWithAuthorization: [
+      { name: 'from', type: 'address' },
+      { name: 'to', type: 'address' },
+      { name: 'value', type: 'uint256' },
+      { name: 'validAfter', type: 'uint256' },
+      { name: 'validBefore', type: 'uint256' },
+      { name: 'nonce', type: 'bytes32' },
+    ],
+  },
+  domain: {
+    name: 'MockERC20',
+    version: '1',
+    chainId: 10,
+    verifyingContract: '0x7f5c764cbc14f9669b88837ca1490cca17c31607',
+  },
+  primaryType: 'TransferWithAuthorization',
+  message: {
+    from: '0xd809de3086ea4f53ed3979cead25e1ff72b564a3',
+    to: '0xcad35fc7a46f6b26c2eda7c153ad6948ab8d424f',
+    value: '1',
+    validAfter: 1700000000,
+    validBefore: 1774077843,
+    nonce: '0x123456789abcdef123456789abcdef123456789abcdef123456789abcdef1234',
+  },
+};
+
 export const SignTypedData = () => {
   const [signTypedDataAppPayload, setSignTypedDataAppPayload] = useState<
     string | undefined
@@ -228,6 +262,14 @@ export const SignTypedData = () => {
     setTempInstallFix((prev) => prev + 1);
   }, []);
 
+  const signBenignPayload = () => {
+    const payload = MiniKit.commands.signTypedData(benignPayload);
+    setSentSignTypedDataPayload({
+      payload,
+    });
+    setTempInstallFix((prev) => prev + 1);
+  };
+
   return (
     <div>
       <div className="grid gap-y-2">
@@ -243,15 +285,25 @@ export const SignTypedData = () => {
         <div className="grid grid-cols-2 gap-x-3">
           <button
             className="bg-black text-white rounded-lg p-4 w-full"
+            onClick={signBenignPayload}
+          >
+            Sign Benign Payload
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-x-3">
+          <button
+            className="bg-red-700 text-white rounded-lg p-4 w-full"
             onClick={() => onSignTypedData()}
           >
-            Sign Typed Data
+            Sign Transaction
           </button>
           <button
-            className="bg-black text-white rounded-lg p-4 w-full"
+            className="bg-red-700 text-white rounded-lg p-4 w-full"
             onClick={() => onSignTypedData(true)}
           >
-            Sign Typed Data State Changes
+            State Changes <br />
+            (Change ownership of safe)
           </button>
         </div>
       </div>

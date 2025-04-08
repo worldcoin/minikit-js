@@ -130,7 +130,6 @@ export class MiniKit {
         payload,
       ) => {
         if (payload.status === 'success') {
-          MiniKit.walletAddress = payload.address;
           MiniKit.getUserByAddress(payload.address).then((user) => {
             MiniKit.user = user;
           });
@@ -298,7 +297,7 @@ export class MiniKit {
     return {
       walletAddress: address,
       username: userProfile.username,
-      profilePictureUrl: userProfile.profilePictureUrl,
+      profilePictureUrl: userProfile.profile_picture_url,
     };
   };
 

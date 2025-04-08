@@ -64,6 +64,35 @@ export const ExternalLinks = () => {
           Open Share Page
         </button>
         <button
+          onClick={() =>
+            window.open(
+              'https://docs.worldcoin.org?open_out_of_window=true',
+              '_blank',
+            )
+          }
+          className="text-white bg-green-500 transition p-4 leading-[1] rounded-lg"
+        >
+          Open Outside App
+        </button>
+        <button
+          onClick={async () => {
+            try {
+              const response = await fetch('/800.jpeg');
+              const blob = await response.blob();
+              const file = new File([blob], '800.jpeg', { type: 'image/jpeg' });
+              await navigator.share({
+                url: 'https://google.com',
+                files: [file],
+              });
+            } catch (error) {
+              console.error('Error sharing:', error);
+            }
+          }}
+          className="text-white bg-green-500 transition p-4 leading-[1] rounded-lg"
+        >
+          Share Image
+        </button>
+        <button
           onClick={() => window.open('https://google.com', '_blank')}
           className="text-white bg-red-500 transition p-4 leading-[1] rounded-lg"
         >

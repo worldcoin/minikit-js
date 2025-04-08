@@ -39,7 +39,7 @@ export const VerifyAction = () => {
     verifyActionAppPayloadValidationMessage,
     setVerifyActionAppPayloadValidationMessage,
   ] = useState<string | null>(null);
-
+  const isProduction = process.env.NEXT_PUBLIC_ENVIRONMENT === 'production';
   const [verifyActionAppPayload, setVerifyActionAppPayload] = useState<
     Record<string, any> | undefined
   >();
@@ -189,13 +189,19 @@ export const VerifyAction = () => {
           <div className="grid gap-y-2">
             <div className="grid grid-cols-2 gap-x-2">
               <button
-                className="bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
+                className={clsx(
+                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
+                  isProduction ? 'hidden' : '',
+                )}
                 onClick={() => onStagingVerifyClick(VerificationLevel.Device)}
               >
                 Send staging app verify (Device)
               </button>
               <button
-                className="bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
+                className={clsx(
+                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
+                  isProduction ? 'hidden' : '',
+                )}
                 onClick={() => onStagingVerifyClick(VerificationLevel.Document)}
               >
                 Send staging app verify (Document)
@@ -204,7 +210,10 @@ export const VerifyAction = () => {
 
             <div className="grid grid-cols-2 gap-x-2">
               <button
-                className="bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
+                className={clsx(
+                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
+                  isProduction ? 'hidden' : '',
+                )}
                 onClick={() =>
                   onStagingVerifyClick(VerificationLevel.SecureDocument)
                 }
@@ -212,7 +221,10 @@ export const VerifyAction = () => {
                 Send staging app verify (SecureDocument)
               </button>
               <button
-                className="bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
+                className={clsx(
+                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
+                  isProduction ? 'hidden' : '',
+                )}
                 onClick={() => onStagingVerifyClick(VerificationLevel.Orb)}
               >
                 Send staging app verify (Orb)
@@ -223,13 +235,17 @@ export const VerifyAction = () => {
               <button
                 className={clsx(
                   'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
+                  isProduction ? '' : 'hidden',
                 )}
                 onClick={() => onProdVerifyClick(VerificationLevel.Device)}
               >
                 Send production app verify (Device)
               </button>
               <button
-                className="bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
+                className={clsx(
+                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
+                  isProduction ? '' : 'hidden',
+                )}
                 onClick={() => onProdVerifyClick(VerificationLevel.Document)}
               >
                 Send production app verify (Document)
@@ -238,7 +254,10 @@ export const VerifyAction = () => {
 
             <div className="grid grid-cols-2 gap-x-2">
               <button
-                className="bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
+                className={clsx(
+                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
+                  isProduction ? '' : 'hidden',
+                )}
                 onClick={() =>
                   onProdVerifyClick(VerificationLevel.SecureDocument)
                 }
@@ -246,7 +265,10 @@ export const VerifyAction = () => {
                 Send production app verify (SecureDocument)
               </button>
               <button
-                className="bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
+                className={clsx(
+                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
+                  isProduction ? '' : 'hidden',
+                )}
                 onClick={() => onProdVerifyClick(VerificationLevel.Orb)}
               >
                 Send production app verify (Orb)
