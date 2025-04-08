@@ -33,6 +33,7 @@ export const ClientContent = () => {
   const [searchValue, setSearchValue] = useState('');
   const [searchResults, setSearchResults] =
     useState<GetSearchedUsernameResult>();
+  const isProduction = process.env.NEXT_DEPLOYMENT_ENVIRONMENT === 'production';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);
@@ -101,12 +102,14 @@ export const ClientContent = () => {
         )}
 
         <div className="grid gap-y-8">
-          <button
-            className="bg-black text-white p-2 rounded-lg"
-            onClick={sendNotification}
-          >
-            Send Notification (auth and turn on notifications first)
-          </button>
+          {isProduction && (
+            <button
+              className="bg-black text-white p-2 rounded-lg"
+              onClick={sendNotification}
+            >
+              Send Notification (auth and turn on notifications first)
+            </button>
+          )}
           <SearchParams />
           <VersionsNoSSR />
           <hr />
