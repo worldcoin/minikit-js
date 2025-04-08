@@ -17,7 +17,7 @@ export const POST = async (request: NextRequest) => {
     console.log('1');
 
     const response = await fetch(
-      `${process.env.NEXT_SERVER_DEV_PORTAL_URL}/api/v2/notifications`,
+      `${process.env.NEXT_SERVER_DEV_PORTAL_URL}/api/v2/minikit/send-notification`,
       {
         method: 'POST',
         headers: {
