@@ -6,7 +6,7 @@ import {
   Tokens,
   tokenToDecimals,
 } from '@worldcoin/minikit-js';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import * as yup from 'yup';
 import { validateSchema } from './helpers/validate-schema';
 
@@ -28,11 +28,14 @@ const paymentErrorPayloadSchema = yup.object({
   status: yup.string<'error'>().equals(['error']).required(),
 });
 
+/* Asynchronous Implementation
+For the purpose of variability some of these commands use async handlers
+and some of the commands user synchronous responses. 
+*/
 export const Pay = () => {
   const [paymentAppPayload, setPaymentAppPayload] = useState<
     string | undefined
   >();
-  const [tempInstallFix, setTempInstallFix] = useState(0);
   const [paymentPayloadValidationMessage, setPaymentPayloadValidationMessage] =
     useState<string | null>();
 
@@ -41,45 +44,35 @@ export const Pay = () => {
     any
   > | null>(null);
 
-  useEffect(() => {
-    if (!MiniKit.isInstalled()) {
-      return;
+  const validateResponse = async (payload) => {
+    console.log('MiniAppPayment, SUBSCRIBE PAYLOAD', payload);
+
+    if (payload.status === 'error') {
+      const errorMessage = await validateSchema(
+        paymentErrorPayloadSchema,
+        payload,
+      );
+
+      if (!errorMessage) {
+        setPaymentPayloadValidationMessage('Payload is valid');
+      } else {
+        setPaymentPayloadValidationMessage(errorMessage);
+      }
+    } else {
+      const errorMessage = await validateSchema(
+        paymentSuccessPayloadSchema,
+        payload,
+      );
+
+      if (!errorMessage) {
+        setPaymentPayloadValidationMessage('Payload is valid');
+      } else {
+        setPaymentPayloadValidationMessage(errorMessage);
+      }
     }
 
-    MiniKit.subscribe(ResponseEvent.MiniAppPayment, async (payload) => {
-      console.log('MiniAppPayment, SUBSCRIBE PAYLOAD', payload);
-
-      if (payload.status === 'error') {
-        const errorMessage = await validateSchema(
-          paymentErrorPayloadSchema,
-          payload,
-        );
-
-        if (!errorMessage) {
-          setPaymentPayloadValidationMessage('Payload is valid');
-        } else {
-          setPaymentPayloadValidationMessage(errorMessage);
-        }
-      } else {
-        const errorMessage = await validateSchema(
-          paymentSuccessPayloadSchema,
-          payload,
-        );
-
-        if (!errorMessage) {
-          setPaymentPayloadValidationMessage('Payload is valid');
-        } else {
-          setPaymentPayloadValidationMessage(errorMessage);
-        }
-      }
-
-      setPaymentAppPayload(JSON.stringify(payload, null, 2));
-    });
-
-    return () => {
-      MiniKit.unsubscribe(ResponseEvent.MiniAppPayment);
-    };
-  }, [tempInstallFix]);
+    setPaymentAppPayload(JSON.stringify(payload, null, 2));
+  };
 
   const onPayClick = useCallback(
     async (amount: number, address: string, token?: Tokens) => {
@@ -114,11 +107,10 @@ export const Pay = () => {
         reference: new Date().toISOString(),
       };
 
-      const payload = MiniKit.commands.pay(payPayload);
-      setTempInstallFix((prev) => prev + 1);
-      setSentPayPayload({
-        payload,
-      });
+      const { commandPayload, finalPayload } =
+        await MiniKit.commandsAsync.pay(payPayload);
+      setSentPayPayload(commandPayload);
+      await validateResponse(finalPayload);
     },
     [],
   );

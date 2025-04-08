@@ -5,7 +5,10 @@ export async function GET() {
   console.log('GET request received');
   return new Response(JSON.stringify({ nonce: randomUUID() }));
 }
-
+/* 
+Note: This is not a secure implementation of Wallet Auth.
+It is only for demo purposes.
+*/
 export async function POST(request: NextRequest) {
   console.log('POST request received');
   const body = await request.json();

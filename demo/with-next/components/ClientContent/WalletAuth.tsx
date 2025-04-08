@@ -24,6 +24,10 @@ const walletAuthErrorPayloadSchema = yup.object({
   status: yup.string<'error'>().equals(['error']).required(),
 });
 
+/* 
+Note: This is not a secure implementation of Wallet Auth.
+It is only for demo purposes.
+*/
 export const WalletAuth = () => {
   const [message, setMessage] = useState<string | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
