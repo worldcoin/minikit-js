@@ -137,12 +137,6 @@ const stateChangesPayload = {
 };
 
 const benignPayload = {
-  domain: {
-    name: 'Ether Mail',
-    version: '1',
-    chainId: 480,
-    verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
-  },
   types: {
     EIP712Domain: [
       { name: 'name', type: 'string' },
@@ -150,27 +144,29 @@ const benignPayload = {
       { name: 'chainId', type: 'uint256' },
       { name: 'verifyingContract', type: 'address' },
     ],
-    Person: [
-      { name: 'name', type: 'string' },
-      { name: 'wallet', type: 'address' },
-    ],
-    Mail: [
-      { name: 'from', type: 'Person' },
-      { name: 'to', type: 'Person' },
-      { name: 'contents', type: 'string' },
+    TransferWithAuthorization: [
+      { name: 'from', type: 'address' },
+      { name: 'to', type: 'address' },
+      { name: 'value', type: 'uint256' },
+      { name: 'validAfter', type: 'uint256' },
+      { name: 'validBefore', type: 'uint256' },
+      { name: 'nonce', type: 'bytes32' },
     ],
   },
-  primaryType: 'Mail',
+  domain: {
+    name: 'MockERC20',
+    version: '1',
+    chainId: 10,
+    verifyingContract: '0x7f5c764cbc14f9669b88837ca1490cca17c31607',
+  },
+  primaryType: 'TransferWithAuthorization',
   message: {
-    from: {
-      name: 'Cow',
-      wallet: '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
-    },
-    to: {
-      name: 'Bob',
-      wallet: '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
-    },
-    contents: 'Hello, Bob!',
+    from: '0xd809de3086ea4f53ed3979cead25e1ff72b564a3',
+    to: '0xcad35fc7a46f6b26c2eda7c153ad6948ab8d424f',
+    value: '1',
+    validAfter: 1700000000,
+    validBefore: 1774077843,
+    nonce: '0x123456789abcdef123456789abcdef123456789abcdef123456789abcdef1234',
   },
 };
 
