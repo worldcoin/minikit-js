@@ -105,7 +105,7 @@ export const ClientContent = () => {
             className="bg-black text-white p-2 rounded-lg"
             onClick={sendNotification}
           >
-            Send Notification
+            Send Notification (auth and turn on notifications first)
           </button>
           <SearchParams />
           <VersionsNoSSR />
