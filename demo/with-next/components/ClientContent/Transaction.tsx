@@ -47,7 +47,7 @@ const testTokens = {
 
 const mainContract =
   process.env.NEXT_PUBLIC_ENVIRONMENT === 'production'
-    ? ''
+    ? '0x9Cf4F011F55Add3ECC1B1B497A3e9bd32183D6e8' // same contract for now since I didn't add proofs
     : '0x9Cf4F011F55Add3ECC1B1B497A3e9bd32183D6e8';
 
 export const SendTransaction = () => {
