@@ -14,6 +14,7 @@ export const POST = async (request: NextRequest) => {
         { status: 400 },
       );
     }
+    console.log('1');
 
     const response = await fetch(
       `${process.env.NEXT_SERVER_DEV_PORTAL_URL}/api/v2/notifications`,
@@ -32,6 +33,7 @@ export const POST = async (request: NextRequest) => {
         }),
       },
     );
+    console.log('2');
 
     if (!response.ok) {
       const error = await response.json();
@@ -40,7 +42,7 @@ export const POST = async (request: NextRequest) => {
         { status: response.status },
       );
     }
-
+    console.log('3');
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error: any) {
