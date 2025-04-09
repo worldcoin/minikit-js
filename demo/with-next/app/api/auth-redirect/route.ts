@@ -16,6 +16,8 @@ export async function GET(request: NextRequest) {
   // Remove the trailing '&'
   path = path.slice(0, -1);
 
+  console.log(worldAppUrl.toString() + encodeURIComponent(path));
+
   // Redirect to the constructed URL
   return NextResponse.redirect(
     worldAppUrl.toString() + encodeURIComponent(path),
