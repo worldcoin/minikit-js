@@ -34,7 +34,7 @@ export const authOptions: NextAuthOptions = {
       authorization: {
         params: {
           redirect_uri:
-            'https://worldcoin.org/mini-apps?app_id=app_staging_5748c49d2e6c68849479e0b321bc5257&path=%2Fapi%2Fauth%2Fcallback%2Fgoogle',
+            'https://worldcoin.org/mini-app?app_id=app_staging_5748c49d2e6c68849479e0b321bc5257&path=%2Fapi%2Fauth%2Fcallback%2Fgoogle',
         },
       },
     }),
