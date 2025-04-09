@@ -114,7 +114,7 @@ export const WalletAuth = () => {
             },
           );
         } else {
-          const user = await MiniKit.getUserByAddress(payload.address);
+          const user = await MiniKit.getUserByAddress();
           console.log(user);
           setProfile(user);
         }

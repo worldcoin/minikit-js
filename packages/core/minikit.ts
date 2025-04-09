@@ -105,11 +105,11 @@ export class MiniKit {
   };
 
   public static appId: string | null = null;
-  /**
-   * @deprecated you should use MiniKit.user.walletAddress instead
-   */
-  public static walletAddress: string | null = null;
-  public static user: User | null = null;
+  public static user: User = {
+    walletAddress: '',
+    username: '',
+    profilePictureUrl: '',
+  };
 
   private static sendInit() {
     sendWebviewEvent({
@@ -130,6 +130,7 @@ export class MiniKit {
         payload,
       ) => {
         if (payload.status === 'success') {
+          MiniKit.user.walletAddress = payload.address;
           MiniKit.getUserByAddress(payload.address).then((user) => {
             MiniKit.user = user;
           });
@@ -291,15 +292,20 @@ export class MiniKit {
     return isInstalled;
   }
 
-  public static getUserByAddress = async (address: string): Promise<User> => {
-    const userProfile = await getUserProfile(address);
+  public static getUserByAddress = async (address?: string): Promise<User> => {
+    const userProfile = await getUserProfile(
+      address ?? MiniKit.user.walletAddress!,
+    );
 
     return {
-      walletAddress: address,
+      walletAddress: address ?? MiniKit.user.walletAddress!,
       username: userProfile.username,
       profilePictureUrl: userProfile.profile_picture_url,
     };
   };
+
+  // Simply re-exporting the existing function
+  public static getUserInfo = this.getUserByAddress;
 
   public static commands = {
     verify: (payload: VerifyCommandInput): VerifyCommandPayload | null => {
@@ -401,7 +407,7 @@ export class MiniKit {
         domain: window.location.host,
         statement: payload.statement ?? undefined,
         uri: window.location.href,
-        version: 1,
+        version: '1',
         chain_id: 480,
         nonce: payload.nonce,
         issued_at: new Date().toISOString(),
