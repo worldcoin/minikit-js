@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   const worldAppUrl = new URL(
     `worldapp://mini-app?app_id=${process.env.WLD_CLIENT_ID}&path=`,
   );
-  let path = '/api/auth/callback/google?';
+  let path = `/api/auth/callback/google?redirect_uri=${process.env.NEXTAUTH_URL}/api/auth-redirect&`;
 
   // Copy all search parameters to the new URL
   searchParams.forEach((value, key) => {
