@@ -38,6 +38,11 @@ export const authOptions: NextAuthConfig = {
           redirect_uri: `${process.env.NEXTAUTH_URL}/api/auth-redirect`,
         },
       },
+      token: {
+        params: {
+          redirect_uri: `${process.env.NEXTAUTH_URL}/api/auth-redirect`,
+        },
+      },
     }),
   ],
   callbacks: {
