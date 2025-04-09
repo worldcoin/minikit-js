@@ -11,13 +11,13 @@ export const Nav = () => {
 
       <button
         onClick={user?.name ? () => signOut() : () => signIn('worldcoin')}
-        className="text-white bg-black-500 hover:bg-black-300 transition p-4 leading-[1]"
+        className="text-white bg-black hover:bg-gray-500 transition p-4 leading-[1] rounded-md"
       >
         {user?.name ? 'Sign Out' : 'Sign In'}
       </button>
       <button
         onClick={user?.name ? () => signOut() : () => signIn('google')}
-        className="text-white bg-blue-500 hover:bg-blue-300 transition p-4 leading-[1]"
+        className="text-white bg-blue-500 hover:bg-blue-300 transition p-4 leading-[1] rounded-md"
       >
         {user?.name ? 'Google Sign Out' : 'Google Sign In'}
       </button>
