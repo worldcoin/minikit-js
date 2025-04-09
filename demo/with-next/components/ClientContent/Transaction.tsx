@@ -650,15 +650,6 @@ export const SendTransaction = () => {
         </button>
       </div>
 
-      <div className="grid gap-x-2 grid-cols-2">
-        <button
-          className="bg-black text-white rounded-lg p-4 w-full"
-          onClick={sendTransactionError}
-        >
-          Send Transaction Error
-        </button>
-      </div>
-
       <div className="grid gap-y-1">
         <p>
           Received from &quot;{ResponseEvent.MiniAppSendTransaction}&quot;:{' '}
