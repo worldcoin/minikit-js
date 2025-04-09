@@ -33,7 +33,7 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       authorization: {
         params: {
-          redirect_uri: `${process.env.NEXT_PUBLIC_URL}/api/auth-redirect`,
+          redirect_uri: `${process.env.NEXTAUTH_URL}/api/auth-redirect`,
         },
       },
     }),
