@@ -9,15 +9,17 @@ export async function GET(request: NextRequest) {
     `worldapp://mini-app?app_id=${process.env.WLD_CLIENT_ID}&path=`,
   );
   let path = '/api/auth/callback/google?';
+
   // Copy all search parameters to the new URL
   searchParams.forEach((value, key) => {
     path += `${key}=${value}&`;
   });
+
   // Remove the trailing '&'
   path = path.slice(0, -1);
 
   console.log(worldAppUrl.toString() + encodeURIComponent(path));
-
+  console.log(path);
   // Redirect to the constructed URL
   return NextResponse.redirect(
     worldAppUrl.toString() + encodeURIComponent(path),
