@@ -21,9 +21,6 @@ const NBF_TAG = 'Not Before: ';
 const RID_TAG = 'Request ID: ';
 const ERC_191_PREFIX = '\x19Ethereum Signed Message:\n';
 const EIP1271_MAGICVALUE = '0x1626ba7e';
-const EIP1271_ABI = [
-  'function isValidSignature(bytes32 _message, bytes _signature) public view returns (bytes4)',
-];
 
 const SAFE_CONTRACT_ABI = [
   {
