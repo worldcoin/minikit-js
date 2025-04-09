@@ -1,5 +1,5 @@
 import NextAuth, { NextAuthConfig, NextAuthResult } from 'next-auth';
-
+import GoogleProvider from 'next-auth/providers/google';
 // For more information on each option (and a full list of options) go to
 // https://next-auth.js.org/configuration/options
 export const authOptions: NextAuthConfig = {
@@ -30,6 +30,15 @@ export const authOptions: NextAuthConfig = {
         };
       },
     },
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          redirect_uri: `${process.env.NEXTAUTH_URL}/api/auth-redirect`,
+        },
+      },
+    }),
   ],
   callbacks: {
     async jwt({ token, account, user }) {
