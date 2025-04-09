@@ -6,12 +6,12 @@ export const Nav = () => {
   const user = useMemo(() => session?.user, [session]);
 
   return (
-    <header className="flex justify-between">
+    <header className="flex justify-between gap-x-2">
       <h1 className="text-2xl font-bold">MiniKit V1</h1>
 
       <button
         onClick={user?.name ? () => signOut() : () => signIn('worldcoin')}
-        className="text-white bg-blue-500 hover:bg-blue-300 transition p-4 leading-[1]"
+        className="text-white bg-black-500 hover:bg-black-300 transition p-4 leading-[1]"
       >
         {user?.name ? 'Sign Out' : 'Sign In'}
       </button>
@@ -19,7 +19,7 @@ export const Nav = () => {
         onClick={user?.name ? () => signOut() : () => signIn('google')}
         className="text-white bg-blue-500 hover:bg-blue-300 transition p-4 leading-[1]"
       >
-        {user?.name ? 'GoogleSign Out' : 'Google Sign In'}
+        {user?.name ? 'Google Sign Out' : 'Google Sign In'}
       </button>
     </header>
   );
