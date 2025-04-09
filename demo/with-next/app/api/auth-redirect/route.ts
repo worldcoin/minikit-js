@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
 
   // Construct the base worldapp URL
   const worldAppUrl = new URL(
-    `worldapp://worldcoin.org/mini-app?app_id=${process.env.WLD_CLIENT_ID}&path=`,
+    `worldapp://mini-app?app_id=${process.env.WLD_CLIENT_ID}&path=`,
   );
   let path = '/api/auth/callback/google?';
   // Copy all search parameters to the new URL
