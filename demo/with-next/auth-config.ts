@@ -33,8 +33,7 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       authorization: {
         params: {
-          redirect_uri:
-            'https://worldcoin.org/mini-app?app_id=app_staging_5748c49d2e6c68849479e0b321bc5257&path=%2Fapi%2Fauth%2Fcallback%2Fgoogle',
+          redirect_uri: `${process.env.NEXT_PUBLIC_URL}/api/auth-redirect`,
         },
       },
     }),
