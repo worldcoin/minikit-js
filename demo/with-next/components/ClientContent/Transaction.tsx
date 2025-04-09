@@ -518,7 +518,6 @@ export const SendTransaction = () => {
       });
 
       console.log('Transaction result:', result);
-      setTempInstallFix((prev) => prev + 1);
       setTransactionData(result.commandPayload);
       setReceivedSendTransactionPayload(result.finalPayload);
     } catch (error: any) {
