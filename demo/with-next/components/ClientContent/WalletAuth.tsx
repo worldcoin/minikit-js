@@ -114,16 +114,14 @@ export const WalletAuth = () => {
             },
           );
         } else {
-          const user = await MiniKit.getUserByAddress(payload.address);
+          const user = await MiniKit.getUserInfo();
           console.log(user);
           setProfile(user);
         }
       }
 
       setReceivedWalletAuthPayload(payload);
-      console.log('From object', MiniKit?.walletAddress);
-      //@ts-ignore
-      console.log('From static', window.MiniKit?.walletAddress);
+      console.log('From object', MiniKit.user?.walletAddress);
     });
 
     return () => {
