@@ -92,7 +92,7 @@ export const SendHapticFeedback = () => {
   return (
     <div>
       <div className="grid gap-y-2">
-        <h2 className="text-2xl font-bold">Sign Typed Data</h2>
+        <h2 className="text-2xl font-bold">Send Haptics</h2>
 
         <div>
           <div className="bg-gray-300 min-h-[100px] p-2">
