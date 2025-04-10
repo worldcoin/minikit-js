@@ -15,12 +15,12 @@ export const Nav = () => {
       >
         {user?.name ? 'Sign Out' : 'Sign In'}
       </button>
-      <button
+      {/* <button
         onClick={user?.name ? () => signOut() : () => signIn('google')}
         className="text-white bg-blue-500 hover:bg-blue-300 transition p-4 leading-[1] rounded-md"
       >
         {user?.name ? 'Google Sign Out' : 'Google Sign In'}
-      </button>
+      </button> */}
     </header>
   );
 };
