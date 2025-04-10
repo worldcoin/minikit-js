@@ -230,3 +230,16 @@ export const SendHapticFeedbackErrorMessage = {
     'Something unexpected went wrong.',
   [SendHapticFeedbackErrorCodes.UserRejected]: 'User rejected the request.',
 };
+
+export enum ShareFilesErrorCodes {
+  UserRejected = 'user_rejected',
+  GenericError = 'generic_error',
+  InvalidFileName = 'invalid_file_name',
+}
+
+export const ShareFilesErrorMessage = {
+  [ShareFilesErrorCodes.UserRejected]: 'User rejected the request.',
+  [ShareFilesErrorCodes.GenericError]: 'Something unexpected went wrong.',
+  [ShareFilesErrorCodes.InvalidFileName]:
+    'Invalid file name. Make sure you include the extension',
+};

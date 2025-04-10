@@ -15,6 +15,7 @@ export enum Command {
   RequestPermission = 'request-permission',
   GetPermissions = 'get-permissions',
   SendHapticFeedback = 'send-haptic-feedback',
+  ShareFiles = 'share-files',
 }
 
 export type WebViewBasePayload = {
@@ -139,6 +140,20 @@ export type SendHapticFeedbackInput =
 
 export type SendHapticFeedbackPayload = SendHapticFeedbackInput;
 
+// Anchor: Share Files Payload
+
+type ShareFile = {
+  url: string;
+  saved_file_name_with_extension: string;
+};
+
+export type ShareFilesInput = {
+  files: ShareFile[];
+  mime_type: string;
+};
+
+export type ShareFilesPayload = ShareFilesInput;
+
 type CommandReturnPayloadMap = {
   [Command.Verify]: VerifyCommandPayload;
   [Command.Pay]: PayCommandPayload;
@@ -150,6 +165,7 @@ type CommandReturnPayloadMap = {
   [Command.RequestPermission]: RequestPermissionPayload;
   [Command.GetPermissions]: GetPermissionsPayload;
   [Command.SendHapticFeedback]: SendHapticFeedbackPayload;
+  [Command.ShareFiles]: ShareFilesPayload;
 };
 export type CommandReturnPayload<T extends Command> =
   T extends keyof CommandReturnPayloadMap ? CommandReturnPayloadMap[T] : never;

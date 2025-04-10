@@ -21,6 +21,8 @@ import {
   SendTransactionInput,
   SendTransactionPayload,
   ShareContactsPayload,
+  ShareFilesInput,
+  ShareFilesPayload,
   SignMessageInput,
   SignMessagePayload,
   SignTypedDataInput,
@@ -46,6 +48,7 @@ import {
   MiniAppSendHapticFeedbackPayload,
   MiniAppSendTransactionPayload,
   MiniAppShareContactsPayload,
+  MiniAppShareFilesPayload,
   MiniAppSignMessagePayload,
   MiniAppSignTypedDataPayload,
   MiniAppVerifyActionPayload,
@@ -76,6 +79,7 @@ export class MiniKit {
     [Command.RequestPermission]: 1,
     [Command.GetPermissions]: 1,
     [Command.SendHapticFeedback]: 1,
+    [Command.ShareFiles]: 1,
   };
 
   private static isCommandAvailable = {
@@ -89,6 +93,7 @@ export class MiniKit {
     [Command.RequestPermission]: false,
     [Command.GetPermissions]: false,
     [Command.SendHapticFeedback]: false,
+    [Command.ShareFiles]: false,
   };
 
   private static listeners: Record<ResponseEvent, EventHandler> = {
@@ -102,6 +107,7 @@ export class MiniKit {
     [ResponseEvent.MiniAppRequestPermission]: () => {},
     [ResponseEvent.MiniAppGetPermissions]: () => {},
     [ResponseEvent.MiniAppSendHapticFeedback]: () => {},
+    [ResponseEvent.MiniAppShareFiles]: () => {},
   };
 
   public static appId: string | null = null;
@@ -584,6 +590,26 @@ export class MiniKit {
 
       return payload;
     },
+
+    shareFiles: (payload: ShareFilesInput): ShareFilesPayload | null => {
+      if (
+        typeof window === 'undefined' ||
+        !this.isCommandAvailable[Command.ShareFiles]
+      ) {
+        console.error(
+          "'shareFiles' command is unavailable. Check MiniKit.install() or update the app version",
+        );
+        return null;
+      }
+
+      sendMiniKitEvent<WebViewBasePayload>({
+        command: Command.ShareFiles,
+        version: this.miniKitCommandVersion[Command.ShareFiles],
+        payload,
+      });
+
+      return payload;
+    },
   };
 
   /**
@@ -784,6 +810,25 @@ export class MiniKit {
             ResponseEvent.MiniAppSendHapticFeedback,
             Command.SendHapticFeedback,
             () => this.commands.sendHapticFeedback(payload),
+          );
+          resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
+    shareFiles: async (
+      payload: ShareFilesInput,
+    ): AsyncHandlerReturn<
+      ShareFilesPayload | null,
+      MiniAppShareFilesPayload
+    > => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppShareFiles,
+            Command.ShareFiles,
+            () => this.commands.shareFiles(payload),
           );
           resolve(response);
         } catch (error) {
