@@ -14,6 +14,7 @@ const walletAuthSuccessPayloadSchema = yup.object({
   message: yup.string().required(),
   signature: yup.string().required(),
   address: yup.string().required(),
+  version: yup.number().required(),
 });
 
 const walletAuthErrorPayloadSchema = yup.object({
