@@ -1,7 +1,9 @@
-import ClientProviders from '@/components/ClientProviders';
+import SessionProvider from '@/components/SessionProvider';
+import { MiniKitProvider } from '@worldcoin/minikit-js/minikit-provider';
 import type { Metadata } from 'next';
+import { getServerSession } from 'next-auth';
+import dynamic from 'next/dynamic';
 import { Inter } from 'next/font/google';
-import { auth } from './auth';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -16,11 +18,22 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth();
+  const session = await getServerSession();
+  const ErudaProvider = dynamic(
+    () =>
+      import('../components/ClientContent/Eruda').then((c) => c.ErudaProvider),
+    {
+      ssr: false,
+    },
+  );
   return (
     <html lang="en">
       <body className={inter.className}>
-        <ClientProviders session={session}>{children}</ClientProviders>
+        <ErudaProvider>
+          <MiniKitProvider>
+            <SessionProvider session={session}>{children}</SessionProvider>
+          </MiniKitProvider>
+        </ErudaProvider>
       </body>
     </html>
   );
