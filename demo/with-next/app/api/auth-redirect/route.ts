@@ -1,27 +1,23 @@
-import { NextRequest, NextResponse } from 'next/server';
+// app/auth/resume/route.ts
+import { NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest) {
-  const url = new URL(request.url);
-  const searchParams = new URLSearchParams(url.search);
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const token = searchParams.get('token');
 
-  // Construct the base worldapp URL
-  const worldAppUrl = new URL(
-    `worldapp://mini-app?app_id=${process.env.WLD_CLIENT_ID}&path=`,
-  );
-  let path = `/api/auth/callback/google?redirect_uri=${process.env.NEXTAUTH_URL}/api/auth-redirect&`;
+  if (!token) {
+    return NextResponse.redirect(`${process.env.NEXTAUTH_URL}`);
+  }
 
-  // Copy all search parameters to the new URL
-  searchParams.forEach((value, key) => {
-    path += `${key}=${value}&`;
+  const cookieName = `__Secure-next-auth.session-token`;
+
+  const response = NextResponse.redirect(`${process.env.NEXTAUTH_URL}`);
+  response.cookies.set(cookieName, token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none',
+    path: '/',
   });
 
-  // Remove the trailing '&'
-  path = path.slice(0, -1);
-
-  console.log(worldAppUrl.toString() + encodeURIComponent(path));
-  console.log(path);
-  // Redirect to the constructed URL
-  return NextResponse.redirect(
-    worldAppUrl.toString() + encodeURIComponent(path),
-  );
+  return response;
 }
