@@ -66,6 +66,13 @@ export const Versions = () => {
           </pre>
         </div>
       </div>
+
+      <div>
+        <p>MiniKit.user:</p>
+        <pre className="break-all whitespace-break-spaces">
+          {JSON.stringify(MiniKit.user ?? null, null, 2)}
+        </pre>
+      </div>
     </div>
   );
 };

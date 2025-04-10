@@ -55,7 +55,7 @@ import {
   MiniAppWalletAuthPayload,
   ResponseEvent,
 } from './types/responses';
-import { User } from './types/user';
+import { User, UserNameService } from './types/user';
 
 export const sendMiniKitEvent = <
   T extends WebViewBasePayload = WebViewBasePayload,
@@ -111,11 +111,7 @@ export class MiniKit {
   };
 
   public static appId: string | null = null;
-  public static user: User = {
-    walletAddress: '',
-    username: '',
-    profilePictureUrl: '',
-  };
+  public static user: User = {};
 
   private static sendInit() {
     sendWebviewEvent({
@@ -132,14 +128,17 @@ export class MiniKit {
       const originalHandler =
         handler as EventHandler<ResponseEvent.MiniAppWalletAuth>;
 
-      const wrappedHandler: EventHandler<ResponseEvent.MiniAppWalletAuth> = (
-        payload,
-      ) => {
+      const wrappedHandler: EventHandler<
+        ResponseEvent.MiniAppWalletAuth
+      > = async (payload) => {
         if (payload.status === 'success') {
           MiniKit.user.walletAddress = payload.address;
-          MiniKit.getUserByAddress(payload.address).then((user) => {
-            MiniKit.user = user;
-          });
+          try {
+            const user = await MiniKit.getUserByAddress(payload.address);
+            MiniKit.user = { ...MiniKit.user, ...user };
+          } catch (error) {
+            console.error('Failed to fetch user profile:', error);
+          }
         }
 
         originalHandler(payload);
@@ -285,6 +284,12 @@ export class MiniKit {
       };
     }
 
+    // Set user properties
+    MiniKit.user.optedIntoOptionalAnalytics =
+      window.WorldApp.is_optional_analytics;
+    MiniKit.user.deviceOS = window.WorldApp.device_os;
+    MiniKit.user.worldAppVersion = window.WorldApp.world_app_version;
+
     return { success: true };
   }
 
@@ -298,7 +303,9 @@ export class MiniKit {
     return isInstalled;
   }
 
-  public static getUserByAddress = async (address?: string): Promise<User> => {
+  public static getUserByAddress = async (
+    address?: string,
+  ): Promise<UserNameService> => {
     const userProfile = await getUserProfile(
       address ?? MiniKit.user.walletAddress!,
     );
