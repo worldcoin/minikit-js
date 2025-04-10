@@ -257,6 +257,12 @@ export class MiniKit {
       };
     }
 
+    // Set user properties
+    MiniKit.user.optedIntoOptionalAnalytics =
+      window.WorldApp.is_optional_analytics;
+    MiniKit.user.deviceOS = window.WorldApp.device_os;
+    MiniKit.user.worldAppVersion = window.WorldApp.world_app_version;
+
     try {
       window.MiniKit = MiniKit;
       this.sendInit();
@@ -283,12 +289,6 @@ export class MiniKit {
           MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.AppOutOfDate],
       };
     }
-
-    // Set user properties
-    MiniKit.user.optedIntoOptionalAnalytics =
-      window.WorldApp.is_optional_analytics;
-    MiniKit.user.deviceOS = window.WorldApp.device_os;
-    MiniKit.user.worldAppVersion = window.WorldApp.world_app_version;
 
     return { success: true };
   }
