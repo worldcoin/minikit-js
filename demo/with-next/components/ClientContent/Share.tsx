@@ -2,6 +2,7 @@ import {
   MiniAppShareFilesPayload,
   MiniKit,
   SendHapticFeedbackErrorCodes,
+  SendHapticFeedbackInput,
   ShareFilesInput,
 } from '@worldcoin/minikit-js';
 import { useCallback, useState } from 'react';
@@ -20,6 +21,16 @@ const sendHapticFeedbackErrorPayloadSchema = yup.object({
   status: yup.string<'error'>().equals(['error']).required(),
   version: yup.number().required(),
 });
+
+const allPossibleHaptics: SendHapticFeedbackInput[] = [
+  { hapticsType: 'impact', style: 'heavy' },
+  { hapticsType: 'impact', style: 'light' },
+  { hapticsType: 'impact', style: 'medium' },
+  { hapticsType: 'notification', style: 'error' },
+  { hapticsType: 'notification', style: 'success' },
+  { hapticsType: 'notification', style: 'warning' },
+  { hapticsType: 'selection-changed' },
+];
 
 export const ShareFiles = () => {
   const [sentShareFilesPayload, setSentShareFilesPayload] = useState<Record<
@@ -70,7 +81,7 @@ export const ShareFiles = () => {
   return (
     <div>
       <div className="grid gap-y-2">
-        <h2 className="text-2xl font-bold">Share Files</h2>
+        <h2 className="text-2xl font-bold">Sign Typed Data</h2>
 
         <div>
           <div className="bg-gray-300 min-h-[100px] p-2">
