@@ -178,7 +178,9 @@ export class MiniKit {
 
   public static trigger(event: ResponseEvent, payload: EventPayload) {
     if (!this.listeners[event]) {
-      console.error(`No handler for event ${event}, payload: ${payload}`);
+      console.error(
+        `No handler for event ${event}, payload: ${JSON.stringify(payload)}`,
+      );
       return;
     }
     this.listeners[event](payload);
