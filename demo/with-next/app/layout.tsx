@@ -1,9 +1,9 @@
 import SessionProvider from '@/components/SessionProvider';
+import { MiniKitProvider } from '@worldcoin/minikit-js/minikit-provider';
 import type { Metadata } from 'next';
 import { getServerSession } from 'next-auth';
 import dynamic from 'next/dynamic';
 import { Inter } from 'next/font/google';
-import { MiniKitProvider } from '../components/MiniKitProvider';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });

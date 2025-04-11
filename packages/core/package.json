@@ -7,11 +7,13 @@
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "@types/node": "^20",
+    "@types/react": "^17.0.0",
     "@typescript-eslint/eslint-plugin": "^7.7.0",
     "@typescript-eslint/parser": "^7.7.0",
     "jest": "^29.7.0",
     "prettier": "^3.2.5",
     "prettier-plugin-sort-imports-desc": "^1.0.0",
+    "react": "^17.0.0",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "tsup": "^8.0.2",
@@ -31,6 +33,16 @@
         "types": "./build/index.d.cts",
         "default": "./build/index.cjs"
       }
+    },
+    "./minikit-provider": {
+      "import": {
+        "types": "./build/minikit-provider.d.ts",
+        "default": "./build/minikit-provider.js"
+      },
+      "require": {
+        "types": "./build/minikit-provider.d.cts",
+        "default": "./build/minikit-provider.cjs"
+      }
     }
   },
   "files": [
@@ -46,6 +58,7 @@
   "main": "index.ts",
   "name": "@worldcoin/minikit-js",
   "peerDependencies": {
+    "react": "^17.0.0",
     "viem": "^2.23.5"
   },
   "private": false,

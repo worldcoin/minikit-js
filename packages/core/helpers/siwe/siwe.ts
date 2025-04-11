@@ -20,6 +20,53 @@ const EXP_TAG = 'Expiration Time: ';
 const NBF_TAG = 'Not Before: ';
 const RID_TAG = 'Request ID: ';
 const ERC_191_PREFIX = '\x19Ethereum Signed Message:\n';
+const EIP1271_MAGICVALUE = '0x1626ba7e';
+
+const SAFE_CONTRACT_ABI = [
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'owner',
+        type: 'address',
+      },
+    ],
+    name: 'isOwner',
+    outputs: [
+      {
+        internalType: 'bool',
+        name: '',
+        type: 'bool',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'bytes32',
+        name: '_message',
+        type: 'bytes32',
+      },
+      {
+        internalType: 'bytes',
+        name: '_signature',
+        type: 'bytes',
+      },
+    ],
+    name: 'isValidSignature',
+    outputs: [
+      {
+        internalType: 'bytes4',
+        name: '',
+        type: 'bytes4',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+];
 
 const tagged = (line, tag) => {
   if (line && line.includes(tag)) {
@@ -126,43 +173,40 @@ export const generateSiweMessage = (siweMessageData: SiweMessage) => {
   return siweMessage;
 };
 
-export const SAFE_CONTRACT_ABI = [
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'owner',
-        type: 'address',
-      },
-    ],
-    name: 'isOwner',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-];
-
-// Nonce is required to be passed in as a parameter to verify the message
-export const verifySiweMessage = async (
+export const verifySiweMessage = (
   payload: MiniAppWalletAuthSuccessPayload,
   nonce: string,
   statement?: string,
   requestId?: string,
   userProvider?: Client,
 ) => {
-  if (typeof window !== 'undefined') {
-    throw new Error('Verify can only be called in the backend');
+  if (payload.version === 1) {
+    return verifySiweMessageV1(
+      payload,
+      nonce,
+      statement,
+      requestId,
+      userProvider,
+    );
+  } else if (payload.version === 2) {
+    return verifySiweMessageV2(
+      payload,
+      nonce,
+      statement,
+      requestId,
+      userProvider,
+    );
   }
 
-  const { message, signature, address } = payload;
-  const siweMessageData = parseSiweMessage(message);
+  throw new Error('Invalid version received in response');
+};
 
+const validateMessage = (
+  siweMessageData: SiweMessage,
+  nonce: string,
+  statement?: string,
+  requestId?: string,
+) => {
   // Check expiration_time has not passed
   if (siweMessageData.expiration_time) {
     const expirationTime = new Date(siweMessageData.expiration_time);
@@ -195,6 +239,24 @@ export const verifySiweMessage = async (
       `Request ID mismatch. Got: ${siweMessageData.request_id}, Expected: ${requestId}`,
     );
   }
+  return true;
+};
+
+// To be deprecated in later versions
+export const verifySiweMessageV1 = async (
+  payload: MiniAppWalletAuthSuccessPayload,
+  nonce: string,
+  statement?: string,
+  requestId?: string,
+  userProvider?: Client,
+) => {
+  if (typeof window !== 'undefined') {
+    throw new Error('Wallet auth payload can only be verified in the backend');
+  }
+
+  const { message, signature, address } = payload;
+  const siweMessageData = parseSiweMessage(message);
+  validateMessage(siweMessageData, nonce, statement, requestId);
 
   // Check ERC-191 Signature Matches not recovery
   let provider =
@@ -221,5 +283,49 @@ export const verifySiweMessage = async (
   } catch (error) {
     throw new Error('Signature verification failed');
   }
+  // TODO: Once live, in app
+  // console.warn('Using deprecated SIWE v1 verification. Please update your app');
+
   return { isValid: true, siweMessageData: siweMessageData };
+};
+
+// Nonce is required to be passed in as a parameter to verify the message
+export const verifySiweMessageV2 = async (
+  payload: MiniAppWalletAuthSuccessPayload,
+  nonce: string,
+  statement?: string,
+  requestId?: string,
+  userProvider?: Client,
+) => {
+  if (typeof window !== 'undefined') {
+    throw new Error('Wallet auth payload can only be verified in the backend');
+  }
+
+  const { message, signature, address } = payload;
+  const siweMessageData = parseSiweMessage(message);
+  if (!validateMessage(siweMessageData, nonce, statement, requestId)) {
+    throw new Error('Validation failed');
+  }
+
+  try {
+    const walletContract = getContract({
+      address: address as `0x${string}`,
+      abi: SAFE_CONTRACT_ABI,
+      client:
+        userProvider ||
+        createPublicClient({ chain: worldchain, transport: http() }),
+    });
+    const hashedMessage = hashMessage(message);
+    const res = await walletContract.read.isValidSignature([
+      hashedMessage,
+      signature,
+    ]);
+    return {
+      isValid: res === EIP1271_MAGICVALUE,
+      siweMessageData: siweMessageData,
+    };
+  } catch (error) {
+    console.log(error);
+    throw new Error('Signature verification failed');
+  }
 };
