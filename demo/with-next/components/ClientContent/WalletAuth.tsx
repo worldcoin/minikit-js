@@ -211,12 +211,14 @@ export const WalletAuth = () => {
         <div className="grid gap-y-1">
           <p>Profile</p>
           <p className="bg-gray-300 p-2">{profile?.username}</p>
-          <Image
-            src={profile?.profilePictureUrl ?? ''}
-            alt="Profile"
-            width={100}
-            height={100}
-          />
+          {profile?.profilePictureUrl && (
+            <Image
+              src={profile.profilePictureUrl}
+              alt="Profile"
+              width={100}
+              height={100}
+            />
+          )}
         </div>
       </div>
     </div>
