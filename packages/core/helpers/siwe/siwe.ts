@@ -180,15 +180,7 @@ export const verifySiweMessage = (
   requestId?: string,
   userProvider?: Client,
 ) => {
-  if (payload.version === 1) {
-    return verifySiweMessageV1(
-      payload,
-      nonce,
-      statement,
-      requestId,
-      userProvider,
-    );
-  } else if (payload.version === 2) {
+  if (payload.version === 2) {
     return verifySiweMessageV2(
       payload,
       nonce,
@@ -196,9 +188,15 @@ export const verifySiweMessage = (
       requestId,
       userProvider,
     );
+  } else {
+    return verifySiweMessageV1(
+      payload,
+      nonce,
+      statement,
+      requestId,
+      userProvider,
+    );
   }
-
-  throw new Error('Invalid version received in response');
 };
 
 const validateMessage = (
