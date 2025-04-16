@@ -1,8 +1,11 @@
-import { NextAuthOptions } from 'next-auth';
+import NextAuth, { NextAuthConfig, NextAuthResult } from 'next-auth';
 
 // For more information on each option (and a full list of options) go to
 // https://next-auth.js.org/configuration/options
-export const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthConfig = {
+  session: {
+    strategy: 'jwt',
+  },
   // https://next-auth.js.org/configuration/providers/oauth
   providers: [
     {
@@ -16,8 +19,8 @@ export const authOptions: NextAuthOptions = {
       authorization: { params: { scope: 'openid' } },
       clientId: process.env.WLD_CLIENT_ID,
       clientSecret: process.env.WLD_CLIENT_SECRET,
-      idToken: true,
-      checks: ['state', 'nonce', 'pkce'],
+      issuer: 'https://id.worldcoin.org',
+      checks: ['state', 'pkce'],
       profile(profile) {
         return {
           id: profile.sub,
@@ -29,10 +32,23 @@ export const authOptions: NextAuthOptions = {
     },
   ],
   callbacks: {
-    async jwt({ token }) {
-      token.userRole = 'admin';
+    async jwt({ token, account, user }) {
+      if (account) {
+        token.accessToken = account.access_token;
+        token.idToken = account.id_token;
+        token.provider = account.provider;
+      }
+      if (user) {
+        token.user = user;
+      }
       return token;
     },
   },
   debug: true,
 };
+
+const nextAuth = NextAuth(authOptions);
+
+export const signIn: NextAuthResult['signIn'] = nextAuth.signIn;
+export const auth: NextAuthResult['auth'] = nextAuth.auth;
+export const handlers: NextAuthResult['handlers'] = nextAuth.handlers;

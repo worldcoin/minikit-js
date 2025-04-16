@@ -14,6 +14,7 @@ const walletAuthSuccessPayloadSchema = yup.object({
   message: yup.string().required(),
   signature: yup.string().required(),
   address: yup.string().required(),
+  version: yup.number().required(),
 });
 
 const walletAuthErrorPayloadSchema = yup.object({
@@ -73,6 +74,8 @@ export const WalletAuth = () => {
           setWalletAuthPayloadValidationMessage(errorMessage);
         }
 
+        console.log('MiniKit.user', MiniKit.user);
+
         // Call the API to verify the message
         const response = await fetch('/api/verify-siwe', {
           method: 'POST',
@@ -114,16 +117,14 @@ export const WalletAuth = () => {
             },
           );
         } else {
-          const user = await MiniKit.getUserByAddress(payload.address);
+          const user = await MiniKit.getUserInfo();
           console.log(user);
           setProfile(user);
         }
       }
 
       setReceivedWalletAuthPayload(payload);
-      console.log('From object', MiniKit?.walletAddress);
-      //@ts-ignore
-      console.log('From static', window.MiniKit?.walletAddress);
+      console.log('From object', MiniKit.user?.walletAddress);
     });
 
     return () => {
@@ -210,12 +211,14 @@ export const WalletAuth = () => {
         <div className="grid gap-y-1">
           <p>Profile</p>
           <p className="bg-gray-300 p-2">{profile?.username}</p>
-          <Image
-            src={profile?.profilePictureUrl ?? ''}
-            alt="Profile"
-            width={100}
-            height={100}
-          />
+          {profile?.profilePictureUrl && (
+            <Image
+              src={profile.profilePictureUrl}
+              alt="Profile"
+              width={100}
+              height={100}
+            />
+          )}
         </div>
       </div>
     </div>

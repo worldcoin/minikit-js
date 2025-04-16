@@ -21,6 +21,8 @@ import {
   SendTransactionInput,
   SendTransactionPayload,
   ShareContactsPayload,
+  ShareFilesInput,
+  ShareFilesPayload,
   SignMessageInput,
   SignMessagePayload,
   SignTypedDataInput,
@@ -46,13 +48,14 @@ import {
   MiniAppSendHapticFeedbackPayload,
   MiniAppSendTransactionPayload,
   MiniAppShareContactsPayload,
+  MiniAppShareFilesPayload,
   MiniAppSignMessagePayload,
   MiniAppSignTypedDataPayload,
   MiniAppVerifyActionPayload,
   MiniAppWalletAuthPayload,
   ResponseEvent,
 } from './types/responses';
-import { User } from './types/user';
+import { User, UserNameService } from './types/user';
 
 export const sendMiniKitEvent = <
   T extends WebViewBasePayload = WebViewBasePayload,
@@ -68,7 +71,7 @@ export class MiniKit {
   private static readonly miniKitCommandVersion: Record<Command, number> = {
     [Command.Verify]: 1,
     [Command.Pay]: 1,
-    [Command.WalletAuth]: 1,
+    [Command.WalletAuth]: 2,
     [Command.SendTransaction]: 1,
     [Command.SignMessage]: 1,
     [Command.SignTypedData]: 1,
@@ -76,6 +79,7 @@ export class MiniKit {
     [Command.RequestPermission]: 1,
     [Command.GetPermissions]: 1,
     [Command.SendHapticFeedback]: 1,
+    [Command.ShareFiles]: 1,
   };
 
   private static isCommandAvailable = {
@@ -89,6 +93,7 @@ export class MiniKit {
     [Command.RequestPermission]: false,
     [Command.GetPermissions]: false,
     [Command.SendHapticFeedback]: false,
+    [Command.ShareFiles]: false,
   };
 
   private static listeners: Record<ResponseEvent, EventHandler> = {
@@ -102,14 +107,11 @@ export class MiniKit {
     [ResponseEvent.MiniAppRequestPermission]: () => {},
     [ResponseEvent.MiniAppGetPermissions]: () => {},
     [ResponseEvent.MiniAppSendHapticFeedback]: () => {},
+    [ResponseEvent.MiniAppShareFiles]: () => {},
   };
 
   public static appId: string | null = null;
-  /**
-   * @deprecated you should use MiniKit.user.walletAddress instead
-   */
-  public static walletAddress: string | null = null;
-  public static user: User | null = null;
+  public static user: User = {};
 
   private static sendInit() {
     sendWebviewEvent({
@@ -126,13 +128,17 @@ export class MiniKit {
       const originalHandler =
         handler as EventHandler<ResponseEvent.MiniAppWalletAuth>;
 
-      const wrappedHandler: EventHandler<ResponseEvent.MiniAppWalletAuth> = (
-        payload,
-      ) => {
+      const wrappedHandler: EventHandler<
+        ResponseEvent.MiniAppWalletAuth
+      > = async (payload) => {
         if (payload.status === 'success') {
-          MiniKit.getUserByAddress(payload.address).then((user) => {
-            MiniKit.user = user;
-          });
+          MiniKit.user.walletAddress = payload.address;
+          try {
+            const user = await MiniKit.getUserByAddress(payload.address);
+            MiniKit.user = { ...MiniKit.user, ...user };
+          } catch (error) {
+            console.error('Failed to fetch user profile:', error);
+          }
         }
 
         originalHandler(payload);
@@ -172,7 +178,9 @@ export class MiniKit {
 
   public static trigger(event: ResponseEvent, payload: EventPayload) {
     if (!this.listeners[event]) {
-      console.error(`No handler for event ${event}`);
+      console.error(
+        `No handler for event ${event}, payload: ${JSON.stringify(payload)}`,
+      );
       return;
     }
     this.listeners[event](payload);
@@ -251,6 +259,12 @@ export class MiniKit {
       };
     }
 
+    // Set user properties
+    MiniKit.user.optedIntoOptionalAnalytics =
+      window.WorldApp.is_optional_analytics;
+    MiniKit.user.deviceOS = window.WorldApp.device_os;
+    MiniKit.user.worldAppVersion = window.WorldApp.world_app_version;
+
     try {
       window.MiniKit = MiniKit;
       this.sendInit();
@@ -291,15 +305,22 @@ export class MiniKit {
     return isInstalled;
   }
 
-  public static getUserByAddress = async (address: string): Promise<User> => {
-    const userProfile = await getUserProfile(address);
+  public static getUserByAddress = async (
+    address?: string,
+  ): Promise<UserNameService> => {
+    const userProfile = await getUserProfile(
+      address ?? MiniKit.user.walletAddress!,
+    );
 
     return {
-      walletAddress: address,
+      walletAddress: address ?? MiniKit.user.walletAddress!,
       username: userProfile.username,
       profilePictureUrl: userProfile.profile_picture_url,
     };
   };
+
+  // Simply re-exporting the existing function
+  public static getUserInfo = this.getUserByAddress;
 
   public static commands = {
     verify: (payload: VerifyCommandInput): VerifyCommandPayload | null => {
@@ -401,7 +422,7 @@ export class MiniKit {
         domain: window.location.host,
         statement: payload.statement ?? undefined,
         uri: window.location.href,
-        version: 1,
+        version: '1',
         chain_id: 480,
         nonce: payload.nonce,
         issued_at: new Date().toISOString(),
@@ -573,6 +594,26 @@ export class MiniKit {
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.SendHapticFeedback,
         version: this.miniKitCommandVersion[Command.SendHapticFeedback],
+        payload,
+      });
+
+      return payload;
+    },
+
+    shareFiles: (payload: ShareFilesInput): ShareFilesPayload | null => {
+      if (
+        typeof window === 'undefined' ||
+        !this.isCommandAvailable[Command.ShareFiles]
+      ) {
+        console.error(
+          "'shareFiles' command is unavailable. Check MiniKit.install() or update the app version",
+        );
+        return null;
+      }
+
+      sendMiniKitEvent<WebViewBasePayload>({
+        command: Command.ShareFiles,
+        version: this.miniKitCommandVersion[Command.ShareFiles],
         payload,
       });
 
@@ -778,6 +819,25 @@ export class MiniKit {
             ResponseEvent.MiniAppSendHapticFeedback,
             Command.SendHapticFeedback,
             () => this.commands.sendHapticFeedback(payload),
+          );
+          resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
+    shareFiles: async (
+      payload: ShareFilesInput,
+    ): AsyncHandlerReturn<
+      ShareFilesPayload | null,
+      MiniAppShareFilesPayload
+    > => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppShareFiles,
+            Command.ShareFiles,
+            () => this.commands.shareFiles(payload),
           );
           resolve(response);
         } catch (error) {

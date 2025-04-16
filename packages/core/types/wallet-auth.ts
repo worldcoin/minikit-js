@@ -4,7 +4,7 @@ export type SiweMessage = {
   address?: string;
   statement?: string;
   uri: string;
-  version: number;
+  version: string;
   chain_id: number;
   nonce: string;
   issued_at: string;
