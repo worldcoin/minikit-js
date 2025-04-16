@@ -17,5 +17,4 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-
 With community help from the amazing [supercorp-ai](https://github.com/supercorp-ai) team.
