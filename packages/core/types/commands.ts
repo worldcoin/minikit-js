@@ -165,7 +165,7 @@ type CommandReturnPayloadMap = {
   [Command.RequestPermission]: RequestPermissionPayload;
   [Command.GetPermissions]: GetPermissionsPayload;
   [Command.SendHapticFeedback]: SendHapticFeedbackPayload;
-  [Command.ShareFiles]: ShareFilesPayload;
+  // [Command.ShareFiles]: ShareFilesPayload;
 };
 export type CommandReturnPayload<T extends Command> =
   T extends keyof CommandReturnPayloadMap ? CommandReturnPayloadMap[T] : never;
