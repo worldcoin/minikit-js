@@ -17,7 +17,6 @@ export async function fetchTransactionHash(
       },
     );
 
-    console.log('Received response:', response.url);
     if (!response.ok) {
       throw new Error('Failed to fetch transaction status');
     }
