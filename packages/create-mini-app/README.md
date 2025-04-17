@@ -1,20 +1,13 @@
-This is an example project of Next.js with World’s minikit wallet auth and next-auth.
-Look into the source code to see how it works.
+## Create a Mini App
+[Mini apps](https://docs.worldcoin.org/mini-apps) enable third-party developers to create native-like applications within World App.
 
-## Getting Started
+## Authentication
 
-First, run the development server:
+This starter kit uses [Minikit's](https://github.com/worldcoin/minikit-js) wallet auth to authenticate users, and [next-auth](https://authjs.dev/getting-started) to manage sessions.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## UI Library
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+This starter kit uses [Mini Apps UI Kit](https://github.com/worldcoin/mini-apps-ui-kit-react) to style the app. We recommend using the UI kit to make sure you follow [World App's design system](https://docs.world.org/mini-apps/design/app-guidelines). 
 
-With community help from the amazing [supercorp-ai](https://github.com/supercorp-ai) team.
+## Contributing
+This template was made with help from the amazing [supercorp-ai](https://github.com/supercorp-ai) team.

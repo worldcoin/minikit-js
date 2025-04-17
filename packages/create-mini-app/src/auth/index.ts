@@ -1,20 +1,31 @@
-import { getSignedNonce } from '@/auth/walletAuth/getSignedNonce';
-import { verifySiweMessage } from '@worldcoin/minikit-js';
+import { hashNonce } from '@/auth/wallet/client-helpers';
+import {
+  MiniAppWalletAuthSuccessPayload,
+  MiniKit,
+  verifySiweMessage,
+} from '@worldcoin/minikit-js';
 import NextAuth, { type DefaultSession } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 
 declare module 'next-auth' {
   interface User {
-    address: string;
+    walletAddress: string;
+    username: string;
+    profilePictureUrl: string;
   }
 
   interface Session {
     user: {
-      address: string;
+      walletAddress: string;
+      username: string;
+      profilePictureUrl: string;
     } & DefaultSession['user'];
   }
 }
 
+// Auth configuration for Wallet Auth based sessions
+// For more information on each option (and a full list of options) go to
+// https://authjs.dev/getting-started/authentication/credentials
 export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: process.env.NEXTAUTH_SECRET,
   session: { strategy: 'jwt' },
@@ -36,20 +47,28 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         signedNonce: string;
         finalPayloadJson: string;
       }) => {
-        const expectedSignedNonce = getSignedNonce({ nonce });
+        const expectedSignedNonce = hashNonce({ nonce });
 
         if (signedNonce !== expectedSignedNonce) {
           console.log('Invalid signed nonce');
           return null;
         }
 
-        const finalPayload = JSON.parse(finalPayloadJson);
+        const finalPayload: MiniAppWalletAuthSuccessPayload =
+          JSON.parse(finalPayloadJson);
         const result = await verifySiweMessage(finalPayload, nonce);
 
         if (!result.isValid || !result.siweMessageData.address) {
           console.log('Invalid final payload');
           return null;
         }
+        // Optionally, fetch the user info from your own database
+        const userInfo = await MiniKit.getUserInfo(finalPayload.address);
+
+        return {
+          id: finalPayload.address,
+          ...userInfo,
+        };
       },
     }),
   ],
@@ -57,7 +76,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.userId = user.id;
-        token.address = user.address;
+        token.walletAddress = user.walletAddress;
+        token.username = user.username;
+        token.profilePictureUrl = user.profilePictureUrl;
       }
 
       return token;
@@ -65,7 +86,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     session: async ({ session, token }) => {
       if (token.userId) {
         session.user.id = token.userId as string;
-        session.user.address = token.address as string;
+        session.user.walletAddress = token.address as string;
+        session.user.username = token.username as string;
+        session.user.profilePictureUrl = token.profilePictureUrl as string;
       }
 
       return session;

@@ -1,5 +1,12 @@
-import { AuthButton } from './AuthButton';
+import { Page } from '@/components/PageLayout';
+import { AuthButton } from '../components/AuthButton';
 
 export default function Home() {
-  return <AuthButton />;
+  return (
+    <Page>
+      <Page.Main className="flex flex-col items-center justify-center">
+        <AuthButton />
+      </Page.Main>
+    </Page>
+  );
 }

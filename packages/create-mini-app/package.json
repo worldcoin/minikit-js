@@ -3,18 +3,22 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.8.0",
+    "@worldcoin/mini-apps-ui-kit-react": "^1.0.1",
     "@worldcoin/minikit-js": "workspace:*",
+    "clsx": "^2.1.1",
+    "iconoir-react": "^7.11.0",
     "next": "15.2.3",
     "next-auth": "^5.0.0-beta.25",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^3.2.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
