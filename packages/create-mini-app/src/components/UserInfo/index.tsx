@@ -2,6 +2,7 @@
 import { CircularIcon, Marble } from '@worldcoin/mini-apps-ui-kit-react';
 import { CheckCircleSolid } from 'iconoir-react';
 import { useSession } from 'next-auth/react';
+
 /**
  * Minikit is only available on client side. Thus user info needs to be rendered on client side.
  * UserInfo component displays user information including profile picture, username, and verification status.

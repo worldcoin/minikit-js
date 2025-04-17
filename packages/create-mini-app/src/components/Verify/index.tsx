@@ -9,7 +9,6 @@ import { useState } from 'react';
  * It's critical you verify the proof on the server side
  * Read More: https://docs.world.org/mini-apps/commands/verify#verifying-the-proof
  */
-
 export const Verify = () => {
   const [buttonState, setButtonState] = useState<
     'pending' | 'success' | 'failed' | undefined

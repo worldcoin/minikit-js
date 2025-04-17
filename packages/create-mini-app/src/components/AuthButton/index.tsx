@@ -3,6 +3,11 @@ import { walletAuth } from '@/auth/wallet';
 import { Button, LiveFeedback } from '@worldcoin/mini-apps-ui-kit-react';
 import { useCallback, useState } from 'react';
 
+/**
+ * This component is an example of how to authenticate a user
+ * We will use Next Auth for this example, but you can use any auth provider
+ * Read More: https://docs.world.org/mini-apps/commands/wallet-auth
+ */
 export const AuthButton = () => {
   const [isPending, setIsPending] = useState(false);
 

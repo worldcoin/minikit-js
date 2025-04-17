@@ -2,6 +2,10 @@ import clsx from 'clsx';
 import { ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
 
+/**
+ * This component is a simple page layout component to help with design consistency
+ * Feel free to modify this component to fit your needs
+ */
 export const Page = (props: { children: ReactNode; className?: string }) => {
   return (
     <div className={twMerge(clsx('flex h-dvh flex-col', props.className))}>
