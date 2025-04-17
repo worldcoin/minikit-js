@@ -71,7 +71,7 @@ export class MiniKit {
   private static readonly miniKitCommandVersion: Record<Command, number> = {
     [Command.Verify]: 1,
     [Command.Pay]: 1,
-    [Command.WalletAuth]: 2,
+    [Command.WalletAuth]: 1,
     [Command.SendTransaction]: 1,
     [Command.SignMessage]: 1,
     [Command.SignTypedData]: 1,
@@ -112,6 +112,7 @@ export class MiniKit {
 
   public static appId: string | null = null;
   public static user: User = {};
+  private static isReady: boolean = false;
 
   private static sendInit() {
     sendWebviewEvent({
@@ -211,25 +212,34 @@ export class MiniKit {
       typeof window.WorldApp
     >['supported_commands'],
   ) {
-    return Object.entries(this.miniKitCommandVersion).every(
+    let allCommandsValid = true;
+    Object.entries(this.miniKitCommandVersion).forEach(
       ([minikitCommandName, version]) => {
         const commandInput = worldAppSupportedCommands.find(
           (command) => command.name === minikitCommandName,
         );
-
+        let isCommandValid = false;
         if (!commandInput) {
           console.error(
             `Command ${minikitCommandName} is not supported by the app. Try updating the app version`,
           );
         } else {
-          MiniKit.isCommandAvailable[minikitCommandName] = true;
+          if (commandInput.supported_versions.includes(version)) {
+            MiniKit.isCommandAvailable[minikitCommandName] = true;
+            isCommandValid = true;
+          } else {
+            console.error(
+              `Command ${minikitCommandName} version ${version} is not supported by the app. Supported versions: ${commandInput.supported_versions.join(', ')}`,
+            );
+            MiniKit.isCommandAvailable[minikitCommandName] = isCommandValid;
+          }
         }
-
-        return commandInput
-          ? commandInput.supported_versions.includes(version)
-          : false;
+        if (!isCommandValid) {
+          allCommandsValid = false;
+        }
       },
     );
+    return allCommandsValid;
   }
 
   public static install(appId?: string): MiniKitInstallReturnType {
@@ -292,16 +302,17 @@ export class MiniKit {
       };
     }
 
+    MiniKit.isReady = true;
     return { success: true };
   }
 
   public static isInstalled(debug?: boolean) {
-    if (debug) console.log('MiniKit is alive!');
-    const isInstalled = Boolean(window.MiniKit);
+    const isInstalled = MiniKit.isReady && Boolean(window.MiniKit);
     if (!isInstalled)
       console.error(
         "MiniKit is not installed. Make sure you're running the application inside of World App",
       );
+    if (debug && isInstalled) console.log('MiniKit is alive!');
     return isInstalled;
   }
 
@@ -316,6 +327,27 @@ export class MiniKit {
       walletAddress: address ?? MiniKit.user.walletAddress!,
       username: userProfile.username,
       profilePictureUrl: userProfile.profile_picture_url,
+    };
+  };
+
+  public static getUserByUsername = async (
+    username: string,
+  ): Promise<UserNameService> => {
+    const res = await fetch(
+      `https://usernames.worldcoin.org/api/v1/${username}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+
+    const user = await res.json();
+    return {
+      walletAddress: user.address,
+      username: user.username,
+      profilePictureUrl: user.profile_picture_url,
     };
   };
 
@@ -368,11 +400,9 @@ export class MiniKit {
         return null;
       }
 
-      const network = Network.WorldChain;
-
       const eventPayload: PayCommandPayload = {
         ...payload,
-        network,
+        network: Network.WorldChain,
       };
 
       sendMiniKitEvent<WebViewBasePayload>({

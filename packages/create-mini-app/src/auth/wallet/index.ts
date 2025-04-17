@@ -23,13 +23,17 @@ export const walletAuth = async () => {
   });
   console.log('Result', result);
   if (!result) {
-    throw new Error('Wallet authentication failed');
+    throw new Error('No response from wallet auth');
   }
 
   if (result.finalPayload.status !== 'success') {
-    throw new Error('Wallet authentication failed', {
-      cause: result.finalPayload,
-    });
+    console.error(
+      'Wallet authentication failed',
+      result.finalPayload.error_code,
+    );
+    return;
+  } else {
+    console.log(result.finalPayload);
   }
 
   await signIn('credentials', {
