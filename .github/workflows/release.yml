@@ -1,106 +1,40 @@
-name: New Release
+name: Release
 
 on:
   push:
     branches:
       - main
 
-permissions:
-  contents: write
-  pull-requests: write
+concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   release:
-    name: Create GitHub Release
+    name: Release
     runs-on: ubuntu-latest
-    outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Repo
+        uses: actions/checkout@v4
 
-      - name: Create Release
-        id: release
-        uses: google-github-actions/release-please-action@v3
+      - name: Setup Node.js 22.x
+        uses: actions/setup-node@v4
         with:
-          command: release        # Use release to actually create the release
-          config-file: release-please-config.json
-          manifest-file: .release-please-manifest.json
-          monorepo-tags: true
-          release-type: node
+          node-version: 22.x
 
-      - name: Debug Output
-        run: echo "Release Created - ${{ steps.release.outputs.release_created }}"
-
-  publish-npm:
-    needs: release
-    name: Publish to npm
-    runs-on: ubuntu-latest
-    if: ${{ needs.release.outputs.release_created == 'true' }}
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: pnpm/action-setup@v4
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v2
         with:
-          version: "9.9.0"
+          version: 9.12.1
 
-      - name: Set up Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: "20"
-          cache: pnpm
-          registry-url: "https://registry.npmjs.org"
-
-      - name: Install dependencies
+      - name: Install Dependencies
         run: pnpm install
 
-      - name: Build
-        run: pnpm build
-
-      - name: Publish Core to npm
-        working-directory: ./packages/core
-        run: pnpm publish --report-summary --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish React to npm
-        working-directory: ./packages/react
-        run: pnpm publish --report-summary --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-  publish-github:
-    needs: release
-    name: Publish to GitHub Package Registry
-    runs-on: ubuntu-latest
-    if: ${{ needs.release.outputs.release_created == 'true' }}
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: pnpm/action-setup@v4
+      - name: Create Release Pull Request or Publish to npm
+        id: changesets
+        uses: changesets/action@v1
         with:
-          version: "9.9.0"
-
-      - name: Set up Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: "20"
-          cache: pnpm
-          registry-url: "https://npm.pkg.github.com"
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Build
-        run: pnpm build
-
-      - name: Publish Core to GitHub
-        working-directory: ./packages/core
-        run: pnpm publish --report-summary --no-git-checks
+          # This expects you to have a script called release which does a build for your packages and calls changeset publish
+          publish: pnpm release
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish React to GitHub
-        working-directory: ./packages/react
-        run: pnpm publish --report-summary --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
