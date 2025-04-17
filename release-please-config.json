@@ -5,6 +5,10 @@
       "component": "minikit-js",
       "skip-github-release": false
     },
+    "packages/create-mini-app": {
+      "component": "create-mini-app",
+      "skip-github-release": false
+    },
     "packages/react": {
       "component": "minikit-react",
       "skip-github-release": false
@@ -16,7 +20,7 @@
       "type": "node-workspace"
     },
     {
-      "components": ["minikit-react", "minikit-js"],
+      "components": ["minikit-react", "minikit-js", "create-mini-app"],
       "groupName": "minikit-packages",
       "type": "linked-versions"
     }
