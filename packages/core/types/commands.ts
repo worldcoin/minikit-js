@@ -15,7 +15,7 @@ export enum Command {
   RequestPermission = 'request-permission',
   GetPermissions = 'get-permissions',
   SendHapticFeedback = 'send-haptic-feedback',
-  ShareFiles = 'share-files',
+  // ShareFiles = 'share-files',
 }
 
 export type WebViewBasePayload = {
