@@ -22,8 +22,8 @@ importers:
   demo/next-15-template:
     dependencies:
       '@worldcoin/mini-apps-ui-kit-react':
-        specifier: ^1.0.1
-        version: 1.0.1(@types/react-dom@19.1.2(@types/react@19.1.1))(@types/react@19.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@4.1.4)
+        specifier: ^1.0.2
+        version: 1.0.2(@types/react-dom@19.1.2(@types/react@19.1.1))(@types/react@19.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@4.1.4)
       '@worldcoin/minikit-js':
         specifier: workspace:*
         version: link:../../packages/core
@@ -1940,12 +1940,12 @@ packages:
     resolution: {integrity: sha512-GqBNAI+OyG+YXoMOI9PJDlO+MeiUnclrdjaXDYYCjmXBQi+tx0rQjNJfxwS9H6jQSVPSYaa/crcgYYMJvwdS0A==}
     engines: {node: '>=12.4'}
 
-  '@worldcoin/mini-apps-ui-kit-react@1.0.1':
-    resolution: {integrity: sha512-C6SMwY2tTTBCPaDibxdK4wv10YXr5M57x9MhuhpFJ+5K2Afes7fKiuqEhcEQnulkc2gUr40PfCFlRFmXz2S0pA==}
+  '@worldcoin/mini-apps-ui-kit-react@1.0.2':
+    resolution: {integrity: sha512-sodGHG76bFCnKS7rlocDW0ILhPmQXCntJWB0FHaCKcqhiySB+8dCwWdwFO5Kl4zwJ3wbCVz4kidLP6YLECAwQA==}
     peerDependencies:
       react: ^18 || ^19
       react-dom: ^18 || ^19
-      tailwindcss: ^3
+      tailwindcss: ^3 || ^4
     peerDependenciesMeta:
       tailwindcss:
         optional: true
@@ -6686,7 +6686,7 @@ snapshots:
       - typescript
       - zod
 
-  '@worldcoin/mini-apps-ui-kit-react@1.0.1(@types/react-dom@19.1.2(@types/react@19.1.1))(@types/react@19.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@4.1.4)':
+  '@worldcoin/mini-apps-ui-kit-react@1.0.2(@types/react-dom@19.1.2(@types/react@19.1.1))(@types/react@19.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@4.1.4)':
     dependencies:
       '@radix-ui/react-checkbox': 1.1.5(@types/react-dom@19.1.2(@types/react@19.1.1))(@types/react@19.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@radix-ui/react-form': 0.1.3(@types/react-dom@19.1.2(@types/react@19.1.1))(@types/react@19.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
