@@ -3,6 +3,13 @@ import { Button, LiveFeedback } from '@worldcoin/mini-apps-ui-kit-react';
 import { MiniKit, VerificationLevel } from '@worldcoin/minikit-js';
 import { useState } from 'react';
 
+/**
+ * This component is an example of how to use World ID in Mini Apps
+ * Minikit commands must be used on client components
+ * It's critical you verify the proof on the server side
+ * Read More: https://docs.world.org/mini-apps/commands/verify#verifying-the-proof
+ */
+
 export const Verify = () => {
   const [buttonState, setButtonState] = useState<
     'pending' | 'success' | 'failed' | undefined
