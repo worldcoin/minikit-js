@@ -48,7 +48,7 @@ export type TokensPayload = {
 
 export type PayCommandInput = {
   reference: string;
-  to: string;
+  to: `0x${string}` | string; // Address or World Username
   tokens: TokensPayload[];
   network?: Network; // Optional
   description: string;
