@@ -1,7 +1,11 @@
 {
   "name": "@worldcoin/create-mini-app",
   "version": "0.1.0",
+  "homepage": "https://docs.worldcoin.org/mini-apps",
+  "description": "Create a Mini App",
+  "license": "MIT",
   "private": false,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
