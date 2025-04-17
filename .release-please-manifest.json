@@ -1,6 +1,5 @@
 {
   ".": "1.6.2",
   "packages/core": "1.8.0",
-  "packages/create-mini-app": "0.1.0",
   "packages/react": "1.8.0"
 }
