@@ -68,7 +68,7 @@ export class MiniKit {
   private static readonly miniKitCommandVersion: Record<Command, number> = {
     [Command.Verify]: 1,
     [Command.Pay]: 1,
-    [Command.WalletAuth]: 1,
+    [Command.WalletAuth]: 2,
     [Command.SendTransaction]: 1,
     [Command.SignMessage]: 1,
     [Command.SignTypedData]: 1,
