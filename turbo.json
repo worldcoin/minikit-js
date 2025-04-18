@@ -15,5 +15,6 @@
     "type-check": {
       "dependsOn": ["^check-types"]
     }
+    
   }
 }
