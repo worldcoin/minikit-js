@@ -146,7 +146,7 @@ export const WalletAuth = () => {
       statement:
         'This is my statement and here is a link https://worldcoin.com/apps',
     });
-
+    console.log('generateMessageResult', generateMessageResult);
     if (!generateMessageResult) {
       return setGenerationError('Failed to generate message');
     }
