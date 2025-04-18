@@ -74,7 +74,7 @@ export const WalletAuth = () => {
           setWalletAuthPayloadValidationMessage(errorMessage);
         }
 
-        console.log('MiniKit.user', MiniKit.user);
+        console.log('MiniKit. payload', payload);
 
         // Call the API to verify the message
         const response = await fetch('/api/verify-siwe', {
