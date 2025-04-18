@@ -1,5 +1,4 @@
 import { AppConfig } from 'src/types/client';
-
 export interface TransactionStatus {
   transactionHash: `0x${string}`;
   transactionStatus: 'pending' | 'mined' | 'failed';
@@ -16,12 +15,14 @@ export async function fetchTransactionHash(
         method: 'GET',
       },
     );
-
     if (!response.ok) {
-      throw new Error('Failed to fetch transaction status');
+      const error = await response.json();
+      console.log(error);
+      throw new Error(`Failed to fetch transaction status: ${error.message}`);
     }
 
     const data: TransactionStatus = await response.json();
+
     return data;
   } catch (error) {
     console.log('Error fetching transaction status', error);
