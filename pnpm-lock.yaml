@@ -28,11 +28,11 @@ importers:
         specifier: ^1.0.2
         version: 1.0.2(@types/react-dom@19.1.2(@types/react@19.1.1))(@types/react@19.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@4.1.4)
       '@worldcoin/minikit-js':
-        specifier: workspace:*
-        version: link:../../packages/core
+        specifier: latest
+        version: 1.9.1(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.23.5(typescript@5.5.4))
       '@worldcoin/minikit-react':
-        specifier: workspace:*
-        version: link:../../packages/react
+        specifier: latest
+        version: 1.9.1(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.23.5(typescript@5.5.4))
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -2020,6 +2020,20 @@ packages:
     peerDependenciesMeta:
       tailwindcss:
         optional: true
+
+  '@worldcoin/minikit-js@1.9.1':
+    resolution: {integrity: sha512-TgxUFi0VcDtqpUdUVq0grlIIGNzhlD564ev4/l7B211V6GuMxTzAnAvPy/9xUU5LtaS5J9UjmzwUttmymTmJWQ==}
+    engines: {node: '>= 16'}
+    peerDependencies:
+      react: ^17 || ^18 || ^19
+      viem: ^2.23.5
+
+  '@worldcoin/minikit-react@1.9.1':
+    resolution: {integrity: sha512-D/1DPqppLjVt8TtEzWqQSSjGDyPZDxf+V7PrRnx/ZwpXAqUsBQwI4Vdw06fXwXOjisAGstkYOFZR7cP30CqbTQ==}
+    engines: {node: '>= 16'}
+    peerDependencies:
+      react: ^18 || ^19
+      viem: ^2.23.5
 
   abitype@1.0.6:
     resolution: {integrity: sha512-MMSqYh4+C/aVqI2RQaWqbvI4Kxo5cQV40WQ4QFtDnNzCkqChm8MuENhElmynZlO0qUy/ObkEUaXtKqYnx1Kp3A==}
@@ -7031,6 +7045,19 @@ snapshots:
       - typescript
       - zod
 
+  '@worldcoin/idkit-core@2.0.2(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)':
+    dependencies:
+      browser-or-node: 3.0.0-pre.0
+      buffer: 6.0.3
+      ox: 0.1.8(typescript@5.5.4)
+      zustand: 4.5.5(@types/react@19.1.1)(react@19.1.0)
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+      - react
+      - typescript
+      - zod
+
   '@worldcoin/mini-apps-ui-kit-react@1.0.2(@types/react-dom@19.1.2(@types/react@19.1.1))(@types/react@19.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@4.1.4)':
     dependencies:
       '@radix-ui/react-checkbox': 1.1.5(@types/react-dom@19.1.2(@types/react@19.1.1))(@types/react@19.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -7058,6 +7085,31 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
       - '@types/react-dom'
+
+  '@worldcoin/minikit-js@1.9.1(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.23.5(typescript@5.5.4))':
+    dependencies:
+      '@worldcoin/idkit-core': 2.0.2(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)
+      abitype: 1.0.8(typescript@5.5.4)
+      react: 19.1.0
+      viem: 2.23.5(typescript@5.5.4)
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+      - typescript
+      - zod
+
+  '@worldcoin/minikit-react@1.9.1(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.23.5(typescript@5.5.4))':
+    dependencies:
+      '@worldcoin/minikit-js': 1.9.1(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.23.5(typescript@5.5.4))
+      abitype: 1.0.8(typescript@5.5.4)
+      react: 19.1.0
+      turbo: 2.3.3
+      viem: 2.23.5(typescript@5.5.4)
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+      - typescript
+      - zod
 
   abitype@1.0.6(typescript@5.5.4):
     optionalDependencies:
@@ -10638,7 +10690,6 @@ snapshots:
   use-sync-external-store@1.2.2(react@19.1.0):
     dependencies:
       react: 19.1.0
-    optional: true
 
   util-deprecate@1.0.2: {}
 
@@ -10824,6 +10875,13 @@ snapshots:
     optionalDependencies:
       '@types/react': 17.0.85
       react: 17.0.2
+
+  zustand@4.5.5(@types/react@19.1.1)(react@19.1.0):
+    dependencies:
+      use-sync-external-store: 1.2.2(react@19.1.0)
+    optionalDependencies:
+      '@types/react': 19.1.1
+      react: 19.1.0
 
   zustand@5.0.0(@types/react@19.1.1)(react@19.1.0)(use-sync-external-store@1.2.2(react@19.1.0)):
     optionalDependencies:
