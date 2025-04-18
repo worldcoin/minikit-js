@@ -17,6 +17,40 @@ export const ExternalLinks = () => {
         >
           worldapp:// deep link
         </Link>
+        <Link
+          href="worldapp://explore?collection_id=top_games"
+          className="bg-green-500 text-white text-center rounded-lg p-3"
+        >
+          worldapp:// games tab collection deep link
+        </Link>
+        <Link
+          href="worldapp://explore?collection_id=must_have_apps"
+          className="bg-green-500 text-white text-center rounded-lg p-3"
+        >
+          worldapp:// apps tab collection deep link
+        </Link>
+        <button
+          onClick={() => {
+            window.open(
+              'https://worldcoin.org/app-store/explore-tab?collection_id=top_games',
+              '_blank',
+            );
+          }}
+          className="text-white bg-green-500 hover:bg-blue-300 transition p-4 leading-[1] rounded-lg"
+        >
+          world.org Games Collection Deep Link
+        </button>
+        <button
+          onClick={() => {
+            window.open(
+              'https://worldcoin.org/app-store/explore-tab?collection_id=must_have_apps',
+              '_blank',
+            );
+          }}
+          className="text-white bg-green-500 hover:bg-blue-300 transition p-4 leading-[1] rounded-lg"
+        >
+          world.org Apps Collection Deep Link
+        </button>
         <button
           onClick={() => {
             window.open(
