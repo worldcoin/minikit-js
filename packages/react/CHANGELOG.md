@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.2
+
+### Patch Changes
+
+- a581c5d: Make hooks more consistent and prevent duplicate race conditions
+
 ## 1.9.0
 
 ### Minor Changes
