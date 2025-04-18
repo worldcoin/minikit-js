@@ -58,7 +58,7 @@
   "main": "index.ts",
   "name": "@worldcoin/minikit-js",
   "peerDependencies": {
-    "react": "^17.0.0",
+    "react": "^17 || ^18 || ^19",
     "viem": "^2.23.5"
   },
   "private": false,
@@ -80,5 +80,5 @@
       ]
     }
   },
-  "version": "1.9.0"
+  "version": "1.9.1"
 }
