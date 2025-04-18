@@ -180,7 +180,7 @@ export const verifySiweMessage = (
   requestId?: string,
   userProvider?: Client,
 ) => {
-  console.log(payload.version);
+  console.log(payload);
   return verifySiweMessageV2(
     payload,
     nonce,
