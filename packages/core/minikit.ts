@@ -459,7 +459,7 @@ export class MiniKit {
       });
 
       const walletAuthPayload = { siweMessage };
-      console.log(this.miniKitCommandVersion[Command.WalletAuth]);
+
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.WalletAuth,
         version: this.miniKitCommandVersion[Command.WalletAuth],
