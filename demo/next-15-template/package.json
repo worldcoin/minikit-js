@@ -4,7 +4,7 @@
   "homepage": "https://docs.worldcoin.org/mini-apps",
   "description": "Create a Mini App",
   "license": "MIT",
-  "private": false,
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "next dev",
