@@ -22,7 +22,7 @@ pnpm dev
 This will launch a demo mini app with all essential commands implemented, allowing you to explore and test the features.
 
 
-## 📦 Bumping Versions
+## 📦 Releasing
 
 To bump the version of the package, run:
 
