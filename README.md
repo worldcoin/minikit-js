@@ -19,8 +19,8 @@ pnpm i
 cd demo/with-next
 pnpm dev
 ```
-This will launch a demo mini app with all essential commands implemented, allowing you to explore and test the features.
 
+This will launch a demo mini app with all essential commands implemented, allowing you to explore and test the features.
 
 ## 📦 Releasing
 
