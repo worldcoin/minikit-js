@@ -21,3 +21,12 @@ pnpm dev
 ```
 
 This will launch a demo mini app with all essential commands implemented, allowing you to explore and test the features.
+
+## 📦 Installation
+
+To quick start with a template, run:
+`npx @worldcoin/create-mini-app my-first-mini-app`
+
+This will create a new directory called `my-first-mini-app` with a basic template setup.
+
+Take a look at the in the template for more information.
