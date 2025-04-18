@@ -1,0 +1,16 @@
+# Config files
+.DS_Store
+.env*
+*.log
+*.tgz
+
+# Tooling config
+*.config.js
+tsconfig.json
+.eslintrc.js
+.prettierrc.js
+
+# Node modules
+node_modules/
+
+# TODO: Improve
