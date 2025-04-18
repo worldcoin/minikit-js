@@ -9,7 +9,7 @@ import {
   type TransactionReceipt,
   type Transport,
 } from 'viem';
-import { fetchTransactionHash } from '.';
+import { fetchTransactionHash, TransactionStatus } from '.';
 import { AppConfig } from '../types/client';
 
 interface UseTransactionReceiptOptions<
@@ -60,7 +60,7 @@ export function useWaitForTransactionReceipt<
     transactionId,
     confirmations = 1,
     timeout,
-    pollingInterval = 4000,
+    pollingInterval = 1000,
   } = options;
 
   const appConfig = useMemo(() => _appConfig, [_appConfig]);
@@ -75,6 +75,9 @@ export function useWaitForTransactionReceipt<
   const [isError, setIsError] = useState<boolean>(false);
   const [error, setError] = useState<Error | undefined>(undefined);
   const [pollCount, setPollCount] = useState<number>(0);
+  const [transactionStatus, setTransactionStatus] = useState<
+    TransactionStatus | undefined
+  >(undefined);
 
   const retrigger = useCallback(() => {
     reset();
@@ -85,8 +88,11 @@ export function useWaitForTransactionReceipt<
   const reset = useCallback(() => {
     setTransactionHash(undefined);
     setReceipt(undefined);
+    setIsLoading(false);
+    setPollCount(0);
     setIsError(false);
     setError(undefined);
+    setTransactionStatus(undefined);
   }, []);
 
   const fetchStatus = useCallback(async () => {
@@ -95,31 +101,57 @@ export function useWaitForTransactionReceipt<
 
   useEffect(() => {
     if (!transactionId) {
-      setIsLoading(false);
+      reset();
       return;
     }
 
-    reset();
-    setIsLoading(true);
+    console.log(
+      '[Effect] Running for txId:',
+      transactionId,
+      'Poll count:',
+      pollCount,
+    );
 
     const abortController = new AbortController();
     const signal = abortController.signal;
     let timeoutId: NodeJS.Timeout | null = null;
 
+    const fetchReceipt = async (hashToWaitFor: `0x${string}`) => {
+      if (signal.aborted) return;
+      try {
+        const txnReceipt = await client.waitForTransactionReceipt({
+          hash: hashToWaitFor,
+          confirmations,
+          timeout,
+        });
+
+        if (signal.aborted) return;
+        setReceipt(txnReceipt);
+        setIsLoading(false);
+      } catch (err) {
+        if (signal.aborted) return;
+        setIsError(true);
+        setError(err instanceof Error ? err : new Error(String(err)));
+        setIsLoading(false);
+      }
+    };
+
     const pollHash = async () => {
       if (signal.aborted) return;
 
       try {
-        const status = await fetchStatus();
-
+        // If we already have the hash, don't poll
+        if (transactionHash) return;
         if (signal.aborted) return;
 
-        if (!status.transactionHash) {
-          timeoutId = setTimeout(pollHash, pollingInterval);
-        } else if (status.transactionHash) {
+        const status = await fetchStatus();
+        setTransactionStatus(status);
+        // If we have the hash, fetch the receipt
+        if (status.transactionHash) {
           setTransactionHash(status.transactionHash);
-          setIsLoading(false);
+          await fetchReceipt(status.transactionHash);
         } else {
+          // Otherwise, poll again
           timeoutId = setTimeout(pollHash, pollingInterval);
         }
       } catch (err) {
@@ -138,39 +170,11 @@ export function useWaitForTransactionReceipt<
         clearTimeout(timeoutId);
       }
     };
-  }, [transactionId, pollCount]);
+  }, [transactionId]);
 
-  useEffect(() => {
-    if (!transactionHash) return;
-    if (receipt) return;
-
-    const abortController = new AbortController();
-    const signal = abortController.signal;
-
-    const fetchReceipt = async () => {
-      try {
-        const txnReceipt = await client.waitForTransactionReceipt({
-          hash: transactionHash,
-          confirmations,
-          timeout,
-        });
-        if (signal.aborted) return;
-        setReceipt(txnReceipt);
-      } catch (err) {
-        if (signal.aborted) return;
-        setIsError(true);
-        setError(err instanceof Error ? err : new Error(String(err)));
-      }
-    };
-
-    fetchReceipt();
-
-    return () => {
-      abortController.abort();
-    };
-  }, [transactionHash, confirmations, timeout, client]);
-
-  const isSuccess = receipt !== undefined && receipt.status === 'success';
+  const isSuccess =
+    (receipt !== undefined && receipt.status === 'success') ||
+    transactionStatus?.transactionStatus === 'mined';
 
   return {
     transactionHash,
