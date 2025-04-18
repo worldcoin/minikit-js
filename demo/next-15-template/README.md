@@ -21,6 +21,7 @@ This starter kit uses [Mini Apps UI Kit](https://github.com/worldcoin/mini-apps-
 5. Update the `AUTH_URL` in the .env.local file
 6. Add your domain to the `allowedDevOrigins` in the next.config.ts file
 7. Continue to developer.worldcoin.org and make sure your app is connected to the right ngrok url
+8. [Optional] For Verify and Send Transaction to work you need to do some more setup in the dev portal. The steps are outlined in the respective component files.
 
 ## Eruda
 
