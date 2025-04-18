@@ -64,11 +64,14 @@ async function run(): Promise<void> {
 
   try {
     // Use degit to clone the specific template directory
-    const emitter = degit('worldcoin/minikit-js/demo/next-15-template#main', {
-      cache: false,
-      force: true,
-      verbose: false,
-    });
+    const emitter = degit(
+      'github:worldcoin/minikit-js/demo/next-15-template#main',
+      {
+        cache: false,
+        force: true,
+        verbose: false,
+      },
+    );
 
     emitter.on('info', (info) => {
       console.log(info.message);
