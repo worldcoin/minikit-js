@@ -18,13 +18,13 @@ export const ExternalLinks = () => {
           worldapp:// deep link
         </Link>
         <Link
-          href="worldapp://explore?collection_id=top_games"
+          href="worldapp://mini-app?app_id=app-store&path=explore?collection_id=top_games"
           className="bg-green-500 text-white text-center rounded-lg p-3"
         >
           worldapp:// games tab collection deep link
         </Link>
         <Link
-          href="worldapp://explore?collection_id=must_have_apps"
+          href="worldapp://mini-app?app_id=app-store&path=explore?collection_id=must_have_apps"
           className="bg-green-500 text-white text-center rounded-lg p-3"
         >
           worldapp:// apps tab collection deep link
@@ -43,7 +43,7 @@ export const ExternalLinks = () => {
         <button
           onClick={() => {
             window.open(
-              'https://worldcoin.org/app-store/explore-tab?collection_id=must_have_apps',
+              'https://worldcoin.org/app-store/explore-tab?collection_id=new_and_noteworthy',
               '_blank',
             );
           }}
