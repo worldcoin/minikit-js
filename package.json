@@ -8,9 +8,11 @@
     "format": "prettier --write .",
     "build": "turbo run build",
     "prepublishOnly": "npm run build",
-    "type-check": "pnpm --recursive type-check"
+    "type-check": "pnpm --recursive type-check",
+    "release": "turbo build && changeset publish"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.29.2",
     "prettier-plugin-organize-imports": "^4.1.0",
     "turbo": "^2.3.3"
   },

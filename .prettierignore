@@ -8,3 +8,4 @@ node_modules/**
 **/.turbo/**
 packages/core/package.json 
 .github/**
+packages/create-world-mini-app/dist/index.js

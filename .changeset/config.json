@@ -1,0 +1,11 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
+  "access": "public",
+  "baseBranch": "main",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [],
+  "ignore": ["minikit-monorepo-demo-with-next", "@worldcoin/next-15-template"],
+  "linked": [],
+  "updateInternalDependencies": "patch"
+}

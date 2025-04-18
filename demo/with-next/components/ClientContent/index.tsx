@@ -17,7 +17,6 @@ import { Pay } from './Pay';
 import { RequestPermission } from './RequestPermissions';
 import { SearchParams } from './SearchParams';
 import { SendHapticFeedback } from './SendHaptic';
-import { ShareFiles } from './Share';
 import { ShareContacts } from './ShareContacts';
 import { SignMessage } from './SignMessage';
 import { SignTypedData } from './SignTypedMessage';
@@ -136,7 +135,7 @@ export const ClientContent = () => {
           <hr />
           <SendHapticFeedback />
           <hr />
-          <ShareFiles />
+          {/* <ShareFiles /> */}
           <hr />
           <input className="text-xs border-black border-2" />
           <ExternalLinks />
