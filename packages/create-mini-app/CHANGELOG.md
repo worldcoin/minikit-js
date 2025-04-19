@@ -1,5 +1,11 @@
 # @worldcoin/create-mini-app
 
+## 0.4.0
+
+### Minor Changes
+
+- b239460: fix npx auth secret
+
 ## 0.3.0
 
 ### Minor Changes
