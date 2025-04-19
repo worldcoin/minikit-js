@@ -180,32 +180,24 @@ export const verifySiweMessage = (
   requestId?: string,
   userProvider?: Client,
 ) => {
-  console.log(payload);
-  return verifySiweMessageV2(
-    payload,
-    nonce,
-    statement,
-    requestId,
-    userProvider,
-  );
-  // if (payload.version === 2) {
-  //   return verifySiweMessageV2(
-  //     payload,
-  //     nonce,
-  //     statement,
-  //     requestId,
-  //     userProvider,
-  //   );
-  // } else {
-  //   console.log('bad');
-  //   return verifySiweMessageV1(
-  //     payload,
-  //     nonce,
-  //     statement,
-  //     requestId,
-  //     userProvider,
-  //   );
-  // }
+  if (payload.version === 2) {
+    return verifySiweMessageV2(
+      payload,
+      nonce,
+      statement,
+      requestId,
+      userProvider,
+    );
+  } else {
+    console.log('bad');
+    return verifySiweMessageV1(
+      payload,
+      nonce,
+      statement,
+      requestId,
+      userProvider,
+    );
+  }
 };
 
 const validateMessage = (
