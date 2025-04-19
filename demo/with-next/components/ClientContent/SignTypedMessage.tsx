@@ -262,8 +262,11 @@ export const SignTypedData = () => {
     setTempInstallFix((prev) => prev + 1);
   }, []);
 
-  const signBenignPayload = () => {
-    const payload = MiniKit.commands.signTypedData(benignPayload);
+  const signBenignPayload = (chainId?: number) => {
+    const payload = MiniKit.commands.signTypedData({
+      ...benignPayload,
+      chainId,
+    });
     setSentSignTypedDataPayload({
       payload,
     });
@@ -285,9 +288,15 @@ export const SignTypedData = () => {
         <div className="grid grid-cols-2 gap-x-3">
           <button
             className="bg-black text-white rounded-lg p-4 w-full"
-            onClick={signBenignPayload}
+            onClick={() => signBenignPayload()}
           >
-            Sign Benign Payload
+            Sign Benign Payload (Worldchain)
+          </button>
+          <button
+            className="bg-black text-white rounded-lg p-4 w-full"
+            onClick={() => signBenignPayload(8453)}
+          >
+            Sign Benign Payload (Base)
           </button>
         </div>
 
