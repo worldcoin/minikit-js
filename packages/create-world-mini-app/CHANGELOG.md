@@ -1,5 +1,11 @@
 # @worldcoin/create-mini-app
 
+## 0.3.0
+
+### Minor Changes
+
+- 5248854: allow asking for auth from the get go
+
 ## 0.2.0
 
 ### Minor Changes
