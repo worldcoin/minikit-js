@@ -1,6 +1,6 @@
 {
   "name": "@worldcoin/create-mini-app",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Create a new World Mini App project based on the Next.js 15 template.",
   "license": "MIT",
   "private": false,
