@@ -11,10 +11,10 @@ This template is a way for you to quickly get started with authentication and ex
 3. Run `npm run dev`
 4. Run `ngrok http 3000`
 5. Run `npx auth secret` to update the `AUTH_SECRET` in the .env.local file
-7. Add your domain to the `allowedDevOrigins` in the next.config.ts file.
-8. [For Testing] If you're using a proxy like ngrok, you need to update the `AUTH_URL` in the .env.local file to your ngrok url.
-9. Continue to developer.worldcoin.org and make sure your app is connected to the right ngrok url
-10. [Optional] For Verify and Send Transaction to work you need to do some more setup in the dev portal. The steps are outlined in the respective component files.
+6. Add your domain to the `allowedDevOrigins` in the next.config.ts file.
+7. [For Testing] If you're using a proxy like ngrok, you need to update the `AUTH_URL` in the .env.local file to your ngrok url.
+8. Continue to developer.worldcoin.org and make sure your app is connected to the right ngrok url
+9. [Optional] For Verify and Send Transaction to work you need to do some more setup in the dev portal. The steps are outlined in the respective component files.
 
 ## Authentication
 
@@ -23,7 +23,6 @@ This starter kit uses [Minikit's](https://github.com/worldcoin/minikit-js) walle
 ## UI Library
 
 This starter kit uses [Mini Apps UI Kit](https://github.com/worldcoin/mini-apps-ui-kit-react) to style the app. We recommend using the UI kit to make sure you are compliant with [World App's design system](https://docs.world.org/mini-apps/design/app-guidelines).
-
 
 ## Eruda
 
