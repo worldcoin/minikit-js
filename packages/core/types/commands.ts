@@ -94,6 +94,7 @@ export type SignTypedDataInput = {
   primaryType: string;
   message: Record<string, unknown>;
   domain?: TypedDataDomain;
+  chainId?: number;
 };
 
 export type SignTypedDataPayload = SignTypedDataInput;
