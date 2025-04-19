@@ -13,6 +13,7 @@ npx create-world-mini-app
 - `-i, --install`: Install dependencies after cloning the template.
 - `--no-install`: Do not install dependencies after cloning the template.
 - `-p, --project-name`: The name of the project.
+- `-a, --auth`: Run `npx auth` to set up next-auth.
 
 ## License
 
