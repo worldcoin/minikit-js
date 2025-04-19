@@ -189,7 +189,6 @@ export const verifySiweMessage = (
       userProvider,
     );
   } else {
-    console.log('bad');
     return verifySiweMessageV1(
       payload,
       nonce,
