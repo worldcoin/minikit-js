@@ -529,6 +529,11 @@ export class MiniKit {
         return null;
       }
 
+      // If no chainId is provided, use Worldchain
+      if (!payload.chainId) {
+        payload.chainId = 480;
+      }
+
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.SignTypedData,
         version: this.miniKitCommandVersion[Command.SignTypedData],

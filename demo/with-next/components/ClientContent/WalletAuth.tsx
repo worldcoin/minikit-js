@@ -3,6 +3,7 @@ import {
   ResponseEvent,
   User,
   WalletAuthErrorCodes,
+  WalletAuthPayload,
 } from '@worldcoin/minikit-js';
 import Image from 'next/image';
 import { useCallback, useEffect, useState } from 'react';
@@ -30,7 +31,7 @@ Note: This is not a secure implementation of Wallet Auth.
 It is only for demo purposes.
 */
 export const WalletAuth = () => {
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<WalletAuthPayload | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [nonce, setNonce] = useState<string | null>(null);
   const [receivedWalletAuthPayload, setReceivedWalletAuthPayload] =
@@ -151,7 +152,7 @@ export const WalletAuth = () => {
       return setGenerationError('Failed to generate message');
     }
 
-    return setMessage(generateMessageResult.siweMessage);
+    return setMessage(generateMessageResult);
   }, []);
 
   return (
@@ -163,18 +164,8 @@ export const WalletAuth = () => {
 
         <div className="bg-gray-300 min-h-[100px] p-2">
           <pre className="break-all whitespace-pre-line">
-            {(message ? JSON.stringify(message) : generationError) ??
+            {(message ? JSON.stringify(message, null, 2) : generationError) ??
               JSON.stringify(null)}
-          </pre>
-        </div>
-      </div>
-
-      <div className="grid gap-y-1">
-        <p>Beautified string:</p>
-
-        <div className="bg-gray-300 min-h-[100px] p-2">
-          <pre className="break-all whitespace-break-spaces">
-            {message ?? generationError ?? JSON.stringify(null)}
           </pre>
         </div>
       </div>
