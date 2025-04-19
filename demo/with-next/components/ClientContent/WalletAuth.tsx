@@ -83,7 +83,7 @@ export const WalletAuth = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            siweResponsePayload: payload,
+            payload,
             nonce,
           }),
         });
