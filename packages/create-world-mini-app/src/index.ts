@@ -11,6 +11,7 @@ const program = new Command();
 interface CLIOptions {
   projectName?: string;
   install: boolean;
+  auth: boolean;
 }
 
 async function run(): Promise<void> {
@@ -20,6 +21,7 @@ async function run(): Promise<void> {
     .argument('[project-name]', 'The name for the new project directory')
     .option('-i, --install', 'Install dependencies after cloning', true)
     .option('--no-install', 'Do not install dependencies after cloning')
+    .option('-a, --auth', 'Runs npx auth to set up next-auth', true)
     .parse(process.argv);
 
   const options = program.opts<CLIOptions>();
@@ -101,6 +103,21 @@ async function run(): Promise<void> {
         );
         console.log(chalk.cyan(`  cd ${projectName}`));
         console.log(chalk.cyan('  npm install'));
+      }
+    }
+
+    if (options.auth) {
+      try {
+        console.log('Setting up next-auth...');
+        await execa('npx', ['auth'], { cwd: targetDir, stdio: 'inherit' });
+        console.log(chalk.green('next-auth setup successfully!'));
+      } catch (error) {
+        console.error(
+          chalk.yellow(
+            'Failed to setup next-auth, install will continue, you will need to run npx auth after install',
+          ),
+          error,
+        );
       }
     }
 
