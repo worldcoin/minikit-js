@@ -5,7 +5,7 @@ Create a new World Mini App project based on the Next.js 15 template.
 ## Usage
 
 ```bash
-npx create-world-mini-app
+npx @worldcoin/create-mini-app my-mini-app -a
 ```
 
 ## Options
