@@ -16,7 +16,7 @@ interface CLIOptions {
 
 async function run(): Promise<void> {
   program
-    .name('create-world-mini-app')
+    .name('create-mini-app')
     .description('Bootstrap a new Worldcoin Mini App project.')
     .argument('[project-name]', 'The name for the new project directory')
     .option('-i, --install', 'Install dependencies after cloning', true)

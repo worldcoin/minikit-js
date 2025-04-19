@@ -6,7 +6,7 @@
   "private": false,
   "type": "module",
   "bin": {
-    "create-world-mini-app": "./dist/index.js"
+    "create-mini-app": "./dist/index.js"
   },
   "engines": {
     "node": ">=18"
