@@ -460,9 +460,15 @@ export class MiniKit {
 
       const walletAuthPayload = { siweMessage };
 
+      // Wallet auth version 2 is only available for world app version 2087900 and above
+      const walletAuthVersion =
+        MiniKit.user.worldAppVersion && MiniKit.user.worldAppVersion > 2087900
+          ? this.miniKitCommandVersion[Command.WalletAuth]
+          : 1;
+
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.WalletAuth,
-        version: this.miniKitCommandVersion[Command.WalletAuth],
+        version: walletAuthVersion,
         payload: walletAuthPayload,
       });
 
