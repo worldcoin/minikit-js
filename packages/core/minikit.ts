@@ -37,6 +37,7 @@ import {
 } from 'types/errors';
 import { Network } from 'types/payment';
 import { sendWebviewEvent } from './helpers/send-webview-event';
+import { DeviceProperties, User, UserNameService } from './types/init';
 import {
   EventHandler,
   EventPayload,
@@ -52,7 +53,6 @@ import {
   MiniAppWalletAuthPayload,
   ResponseEvent,
 } from './types/responses';
-import { User, UserNameService } from './types/user';
 
 export const sendMiniKitEvent = <
   T extends WebViewBasePayload = WebViewBasePayload,
@@ -110,7 +110,7 @@ export class MiniKit {
   public static appId: string | null = null;
   public static user: User = {};
   private static isReady: boolean = false;
-
+  public static deviceProperties: DeviceProperties = {};
   private static sendInit() {
     sendWebviewEvent({
       command: 'init',
@@ -272,9 +272,7 @@ export class MiniKit {
     MiniKit.user.deviceOS = window.WorldApp.device_os;
     MiniKit.user.worldAppVersion = window.WorldApp.world_app_version;
 
-    // TODO: Set device properties
-    // MiniKit.deviceProperties.safeAreaInsets = window.WorldApp.safe_area_insets;
-
+    MiniKit.deviceProperties.safeAreaInsets = window.WorldApp.safe_area_insets;
     try {
       window.MiniKit = MiniKit;
       this.sendInit();
