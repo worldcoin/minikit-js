@@ -79,6 +79,7 @@ export type MiniKitInstallReturnType =
 export type SendTransactionInput = {
   transaction: Transaction[];
   permit2?: Permit2[]; // Optional
+  formatPayload?: boolean; // Optional - If true, the payload will be formatted using objectvalues. Defaults to true if omitted.
 };
 
 export type SendTransactionPayload = SendTransactionInput;

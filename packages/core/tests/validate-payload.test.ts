@@ -1,4 +1,7 @@
-import { validateSendTransactionPayload } from '../helpers/transaction/validate-payload';
+import {
+  objectValuesToArrayRecursive,
+  validateSendTransactionPayload,
+} from '../helpers/transaction/validate-payload';
 const ABI = [
   {
     inputs: [
@@ -222,5 +225,93 @@ describe('validateSendTransactionPayload', () => {
     expect(validateSendTransactionPayload(payload)).toMatchObject(
       formattedPayload,
     );
+  });
+});
+
+describe('objectValuesToArrayRecursive', () => {
+  it('should convert object values to array', () => {
+    const payload = {
+      a: 1,
+      b: { c: 2, d: [3, 4] },
+    };
+    expect(objectValuesToArrayRecursive(payload)).toEqual([1, [2, [3, 4]]]);
+  });
+
+  it('should convert complex values to array', () => {
+    const payload = {
+      configName: 'Main Config',
+      settings: {
+        isEnabled: true,
+        threshold: 0.75,
+        features: {
+          featureA: 'active',
+          featureB: 'inactive',
+        },
+      },
+      dataPoints: [10, 20, { pointId: 'p3', value: 30 }],
+      adminContact: null,
+    };
+    expect(objectValuesToArrayRecursive(payload)).toEqual([
+      'Main Config',
+      [true, 0.75, ['active', 'inactive']],
+      [10, 20, ['p3', 30]],
+      null,
+    ]);
+  });
+
+  it('should convert complex array to array', () => {
+    const payload = [
+      [2, 3],
+      {
+        configName: 'Main Config',
+        settings: {
+          isEnabled: true,
+          threshold: 0.75,
+          features: {
+            featureA: 'active',
+            featureB: 'inactive',
+          },
+        },
+        dataPoints: [10, 20, { pointId: 'p3', value: 30 }],
+        adminContact: null,
+      },
+    ];
+    expect(objectValuesToArrayRecursive(payload)).toEqual([
+      [2, 3],
+      [
+        'Main Config',
+        [true, 0.75, ['active', 'inactive']],
+        [10, 20, ['p3', 30]],
+        null,
+      ],
+    ]);
+  });
+
+  it('should convert complex array with an array to array', () => {
+    const payload = [
+      [2, 3],
+      {
+        configName: 'Main Config',
+        settings: {
+          isEnabled: true,
+          threshold: 0.75,
+          features: {
+            featureA: 'active',
+            featureB: 'inactive',
+          },
+        },
+        dataPoints: [10, 20, { pointId: ['p3', 'p4'], value: 30 }],
+        adminContact: null,
+      },
+    ];
+    expect(objectValuesToArrayRecursive(payload)).toEqual([
+      [2, 3],
+      [
+        'Main Config',
+        [true, 0.75, ['active', 'inactive']],
+        [10, 20, [['p3', 'p4'], 30]],
+        null,
+      ],
+    ]);
   });
 });
