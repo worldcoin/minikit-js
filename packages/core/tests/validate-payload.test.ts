@@ -239,6 +239,18 @@ describe('validateSendTransactionPayload', () => {
           args: [true, { amount: '1000000000000000000', token: ['0x789'] }], // boolean instead of string
           abi: [],
         },
+        {
+          address: '0x123',
+          functionName: 'transfer',
+          args: [
+            true,
+            {
+              address: '0x456',
+              asset: { amount: '1000000000000000000', token: '0x789' },
+            },
+          ], // boolean instead of string
+          abi: [],
+        },
       ],
       permit2: [
         {
@@ -259,6 +271,15 @@ describe('validateSendTransactionPayload', () => {
           address: '0x123',
           functionName: 'transfer',
           args: [true, ['1000000000000000000', ['0x789']]], // boolean instead of string
+          abi: [],
+        },
+        {
+          address: '0x123',
+          functionName: 'transfer',
+          args: [
+            true,
+            ['0x456', ['1000000000000000000', '0x789']], // boolean instead of string
+          ],
           abi: [],
         },
       ],
