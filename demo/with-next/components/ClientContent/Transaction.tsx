@@ -417,7 +417,7 @@ export const SendTransaction = () => {
           {
             address: mainContract,
             abi: MinikitStaging,
-            functionName: 'intentionallyRevert',
+            functionName: 'intentionalRevert',
             args: [],
           },
         ],
