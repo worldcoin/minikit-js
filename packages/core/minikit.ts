@@ -52,7 +52,7 @@ import {
   MiniAppWalletAuthPayload,
   ResponseEvent,
 } from './types/responses';
-import { DeviceProperties, User, UserNameService } from './types/user';
+import { User, UserNameService } from './types/user';
 
 export const sendMiniKitEvent = <
   T extends WebViewBasePayload = WebViewBasePayload,
@@ -110,7 +110,6 @@ export class MiniKit {
   public static appId: string | null = null;
   public static user: User = {};
   private static isReady: boolean = false;
-  public static deviceProperties: DeviceProperties = {};
 
   private static sendInit() {
     sendWebviewEvent({
