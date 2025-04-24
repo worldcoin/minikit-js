@@ -94,8 +94,15 @@ export const validateSendTransactionPayload = (
   payload: SendTransactionInput,
 ): SendTransactionInput => {
   if (payload.formatPayload) {
-    const formattedPayload = objectValuesToArrayRecursive(payload);
-    return processPayload(formattedPayload);
+    const formattedPayload = processPayload(payload);
+    formattedPayload.transaction = formattedPayload.transaction.map((tx) => {
+      const args = objectValuesToArrayRecursive(tx.args);
+      return {
+        ...tx,
+        args,
+      };
+    });
+    return formattedPayload;
   }
 
   return payload;

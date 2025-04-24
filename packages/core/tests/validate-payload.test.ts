@@ -76,6 +76,7 @@ describe('validateSendTransactionPayload', () => {
           args: ['0x456', [1000000000000000000, '1', [true]]],
         },
       ],
+      formatPayload: true,
     };
 
     const formattedPayload = {
@@ -137,6 +138,7 @@ describe('validateSendTransactionPayload', () => {
           abi: ABI,
         },
       ],
+      formatPayload: true,
     };
     const formattedPayload = {
       transaction: [
@@ -163,6 +165,7 @@ describe('validateSendTransactionPayload', () => {
           abi: [],
         },
       ],
+      formatPayload: true,
     };
     const formattedPayload = {
       transaction: [
@@ -200,6 +203,7 @@ describe('validateSendTransactionPayload', () => {
           deadline: '1234567890',
         },
       ],
+      formatPayload: true,
     };
     const formattedPayload = {
       transaction: [
@@ -207,6 +211,54 @@ describe('validateSendTransactionPayload', () => {
           address: '0x123',
           functionName: 'transfer',
           args: [true, '1000000000000000000'], // boolean instead of string
+          abi: [],
+        },
+      ],
+      permit2: [
+        {
+          permitted: {
+            token: '0x789',
+            amount: '1000000000000000000',
+          },
+          spender: '0xabc',
+          nonce: '1',
+          deadline: '1234567890',
+        },
+      ],
+    };
+    expect(validateSendTransactionPayload(payload)).toMatchObject(
+      formattedPayload,
+    );
+  });
+  it('should handle both strings and numbers', () => {
+    const payload = {
+      transaction: [
+        {
+          address: '0x123',
+          functionName: 'transfer',
+          args: [true, { amount: '1000000000000000000', token: ['0x789'] }], // boolean instead of string
+          abi: [],
+        },
+      ],
+      permit2: [
+        {
+          permitted: {
+            token: '0x789',
+            amount: BigInt('1000000000000000000'),
+          },
+          spender: '0xabc',
+          nonce: '1',
+          deadline: '1234567890',
+        },
+      ],
+      formatPayload: true,
+    };
+    const formattedPayload = {
+      transaction: [
+        {
+          address: '0x123',
+          functionName: 'transfer',
+          args: [true, ['1000000000000000000', ['0x789']]], // boolean instead of string
           abi: [],
         },
       ],
