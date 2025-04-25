@@ -19,7 +19,10 @@ export const authOptions: NextAuthConfig = {
       authorization: { params: { scope: 'openid' } },
       clientId: process.env.WLD_CLIENT_ID,
       clientSecret: process.env.WLD_CLIENT_SECRET,
-      issuer: 'https://id.worldcoin.org',
+      issuer:
+        process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging'
+          ? 'https://staging.id.worldcoin.org'
+          : 'https://id.worldcoin.org',
       checks: ['state', 'pkce'],
       profile(profile) {
         return {
