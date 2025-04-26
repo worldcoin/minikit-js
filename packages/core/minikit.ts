@@ -68,7 +68,7 @@ export class MiniKit {
   private static readonly miniKitCommandVersion: Record<Command, number> = {
     [Command.Verify]: 1,
     [Command.Pay]: 1,
-    [Command.WalletAuth]: 1,
+    [Command.WalletAuth]: 2,
     [Command.SendTransaction]: 1,
     [Command.SignMessage]: 1,
     [Command.SignTypedData]: 1,
@@ -272,6 +272,9 @@ export class MiniKit {
     MiniKit.user.deviceOS = window.WorldApp.device_os;
     MiniKit.user.worldAppVersion = window.WorldApp.world_app_version;
 
+    // TODO: Set device properties
+    // MiniKit.deviceProperties.safeAreaInsets = window.WorldApp.safe_area_insets;
+
     try {
       window.MiniKit = MiniKit;
       this.sendInit();
@@ -460,9 +463,15 @@ export class MiniKit {
 
       const walletAuthPayload = { siweMessage };
 
+      // Wallet auth version 2 is only available for world app version 2087900 and above
+      const walletAuthVersion =
+        MiniKit.user.worldAppVersion && MiniKit.user.worldAppVersion > 2087900
+          ? this.miniKitCommandVersion[Command.WalletAuth]
+          : 1;
+
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.WalletAuth,
-        version: this.miniKitCommandVersion[Command.WalletAuth],
+        version: walletAuthVersion,
         payload: walletAuthPayload,
       });
 
@@ -483,6 +492,8 @@ export class MiniKit {
         return null;
       }
 
+      // Default to formatting the payload
+      payload.formatPayload = payload.formatPayload !== false;
       const validatedPayload = validateSendTransactionPayload(payload);
 
       sendMiniKitEvent<WebViewBasePayload>({
@@ -527,6 +538,11 @@ export class MiniKit {
         );
 
         return null;
+      }
+
+      // If no chainId is provided, use Worldchain
+      if (!payload.chainId) {
+        payload.chainId = 480;
       }
 
       sendMiniKitEvent<WebViewBasePayload>({

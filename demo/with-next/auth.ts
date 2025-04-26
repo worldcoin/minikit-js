@@ -11,16 +11,15 @@ export const authOptions: NextAuthConfig = {
     {
       id: 'worldcoin',
       name: 'Worldcoin',
-      type: 'oauth',
-      wellKnown:
-        process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging'
-          ? 'https://staging.id.worldcoin.org/.well-known/openid-configuration'
-          : 'https://id.worldcoin.org/.well-known/openid-configuration',
+      type: 'oidc',
       authorization: { params: { scope: 'openid' } },
       clientId: process.env.WLD_CLIENT_ID,
       clientSecret: process.env.WLD_CLIENT_SECRET,
-      issuer: 'https://id.worldcoin.org',
-      checks: ['state', 'pkce'],
+      issuer:
+        process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging'
+          ? 'https://staging.id.worldcoin.org'
+          : 'https://id.worldcoin.org',
+      checks: ['state', 'pkce', 'nonce'],
       profile(profile) {
         return {
           id: profile.sub,
