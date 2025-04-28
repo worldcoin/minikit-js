@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.2
+
+### Patch Changes
+
+- 0af5f97: update to use new auth
+
 ## 1.9.0
 
 ### Minor Changes
