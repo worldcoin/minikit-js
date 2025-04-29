@@ -1,4 +1,6 @@
+import { JsonRpcProvider } from 'ethers';
 import { parseSiweMessage, verifySiweMessage } from 'helpers/siwe/siwe';
+import { SiweMessage } from 'siwe';
 import { MiniAppWalletAuthSuccessPayload } from 'types/responses';
 import { createPublicClient, http } from 'viem';
 import { worldchain } from 'viem/chains';
@@ -112,6 +114,25 @@ describe('Test SIWE Message Verification', () => {
 
     expect(result.isValid).toBe(true);
     expect(result.siweMessageData).toBeDefined();
+  });
+
+  it('should validate SIWE using SIWE', async () => {
+    const m = new SiweMessage(signedMessagePayload);
+    const provider = new JsonRpcProvider(
+      'https://worldchain-mainnet.g.alchemy.com/public',
+    );
+
+    const isValid = await m.verify(
+      {
+        signature,
+        nonce: '12345678',
+        // @ts-ignore
+      },
+      // @ts-ignore
+      { provider: provider },
+    );
+
+    expect(isValid.success).toBe(true);
   });
 
   test('Verify SIWE Message with invalid signature', async () => {
