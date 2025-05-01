@@ -22,7 +22,7 @@ This starter kit uses [Minikit's](https://github.com/worldcoin/minikit-js) walle
 
 ## UI Library
 
-This starter kit uses [Mini Apps UI Kit](https://github.com/worldcoin/mini-apps-ui-kit-react) to style the app. We recommend using the UI kit to make sure you are compliant with [World App's design system](https://docs.world.org/mini-apps/design/app-guidelines).
+This starter kit uses [Mini Apps UI Kit](https://github.com/worldcoin/mini-apps-ui-kit) to style the app. We recommend using the UI kit to make sure you are compliant with [World App's design system](https://docs.world.org/mini-apps/design/app-guidelines).
 
 ## Eruda
 
