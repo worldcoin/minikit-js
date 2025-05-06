@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.3
+
+### Patch Changes
+
+- fd4acdc: update warning for install
+
 ## 1.9.2
 
 ### Patch Changes
