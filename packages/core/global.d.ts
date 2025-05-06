@@ -21,5 +21,11 @@ interface Window {
       name: import('./types/commands').Command;
       supported_versions: Array<number>;
     }>;
+    safe_area_insets: {
+      top: number;
+      right: number;
+      bottom: number;
+      left: number;
+    };
   };
 }
