@@ -293,6 +293,8 @@ export class MiniKit {
     }
 
     // If commands are missing we will install minikit regardless
+    MiniKit.isReady = true;
+
     if (!this.commandsValid(window.WorldApp.supported_commands)) {
       return {
         success: false,
@@ -302,7 +304,6 @@ export class MiniKit {
       };
     }
 
-    MiniKit.isReady = true;
     return { success: true };
   }
 
