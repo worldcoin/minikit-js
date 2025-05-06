@@ -217,7 +217,7 @@ export class MiniKit {
         );
         let isCommandValid = false;
         if (!commandInput) {
-          console.error(
+          console.warn(
             `Command ${minikitCommandName} is not supported by the app. Try updating the app version`,
           );
         } else {
@@ -225,8 +225,8 @@ export class MiniKit {
             MiniKit.isCommandAvailable[minikitCommandName] = true;
             isCommandValid = true;
           } else {
-            console.error(
-              `Command ${minikitCommandName} version ${version} is not supported by the app. Supported versions: ${commandInput.supported_versions.join(', ')}`,
+            console.warn(
+              `Command ${minikitCommandName} version ${version} is not supported by the app. Supported versions: ${commandInput.supported_versions.join(', ')}. This is not an error, but it is recommended to update the World App version.`,
             );
             MiniKit.isCommandAvailable[minikitCommandName] = isCommandValid;
           }
