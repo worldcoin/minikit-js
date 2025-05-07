@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.4
+
+### Patch Changes
+
+- 90d7027: fix versioning issues blocking wallet-auth
+
 ## 1.9.3
 
 ### Patch Changes
