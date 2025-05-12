@@ -97,8 +97,8 @@ export const Share = () => {
             onClick={async () => {
               try {
                 const imageFile = await createFileFromUrl(
-                  'https://world-id-assets.com/app_a4f7f3e62c1de0b9490a5260cb390b56/9185e1fd-c902-4799-aacb-973ef290fe56.jpg',
-                  'uno.jpg',
+                  '/800.jpeg',
+                  '800.jpeg',
                   'image/jpeg',
                 );
                 console.log('imageFile', imageFile);
@@ -120,26 +120,13 @@ export const Share = () => {
             onClick={async () => {
               try {
                 const filesToShare = await Promise.all([
-                  createFileFromUrl(
-                    'https://world-id-assets.com/app_a4f7f3e62c1de0b9490a5260cb390b56/9185e1fd-c902-4799-aacb-973ef290fe56.jpg',
-                    'uno.jpg',
-                    'image/jpeg',
-                  ),
-                  createFileFromUrl(
-                    'https://world-id-assets.com/app_a4f7f3e62c1de0b9490a5260cb390b56/2470d701-2094-4bbb-92c2-335e9998a286.jpg',
-                    'dos.jpg',
-                    'image/jpeg',
-                  ),
-                  createFileFromUrl(
-                    'https://world-id-assets.com/app_a4f7f3e62c1de0b9490a5260cb390b56/4424dc1e-8905-46b6-a55d-5f6b89f69f63.jpg',
-                    'tres.jpg',
-                    'image/jpeg',
-                  ),
+                  createFileFromUrl('/marble.png', 'marble.png', 'image/png'),
+                  createFileFromUrl('/test.png', 'test.png', 'image/png'),
                 ]);
                 onSendShareFiles({
                   files: filesToShare,
-                  title: 'Share three JPGs',
-                  text: 'Share three JPGs',
+                  title: 'Share two PNGs',
+                  text: 'Share two PNGs',
                 });
               } catch (error) {
                 console.error('Error sharing three JPGs:', error);
@@ -155,16 +142,8 @@ export const Share = () => {
             onClick={async () => {
               try {
                 const filesToShare = await Promise.all([
-                  createFileFromUrl(
-                    'https://world-id-assets.com/app_a4f7f3e62c1de0b9490a5260cb390b56/9185e1fd-c902-4799-aacb-973ef290fe56.jpg',
-                    'uno.jpg',
-                    'image/jpeg',
-                  ),
-                  createFileFromUrl(
-                    'https://world-id-assets.com/app_a4f7f3e62c1de0b9490a5260cb390b56/65b641e9-8a56-4920-b01c-5c5ae4dbc159.png',
-                    'tres.png',
-                    'image/png',
-                  ),
+                  createFileFromUrl('/800.jpeg', '800.jpeg', 'image/jpeg'),
+                  createFileFromUrl('/test.png', 'test.png', 'image/png'),
                 ]);
                 onSendShareFiles({
                   files: filesToShare,
@@ -183,13 +162,9 @@ export const Share = () => {
             onClick={async () => {
               try {
                 const filesToShare = await Promise.all([
+                  createFileFromUrl('/800.jpeg', '800.jpeg', 'image/jpeg'),
                   createFileFromUrl(
-                    'https://world-id-assets.com/app_a4f7f3e62c1de0b9490a5260cb390b56/9185e1fd-c902-4799-aacb-973ef290fe56.jpg',
-                    'uno.jpg',
-                    'image/jpeg',
-                  ),
-                  createFileFromUrl(
-                    'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+                    '/dummy.pdf',
                     'dummy.pdf',
                     'application/pdf',
                   ),
@@ -204,38 +179,10 @@ export const Share = () => {
               }
             }}
           >
-            JPG + PDF (image/*)
+            JPG + PDF
           </button>
         </div>
         <div className="grid grid-cols-2 gap-2">
-          <button
-            className="bg-black text-white rounded-lg p-4 w-full"
-            onClick={async () => {
-              try {
-                const filesToShare = await Promise.all([
-                  createFileFromUrl(
-                    'https://world-id-assets.com/app_a4f7f3e62c1de0b9490a5260cb390b56/9185e1fd-c902-4799-aacb-973ef290fe56.jpg',
-                    'uno.jpg',
-                    'image/jpeg',
-                  ),
-                  createFileFromUrl(
-                    'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-                    'dummy.pdf',
-                    'application/pdf',
-                  ),
-                ]);
-                onSendShareFiles({
-                  files: filesToShare,
-                  title: 'Share JPG + PDF',
-                  text: 'Share JPG + PDF (intended as */*, types set individually)',
-                });
-              } catch (error) {
-                console.error('Error sharing JPG + PDF (*/*):', error);
-              }
-            }}
-          >
-            JPG + PDF (*/*)
-          </button>
           <button
             className="bg-black text-white rounded-lg p-4 w-full"
             onClick={async () => {
@@ -252,8 +199,6 @@ export const Share = () => {
           >
             URL with title and text
           </button>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
           <button
             className="bg-black text-white rounded-lg p-4 w-full"
             onClick={async () => {
