@@ -22,6 +22,10 @@ const processFile = async (
 export const formatShareInput = async (
   input: ShareInput,
 ): Promise<SharePayload> => {
+  if (!input.files) {
+    throw new Error('No files provided');
+  }
+
   if (input.files.length === 0) {
     // Handle case with no files, if navigator.share allows title/text/url sharing without files
     // Or throw an error if files are always required by your use case
