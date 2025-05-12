@@ -83,8 +83,7 @@ export const Share = () => {
   return (
     <div>
       <div className="grid gap-y-2">
-        <h2 className="text-2xl font-bold">Share Files</h2>
-
+        <h2 className="text-2xl font-bold">Share</h2>
         <div>
           <div className="bg-gray-300 min-h-[100px] p-2">
             <pre className="break-all whitespace-break-spaces max-h-[250px] overflow-y-scroll ">
