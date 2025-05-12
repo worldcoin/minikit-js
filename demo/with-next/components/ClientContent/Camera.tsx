@@ -14,6 +14,15 @@ export const CameraComponent = () => {
     },
     [],
   );
+  const endRecording = useCallback(() => {
+    const gum = navigator.mediaDevices.getUserMedia.bind(
+      navigator.mediaDevices,
+    );
+    if (window.__activeStream) {
+      window.__activeStream.getTracks().forEach((t) => t.stop());
+      window.__activeStream = undefined;
+    }
+  }, []);
 
   const playSound = useCallback(() => {
     const audio = new Audio('/money.mp3');
@@ -113,6 +122,14 @@ export const CameraComponent = () => {
           onClick={handleMicAccess}
         >
           {isMicOn ? 'Stop microphone' : 'Activate microphone'}
+        </button>
+      </label>
+      <label className="items-center justify-center rounded-lg bg-2f2b43/5 hover:bg-2f2b43/10">
+        <button
+          className="grid justify-items-center bg-green-500 p-4 rounded-lg text-white w-full"
+          onClick={endRecording}
+        >
+          Stop Mic
         </button>
       </label>
       <label className="items-center justify-center rounded-lg bg-2f2b43/5 hover:bg-2f2b43/10">

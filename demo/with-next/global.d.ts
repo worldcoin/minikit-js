@@ -6,7 +6,7 @@ interface Window {
       };
     };
   };
-
+  __activeStream?: MediaStream;
   Android?: {
     postMessage?: (payload: string) => void;
   };
