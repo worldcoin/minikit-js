@@ -34,7 +34,7 @@ const sendHapticFeedbackErrorPayloadSchema = yup.object({
   version: yup.number().required(),
 });
 
-export const ShareFiles = () => {
+export const Share = () => {
   const [sentShareFilesPayload, setSentShareFilesPayload] = useState<Record<
     string,
     any
