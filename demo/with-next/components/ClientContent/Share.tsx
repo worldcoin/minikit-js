@@ -133,7 +133,7 @@ export const Share = () => {
               }
             }}
           >
-            Three JPGs
+            Two PNGs
           </button>
         </div>
         <div className="grid grid-cols-2 gap-2">
@@ -148,14 +148,14 @@ export const Share = () => {
                 onSendShareFiles({
                   files: filesToShare,
                   title: 'Share JPG + PNG',
-                  text: 'Share JPG + PNG (intended as image/*, types set individually)',
+                  text: 'Share JPG + PNG ',
                 });
               } catch (error) {
                 console.error('Error sharing JPG + PNG:', error);
               }
             }}
           >
-            JPG + PNG (image/*)
+            JPG + PNG
           </button>
           <button
             className="bg-black text-white rounded-lg p-4 w-full"
@@ -172,7 +172,7 @@ export const Share = () => {
                 onSendShareFiles({
                   files: filesToShare,
                   title: 'Share JPG + PDF',
-                  text: 'Share JPG + PDF (intended as image/*, types set individually)',
+                  text: 'Share JPG + PDF ',
                 });
               } catch (error) {
                 console.error('Error sharing JPG + PDF (image/*):', error);
