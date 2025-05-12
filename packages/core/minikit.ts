@@ -1,5 +1,6 @@
 import { VerificationLevel } from '@worldcoin/idkit-core';
 import { encodeAction, generateSignal } from '@worldcoin/idkit-core/hashing';
+import { formatShareInput } from 'helpers/files';
 import { validatePaymentPayload } from 'helpers/payment/client';
 import { compressAndPadProof } from 'helpers/proof';
 import { formatShareInput } from 'helpers/share';
