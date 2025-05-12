@@ -101,6 +101,7 @@ export const Share = () => {
                   'uno.jpg',
                   'image/jpeg',
                 );
+                console.log('imageFile', imageFile);
                 onSendShareFiles({
                   files: [imageFile],
                   title: 'Share one JPG',
@@ -241,7 +242,7 @@ export const Share = () => {
               try {
                 onSendShareFiles({
                   title: 'URL',
-                  text: 'A URL to share ',
+                  text: 'A URL to share',
                   url: 'https://world-id-assets.com/app_a4f7f3e62c1de0b9490a5260cb390b56/9185e1fd-c902-4799-aacb-973ef290fe56.jpg',
                 });
               } catch (error) {
