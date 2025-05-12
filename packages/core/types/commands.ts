@@ -145,14 +145,14 @@ export type SendHapticFeedbackPayload = SendHapticFeedbackInput;
 // Anchor: Share Files Payload
 
 export type ShareInput = {
-  files: File[];
+  files?: File[];
   title?: string;
   text?: string;
   url?: string;
 };
 
 export type SharePayload = {
-  files: Array<{
+  files?: Array<{
     name: string;
     type: string; // MIME type of the file (e.g., from File.type)
     data: string; // Base64 encoded content of the file

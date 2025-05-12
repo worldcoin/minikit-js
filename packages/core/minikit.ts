@@ -648,29 +648,31 @@ export class MiniKit {
 
     // We return share input here because the payload is formatted asynchronously
     share: (payload: ShareInput): ShareInput | null => {
-      if (
-        typeof window === 'undefined' ||
-        !this.isCommandAvailable[Command.Share]
-      ) {
-        console.error(
-          "'share' command is unavailable. Check MiniKit.install() or update the app version",
-        );
-        return null;
-      }
-
-      // Initiate the asynchronous operation for formatting and sending the event
-      formatShareInput(payload)
-        .then((formattedResult: SharePayload) => {
-          sendMiniKitEvent<WebViewBasePayload>({
-            command: Command.Share,
-            version: this.miniKitCommandVersion[Command.Share],
-            payload: formattedResult,
+      // if (
+      //   typeof window === 'undefined' ||
+      //   !this.isCommandAvailable[Command.Share]
+      // ) {
+      //   console.error(
+      //     "'share' command is unavailable. Check MiniKit.install() or update the app version",
+      //   );
+      //   return null;
+      // }
+      if (MiniKit.user.deviceOS === 'ios') {
+        navigator.share(payload);
+      } else {
+        // Only for android
+        formatShareInput(payload)
+          .then((formattedResult: SharePayload) => {
+            sendMiniKitEvent<WebViewBasePayload>({
+              command: Command.Share,
+              version: this.miniKitCommandVersion[Command.Share],
+              payload: formattedResult,
+            });
+          })
+          .catch((error) => {
+            console.error('Failed to format share input', error);
           });
-        })
-        .catch((error) => {
-          console.error('Failed to format share input', error);
-        });
-
+      }
       return payload;
     },
   };
