@@ -3,7 +3,6 @@ import { encodeAction, generateSignal } from '@worldcoin/idkit-core/hashing';
 import { formatShareInput } from 'helpers/files';
 import { validatePaymentPayload } from 'helpers/payment/client';
 import { compressAndPadProof } from 'helpers/proof';
-import { formatShareInput } from 'helpers/share';
 import { generateSiweMessage } from 'helpers/siwe/siwe';
 import { validateWalletAuthCommandInput } from 'helpers/siwe/validate-wallet-auth-command-input';
 import { validateSendTransactionPayload } from 'helpers/transaction/validate-payload';
@@ -678,7 +677,6 @@ export class MiniKit {
             console.error('Failed to format share input', error);
           });
       }
-      console.log('Payload', payload);
       return payload;
     },
   };
