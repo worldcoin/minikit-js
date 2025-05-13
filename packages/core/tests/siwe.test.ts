@@ -126,6 +126,7 @@ describe('Test SIWE Message Verification', () => {
       {
         signature,
         nonce: '12345678',
+        scheme
         // @ts-ignore
       },
       // @ts-ignore
