@@ -450,6 +450,8 @@ export class MiniKit {
         return null;
       }
 
+      console.log('host', window.location.host);
+
       const siweMessage = generateSiweMessage({
         scheme: '',
         domain: window.location.host,
