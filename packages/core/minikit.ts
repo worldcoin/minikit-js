@@ -455,7 +455,7 @@ export class MiniKit {
         domain: window.location.host,
         statement: payload.statement ?? undefined,
         uri: window.location.href,
-        version: '1',
+        version: '2',
         chain_id: 480,
         nonce: payload.nonce,
         issued_at: new Date().toISOString(),
