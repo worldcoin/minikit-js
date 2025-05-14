@@ -1,3 +1,5 @@
+import { sendWebviewEvent } from 'helpers/send-webview-event';
+
 (function () {
   if (!navigator.mediaDevices?.getUserMedia) return;
 
@@ -9,10 +11,26 @@
   async function wrapped(constraints: MediaStreamConstraints) {
     // We create the default stream the developer can interact with.
     const stream = await realGUM(constraints);
+    console.log('[Microphone] Stream started', stream);
+    sendWebviewEvent({
+      command: 'microphone-stream-started',
+      payload: {
+        streamId: stream.id,
+      },
+    });
     live.add(stream);
-    stream
-      .getTracks()
-      .forEach((t) => t.addEventListener('ended', () => live.delete(stream)));
+    stream.getTracks().forEach((t) =>
+      t.addEventListener('ended', () => {
+        sendWebviewEvent({
+          command: 'microphone-stream-ended',
+          payload: {
+            streamId: stream.id,
+          },
+        });
+        console.log('[Microphone] Track ended', t, 'for stream:', stream.id);
+        live.delete(stream);
+      }),
+    );
     return stream;
   }
 
@@ -26,7 +44,18 @@
   Object.freeze(navigator.mediaDevices);
 
   window.__stopAllMiniAppMicrophoneStreams = () => {
-    live.forEach((s: MediaStream) => s.getTracks().forEach((t) => t.stop()));
+    live.forEach((s: MediaStream) => {
+      s.getTracks().forEach((t) => {
+        t.stop();
+        console.log('[Microphone] Stopping track:', t.id, 'for stream:', s.id);
+        sendWebviewEvent({
+          command: 'microphone-stream-ended',
+          payload: {
+            streamId: s.id,
+          },
+        });
+      });
+    });
     live.clear();
   };
 })();
