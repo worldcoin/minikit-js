@@ -9,8 +9,21 @@ const processFile = async (
   file: File,
 ): Promise<{ name: string; type: string; data: string }> => {
   const buffer = await file.arrayBuffer();
-  // Convert ArrayBuffer to binary string
-  const binaryString = String.fromCharCode(...new Uint8Array(buffer));
+  const uint8Array = new Uint8Array(buffer);
+  let binaryString = '';
+  const K_CHUNK_SIZE = 0x8000; // 32K chunks
+
+  for (let i = 0; i < uint8Array.length; i += K_CHUNK_SIZE) {
+    const chunk = uint8Array.subarray(
+      i,
+      Math.min(i + K_CHUNK_SIZE, uint8Array.length),
+    );
+    binaryString += String.fromCharCode.apply(
+      null,
+      Array.from(chunk), // Convert Uint8Array chunk to number[]
+    );
+  }
+
   const base64Data = btoa(binaryString);
   return {
     name: file.name,
@@ -26,6 +39,11 @@ export const formatShareInput = async (
     throw new Error('No files provided');
   }
 
+  // Ensure input.files is an array if it's truthy
+  if (!Array.isArray(input.files)) {
+    throw new Error('The "files" property must be an array.');
+  }
+
   if (input.files.length === 0) {
     // Handle case with no files, if navigator.share allows title/text/url sharing without files
     // Or throw an error if files are always required by your use case
@@ -37,6 +55,12 @@ export const formatShareInput = async (
 
     let totalSize = 0;
     for (const file of input.files) {
+      // Ensure each item in the 'files' array is a File object
+      if (!(file instanceof File)) {
+        throw new Error(
+          `Each item in the 'files' array must be a File object. Received: ${typeof file}`,
+        );
+      }
       totalSize += file.size; // File.size is in bytes
     }
 
