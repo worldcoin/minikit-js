@@ -666,7 +666,7 @@ export class MiniKit {
         // Only for android
         formatShareInput(payload)
           .then((formattedResult: SharePayload) => {
-            console.log('formattedResult', formattedResult);
+            console.log('Command Payload', formattedResult);
             sendMiniKitEvent<WebViewBasePayload>({
               command: Command.Share,
               version: this.miniKitCommandVersion[Command.Share],
