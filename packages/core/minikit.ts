@@ -661,7 +661,7 @@ export class MiniKit {
       //   );
       //   return null;
       // }
-      if (MiniKit.user.deviceOS === 'ios') {
+      if (typeof navigator !== 'undefined' && MiniKit.user.deviceOS === 'ios') {
         navigator.share(payload);
       } else {
         // Only for android
