@@ -19,10 +19,6 @@
   "engines": {
     "node": ">=16"
   },
-  "workspaces": [
-    "packages/*",
-    "demo/*"
-  ],
   "pnpm": {
     "overrides": {
       "ws": ">=7.5.10",

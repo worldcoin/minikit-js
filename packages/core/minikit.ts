@@ -2,6 +2,7 @@ import { VerificationLevel } from '@worldcoin/idkit-core';
 import { encodeAction, generateSignal } from '@worldcoin/idkit-core/hashing';
 import { validatePaymentPayload } from 'helpers/payment/client';
 import { compressAndPadProof } from 'helpers/proof';
+import { formatShareInput } from 'helpers/share';
 import { generateSiweMessage } from 'helpers/siwe/siwe';
 import { validateWalletAuthCommandInput } from 'helpers/siwe/validate-wallet-auth-command-input';
 import { validateSendTransactionPayload } from 'helpers/transaction/validate-payload';
@@ -21,6 +22,8 @@ import {
   SendTransactionInput,
   SendTransactionPayload,
   ShareContactsPayload,
+  ShareInput,
+  SharePayload,
   SignMessageInput,
   SignMessagePayload,
   SignTypedDataInput,
@@ -37,6 +40,7 @@ import {
 } from 'types/errors';
 import { Network } from 'types/payment';
 import { sendWebviewEvent } from './helpers/send-webview-event';
+import { DeviceProperties, User, UserNameService } from './types/init';
 import {
   EventHandler,
   EventPayload,
@@ -46,13 +50,13 @@ import {
   MiniAppSendHapticFeedbackPayload,
   MiniAppSendTransactionPayload,
   MiniAppShareContactsPayload,
+  MiniAppSharePayload,
   MiniAppSignMessagePayload,
   MiniAppSignTypedDataPayload,
   MiniAppVerifyActionPayload,
   MiniAppWalletAuthPayload,
   ResponseEvent,
 } from './types/responses';
-import { User, UserNameService } from './types/user';
 
 export const sendMiniKitEvent = <
   T extends WebViewBasePayload = WebViewBasePayload,
@@ -76,7 +80,7 @@ export class MiniKit {
     [Command.RequestPermission]: 1,
     [Command.GetPermissions]: 1,
     [Command.SendHapticFeedback]: 1,
-    // [Command.ShareFiles]: 1,
+    [Command.Share]: 1,
   };
 
   private static isCommandAvailable = {
@@ -90,7 +94,7 @@ export class MiniKit {
     [Command.RequestPermission]: false,
     [Command.GetPermissions]: false,
     [Command.SendHapticFeedback]: false,
-    // [Command.ShareFiles]: false,
+    [Command.Share]: false,
   };
 
   private static listeners: Record<ResponseEvent, EventHandler> = {
@@ -104,13 +108,13 @@ export class MiniKit {
     [ResponseEvent.MiniAppRequestPermission]: () => {},
     [ResponseEvent.MiniAppGetPermissions]: () => {},
     [ResponseEvent.MiniAppSendHapticFeedback]: () => {},
-    [ResponseEvent.MiniAppShareFiles]: () => {},
+    [ResponseEvent.MiniAppShare]: () => {},
   };
 
   public static appId: string | null = null;
   public static user: User = {};
   private static isReady: boolean = false;
-
+  public static deviceProperties: DeviceProperties = {};
   private static sendInit() {
     sendWebviewEvent({
       command: 'init',
@@ -274,9 +278,8 @@ export class MiniKit {
       window.WorldApp.is_optional_analytics;
     MiniKit.user.deviceOS = window.WorldApp.device_os;
     MiniKit.user.worldAppVersion = window.WorldApp.world_app_version;
-
-    // TODO: Set device properties
-    // MiniKit.deviceProperties.safeAreaInsets = window.WorldApp.safe_area_insets;
+    // Set device properties
+    MiniKit.deviceProperties.safeAreaInsets = window.WorldApp.safe_area_insets;
 
     try {
       window.MiniKit = MiniKit;
@@ -452,7 +455,7 @@ export class MiniKit {
       }
 
       const siweMessage = generateSiweMessage({
-        scheme: protocol,
+        scheme: '',
         domain: window.location.host,
         statement: payload.statement ?? undefined,
         uri: window.location.href,
@@ -647,25 +650,36 @@ export class MiniKit {
       return payload;
     },
 
-    // shareFiles: (payload: ShareFilesInput): ShareFilesPayload | null => {
-    //   if (
-    //     typeof window === 'undefined' ||
-    //     !this.isCommandAvailable[Command.ShareFiles]
-    //   ) {
-    //     console.error(
-    //       "'shareFiles' command is unavailable. Check MiniKit.install() or update the app version",
-    //     );
-    //     return null;
-    //   }
-
-    //   sendMiniKitEvent<WebViewBasePayload>({
-    //     command: Command.ShareFiles,
-    //     version: this.miniKitCommandVersion[Command.ShareFiles],
-    //     payload,
-    //   });
-
-    //   return payload;
-    // },
+    // We return share input here because the payload is formatted asynchronously
+    share: (payload: ShareInput): ShareInput | null => {
+      // if (
+      //   typeof window === 'undefined' ||
+      //   !this.isCommandAvailable[Command.Share]
+      // ) {
+      //   console.error(
+      //     "'share' command is unavailable. Check MiniKit.install() or update the app version",
+      //   );
+      //   return null;
+      // }
+      if (MiniKit.user.deviceOS === 'ios') {
+        navigator.share(payload);
+      } else {
+        // Only for android
+        formatShareInput(payload)
+          .then((formattedResult: SharePayload) => {
+            sendMiniKitEvent<WebViewBasePayload>({
+              command: Command.Share,
+              version: this.miniKitCommandVersion[Command.Share],
+              payload: formattedResult,
+            });
+          })
+          .catch((error) => {
+            console.error('Failed to format share input', error);
+          });
+      }
+      console.log('Payload', payload);
+      return payload;
+    },
   };
 
   /**
@@ -873,24 +887,24 @@ export class MiniKit {
         }
       });
     },
-    // shareFiles: async (
-    //   payload: ShareFilesInput,
-    // ): AsyncHandlerReturn<
-    //   ShareFilesPayload | null,
-    //   MiniAppShareFilesPayload
-    // > => {
-    //   return new Promise(async (resolve, reject) => {
-    //     try {
-    //       const response = await MiniKit.awaitCommand(
-    //         ResponseEvent.MiniAppShareFiles,
-    //         Command.ShareFiles,
-    //         () => this.commands.shareFiles(payload),
-    //       );
-    //       resolve(response);
-    //     } catch (error) {
-    //       reject(error);
-    //     }
-    //   });
-    // },
+    share: async (
+      payload: ShareInput,
+    ): AsyncHandlerReturn<ShareInput | null, MiniAppSharePayload> => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppShare,
+            Command.Share,
+            (() => this.commands.share(payload)) as any,
+          );
+          resolve({
+            commandPayload: response.commandPayload as ShareInput | null,
+            finalPayload: response.finalPayload as MiniAppSharePayload,
+          });
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
   };
 }

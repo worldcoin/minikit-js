@@ -21,6 +21,15 @@ export type User = {
   deviceOS?: string;
 };
 
+export type DeviceProperties = {
+  safeAreaInsets?: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+};
+
 export type UserNameService = {
   walletAddress: string;
   username?: string;

@@ -2,9 +2,9 @@ export { MiniKit } from './minikit';
 
 export * from './types/commands';
 export * from './types/errors';
+export * from './types/init';
 export * from './types/payment';
 export * from './types/responses';
-export * from './types/user';
 export * from './types/wallet-auth';
 
 export { tokenToDecimals } from 'helpers/payment/client';

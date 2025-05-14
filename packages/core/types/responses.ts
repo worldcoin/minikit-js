@@ -27,7 +27,7 @@ export enum ResponseEvent {
   MiniAppRequestPermission = 'miniapp-request-permission',
   MiniAppGetPermissions = 'miniapp-get-permissions',
   MiniAppSendHapticFeedback = 'miniapp-send-haptic-feedback',
-  MiniAppShareFiles = 'miniapp-share-files',
+  MiniAppShare = 'miniapp-share',
 }
 
 export type MiniAppVerifyActionSuccessPayload = {
@@ -233,22 +233,22 @@ export type MiniAppSendHapticFeedbackPayload =
   | MiniAppSendHapticFeedbackErrorPayload;
 
 // Anchor: Share Files Payload
-export type MiniAppShareFilesSuccessPayload = {
+export type MiniAppShareSuccessPayload = {
   status: 'success';
   shared_files_count: number;
   version: number;
   timestamp: string;
 };
 
-export type MiniAppShareFilesErrorPayload = {
+export type MiniAppShareErrorPayload = {
   status: 'error';
   error_code: ShareFilesErrorCodes;
   version: number;
 };
 
-export type MiniAppShareFilesPayload =
-  | MiniAppShareFilesSuccessPayload
-  | MiniAppShareFilesErrorPayload;
+export type MiniAppSharePayload =
+  | MiniAppShareSuccessPayload
+  | MiniAppShareErrorPayload;
 
 type EventPayloadMap = {
   [ResponseEvent.MiniAppVerifyAction]: MiniAppVerifyActionPayload;
@@ -261,7 +261,7 @@ type EventPayloadMap = {
   [ResponseEvent.MiniAppRequestPermission]: MiniAppRequestPermissionPayload;
   [ResponseEvent.MiniAppGetPermissions]: MiniAppGetPermissionsPayload;
   [ResponseEvent.MiniAppSendHapticFeedback]: MiniAppSendHapticFeedbackPayload;
-  [ResponseEvent.MiniAppShareFiles]: MiniAppShareFilesPayload;
+  [ResponseEvent.MiniAppShare]: MiniAppSharePayload;
 };
 
 export type EventPayload<T extends ResponseEvent = ResponseEvent> =

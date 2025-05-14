@@ -3,6 +3,7 @@ import { ChangeEvent, useCallback, useState } from 'react';
 export const CameraComponent = () => {
   const [isMicOn, setIsMicOn] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   const handleChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>, source: string) => {
@@ -13,6 +14,15 @@ export const CameraComponent = () => {
     },
     [],
   );
+  const endRecording = useCallback(() => {
+    const gum = navigator.mediaDevices.getUserMedia.bind(
+      navigator.mediaDevices,
+    );
+    if (window.__activeStream) {
+      window.__activeStream.getTracks().forEach((t) => t.stop());
+      window.__activeStream = undefined;
+    }
+  }, []);
 
   const playSound = useCallback(() => {
     const audio = new Audio('/money.mp3');
@@ -40,6 +50,21 @@ export const CameraComponent = () => {
       }
     }
   }, [isMicOn, stream]);
+
+  const handleFilePick = useCallback(async () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.multiple = true;
+    input.onchange = (event: Event) => {
+      const target = event.target as HTMLInputElement;
+      if (target.files) {
+        setSelectedFiles(Array.from(target.files));
+        // You can now do something with the selected files, e.g., log them
+        console.log('Selected files:', Array.from(target.files));
+      }
+    };
+    input.click();
+  }, []);
 
   return (
     <div className="gap-y-2 grid">
@@ -102,6 +127,14 @@ export const CameraComponent = () => {
       <label className="items-center justify-center rounded-lg bg-2f2b43/5 hover:bg-2f2b43/10">
         <button
           className="grid justify-items-center bg-green-500 p-4 rounded-lg text-white w-full"
+          onClick={endRecording}
+        >
+          Stop Mic
+        </button>
+      </label>
+      <label className="items-center justify-center rounded-lg bg-2f2b43/5 hover:bg-2f2b43/10">
+        <button
+          className="grid justify-items-center bg-green-500 p-4 rounded-lg text-white w-full"
           onClick={playSound}
         >
           Play Sound
@@ -123,6 +156,25 @@ export const CameraComponent = () => {
           Get Location
         </button>
       </label>
+      <label className="items-center justify-center rounded-lg bg-2f2b43/5 hover:bg-2f2b43/10">
+        <button
+          className="grid justify-items-center bg-green-500 p-4 rounded-lg text-white w-full mt-4"
+          onClick={handleFilePick}
+        >
+          Open File Picker
+        </button>
+      </label>
+      {/* Display selected files */}
+      {selectedFiles.length > 0 && (
+        <div className="mt-4">
+          <p className="font-bold">Selected Files:</p>
+          <ul>
+            {selectedFiles.map((file, index) => (
+              <li key={index}>{file.name}</li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };
