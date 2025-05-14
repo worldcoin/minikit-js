@@ -1,4 +1,4 @@
-import './helpers/microphone';
+// import './helpers/microphone';
 
 export { MiniKit } from './minikit';
 

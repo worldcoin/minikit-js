@@ -1,7 +1,8 @@
 import { sendWebviewEvent } from 'helpers/send-webview-event';
 
-(function () {
-  if (!navigator.mediaDevices?.getUserMedia) return;
+export const setupMicrophone = () => {
+  if (typeof navigator !== 'undefined' && !navigator.mediaDevices?.getUserMedia)
+    return;
 
   const realGUM = navigator.mediaDevices.getUserMedia.bind(
     navigator.mediaDevices,
@@ -58,4 +59,4 @@ import { sendWebviewEvent } from 'helpers/send-webview-event';
     });
     live.clear();
   };
-})();
+};
