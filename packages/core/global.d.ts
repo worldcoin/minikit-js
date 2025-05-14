@@ -12,6 +12,7 @@ interface Window {
   };
 
   MiniKit?: import('./minikit').MiniKit;
+  __stopAllMiniAppMicrophoneStreams?: () => void;
 
   WorldApp?: {
     world_app_version: number;

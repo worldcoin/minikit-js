@@ -1,3 +1,5 @@
+// import './helpers/microphone';
+
 export { MiniKit } from './minikit';
 
 export * from './types/commands';

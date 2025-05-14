@@ -14,13 +14,10 @@ export const CameraComponent = () => {
     },
     [],
   );
-  const endRecording = useCallback(() => {
-    const gum = navigator.mediaDevices.getUserMedia.bind(
-      navigator.mediaDevices,
-    );
-    if (window.__activeStream) {
-      window.__activeStream.getTracks().forEach((t) => t.stop());
-      window.__activeStream = undefined;
+  const endRecording = useCallback(async () => {
+    if (window.__stopAllMiniAppMicrophoneStreams) {
+      console.log('stopping all mic');
+      window.__stopAllMiniAppMicrophoneStreams();
     }
   }, []);
 
@@ -129,7 +126,7 @@ export const CameraComponent = () => {
           className="grid justify-items-center bg-green-500 p-4 rounded-lg text-white w-full"
           onClick={endRecording}
         >
-          Stop Mic
+          End Recording
         </button>
       </label>
       <label className="items-center justify-center rounded-lg bg-2f2b43/5 hover:bg-2f2b43/10">
