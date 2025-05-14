@@ -451,8 +451,6 @@ export class MiniKit {
         return null;
       }
 
-      console.log('host', window.location.host);
-
       const siweMessage = generateSiweMessage({
         scheme: '',
         domain: window.location.host,
@@ -666,7 +664,6 @@ export class MiniKit {
         // Only for android
         formatShareInput(payload)
           .then((formattedResult: SharePayload) => {
-            console.log('Command Payload', formattedResult);
             sendMiniKitEvent<WebViewBasePayload>({
               command: Command.Share,
               version: this.miniKitCommandVersion[Command.Share],
@@ -677,7 +674,7 @@ export class MiniKit {
             console.error('Failed to format share input', error);
           });
       }
-      console.log('Payload', payload);
+      console.log('Payload', payload);  
       return payload;
     },
   };
@@ -897,7 +894,6 @@ export class MiniKit {
             Command.Share,
             (() => this.commands.share(payload)) as any,
           );
-          console.log('response', response);
           resolve({
             commandPayload: response.commandPayload as ShareInput | null,
             finalPayload: response.finalPayload as MiniAppSharePayload,
