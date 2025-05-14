@@ -101,7 +101,6 @@ export const Share = () => {
                   '800.jpeg',
                   'image/jpeg',
                 );
-                console.log('imageFile', imageFile);
                 onSendShareFiles({
                   files: [imageFile],
                   title: 'Share one JPG',

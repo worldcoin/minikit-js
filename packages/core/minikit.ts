@@ -1,8 +1,8 @@
 import { VerificationLevel } from '@worldcoin/idkit-core';
 import { encodeAction, generateSignal } from '@worldcoin/idkit-core/hashing';
-import { formatShareInput } from 'helpers/share';
 import { validatePaymentPayload } from 'helpers/payment/client';
 import { compressAndPadProof } from 'helpers/proof';
+import { formatShareInput } from 'helpers/share';
 import { generateSiweMessage } from 'helpers/siwe/siwe';
 import { validateWalletAuthCommandInput } from 'helpers/siwe/validate-wallet-auth-command-input';
 import { validateSendTransactionPayload } from 'helpers/transaction/validate-payload';
@@ -275,8 +275,9 @@ export class MiniKit {
       window.WorldApp.is_optional_analytics;
     MiniKit.user.deviceOS = window.WorldApp.device_os;
     MiniKit.user.worldAppVersion = window.WorldApp.world_app_version;
-
+    // Set device properties
     MiniKit.deviceProperties.safeAreaInsets = window.WorldApp.safe_area_insets;
+
     try {
       window.MiniKit = MiniKit;
       this.sendInit();
@@ -894,6 +895,7 @@ export class MiniKit {
             Command.Share,
             (() => this.commands.share(payload)) as any,
           );
+          console.log('response', response);
           resolve({
             commandPayload: response.commandPayload as ShareInput | null,
             finalPayload: response.finalPayload as MiniAppSharePayload,

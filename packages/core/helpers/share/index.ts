@@ -36,7 +36,11 @@ export const formatShareInput = async (
   input: ShareInput,
 ): Promise<SharePayload> => {
   if (!input.files) {
-    throw new Error('No files provided');
+    return {
+      title: input.title,
+      text: input.text,
+      url: input.url,
+    };
   }
 
   // Ensure input.files is an array if it's truthy
