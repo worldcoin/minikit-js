@@ -677,6 +677,7 @@ export class MiniKit {
             console.error('Failed to format share input', error);
           });
       }
+      console.log('Payload', payload);
       return payload;
     },
   };
