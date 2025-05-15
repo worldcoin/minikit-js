@@ -48,6 +48,14 @@ export const setupMicrophone = () => {
           );
         }
       });
+      t.addEventListener('inactive', () => {
+        console.log('[Microphone] Stream inactive – everything’s stopped');
+        sendWebviewEvent({
+          command: 'microphone-stream-ended',
+          payload: { streamId: stream.id },
+        });
+        live.delete(stream);
+      });
     });
     return stream;
   }
