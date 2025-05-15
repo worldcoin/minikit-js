@@ -124,14 +124,14 @@ export const CameraComponent = () => {
           {isMicOn ? 'Stop microphone' : 'Activate microphone'}
         </button>
       </label>
-      <label className="items-center justify-center rounded-lg bg-2f2b43/5 hover:bg-2f2b43/10">
+      {/* <label className="items-center justify-center rounded-lg bg-2f2b43/5 hover:bg-2f2b43/10">
         <button
           className="grid justify-items-center bg-green-500 p-4 rounded-lg text-white w-full"
           onClick={endRecording}
         >
           End Recording
         </button>
-      </label>
+      </label> */}
       <label className="items-center justify-center rounded-lg bg-2f2b43/5 hover:bg-2f2b43/10">
         <button
           className="grid justify-items-center bg-green-500 p-4 rounded-lg text-white w-full"

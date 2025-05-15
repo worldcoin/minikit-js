@@ -111,6 +111,7 @@ export type ShareContactsPayload = ShareContactsInput;
 export enum Permission {
   Notifications = 'notifications',
   Contacts = 'contacts',
+  Microphone = 'microphone',
 }
 
 export type RequestPermissionInput = {
