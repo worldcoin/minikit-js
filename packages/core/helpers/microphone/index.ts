@@ -1,6 +1,9 @@
 import { sendWebviewEvent } from 'helpers/send-webview-event';
 
-(function () {
+export const setupMicrophone = () => {
+  if (typeof navigator !== 'undefined' && !navigator.mediaDevices?.getUserMedia)
+    return;
+
   const originalStop = MediaStreamTrack.prototype.stop;
   MediaStreamTrack.prototype.stop = function () {
     // call the real stop
@@ -10,11 +13,6 @@ import { sendWebviewEvent } from 'helpers/send-webview-event';
       setTimeout(() => this.dispatchEvent(new Event('ended')), 0);
     }
   };
-})();
-
-export const setupMicrophone = () => {
-  if (typeof navigator !== 'undefined' && !navigator.mediaDevices?.getUserMedia)
-    return;
 
   const realGUM = navigator.mediaDevices.getUserMedia.bind(
     navigator.mediaDevices,
@@ -33,9 +31,6 @@ export const setupMicrophone = () => {
     });
     live.add(stream);
     stream.getTracks().forEach((t) => {
-      console.log(
-        `[Microphone] Attaching 'ended' listener to track: ${t.id} for stream: ${stream.id}`,
-      );
       t.addEventListener('ended', () => {
         console.log(
           `[Microphone] 'ended' listener invoked for track: ${t.id}, stream: ${stream.id}`,
