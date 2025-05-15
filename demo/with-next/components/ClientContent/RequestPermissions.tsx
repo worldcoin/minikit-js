@@ -116,8 +116,6 @@ export const RequestPermission = () => {
           >
             Request Notifications
           </button>
-        </div>
-        <div className="grid gap-4 grid-cols-2">
           <button
             className="bg-black text-white rounded-lg p-4 w-full"
             onClick={() => onRequestPermission(Permission.Microphone)}
