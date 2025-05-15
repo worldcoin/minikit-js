@@ -30,15 +30,8 @@ export const CameraComponent = () => {
     if (isMicOn) {
       // Stop microphone access
       if (stream) {
-        console.log(`[Camera.tsx] Attempting to stop stream: ${stream.id}`);
         const tracks = stream.getTracks();
-        if (tracks.length === 0) {
-          console.log('[Camera.tsx] No tracks found on stream to stop.');
-        }
         tracks.forEach((track) => {
-          console.log(
-            `[Camera.tsx] Stopping track: ${track.id}, kind: ${track.kind}, readyState: ${track.readyState}`,
-          );
           track.stop();
         });
         setStream(null);

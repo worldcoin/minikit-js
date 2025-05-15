@@ -4,11 +4,10 @@ export const setupMicrophone = () => {
   if (typeof navigator !== 'undefined' && !navigator.mediaDevices?.getUserMedia)
     return;
 
+  // We need to do this on iOS since ended is not fired when the track is stopped.
   const originalStop = MediaStreamTrack.prototype.stop;
   MediaStreamTrack.prototype.stop = function () {
-    // call the real stop
     originalStop.call(this);
-    // if it “really” ended, queue an ended event
     if (this.readyState === 'ended') {
       setTimeout(() => this.dispatchEvent(new Event('ended')), 0);
     }
@@ -20,7 +19,6 @@ export const setupMicrophone = () => {
   const live = new Set<MediaStream>();
 
   async function wrapped(constraints: MediaStreamConstraints) {
-    // We create the default stream the developer can interact with.
     const stream = await realGUM(constraints);
     console.log('[Microphone] Stream started', stream);
     sendWebviewEvent({
@@ -32,34 +30,12 @@ export const setupMicrophone = () => {
     live.add(stream);
     stream.getTracks().forEach((t) => {
       t.addEventListener('ended', () => {
-        console.log(
-          `[Microphone] 'ended' listener invoked for track: ${t.id}, stream: ${stream.id}`,
-        );
-        try {
-          console.log('[Microphone] Track ended', t, 'for stream:', stream.id);
-          sendWebviewEvent({
-            command: 'microphone-stream-ended',
-            payload: {
-              streamId: stream.id,
-            },
-          });
-          live.delete(stream);
-        } catch (error) {
-          console.error(
-            '[Microphone] Error in track ended listener:',
-            error,
-            'for stream:',
-            stream?.id, // Use optional chaining for safety
-            'track:',
-            t?.id, // Use optional chaining for safety
-          );
-        }
-      });
-      t.addEventListener('inactive', () => {
-        console.log('[Microphone] Stream inactive – everything’s stopped');
+        console.log('[Microphone] Track ended', t, 'for stream:', stream.id);
         sendWebviewEvent({
           command: 'microphone-stream-ended',
-          payload: { streamId: stream.id },
+          payload: {
+            streamId: stream.id,
+          },
         });
         live.delete(stream);
       });
