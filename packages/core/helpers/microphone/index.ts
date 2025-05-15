@@ -22,13 +22,13 @@ export const setupMicrophone = () => {
     live.add(stream);
     stream.getTracks().forEach((t) =>
       t.addEventListener('ended', () => {
+        console.log('[Microphone] Track ended', t, 'for stream:', stream.id);
         sendWebviewEvent({
           command: 'microphone-stream-ended',
           payload: {
             streamId: stream.id,
           },
         });
-        console.log('[Microphone] Track ended', t, 'for stream:', stream.id);
         live.delete(stream);
       }),
     );
