@@ -20,8 +20,14 @@ export const setupMicrophone = () => {
       },
     });
     live.add(stream);
-    stream.getTracks().forEach((t) =>
+    stream.getTracks().forEach((t) => {
+      console.log(
+        `[Microphone] Attaching 'ended' listener to track: ${t.id} for stream: ${stream.id}`,
+      );
       t.addEventListener('ended', () => {
+        console.log(
+          `[Microphone] 'ended' listener invoked for track: ${t.id}, stream: ${stream.id}`,
+        );
         try {
           console.log('[Microphone] Track ended', t, 'for stream:', stream.id);
           sendWebviewEvent({
@@ -41,8 +47,8 @@ export const setupMicrophone = () => {
             t?.id, // Use optional chaining for safety
           );
         }
-      }),
-    );
+      });
+    });
     return stream;
   }
 
