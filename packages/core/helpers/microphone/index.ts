@@ -1,5 +1,17 @@
 import { sendWebviewEvent } from 'helpers/send-webview-event';
 
+(function () {
+  const originalStop = MediaStreamTrack.prototype.stop;
+  MediaStreamTrack.prototype.stop = function () {
+    // call the real stop
+    originalStop.call(this);
+    // if it “really” ended, queue an ended event
+    if (this.readyState === 'ended') {
+      setTimeout(() => this.dispatchEvent(new Event('ended')), 0);
+    }
+  };
+})();
+
 export const setupMicrophone = () => {
   if (typeof navigator !== 'undefined' && !navigator.mediaDevices?.getUserMedia)
     return;
