@@ -1,5 +1,6 @@
 import { VerificationLevel } from '@worldcoin/idkit-core';
 import { encodeAction, generateSignal } from '@worldcoin/idkit-core/hashing';
+import { setupMicrophone } from 'helpers/microphone';
 import { validatePaymentPayload } from 'helpers/payment/client';
 import { compressAndPadProof } from 'helpers/proof';
 import { formatShareInput } from 'helpers/share';
@@ -255,6 +256,7 @@ export class MiniKit {
           MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.AlreadyInstalled],
       };
     }
+    setupMicrophone();
 
     if (!appId) {
       console.warn('App ID not provided during install');
@@ -661,7 +663,7 @@ export class MiniKit {
       //   );
       //   return null;
       // }
-      if (MiniKit.user.deviceOS === 'ios') {
+      if (typeof navigator !== 'undefined' && MiniKit.user.deviceOS === 'ios') {
         navigator.share(payload);
       } else {
         // Only for android
@@ -677,7 +679,6 @@ export class MiniKit {
             console.error('Failed to format share input', error);
           });
       }
-      console.log('Payload', payload);
       return payload;
     },
   };

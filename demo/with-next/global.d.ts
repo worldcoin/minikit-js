@@ -6,7 +6,7 @@ interface Window {
       };
     };
   };
-  __activeStream?: MediaStream;
+  __stopAllMiniAppMicrophoneStreams?: () => void;
   Android?: {
     postMessage?: (payload: string) => void;
   };
