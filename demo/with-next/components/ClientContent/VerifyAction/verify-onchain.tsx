@@ -39,7 +39,9 @@ export const verifyOnchain = async (params: {
   transactionHash?: string;
   error?: string;
 }> => {
-  const { signal, payload } = params;
+  const { payload } = params;
+
+  const signal = payload.signal;
 
   try {
     const root = BigInt(payload.root);
@@ -95,10 +97,20 @@ export const VerifyOnchainProof = () => {
   }>({});
 
   const handleOnchainVerify = async () => {
-    const fixedSignalAddress = '0x0000000000000000000000000000000000000000';
+    let signal = MiniKit.user.walletAddress;
+    if (!signal) {
+      const { finalPayload } = await MiniKit.commandsAsync.walletAuth({
+        nonce: 'i-trust-you',
+      });
+      if (finalPayload.status === 'success') {
+        signal = finalPayload.address;
+      } else {
+        return { success: false, error: 'No wallet address' };
+      }
+    }
     const { finalPayload } = await MiniKit.commandsAsync.verify({
       action: process.env.NEXT_PUBLIC_ACTION_ID as string,
-      signal: fixedSignalAddress,
+      signal: signal,
     });
     if (finalPayload.status === 'success') {
       const merkleRoot = finalPayload.merkle_root;
@@ -108,9 +120,9 @@ export const VerifyOnchainProof = () => {
       try {
         // Using a fixed signal address for simplicity
         const result = await verifyOnchain({
-          signal: fixedSignalAddress,
+          signal: signal,
           payload: {
-            signal: fixedSignalAddress,
+            signal: signal,
             root: merkleRoot,
             nullifierHash: nullifierHash,
             proof: proof,
