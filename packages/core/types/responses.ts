@@ -2,6 +2,7 @@ import { VerificationLevel } from '@worldcoin/idkit-core';
 import { Permission } from './commands';
 import {
   GetPermissionsErrorCodes,
+  MicrophoneErrorCodes,
   PaymentErrorCodes,
   RequestPermissionErrorCodes,
   SendHapticFeedbackErrorCodes,
