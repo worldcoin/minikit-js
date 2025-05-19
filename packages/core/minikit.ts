@@ -110,6 +110,7 @@ export class MiniKit {
     [ResponseEvent.MiniAppGetPermissions]: () => {},
     [ResponseEvent.MiniAppSendHapticFeedback]: () => {},
     [ResponseEvent.MiniAppShare]: () => {},
+    [ResponseEvent.MiniAppMicrophone]: () => {},
   };
 
   public static appId: string | null = null;
