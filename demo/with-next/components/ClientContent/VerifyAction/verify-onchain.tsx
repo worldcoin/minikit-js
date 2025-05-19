@@ -26,21 +26,16 @@ export const TEST_VERIFY_CONTRACT_ADDRESS =
 /**
  * Calls the TestVerify contract's verify function
  */
-export const verifyOnchain = async (params: {
+export const verifyOnchain = async (payload: {
   signal: string;
-  payload: {
-    signal: string;
-    root: string;
-    nullifierHash: string;
-    proof: string;
-  };
+  root: string;
+  nullifierHash: string;
+  proof: string;
 }): Promise<{
   success: boolean;
   transactionHash?: string;
   error?: string;
 }> => {
-  const { payload } = params;
-
   const signal = payload.signal;
 
   try {
@@ -121,12 +116,9 @@ export const VerifyOnchainProof = () => {
         // Using a fixed signal address for simplicity
         const result = await verifyOnchain({
           signal: signal,
-          payload: {
-            signal: signal,
-            root: merkleRoot,
-            nullifierHash: nullifierHash,
-            proof: proof,
-          },
+          root: merkleRoot,
+          nullifierHash: nullifierHash,
+          proof: proof,
         });
 
         setOnchainVerifyResult({
