@@ -137,13 +137,22 @@ export const CameraComponent = () => {
           Get Location
         </button>
       </label>
-      <label className="items-center justify-center rounded-lg bg-2f2b43/5 hover:bg-2f2b43/10">
+      <label
+        htmlFor="fileInput"
+        className="items-center justify-center rounded-lg bg-2f2b43/5 hover:bg-2f2b43/10 cursor-pointer"
+      >
         <input
           type="file"
           id="fileInput"
           multiple
           accept="*/*"
-          onChange={(event) => handleChange(event, 'file')}
+          onChange={(event) => {
+            const files = event.target.files;
+            if (!files) {
+              return;
+            }
+            setSelectedFiles(Array.from(files));
+          }}
           style={{ display: 'none' }}
         />
         <div className="grid justify-items-center bg-green-500 p-4 rounded-lg text-white">
