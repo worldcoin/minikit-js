@@ -1,6 +1,12 @@
 import { sendWebviewEvent } from 'helpers/send-webview-event';
 
+let microphoneSetupDone = false;
+
 export const setupMicrophone = () => {
+  if (microphoneSetupDone) {
+    return;
+  }
+
   if (typeof navigator !== 'undefined' && !navigator.mediaDevices?.getUserMedia)
     return;
 
@@ -67,4 +73,5 @@ export const setupMicrophone = () => {
     });
     live.clear();
   };
+  microphoneSetupDone = true;
 };
