@@ -243,3 +243,15 @@ export const ShareFilesErrorMessage = {
   [ShareFilesErrorCodes.InvalidFileName]:
     'Invalid file name. Make sure you include the extension',
 };
+
+export enum MicrophoneErrorCodes {
+  MiniAppPermissionNotEnabled = 'mini_app_permission_not_enabled',
+  WorldAppPermissionNotEnabled = 'world_app_permission_not_enabled',
+}
+
+export const MicrophoneErrorMessage = {
+  [MicrophoneErrorCodes.MiniAppPermissionNotEnabled]:
+    'Microphone permission not enabled for your Mini App',
+  [MicrophoneErrorCodes.WorldAppPermissionNotEnabled]:
+    'Microphone permission not enabled in World App',
+};

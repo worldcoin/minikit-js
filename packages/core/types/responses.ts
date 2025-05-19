@@ -28,6 +28,7 @@ export enum ResponseEvent {
   MiniAppGetPermissions = 'miniapp-get-permissions',
   MiniAppSendHapticFeedback = 'miniapp-send-haptic-feedback',
   MiniAppShare = 'miniapp-share',
+  MiniAppMicrophone = 'miniapp-microphone',
 }
 
 export type MiniAppVerifyActionSuccessPayload = {
@@ -250,6 +251,22 @@ export type MiniAppSharePayload =
   | MiniAppShareSuccessPayload
   | MiniAppShareErrorPayload;
 
+export type MiniAppMicrophoneSuccessPayload = {
+  status: 'success';
+  version: number;
+  timestamp: string;
+};
+
+export type MiniAppMicrophoneErrorPayload = {
+  status: 'error';
+  error_code: MicrophoneErrorCodes;
+  version: number;
+};
+
+export type MiniAppMicrophonePayload =
+  | MiniAppMicrophoneSuccessPayload
+  | MiniAppMicrophoneErrorPayload;
+
 type EventPayloadMap = {
   [ResponseEvent.MiniAppVerifyAction]: MiniAppVerifyActionPayload;
   [ResponseEvent.MiniAppPayment]: MiniAppPaymentPayload;
@@ -262,6 +279,7 @@ type EventPayloadMap = {
   [ResponseEvent.MiniAppGetPermissions]: MiniAppGetPermissionsPayload;
   [ResponseEvent.MiniAppSendHapticFeedback]: MiniAppSendHapticFeedbackPayload;
   [ResponseEvent.MiniAppShare]: MiniAppSharePayload;
+  [ResponseEvent.MiniAppMicrophone]: MiniAppMicrophonePayload;
 };
 
 export type EventPayload<T extends ResponseEvent = ResponseEvent> =
