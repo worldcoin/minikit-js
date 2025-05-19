@@ -151,6 +151,7 @@ export const CameraComponent = () => {
             if (!files) {
               return;
             }
+            console.log(files);
             setSelectedFiles(Array.from(files));
           }}
           style={{ display: 'none' }}
