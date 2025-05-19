@@ -11,6 +11,7 @@ import { useCallback, useEffect, useState } from 'react';
 import * as yup from 'yup';
 import { validateSchema } from '../helpers/validate-schema';
 import { verifyProof } from './verify-cloud-proof';
+import { VerifyOnchainProof } from './verify-onchain';
 
 const verifyActionSuccessPayloadSchema = yup.object({
   status: yup
@@ -303,6 +304,7 @@ export const VerifyAction = () => {
           </div>
         </div>
       </div>
+      <VerifyOnchainProof />
     </div>
   );
 };
