@@ -15,9 +15,9 @@ export const CameraComponent = () => {
     [],
   );
   const endRecording = useCallback(() => {
-    const gum = navigator.mediaDevices.getUserMedia.bind(
-      navigator.mediaDevices,
-    );
+    if (window.__stopAllMiniAppMicrophoneStreams) {
+      window.__stopAllMiniAppMicrophoneStreams();
+    }
   }, []);
 
   const playSound = useCallback(() => {
