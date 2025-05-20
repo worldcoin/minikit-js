@@ -1,4 +1,7 @@
 import { sendWebviewEvent } from 'helpers/send-webview-event';
+import { MiniKit } from 'minikit';
+import { MicrophoneErrorCodes } from 'types/errors';
+import { ResponseEvent } from 'types/responses';
 
 let microphoneSetupDone = false;
 
@@ -58,7 +61,7 @@ export const setupMicrophone = () => {
   });
   Object.freeze(navigator.mediaDevices);
 
-  window.__stopAllMiniAppMicrophoneStreams = () => {
+  const stopAllMiniAppMicrophoneStreams = () => {
     live.forEach((s: MediaStream) => {
       s.getTracks().forEach((t) => {
         t.stop();
@@ -73,5 +76,24 @@ export const setupMicrophone = () => {
     });
     live.clear();
   };
+
+  MiniKit.subscribe(ResponseEvent.MiniAppMicrophone, (payload) => {
+    console.log('[Microphone] Microphone', payload);
+    // If the miniapp has requested the microphone and it has not been granted,
+    // we stop all streams.
+    if (
+      payload.status === 'error' &&
+      (payload.error_code ===
+        MicrophoneErrorCodes.MiniAppPermissionNotEnabled ||
+        payload.error_code ===
+          MicrophoneErrorCodes.WorldAppPermissionNotEnabled)
+    ) {
+      stopAllMiniAppMicrophoneStreams();
+    }
+  });
+
+  window.__stopAllMiniAppMicrophoneStreams = () =>
+    stopAllMiniAppMicrophoneStreams;
+
   microphoneSetupDone = true;
 };
