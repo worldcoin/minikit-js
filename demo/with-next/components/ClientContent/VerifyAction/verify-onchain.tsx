@@ -20,7 +20,7 @@ const testVerifyAbi = [
   },
 ];
 
-/** works on StagingAppMiniKitStagingDevPortal  */
+/** works on Prod QA App, app_id: app_dfbe55706a640c82dce839bb0ecae74d */
 export const TEST_VERIFY_CONTRACT_ADDRESS =
   '0x793dda8ec2aff37945627ab64dd4e8b4e8ea4cb1';
 
@@ -136,6 +136,12 @@ export const VerifyOnchainProof = () => {
       }
     }
   };
+  if (
+    process.env.NEXT_PUBLIC_PROD_VERIFY_APP_ID !==
+    'app_dfbe55706a640c82dce839bb0ecae74d'
+  ) {
+    return <></>;
+  }
   return (
     <div className="grid gap-y-2 mt-6 border-t pt-4">
       <h3 className="font-bold text-xl">Onchain Verification Test</h3>
@@ -143,7 +149,15 @@ export const VerifyOnchainProof = () => {
         Tests the verification proof on-chain using the TestVerify contract at
         address: {TEST_VERIFY_CONTRACT_ADDRESS}
         <br />
-        To test you should be on StagingAppMiniKitStagingDevPortal
+        To test you should be on Prod QA App, app_id:
+        <a
+          href="https://world.org/ecosystem/app_dfbe55706a640c82dce839bb0ecae74d"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          app_dfbe55706a640c82dce839bb0ecae74d
+        </a>
+        <br />
       </p>
 
       <button
