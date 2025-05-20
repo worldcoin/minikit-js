@@ -20,8 +20,9 @@ const testVerifyAbi = [
   },
 ];
 
+/** works on StagingAppMiniKitStagingDevPortal  */
 export const TEST_VERIFY_CONTRACT_ADDRESS =
-  '0xf11ccdbdfbfb9a00389e68f7af24d2fb9df91ad5';
+  '0x793dda8ec2aff37945627ab64dd4e8b4e8ea4cb1';
 
 /**
  * Calls the TestVerify contract's verify function
@@ -104,7 +105,7 @@ export const VerifyOnchainProof = () => {
       }
     }
     const { finalPayload } = await MiniKit.commandsAsync.verify({
-      action: process.env.NEXT_PUBLIC_ACTION_ID as string,
+      action: 'onchain-verify-test',
       signal: signal,
     });
     if (finalPayload.status === 'success') {
@@ -141,6 +142,8 @@ export const VerifyOnchainProof = () => {
       <p className="text-sm text-gray-600">
         Tests the verification proof on-chain using the TestVerify contract at
         address: {TEST_VERIFY_CONTRACT_ADDRESS}
+        <br />
+        To test you should be on ProdAppMiniKitStagingDevPortal
       </p>
 
       <button
