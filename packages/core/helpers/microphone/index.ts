@@ -92,8 +92,6 @@ export const setupMicrophone = () => {
     }
   });
 
-  window.__stopAllMiniAppMicrophoneStreams = () =>
-    stopAllMiniAppMicrophoneStreams;
-
+  window.__stopAllMiniAppMicrophoneStreams = stopAllMiniAppMicrophoneStreams;
   microphoneSetupDone = true;
 };
