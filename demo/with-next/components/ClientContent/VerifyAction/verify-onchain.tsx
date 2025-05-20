@@ -136,10 +136,7 @@ export const VerifyOnchainProof = () => {
       }
     }
   };
-  if (
-    process.env.NEXT_PUBLIC_PROD_VERIFY_APP_ID !==
-    'app_dfbe55706a640c82dce839bb0ecae74d'
-  ) {
+  if (process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging') {
     return <></>;
   }
   return (
@@ -149,7 +146,7 @@ export const VerifyOnchainProof = () => {
         Tests the verification proof on-chain using the TestVerify contract at
         address: {TEST_VERIFY_CONTRACT_ADDRESS}
         <br />
-        To test you should be on Prod QA App, app_id:
+        This will only work on the prod QA App -
         <a
           href="https://world.org/ecosystem/app_dfbe55706a640c82dce839bb0ecae74d"
           target="_blank"
