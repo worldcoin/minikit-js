@@ -143,7 +143,7 @@ export const VerifyOnchainProof = () => {
         Tests the verification proof on-chain using the TestVerify contract at
         address: {TEST_VERIFY_CONTRACT_ADDRESS}
         <br />
-        To test you should be on ProdAppMiniKitStagingDevPortal
+        To test you should be on StagingAppMiniKitStagingDevPortal
       </p>
 
       <button
