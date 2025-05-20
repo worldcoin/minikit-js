@@ -16,6 +16,7 @@ export const CameraComponent = () => {
   );
   const endRecording = useCallback(() => {
     if (window.__stopAllMiniAppMicrophoneStreams) {
+      console.log('[Camera] Stopping all microphone streams');
       window.__stopAllMiniAppMicrophoneStreams();
     }
   }, []);
