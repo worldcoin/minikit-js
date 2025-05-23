@@ -15,12 +15,9 @@ export const CameraComponent = () => {
     [],
   );
   const endRecording = useCallback(() => {
-    const gum = navigator.mediaDevices.getUserMedia.bind(
-      navigator.mediaDevices,
-    );
-    if (window.__activeStream) {
-      window.__activeStream.getTracks().forEach((t) => t.stop());
-      window.__activeStream = undefined;
+    if (window.__stopAllMiniAppMicrophoneStreams) {
+      console.log('[Camera] Stopping all microphone streams');
+      window.__stopAllMiniAppMicrophoneStreams();
     }
   }, []);
 
@@ -50,21 +47,6 @@ export const CameraComponent = () => {
       }
     }
   }, [isMicOn, stream]);
-
-  const handleFilePick = useCallback(async () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.multiple = true;
-    input.onchange = (event: Event) => {
-      const target = event.target as HTMLInputElement;
-      if (target.files) {
-        setSelectedFiles(Array.from(target.files));
-        // You can now do something with the selected files, e.g., log them
-        console.log('Selected files:', Array.from(target.files));
-      }
-    };
-    input.click();
-  }, []);
 
   return (
     <div className="gap-y-2 grid">
@@ -156,13 +138,28 @@ export const CameraComponent = () => {
           Get Location
         </button>
       </label>
-      <label className="items-center justify-center rounded-lg bg-2f2b43/5 hover:bg-2f2b43/10">
-        <button
-          className="grid justify-items-center bg-green-500 p-4 rounded-lg text-white w-full mt-4"
-          onClick={handleFilePick}
-        >
+      <label
+        htmlFor="fileInput"
+        className="items-center justify-center rounded-lg bg-2f2b43/5 hover:bg-2f2b43/10 cursor-pointer"
+      >
+        <input
+          type="file"
+          id="fileInput"
+          multiple
+          accept="*/*"
+          onChange={(event) => {
+            const files = event.target.files;
+            if (!files) {
+              return;
+            }
+            console.log(files);
+            setSelectedFiles(Array.from(files));
+          }}
+          style={{ display: 'none' }}
+        />
+        <div className="grid justify-items-center bg-green-500 p-4 rounded-lg text-white">
           Open File Picker
-        </button>
+        </div>
       </label>
       {/* Display selected files */}
       {selectedFiles.length > 0 && (
