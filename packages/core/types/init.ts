@@ -19,7 +19,7 @@ export type User = {
   optedIntoOptionalAnalytics?: boolean;
   /** @deprecated Moved to DeviceProperties */
   worldAppVersion?: number;
-    /** @deprecated Moved to DeviceProperties */
+  /** @deprecated Moved to DeviceProperties */
   deviceOS?: string;
 };
 
