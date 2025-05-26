@@ -17,7 +17,9 @@ export type User = {
   //   };
   // };
   optedIntoOptionalAnalytics?: boolean;
+  /** @deprecated Moved to DeviceProperties */
   worldAppVersion?: number;
+    /** @deprecated Moved to DeviceProperties */
   deviceOS?: string;
 };
 
@@ -28,6 +30,8 @@ export type DeviceProperties = {
     bottom: number;
     left: number;
   };
+  deviceOS?: string;
+  worldAppVersion?: number;
 };
 
 export type UserNameService = {

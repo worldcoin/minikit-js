@@ -281,8 +281,12 @@ export class MiniKit {
       window.WorldApp.is_optional_analytics;
     MiniKit.user.deviceOS = window.WorldApp.device_os;
     MiniKit.user.worldAppVersion = window.WorldApp.world_app_version;
+
     // Set device properties
     MiniKit.deviceProperties.safeAreaInsets = window.WorldApp.safe_area_insets;
+    MiniKit.deviceProperties.deviceOS = window.WorldApp.device_os;
+    MiniKit.deviceProperties.worldAppVersion =
+      window.WorldApp.world_app_version;
 
     try {
       window.MiniKit = MiniKit;

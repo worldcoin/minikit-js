@@ -1,4 +1,4 @@
-import { ChangeEvent, useCallback, useState } from 'react';
+import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 
 export const CameraComponent = () => {
   const [isMicOn, setIsMicOn] = useState(false);
@@ -14,6 +14,20 @@ export const CameraComponent = () => {
     },
     [],
   );
+
+  // create an endpoint to poll if a mic stream is still active
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (stream && stream.getTracks().length > 0) {
+        console.log('[Camera] Mic stream is still active');
+      } else {
+        console.log('[Camera] Mic stream is not active');
+        setIsMicOn(false);
+        clearInterval(interval);
+      }
+    }, 1000);
+  }, [stream]);
+
   const endRecording = useCallback(() => {
     if (window.__stopAllMiniAppMicrophoneStreams) {
       console.log('[Camera] Stopping all microphone streams');

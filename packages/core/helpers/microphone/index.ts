@@ -34,6 +34,7 @@ export const setupMicrophone = () => {
       command: 'microphone-stream-started',
       payload: {
         streamId: stream.id,
+        version: 1,
       },
     });
     live.add(stream);
@@ -44,6 +45,7 @@ export const setupMicrophone = () => {
           command: 'microphone-stream-ended',
           payload: {
             streamId: stream.id,
+            version: 1,
           },
         });
         live.delete(stream);
@@ -70,6 +72,7 @@ export const setupMicrophone = () => {
           command: 'microphone-stream-ended',
           payload: {
             streamId: s.id,
+            version: 1,
           },
         });
       });
