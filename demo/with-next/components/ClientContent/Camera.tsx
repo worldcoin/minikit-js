@@ -19,13 +19,27 @@ export const CameraComponent = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       if (stream && stream.getTracks().length > 0) {
-        console.log('[Camera] Mic stream is still active');
+        const audioTracks = stream.getAudioTracks();
+        const isRecording = audioTracks.some(
+          (track) => track.readyState === 'live' && track.enabled,
+        );
+
+        if (isRecording) {
+          console.log('[Camera] Mic stream is actively recording');
+        } else {
+          console.log(
+            '[Camera] Mic stream is not recording or tracks are ended',
+          );
+          setIsMicOn(false);
+          clearInterval(interval);
+        }
       } else {
-        console.log('[Camera] Mic stream is not active');
         setIsMicOn(false);
         clearInterval(interval);
       }
     }, 1000);
+
+    return () => clearInterval(interval);
   }, [stream]);
 
   const endRecording = useCallback(() => {
