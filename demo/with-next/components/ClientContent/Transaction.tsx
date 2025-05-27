@@ -38,10 +38,10 @@ const sendTransactionErrorPayloadSchema = yup.object({
 const testTokens = {
   optimism: {
     USDC: '0x0b2c639c533813f4aa9d7837caf62653d097ff85',
-    USDCE: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
+    USDC: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
   },
   worldchain: {
-    USDCE: '0x79A02482A880bCE3F13e09Da970dC34db4CD24d1',
+    USDC: '0x79A02482A880bCE3F13e09Da970dC34db4CD24d1',
   },
 };
 
@@ -135,7 +135,7 @@ export const SendTransaction = () => {
     // transfers can also be at most 1 hour in the future.
     const permitTransfer = {
       permitted: {
-        token: testTokens.worldchain.USDCE,
+        token: testTokens.worldchain.USDC,
         amount: '100000',
       },
       nonce: Date.now().toString(),
@@ -191,7 +191,7 @@ export const SendTransaction = () => {
     // transfers can also be at most 1 hour in the future.
     const permitTransfer = {
       permitted: {
-        token: testTokens.worldchain.USDCE,
+        token: testTokens.worldchain.USDC,
         amount: '10000',
       },
       nonce: Date.now().toString(),
@@ -205,7 +205,7 @@ export const SendTransaction = () => {
 
     const permitTransfer2 = {
       permitted: {
-        token: testTokens.worldchain.USDCE,
+        token: testTokens.worldchain.USDC,
         amount: '20000',
       },
       nonce: deadline,
@@ -285,7 +285,7 @@ export const SendTransaction = () => {
     // transfers can also be at most 1 hour in the future.
     const permitTransfer = {
       permitted: {
-        token: testTokens.worldchain.USDCE,
+        token: testTokens.worldchain.USDC,
         amount: '1000000',
       },
       nonce: Date.now().toString(),
