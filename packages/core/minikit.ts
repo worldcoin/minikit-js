@@ -566,7 +566,7 @@ export class MiniKit {
     ): ShareContactsPayload | null => {
       if (
         typeof window === 'undefined' ||
-        !this.isCommandAvailable[Command.SignTypedData]
+        !this.isCommandAvailable[Command.ShareContacts]
       ) {
         console.error(
           "'shareContacts' command is unavailable. Check MiniKit.install() or update the app version",
