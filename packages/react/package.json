@@ -52,7 +52,7 @@
     "turbo": "^2.3.3"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@types/node": "^22",
     "@typescript-eslint/eslint-plugin": "^7.7.0",
     "@typescript-eslint/parser": "^7.7.0",
     "prettier": "^3.2.5",
