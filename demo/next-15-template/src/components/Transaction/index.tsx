@@ -44,7 +44,7 @@ export const Transaction = () => {
   } = useWaitForTransactionReceipt({
     client: client,
     appConfig: {
-      app_id: process.env.NEXT_PUBLIC_APP_ID as `app_${string}`,
+      app_id: process.env.WLD_CLIENT_ID as `app_${string}`,
     },
     transactionId: transactionId,
   });
