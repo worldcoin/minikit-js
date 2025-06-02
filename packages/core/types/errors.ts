@@ -85,6 +85,7 @@ export enum SendTransactionErrorCodes {
   TransactionFailed = 'transaction_failed',
   GenericError = 'generic_error',
   DisallowedOperation = 'disallowed_operation',
+  ValidationError = 'validation_error',
   InvalidContract = 'invalid_contract',
   MaliciousOperation = 'malicious_operation',
   DailyTxLimitReached = 'daily_tx_limit_reached',
@@ -102,6 +103,8 @@ export const SendTransactionErrorMessage: Record<
   [SendTransactionErrorCodes.InputError]: 'Invalid payload.',
   [SendTransactionErrorCodes.SimulationFailed]:
     'The transaction simulation failed.',
+  [SendTransactionErrorCodes.ValidationError]:
+    'The transaction validation failed. Please try again.',
   [SendTransactionErrorCodes.TransactionFailed]:
     'The transaction failed. Please try again later.',
   [SendTransactionErrorCodes.GenericError]:
