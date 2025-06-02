@@ -29,7 +29,6 @@ export const setupMicrophone = () => {
 
   async function wrapped(constraints: MediaStreamConstraints) {
     const stream = await realGUM(constraints);
-    console.log('[Microphone] Stream started', stream);
     sendWebviewEvent({
       command: 'microphone-stream-started',
       payload: {
@@ -40,7 +39,6 @@ export const setupMicrophone = () => {
     live.add(stream);
     stream.getTracks().forEach((t) => {
       t.addEventListener('ended', () => {
-        console.log('[Microphone] Track ended', t, 'for stream:', stream.id);
         sendWebviewEvent({
           command: 'microphone-stream-ended',
           payload: {
@@ -67,7 +65,6 @@ export const setupMicrophone = () => {
     live.forEach((s: MediaStream) => {
       s.getTracks().forEach((t) => {
         t.stop();
-        console.log('[Microphone] Stopping track:', t.id, 'for stream:', s.id);
         sendWebviewEvent({
           command: 'microphone-stream-ended',
           payload: {
@@ -81,7 +78,6 @@ export const setupMicrophone = () => {
   };
 
   MiniKit.subscribe(ResponseEvent.MiniAppMicrophone, (payload) => {
-    console.log('[Microphone] Microphone', payload);
     // If the miniapp has requested the microphone and it has not been granted,
     // we stop all streams.
     if (
