@@ -156,7 +156,7 @@ const benignPayload = {
   domain: {
     name: 'MockERC20',
     version: '1',
-    chainId: 10,
+    chainId: 480,
     verifyingContract: '0x7f5c764cbc14f9669b88837ca1490cca17c31607',
   },
   primaryType: 'TransferWithAuthorization',
