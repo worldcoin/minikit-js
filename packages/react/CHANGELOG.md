@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.9.6
+
+### Patch Changes
+
+- Updated dependencies [b00f22c]
+  - @worldcoin/minikit-js@1.9.5
+
 ## 1.9.5
 
 ### Patch Changes

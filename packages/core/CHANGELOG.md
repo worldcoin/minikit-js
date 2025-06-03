@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.5
+
+### Patch Changes
+
+- b00f22c: Sharing!
+
 ## 1.9.4
 
 ### Patch Changes
