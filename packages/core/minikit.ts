@@ -668,7 +668,16 @@ export class MiniKit {
         );
         return null;
       }
-      if (MiniKit.user.deviceOS === 'ios' && typeof navigator !== 'undefined') {
+      if (
+        MiniKit.deviceProperties.deviceOS === 'ios' &&
+        typeof navigator !== 'undefined'
+      ) {
+        // Send the payload to the World App
+        sendMiniKitEvent<WebViewBasePayload>({
+          command: Command.Share,
+          version: this.miniKitCommandVersion[Command.Share],
+          payload: payload,
+        });
         navigator.share(payload);
       } else {
         // Only for android
