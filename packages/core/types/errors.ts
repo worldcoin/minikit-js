@@ -85,6 +85,7 @@ export enum SendTransactionErrorCodes {
   TransactionFailed = 'transaction_failed',
   GenericError = 'generic_error',
   DisallowedOperation = 'disallowed_operation',
+  ValidationError = 'validation_error',
   InvalidContract = 'invalid_contract',
   MaliciousOperation = 'malicious_operation',
   DailyTxLimitReached = 'daily_tx_limit_reached',
@@ -102,6 +103,8 @@ export const SendTransactionErrorMessage: Record<
   [SendTransactionErrorCodes.InputError]: 'Invalid payload.',
   [SendTransactionErrorCodes.SimulationFailed]:
     'The transaction simulation failed.',
+  [SendTransactionErrorCodes.ValidationError]:
+    'The transaction validation failed. Please try again.',
   [SendTransactionErrorCodes.TransactionFailed]:
     'The transaction failed. Please try again later.',
   [SendTransactionErrorCodes.GenericError]:
@@ -242,4 +245,16 @@ export const ShareFilesErrorMessage = {
   [ShareFilesErrorCodes.GenericError]: 'Something unexpected went wrong.',
   [ShareFilesErrorCodes.InvalidFileName]:
     'Invalid file name. Make sure you include the extension',
+};
+
+export enum MicrophoneErrorCodes {
+  MiniAppPermissionNotEnabled = 'mini_app_permission_not_enabled',
+  WorldAppPermissionNotEnabled = 'world_app_permission_not_enabled',
+}
+
+export const MicrophoneErrorMessage = {
+  [MicrophoneErrorCodes.MiniAppPermissionNotEnabled]:
+    'Microphone permission not enabled for your Mini App',
+  [MicrophoneErrorCodes.WorldAppPermissionNotEnabled]:
+    'Microphone permission not enabled in World App',
 };

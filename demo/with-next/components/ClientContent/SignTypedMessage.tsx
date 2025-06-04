@@ -138,36 +138,14 @@ const stateChangesPayload = {
 
 const benignPayload = {
   types: {
-    EIP712Domain: [
-      { name: 'name', type: 'string' },
-      { name: 'version', type: 'string' },
-      { name: 'chainId', type: 'uint256' },
-      { name: 'verifyingContract', type: 'address' },
-    ],
-    TransferWithAuthorization: [
-      { name: 'from', type: 'address' },
-      { name: 'to', type: 'address' },
-      { name: 'value', type: 'uint256' },
-      { name: 'validAfter', type: 'uint256' },
-      { name: 'validBefore', type: 'uint256' },
-      { name: 'nonce', type: 'bytes32' },
-    ],
+    Multiproposal: [{ name: 'multiproposalMerkleRoot', type: 'bytes32' }],
   },
-  domain: {
-    name: 'MockERC20',
-    version: '1',
-    chainId: 480,
-    verifyingContract: '0x7f5c764cbc14f9669b88837ca1490cca17c31607',
-  },
-  primaryType: 'TransferWithAuthorization',
+  primaryType: 'Multiproposal',
   message: {
-    from: '0xd809de3086ea4f53ed3979cead25e1ff72b564a3',
-    to: '0xcad35fc7a46f6b26c2eda7c153ad6948ab8d424f',
-    value: '1',
-    validAfter: 1700000000,
-    validBefore: 1774077843,
-    nonce: '0x123456789abcdef123456789abcdef123456789abcdef123456789abcdef1234',
+    multiproposalMerkleRoot:
+      '0x25036394ad71c7df18db57d4a48de979fda55b9607eeb5990951d898449a20dc',
   },
+  domain: { name: 'PWNMultiproposal' },
 };
 
 export const SignTypedData = () => {

@@ -19,11 +19,10 @@ export const tokenToDecimals = (amount: number, token: Tokens): number => {
 export const validatePaymentPayload = (payload: PayCommandInput): boolean => {
   if (
     payload.tokens.some(
-      (token) =>
-        token.symbol == 'USDCE' && parseFloat(token.token_amount) < 0.1,
+      (token) => token.symbol == 'USDC' && parseFloat(token.token_amount) < 0.1,
     )
   ) {
-    console.error('USDCE amount should be greater than $0.1');
+    console.error('USDC amount should be greater than $0.1');
     return false; // reject
   }
 

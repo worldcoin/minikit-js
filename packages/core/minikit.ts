@@ -1,5 +1,6 @@
 import { VerificationLevel } from '@worldcoin/idkit-core';
 import { encodeAction, generateSignal } from '@worldcoin/idkit-core/hashing';
+import { setupMicrophone } from 'helpers/microphone';
 import { validatePaymentPayload } from 'helpers/payment/client';
 import { compressAndPadProof } from 'helpers/proof';
 import { formatShareInput } from 'helpers/share';
@@ -109,6 +110,7 @@ export class MiniKit {
     [ResponseEvent.MiniAppGetPermissions]: () => {},
     [ResponseEvent.MiniAppSendHapticFeedback]: () => {},
     [ResponseEvent.MiniAppShare]: () => {},
+    [ResponseEvent.MiniAppMicrophone]: () => {},
   };
 
   public static appId: string | null = null;
@@ -255,6 +257,7 @@ export class MiniKit {
           MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.AlreadyInstalled],
       };
     }
+    setupMicrophone();
 
     if (!appId) {
       console.warn('App ID not provided during install');
@@ -278,8 +281,12 @@ export class MiniKit {
       window.WorldApp.is_optional_analytics;
     MiniKit.user.deviceOS = window.WorldApp.device_os;
     MiniKit.user.worldAppVersion = window.WorldApp.world_app_version;
+
     // Set device properties
     MiniKit.deviceProperties.safeAreaInsets = window.WorldApp.safe_area_insets;
+    MiniKit.deviceProperties.deviceOS = window.WorldApp.device_os;
+    MiniKit.deviceProperties.worldAppVersion =
+      window.WorldApp.world_app_version;
 
     try {
       window.MiniKit = MiniKit;
@@ -661,7 +668,16 @@ export class MiniKit {
         );
         return null;
       }
-      if (MiniKit.user.deviceOS === 'ios') {
+      if (
+        MiniKit.deviceProperties.deviceOS === 'ios' &&
+        typeof navigator !== 'undefined'
+      ) {
+        // Send the payload to the World App for Analytics
+        sendMiniKitEvent<WebViewBasePayload>({
+          command: Command.Share,
+          version: this.miniKitCommandVersion[Command.Share],
+          payload: payload,
+        });
         navigator.share(payload);
       } else {
         // Only for android

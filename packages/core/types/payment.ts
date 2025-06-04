@@ -1,10 +1,10 @@
 export enum Tokens {
-  USDCE = 'USDCE',
+  USDC = 'USDC',
   WLD = 'WLD',
 }
 
 export const TokenDecimals: { [key in Tokens]: number } = {
-  [Tokens.USDCE]: 6,
+  [Tokens.USDC]: 6,
   [Tokens.WLD]: 18,
 };
 
