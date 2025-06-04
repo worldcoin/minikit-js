@@ -672,7 +672,7 @@ export class MiniKit {
         MiniKit.deviceProperties.deviceOS === 'ios' &&
         typeof navigator !== 'undefined'
       ) {
-        // Send the payload to the World App
+        // Send the payload to the World App for Analytics
         sendMiniKitEvent<WebViewBasePayload>({
           command: Command.Share,
           version: this.miniKitCommandVersion[Command.Share],
