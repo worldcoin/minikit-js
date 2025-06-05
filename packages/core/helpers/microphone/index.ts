@@ -67,9 +67,9 @@ export const setupMicrophone = () => {
         t.stop();
         sendWebviewEvent({
           command: 'microphone-stream-ended',
+          version: 1,
           payload: {
             streamId: s.id,
-            version: 1,
           },
         });
       });
