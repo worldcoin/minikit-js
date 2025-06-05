@@ -156,7 +156,7 @@ export const CameraComponent = () => {
           onClick={() => {
             navigator.geolocation.getCurrentPosition(
               (position) =>
-                alert(
+                console.log(
                   `Location: ${position.coords.latitude}, ${position.coords.longitude}`,
                 ),
               (error) => alert(`Error: ${error.message}`),

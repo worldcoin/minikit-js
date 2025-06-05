@@ -87,6 +87,7 @@ export const setupMicrophone = () => {
         payload.error_code ===
           MicrophoneErrorCodes.WorldAppPermissionNotEnabled)
     ) {
+      console.log('stopping all microphone streams', payload);
       stopAllMiniAppMicrophoneStreams();
     }
   });
