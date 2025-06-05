@@ -31,9 +31,9 @@ export const setupMicrophone = () => {
     const stream = await realGUM(constraints);
     sendWebviewEvent({
       command: 'microphone-stream-started',
+      version: 1,
       payload: {
         streamId: stream.id,
-        version: 1,
       },
     });
     live.add(stream);
@@ -41,9 +41,9 @@ export const setupMicrophone = () => {
       t.addEventListener('ended', () => {
         sendWebviewEvent({
           command: 'microphone-stream-ended',
+          version: 1,
           payload: {
             streamId: stream.id,
-            version: 1,
           },
         });
         live.delete(stream);
