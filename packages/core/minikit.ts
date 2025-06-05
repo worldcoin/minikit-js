@@ -69,6 +69,7 @@ export const sendMiniKitEvent = <
 
 export class MiniKit {
   private static readonly MINIKIT_VERSION = 1;
+  private static readonly MINIKIT_MINOR_VERSION = 96;
 
   private static readonly miniKitCommandVersion: Record<Command, number> = {
     [Command.Verify]: 1,
@@ -120,7 +121,10 @@ export class MiniKit {
   private static sendInit() {
     sendWebviewEvent({
       command: 'init',
-      payload: { version: this.MINIKIT_VERSION },
+      payload: {
+        version: this.MINIKIT_VERSION,
+        minorVersion: this.MINIKIT_MINOR_VERSION,
+      },
     });
   }
 
