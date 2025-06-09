@@ -17,34 +17,40 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Common Development Commands
 
 **Setup:**
+
 ```bash
 pnpm i                    # Install dependencies
 ```
 
 **Development:**
+
 ```bash
 pnpm dev                  # Start all development servers (turbo)
 cd demo/with-next && pnpm dev  # Run comprehensive demo locally
 ```
 
 **Building:**
+
 ```bash
 pnpm build               # Build all packages (turbo)
 pnpm type-check          # Type check all packages
 ```
 
 **Testing:**
+
 ```bash
 cd packages/core && pnpm test  # Run core package tests
 ```
 
 **Code Quality:**
+
 ```bash
 pnpm lint                # Check formatting (prettier)
 pnpm format              # Fix formatting (prettier)
 ```
 
 **Releasing:**
+
 ```bash
 pnpm changeset           # Create changeset for version bump
 pnpm release             # Build and publish with changesets
@@ -53,18 +59,22 @@ pnpm release             # Build and publish with changesets
 ## Architecture
 
 ### Core SDK Design
+
 - **Singleton pattern:** `MiniKit` class as main entry point
 - **Command versioning:** Each command has version compatibility checking
 - **Event-driven architecture:** WebView postMessage for native communication
 - **Dual API support:** Both callback-based and Promise-based APIs
 
 ### Communication Protocol
+
 The SDK communicates with the World App native container via WebView postMessage:
+
 - Commands are sent as versioned payloads
 - Responses are handled through event subscription system
 - Error handling uses comprehensive error codes
 
 ### Key Features
+
 - Wallet authentication (SIWE - Sign-In with Ethereum)
 - Identity verification (World ID proofs)
 - Payments integration
@@ -75,16 +85,19 @@ The SDK communicates with the World App native container via WebView postMessage
 ## Package-Specific Information
 
 ### Core Package (`packages/core/`)
+
 - **Build tool:** tsup for ESM/CJS dual format
 - **Testing:** Jest with ts-jest
 - **Type checking:** `tsc --noEmit`
 - **Entry points:** Main SDK and minikit-provider React component
 
 ### React Package (`packages/react/`)
+
 - **Dependencies:** Workspace dependency on core package
 - **Exports:** React hooks for address book, transactions, username search
 
 ### Demo Applications
+
 - **with-next:** Full-featured demo using Next.js 15, next-auth, viem
 - **next-15-template:** Production starter with Mini Apps UI Kit
 
