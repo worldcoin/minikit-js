@@ -24,7 +24,9 @@ export const MiniKitProvider = ({
   children: ReactNode;
   props?: MiniKitProps;
 }) => {
-  const [isInstalled, setIsInstalled] = useState<boolean | undefined>(undefined);
+  const [isInstalled, setIsInstalled] = useState<boolean | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     const { success } = MiniKit.install(props?.appId);
