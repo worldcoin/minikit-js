@@ -42,7 +42,7 @@ export const MiniKitProvider = ({
           };
         }
       });
-    setIsInstalled(true);
+    setIsInstalled(success);
   }, [props?.appId]);
 
   return (

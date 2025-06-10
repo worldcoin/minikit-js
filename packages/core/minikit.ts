@@ -261,7 +261,6 @@ export class MiniKit {
           MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.AlreadyInstalled],
       };
     }
-    setupMicrophone();
 
     if (!appId) {
       console.warn('App ID not provided during install');
@@ -311,6 +310,7 @@ export class MiniKit {
 
     // If commands are missing we will install minikit regardless
     MiniKit.isReady = true;
+    setupMicrophone();
 
     if (!this.commandsValid(window.WorldApp.supported_commands)) {
       return {
