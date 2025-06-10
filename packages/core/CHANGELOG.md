@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.6
+
+### Patch Changes
+
+- 7fa57c9: microphone support and improvements to init
+
 ## 1.9.5
 
 ### Patch Changes
