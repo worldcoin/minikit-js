@@ -13,8 +13,8 @@ type MiniKitProps = {
   appId: string;
 };
 
-const MiniKitContext = createContext<{ isInstalled: boolean }>({
-  isInstalled: false,
+const MiniKitContext = createContext<{ isInstalled: boolean | undefined }>({
+  isInstalled: undefined,
 });
 
 export const MiniKitProvider = ({
@@ -24,10 +24,14 @@ export const MiniKitProvider = ({
   children: ReactNode;
   props?: MiniKitProps;
 }) => {
-  const [isInstalled, setIsInstalled] = useState(false);
+  const [isInstalled, setIsInstalled] = useState<boolean | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
-    MiniKit.install(props?.appId);
+    const { success } = MiniKit.install(props?.appId);
+    if (!success) return setIsInstalled(false);
+
     MiniKit.commandsAsync
       .getPermissions()
       .then(({ commandPayload: _, finalPayload }) => {
