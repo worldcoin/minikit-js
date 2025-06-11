@@ -125,13 +125,13 @@ export type GetPermissionsInput = {};
 
 export type GetPermissionsPayload = GetPermissionsInput;
 
+// Anchor: Send Haptic Feedback Payload
 export type HapticImpactStyle = 'light' | 'medium' | 'heavy' | 'soft' | 'rigid';
 
 export type HapticNotificationType = 'success' | 'warning' | 'error';
 
 export type HapticType = 'impact' | 'notification' | 'selection-changed';
 
-// Anchor: Send Haptic Feedback Payload
 export type SendHapticFeedbackInput =
   | {
       hapticsType: Extract<HapticType, 'notification'>;
