@@ -9,6 +9,8 @@ import { useCallback, useEffect, useState } from 'react';
 import * as yup from 'yup';
 import { validateSchema } from './helpers/validate-schema';
 
+const ALCHEMY_API_URL = process.env.NEXT_PUBLIC_ALCHEMY_API_URL;
+
 const signTypedDataSuccessPayloadSchema = yup.object({
   status: yup.string<'success'>().oneOf(['success']),
   signature: yup.string().required(),
@@ -206,8 +208,7 @@ export const SignTypedData = () => {
 
           const isValid = await (
             await Safe.init({
-              provider:
-                'https://opt-mainnet.g.alchemy.com/v2/Ha76ahWcm6iDVBU7GNr5n-ONLgzWnkWc',
+              provider: ALCHEMY_API_URL,
               safeAddress: payload.address,
             })
           ).isValidSignature(messageHash, payload.signature);
