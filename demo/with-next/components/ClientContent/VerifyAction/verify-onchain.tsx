@@ -22,7 +22,7 @@ const testVerifyAbi = [
 
 /** works on Prod QA App, app_id: app_dfbe55706a640c82dce839bb0ecae74d */
 export const TEST_VERIFY_CONTRACT_ADDRESS =
-  '0x793dda8ec2aff37945627ab64dd4e8b4e8ea4cb1';
+  '0x02ce0121bfc7f4d142d2da0452344923e59e53da';
 
 /**
  * Calls the TestVerify contract's verify function
