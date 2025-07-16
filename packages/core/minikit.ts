@@ -116,8 +116,9 @@ export class MiniKit {
 
   public static appId: string | null = null;
   public static user: User = {};
-  private static isReady: boolean = false;
   public static deviceProperties: DeviceProperties = {};
+  
+  private static isReady: boolean = false;
   private static sendInit() {
     sendWebviewEvent({
       command: 'init',
