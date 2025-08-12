@@ -29,26 +29,40 @@ export const setupMicrophone = () => {
 
   async function wrapped(constraints: MediaStreamConstraints) {
     const stream = await realGUM(constraints);
-    sendWebviewEvent({
-      command: 'microphone-stream-started',
-      version: 1,
-      payload: {
-        streamId: stream.id,
-      },
-    });
-    live.add(stream);
-    stream.getTracks().forEach((t) => {
-      t.addEventListener('ended', () => {
-        sendWebviewEvent({
-          command: 'microphone-stream-ended',
-          version: 1,
-          payload: {
-            streamId: stream.id,
-          },
-        });
-        live.delete(stream);
+
+    // Only track and send events for streams that have audio tracks
+    const hasAudioTrack = stream.getAudioTracks().length > 0;
+
+    if (hasAudioTrack) {
+      sendWebviewEvent({
+        command: 'microphone-stream-started',
+        version: 1,
+        payload: {
+          streamId: stream.id,
+        },
       });
-    });
+      live.add(stream);
+
+      stream.getAudioTracks().forEach((t) => {
+        t.addEventListener('ended', () => {
+          const allAudioTracksEnded = stream
+            .getAudioTracks()
+            .every((track) => track.readyState === 'ended');
+
+          if (allAudioTracksEnded) {
+            sendWebviewEvent({
+              command: 'microphone-stream-ended',
+              version: 1,
+              payload: {
+                streamId: stream.id,
+              },
+            });
+            live.delete(stream);
+          }
+        });
+      });
+    }
+
     return stream;
   }
 
@@ -63,8 +77,12 @@ export const setupMicrophone = () => {
 
   const stopAllMiniAppMicrophoneStreams = () => {
     live.forEach((s: MediaStream) => {
-      s.getTracks().forEach((t) => {
-        t.stop();
+      // Only stop audio tracks since we're only tracking streams with audio
+      const audioTracks = s.getAudioTracks();
+      if (audioTracks.length > 0) {
+        audioTracks.forEach((t) => {
+          t.stop();
+        });
         sendWebviewEvent({
           command: 'microphone-stream-ended',
           version: 1,
@@ -72,7 +90,7 @@ export const setupMicrophone = () => {
             streamId: s.id,
           },
         });
-      });
+      }
     });
     live.clear();
   };
