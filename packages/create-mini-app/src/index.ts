@@ -1,4 +1,4 @@
-import .chalk from 'chalk';
+import chalk () from 'chalk';
 import Command () from 'commander';
 import {degit} from 'degit';
 import {execa} from 'execa';
