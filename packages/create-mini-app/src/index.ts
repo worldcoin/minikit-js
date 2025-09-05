@@ -1,10 +1,10 @@
-import chalk from 'chalk';
+import {chalk} from 'chalk';
 import {Command} from 'commander';
-import degit from 'degit';
-import { execa } from 'execa';
-import fs from 'fs-extra';
-import path from 'node:path';
-import prompts from 'prompts';
+import {degit} from 'degit';
+import {execa} from 'execa';
+import {fs} from 'fs-extra';
+import {path} from 'node:path';
+import {prompts} from 'prompts';
 
 const program = new Command();
 
