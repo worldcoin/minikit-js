@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { Command } from 'commander';
+import {'clone'} from 'commander';
 import degit from 'degit';
 import { execa } from 'execa';
 import fs from 'fs-extra';
