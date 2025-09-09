@@ -26,8 +26,6 @@ const allPossibleHaptics: SendHapticFeedbackInput[] = [
   { hapticsType: 'impact', style: 'heavy' },
   { hapticsType: 'impact', style: 'light' },
   { hapticsType: 'impact', style: 'medium' },
-  { hapticsType: 'impact', style: 'soft' },
-  { hapticsType: 'impact', style: 'rigid' },
   { hapticsType: 'notification', style: 'error' },
   { hapticsType: 'notification', style: 'success' },
   { hapticsType: 'notification', style: 'warning' },

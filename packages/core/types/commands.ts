@@ -126,25 +126,19 @@ export type GetPermissionsInput = {};
 export type GetPermissionsPayload = GetPermissionsInput;
 
 // Anchor: Send Haptic Feedback Payload
-export type HapticImpactStyle = 'light' | 'medium' | 'heavy' | 'soft' | 'rigid';
-
-export type HapticNotificationStyle = 'success' | 'warning' | 'error';
-
-export type HapticType = 'impact' | 'notification' | 'selection-changed';
-
 export type SendHapticFeedbackInput =
   | {
-      hapticsType: Extract<HapticType, 'notification'>;
-      style: HapticNotificationStyle;
+      hapticsType: 'notification';
+      style: 'error' | 'success' | 'warning';
     }
   | {
-      hapticsType: Extract<HapticType, 'selection-changed'>;
+      hapticsType: 'selection-changed';
       // never necessary or used but improves DX
       style?: never;
     }
   | {
-      hapticsType: Extract<HapticType, 'impact'>;
-      style: HapticImpactStyle;
+      hapticsType: 'impact';
+      style: 'light' | 'medium' | 'heavy';
     };
 
 export type SendHapticFeedbackPayload = SendHapticFeedbackInput;
