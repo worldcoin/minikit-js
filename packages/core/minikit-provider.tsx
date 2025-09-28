@@ -17,7 +17,9 @@ type MiniKitContextValue = {
   isInstalled: boolean | undefined;
 };
 
-const MiniKitContext = createContext<MiniKitContextValue | undefined>(undefined);
+const MiniKitContext = createContext<MiniKitContextValue | undefined>(
+  undefined,
+);
 
 export const MiniKitProvider = ({
   children,
