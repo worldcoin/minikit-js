@@ -13,9 +13,11 @@ type MiniKitProps = {
   appId: string;
 };
 
-const MiniKitContext = createContext<{ isInstalled: boolean | undefined }>({
-  isInstalled: undefined,
-});
+type MiniKitContextValue = {
+  isInstalled: boolean | undefined;
+};
+
+const MiniKitContext = createContext<MiniKitContextValue | undefined>(undefined);
 
 export const MiniKitProvider = ({
   children,
