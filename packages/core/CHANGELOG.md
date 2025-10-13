@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.8
+
+### Patch Changes
+
+- df9df09: remove permission check
+
 ## 1.9.7
 
 ### Patch Changes
