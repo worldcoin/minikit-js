@@ -83,6 +83,14 @@ export const Versions = () => {
           </pre>
         </div>
       </div>
+      <div>
+        <p>Location:</p>
+        <div className="bg-gray-300 min-h-[100px] p-2">
+          <pre className="break-all whitespace-break-spaces">
+            {JSON.stringify(MiniKit.location ?? null, null, 2)}
+          </pre>
+        </div>
+      </div>
     </div>
   );
 };
