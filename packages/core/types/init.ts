@@ -39,3 +39,17 @@ export type UserNameService = {
   username?: string;
   profilePictureUrl?: string;
 };
+
+export type MiniAppLocation = {
+  countryCode?: string;
+  regionCode?: string;
+};
+
+export enum MiniAppLaunchLocation {
+  Chat = "chat",
+  Home = "home",
+  AppStore = "app-store",
+  DeepLink = "deep-link",
+  QuickAction = "quick-action",
+  ContentCard = "content-card",
+}

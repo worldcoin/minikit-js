@@ -1,6 +1,7 @@
 import { VerificationLevel } from '@worldcoin/idkit-core';
 import { Permission } from './commands';
 import {
+  ChatErrorCodes,
   GetPermissionsErrorCodes,
   MicrophoneErrorCodes,
   PaymentErrorCodes,
@@ -30,6 +31,7 @@ export enum ResponseEvent {
   MiniAppSendHapticFeedback = 'miniapp-send-haptic-feedback',
   MiniAppShare = 'miniapp-share',
   MiniAppMicrophone = 'miniapp-microphone',
+  MiniAppChat = 'miniapp-chat',
 }
 
 export type MiniAppVerifyActionSuccessPayload = {
@@ -268,6 +270,23 @@ export type MiniAppMicrophonePayload =
   | MiniAppMicrophoneSuccessPayload
   | MiniAppMicrophoneErrorPayload;
 
+export type MiniAppChatSuccessPayload = {
+  status: 'success';
+  count: number; // Number of recipients
+  timestamp: string;
+  version: number;
+};
+
+export type MiniAppChatErrorPayload = {
+  status: 'error';
+  error_code: ChatErrorCodes;
+  version: number;
+};
+
+export type MiniAppChatPayload =
+  | MiniAppChatSuccessPayload
+  | MiniAppChatErrorPayload;
+
 type EventPayloadMap = {
   [ResponseEvent.MiniAppVerifyAction]: MiniAppVerifyActionPayload;
   [ResponseEvent.MiniAppPayment]: MiniAppPaymentPayload;
@@ -281,6 +300,7 @@ type EventPayloadMap = {
   [ResponseEvent.MiniAppSendHapticFeedback]: MiniAppSendHapticFeedbackPayload;
   [ResponseEvent.MiniAppShare]: MiniAppSharePayload;
   [ResponseEvent.MiniAppMicrophone]: MiniAppMicrophonePayload;
+  [ResponseEvent.MiniAppChat]: MiniAppChatPayload;
 };
 
 export type EventPayload<T extends ResponseEvent = ResponseEvent> =
