@@ -35,7 +35,9 @@ export const MiniKitProvider = ({
   useEffect(() => {
     const { success } = MiniKit.install(props?.appId);
     if (!success) return setIsInstalled(false);
-
+    console.warn(
+      'MiniKit permissions not fetched in provider. MiniKit.user.permissions will be inaccurate.',
+    );
     // MiniKit.commandsAsync
     //   .getPermissions()
     //   .then(({ commandPayload: _, finalPayload }) => {
