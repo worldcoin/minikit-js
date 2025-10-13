@@ -9,6 +9,7 @@ import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useState } from 'react';
 import { CameraComponent } from './Camera';
+import { Chat } from './Chat';
 import CheckRequests from './CheckRequests';
 import { ExternalLinks } from './ExternalLinks';
 import { GetPermissions } from './GetPermissions';
@@ -137,6 +138,8 @@ export const ClientContent = () => {
           <SendHapticFeedback />
           <hr />
           <Share />
+          <hr />
+          <Chat />
           <hr />
           <input className="text-xs border-black border-2" />
           <ExternalLinks />
