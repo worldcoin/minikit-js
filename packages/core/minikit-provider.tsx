@@ -36,16 +36,16 @@ export const MiniKitProvider = ({
     const { success } = MiniKit.install(props?.appId);
     if (!success) return setIsInstalled(false);
 
-    MiniKit.commandsAsync
-      .getPermissions()
-      .then(({ commandPayload: _, finalPayload }) => {
-        if (finalPayload.status === 'success') {
-          MiniKit.user.permissions = {
-            notifications: finalPayload.permissions.notifications,
-            contacts: finalPayload.permissions.contacts,
-          };
-        }
-      });
+    // MiniKit.commandsAsync
+    //   .getPermissions()
+    //   .then(({ commandPayload: _, finalPayload }) => {
+    //     if (finalPayload.status === 'success') {
+    //       MiniKit.user.permissions = {
+    //         notifications: finalPayload.permissions.notifications,
+    //         contacts: finalPayload.permissions.contacts,
+    //       };
+    //     }
+    //   });
     setIsInstalled(success);
   }, [props?.appId]);
 
