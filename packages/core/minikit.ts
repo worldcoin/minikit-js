@@ -39,6 +39,7 @@ import {
 import {
   MiniKitInstallErrorCodes,
   MiniKitInstallErrorMessage,
+  VerificationErrorCodes,
 } from 'types/errors';
 import { Network } from 'types/payment';
 import { sendWebviewEvent } from './helpers/send-webview-event';
@@ -777,6 +778,14 @@ export class MiniKit {
             response.finalPayload.proof = await compressAndPadProof(
               response.finalPayload.proof as `0x${string}`,
             );
+          }
+          // Align error codes on iOS and Android
+          if (
+            response.finalPayload.status === 'error' &&
+            (response.finalPayload.error_code as string) == 'user_rejected'
+          ) {
+            response.finalPayload.error_code =
+              VerificationErrorCodes.VerificationRejected;
           }
           resolve(response);
         } catch (error) {
