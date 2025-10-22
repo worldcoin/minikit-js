@@ -1,6 +1,6 @@
 import {
-  ChatPayload,
   ChatErrorCodes,
+  ChatPayload,
   MiniAppChatPayload,
   MiniKit,
   ResponseEvent,
@@ -26,8 +26,10 @@ const chatErrorPayloadSchema = yup.object({
 });
 
 export const Chat = () => {
-  const [sentChatPayload, setSentChatPayload] =
-    useState<Record<string, any> | null>(null);
+  const [sentChatPayload, setSentChatPayload] = useState<Record<
+    string,
+    any
+  > | null>(null);
   const [toAddress, setToAddress] = useState<string>('');
   const [message, setMessage] = useState<string>('Hello from MiniKit!');
 
@@ -77,8 +79,8 @@ export const Chat = () => {
 
   const onSendChat = useCallback(() => {
     const chatPayload: ChatPayload = {
+      message: message || '',
       ...(toAddress && { to: toAddress.split(',').map((addr) => addr.trim()) }),
-      ...(message && { message }),
     };
 
     const payload = MiniKit.commands.chat(chatPayload);
