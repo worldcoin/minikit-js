@@ -731,6 +731,11 @@ export class MiniKit {
         return null;
       }
 
+      if (payload.message.length === 0) {
+        console.error("'chat' command requires a non-empty message");
+        return null;
+      }
+
       sendMiniKitEvent<WebViewBasePayload>({
         command: Command.Chat,
         version: this.miniKitCommandVersion[Command.Chat],

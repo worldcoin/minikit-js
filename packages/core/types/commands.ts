@@ -167,7 +167,7 @@ export type SharePayload = {
 // Anchor: Chat Payload
 export type ChatPayload = {
   to?: string[]; // Address or World Username
-  message?: string;
+  message: string; // Required field
 };
 
 type CommandReturnPayloadMap = {
