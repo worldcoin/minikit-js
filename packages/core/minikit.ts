@@ -172,6 +172,14 @@ export class MiniKit {
       const wrappedHandler: EventHandler<ResponseEvent.MiniAppVerifyAction> = (
         payload,
       ) => {
+        // Align error codes on iOS and Android
+        if (
+          payload.status === 'error' &&
+          (payload.error_code as string) == 'user_rejected'
+        ) {
+          payload.error_code = VerificationErrorCodes.VerificationRejected;
+        }
+
         if (
           payload.status === 'success' &&
           payload.verification_level === VerificationLevel.Orb
@@ -778,14 +786,6 @@ export class MiniKit {
             response.finalPayload.proof = await compressAndPadProof(
               response.finalPayload.proof as `0x${string}`,
             );
-          }
-          // Align error codes on iOS and Android
-          if (
-            response.finalPayload.status === 'error' &&
-            (response.finalPayload.error_code as string) == 'user_rejected'
-          ) {
-            response.finalPayload.error_code =
-              VerificationErrorCodes.VerificationRejected;
           }
           resolve(response);
         } catch (error) {
