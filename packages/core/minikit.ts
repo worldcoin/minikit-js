@@ -393,6 +393,19 @@ export class MiniKit {
     };
   };
 
+  // This is a helper function for developers to generate MiniApp URLs
+  public static getMiniAppUrl = (path: string, appId?: string): string => {
+    const baseUrl = new URL('https://world.org/mini-app');
+    if (!this.appId && !appId) {
+      throw new Error('AppID must be defined to generate MiniApp URL');
+    }
+    // Add app_id as query param and path as a url encoded query param
+    baseUrl.searchParams.append('app_id', this.appId || appId!);
+    const fullPath = path.startsWith('/') ? path : `/${path}`;
+    baseUrl.searchParams.append('path', encodeURIComponent(fullPath));
+    return baseUrl.toString();
+  };
+
   // Simply re-exporting the existing function
   public static getUserInfo = this.getUserByAddress;
 
