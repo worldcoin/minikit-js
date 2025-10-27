@@ -406,6 +406,29 @@ export class MiniKit {
     return baseUrl.toString();
   };
 
+  // Opens the profile card for a given username or wallet address
+  public static showProfileCard = (
+    username?: string,
+    walletAddress?: string,
+  ): void => {
+    if (!username && !walletAddress) {
+      console.error(
+        'Either username or walletAddress must be provided to show profile card',
+      );
+      return;
+    }
+    if (username) {
+      window.open(
+        `worldapp://profile?username=${encodeURIComponent(username)}`,
+      );
+      return;
+    } else {
+      window.open(
+        `worldapp://profile?address=${encodeURIComponent(walletAddress || '')}`,
+      );
+    }
+  };
+
   // Simply re-exporting the existing function
   public static getUserInfo = this.getUserByAddress;
 
