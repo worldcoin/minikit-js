@@ -98,8 +98,8 @@ export const Versions = () => {
           <pre className="break-all whitespace-break-spaces">
             {JSON.stringify(
               MiniKit.getMiniAppUrl(
-                '/test',
                 'app_dec1bff0efe878fea0011d5b8b17ce99',
+                '/test',
               ) ?? null,
               null,
               2,
