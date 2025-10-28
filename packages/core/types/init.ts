@@ -67,7 +67,8 @@ const WORLD_APP_LAUNCH_LOCATION_MAP: Record<string, MiniAppLaunchLocation> = {
 export const mapWorldAppLaunchLocation = (
   location: string | null | undefined,
 ): MiniAppLaunchLocation | null => {
-  if (!location) return null;
+  if (!location || typeof location !== 'string') return null;
+  console.log('MiniKit launch location mapped:', location);
 
   const normalizedLocation = location.toLowerCase();
 
