@@ -46,10 +46,30 @@ export type MiniAppLocation = {
 };
 
 export enum MiniAppLaunchLocation {
-  Chat = "chat",
-  Home = "home",
-  AppStore = "app-store",
-  DeepLink = "deep-link",
-  QuickAction = "quick-action",
-  ContentCard = "content-card",
+  Chat = 'chat',
+  Home = 'home',
+  AppStore = 'app-store',
+  DeepLink = 'deep-link',
+  WalletTab = 'wallet-tab',
 }
+
+const WORLD_APP_LAUNCH_LOCATION_MAP: Record<string, MiniAppLaunchLocation> = {
+  'app-store': MiniAppLaunchLocation.AppStore,
+  carousel: MiniAppLaunchLocation.AppStore,
+  explore: MiniAppLaunchLocation.AppStore,
+  app_details: MiniAppLaunchLocation.AppStore,
+  deeplink: MiniAppLaunchLocation.DeepLink,
+  homepage: MiniAppLaunchLocation.Home,
+  wallet_tab: MiniAppLaunchLocation.WalletTab,
+  world_chat: MiniAppLaunchLocation.Chat,
+};
+
+export const mapWorldAppLaunchLocation = (
+  location: string | null | undefined,
+): MiniAppLaunchLocation | null => {
+  if (!location) return null;
+
+  const normalizedLocation = location.toLowerCase();
+
+  return WORLD_APP_LAUNCH_LOCATION_MAP[normalizedLocation] ?? null;
+};

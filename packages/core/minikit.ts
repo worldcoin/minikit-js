@@ -45,6 +45,7 @@ import { Network } from 'types/payment';
 import { sendWebviewEvent } from './helpers/send-webview-event';
 import {
   DeviceProperties,
+  mapWorldAppLaunchLocation,
   MiniAppLaunchLocation,
   User,
   UserNameService,
@@ -313,7 +314,7 @@ export class MiniKit {
       window.WorldApp.world_app_version;
 
     // Set launch location
-    MiniKit.location = window.WorldApp.location;
+    MiniKit.location = mapWorldAppLaunchLocation(window.WorldApp.location);
 
     try {
       window.MiniKit = MiniKit;
@@ -394,13 +395,11 @@ export class MiniKit {
   };
 
   // This is a helper function for developers to generate MiniApp URLs
-  public static getMiniAppUrl = (path?: string, appId?: string): string => {
+  public static getMiniAppUrl = (appId: string, path?: string): string => {
     const baseUrl = new URL('https://world.org/mini-app');
-    if (!this.appId && !appId) {
-      throw new Error('AppID must be defined to generate MiniApp URL');
-    }
+
     // Add app_id as query param and path as a url encoded query param
-    baseUrl.searchParams.append('app_id', this.appId || appId!);
+    baseUrl.searchParams.append('app_id', appId);
     if (path) {
       const fullPath = path.startsWith('/') ? path : `/${path}`;
       baseUrl.searchParams.append('path', encodeURIComponent(fullPath));
