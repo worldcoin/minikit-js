@@ -29,10 +29,10 @@ importers:
         version: 1.0.2(@types/react-dom@19.1.2(@types/react@19.1.1))(@types/react@19.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@4.1.4)
       '@worldcoin/minikit-js':
         specifier: latest
-        version: 1.9.2(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.23.5(typescript@5.5.4))
+        version: 1.9.8(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.23.5(typescript@5.5.4))
       '@worldcoin/minikit-react':
         specifier: latest
-        version: 1.9.3(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.23.5(typescript@5.5.4))
+        version: 1.9.9(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.23.5(typescript@5.5.4))
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -2055,15 +2055,15 @@ packages:
       tailwindcss:
         optional: true
 
-  '@worldcoin/minikit-js@1.9.2':
-    resolution: {integrity: sha512-WwJmsemco88mYr/kGohdL/pRhKnDWHuSn+mYk29KIc3cEB9fHWvtpTB9l34qgiMwBdQixh5IoMYTbhFNyIXLxw==}
+  '@worldcoin/minikit-js@1.9.8':
+    resolution: {integrity: sha512-BUjB8q4bqaQvwyye2ij8XopD6zq+g8lZ4CxnmtZufwoQ/fIYdfRltTPTbUDsuwWaXk9NrURuhxzEBbALKqZ/4w==}
     engines: {node: '>= 16'}
     peerDependencies:
       react: ^17 || ^18 || ^19
       viem: ^2.23.5
 
-  '@worldcoin/minikit-react@1.9.3':
-    resolution: {integrity: sha512-aBqaD/TI2JsAyMScTy6/1PZIYa1j5bLiNAUpQVUbRmWJAqDqnItql6cICabvYk9/Gmd52asYZH5S36wb898F7w==}
+  '@worldcoin/minikit-react@1.9.9':
+    resolution: {integrity: sha512-AUHyGnTHCC2qXu8UYmvgBUVQEekYrjpIDj2MjdATDoJTdEP5Gje2EICxmDhfcvvWsQMNPEk4BaV2BtWf7Qf6ow==}
     engines: {node: '>= 16'}
     peerDependencies:
       react: ^18 || ^19
@@ -7168,7 +7168,7 @@ snapshots:
       - '@types/react'
       - '@types/react-dom'
 
-  '@worldcoin/minikit-js@1.9.2(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.23.5(typescript@5.5.4))':
+  '@worldcoin/minikit-js@1.9.8(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.23.5(typescript@5.5.4))':
     dependencies:
       '@worldcoin/idkit-core': 2.0.2(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)
       abitype: 1.0.8(typescript@5.5.4)
@@ -7180,9 +7180,9 @@ snapshots:
       - typescript
       - zod
 
-  '@worldcoin/minikit-react@1.9.3(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.23.5(typescript@5.5.4))':
+  '@worldcoin/minikit-react@1.9.9(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.23.5(typescript@5.5.4))':
     dependencies:
-      '@worldcoin/minikit-js': 1.9.2(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.23.5(typescript@5.5.4))
+      '@worldcoin/minikit-js': 1.9.8(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.23.5(typescript@5.5.4))
       abitype: 1.0.8(typescript@5.5.4)
       react: 19.1.0
       turbo: 2.3.3
