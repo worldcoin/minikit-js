@@ -16,6 +16,7 @@ export enum Command {
   GetPermissions = 'get-permissions',
   SendHapticFeedback = 'send-haptic-feedback',
   Share = 'share',
+  Chat = 'chat',
 }
 
 export type WebViewBasePayload = {
@@ -163,6 +164,12 @@ export type SharePayload = {
   url?: string;
 };
 
+// Anchor: Chat Payload
+export type ChatPayload = {
+  to?: string[]; // Address or World Username
+  message: string; // Required field
+};
+
 type CommandReturnPayloadMap = {
   [Command.Verify]: VerifyCommandPayload;
   [Command.Pay]: PayCommandPayload;
@@ -175,6 +182,7 @@ type CommandReturnPayloadMap = {
   [Command.GetPermissions]: GetPermissionsPayload;
   [Command.SendHapticFeedback]: SendHapticFeedbackPayload;
   [Command.Share]: SharePayload;
+  [Command.Chat]: ChatPayload;
 };
 export type CommandReturnPayload<T extends Command> =
   T extends keyof CommandReturnPayloadMap ? CommandReturnPayloadMap[T] : never;
