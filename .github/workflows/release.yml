@@ -7,21 +7,27 @@ on:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
+permissions:
+  contents: write
+  attestations: write
+  id-token: write
+
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0 (https://github.com/actions/checkout/releases/tag/v6.0.0)
 
       - name: Setup Node.js 22.x
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0 (https://github.com/actions/setup-node/releases/tag/v6.0.0)
         with:
           node-version: 22.x
 
       - name: Setup PNPM
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0 (https://github.com/pnpm/action-setup/releases/tag/v4.2.0)
         with:
           version: 9.12.1
 
@@ -30,11 +36,8 @@ jobs:
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
-        uses: changesets/action@v1
+        uses: changesets/action@e0145edc7d9d8679003495b11f87bd8ef63c0cba # v1.5.3 (https://github.com/changesets/action/releases/tag/v1.5.3)
         with:
-          # This expects you to have a script called release which does a build for your packages and calls changeset publish
           publish: pnpm release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
+          GITHUB_TOKEN: ${{ github.token }}
