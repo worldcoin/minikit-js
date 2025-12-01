@@ -5,6 +5,7 @@ import {
   MiniKitInstallErrorCodes,
   MiniKitInstallErrorMessage,
 } from '@worldcoin/minikit-js';
+import clsx from 'clsx';
 
 const appId = 'your-app-id';
 
@@ -82,6 +83,40 @@ export const Versions = () => {
             {JSON.stringify(MiniKit.deviceProperties ?? null, null, 2)}
           </pre>
         </div>
+      </div>
+      <div>
+        <p>Location:</p>
+        <div className="bg-gray-300 min-h-[100px] p-2">
+          <pre className="break-all whitespace-break-spaces">
+            {JSON.stringify(MiniKit.location ?? null, null, 2)}
+          </pre>
+        </div>
+      </div>
+      <div>
+        <p>App URL:</p>
+        <div className="bg-gray-300 min-h-[100px] p-2">
+          <pre className="break-all whitespace-break-spaces">
+            {JSON.stringify(
+              MiniKit.getMiniAppUrl(
+                'app_dec1bff0efe878fea0011d5b8b17ce99',
+                '/test',
+              ) ?? null,
+              null,
+              2,
+            )}
+          </pre>
+        </div>
+      </div>
+      <div>
+        <p>Show profile card:</p>
+        <button
+          className={clsx(
+            'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
+          )}
+          onClick={() => MiniKit.showProfileCard('andy')}
+        >
+          Show Profile Card
+        </button>
       </div>
     </div>
   );

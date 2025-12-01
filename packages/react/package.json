@@ -1,6 +1,6 @@
 {
   "name": "@worldcoin/minikit-react",
-  "version": "1.9.7",
+  "version": "1.9.9",
   "homepage": "https://docs.worldcoin.org/mini-apps",
   "description": "minikit-react is a set of hooks for building mini-apps",
   "license": "MIT",

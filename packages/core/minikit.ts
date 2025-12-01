@@ -10,6 +10,7 @@ import { validateSendTransactionPayload } from 'helpers/transaction/validate-pay
 import { getUserProfile } from 'helpers/usernames';
 import {
   AsyncHandlerReturn,
+  ChatPayload,
   Command,
   CommandReturnPayload,
   GetPermissionsPayload,
@@ -38,13 +39,21 @@ import {
 import {
   MiniKitInstallErrorCodes,
   MiniKitInstallErrorMessage,
+  VerificationErrorCodes,
 } from 'types/errors';
 import { Network } from 'types/payment';
 import { sendWebviewEvent } from './helpers/send-webview-event';
-import { DeviceProperties, User, UserNameService } from './types/init';
+import {
+  DeviceProperties,
+  mapWorldAppLaunchLocation,
+  MiniAppLaunchLocation,
+  User,
+  UserNameService,
+} from './types/init';
 import {
   EventHandler,
   EventPayload,
+  MiniAppChatPayload,
   MiniAppGetPermissionsPayload,
   MiniAppPaymentPayload,
   MiniAppRequestPermissionPayload,
@@ -83,6 +92,7 @@ export class MiniKit {
     [Command.GetPermissions]: 1,
     [Command.SendHapticFeedback]: 1,
     [Command.Share]: 1,
+    [Command.Chat]: 1,
   };
 
   private static isCommandAvailable = {
@@ -97,6 +107,7 @@ export class MiniKit {
     [Command.GetPermissions]: false,
     [Command.SendHapticFeedback]: false,
     [Command.Share]: false,
+    [Command.Chat]: false,
   };
 
   private static listeners: Record<ResponseEvent, EventHandler> = {
@@ -112,12 +123,15 @@ export class MiniKit {
     [ResponseEvent.MiniAppSendHapticFeedback]: () => {},
     [ResponseEvent.MiniAppShare]: () => {},
     [ResponseEvent.MiniAppMicrophone]: () => {},
+    [ResponseEvent.MiniAppChat]: () => {},
   };
 
   public static appId: string | null = null;
   public static user: User = {};
-  private static isReady: boolean = false;
   public static deviceProperties: DeviceProperties = {};
+  public static location: MiniAppLaunchLocation | null = null;
+
+  private static isReady: boolean = false;
   private static sendInit() {
     sendWebviewEvent({
       command: 'init',
@@ -159,6 +173,14 @@ export class MiniKit {
       const wrappedHandler: EventHandler<ResponseEvent.MiniAppVerifyAction> = (
         payload,
       ) => {
+        // Align error codes on iOS and Android
+        if (
+          payload.status === 'error' &&
+          (payload.error_code as string) == 'user_rejected'
+        ) {
+          payload.error_code = VerificationErrorCodes.VerificationRejected;
+        }
+
         if (
           payload.status === 'success' &&
           payload.verification_level === VerificationLevel.Orb
@@ -291,6 +313,9 @@ export class MiniKit {
     MiniKit.deviceProperties.worldAppVersion =
       window.WorldApp.world_app_version;
 
+    // Set launch location
+    MiniKit.location = mapWorldAppLaunchLocation(window.WorldApp.location);
+
     try {
       window.MiniKit = MiniKit;
       this.sendInit();
@@ -367,6 +392,42 @@ export class MiniKit {
       username: user.username,
       profilePictureUrl: user.profile_picture_url,
     };
+  };
+
+  // This is a helper function for developers to generate MiniApp URLs
+  public static getMiniAppUrl = (appId: string, path?: string): string => {
+    const baseUrl = new URL('https://world.org/mini-app');
+
+    // Add app_id as query param and path as a url encoded query param
+    baseUrl.searchParams.append('app_id', appId);
+    if (path) {
+      const fullPath = path.startsWith('/') ? path : `/${path}`;
+      baseUrl.searchParams.append('path', encodeURIComponent(fullPath));
+    }
+    return baseUrl.toString();
+  };
+
+  // Opens the profile card for a given username or wallet address
+  public static showProfileCard = (
+    username?: string,
+    walletAddress?: string,
+  ): void => {
+    if (!username && !walletAddress) {
+      console.error(
+        'Either username or walletAddress must be provided to show profile card',
+      );
+      return;
+    }
+    if (username) {
+      window.open(
+        `worldapp://profile?username=${encodeURIComponent(username)}`,
+      );
+      return;
+    } else {
+      window.open(
+        `worldapp://profile?address=${encodeURIComponent(walletAddress || '')}`,
+      );
+    }
   };
 
   // Simply re-exporting the existing function
@@ -704,6 +765,31 @@ export class MiniKit {
       }
       return payload;
     },
+
+    chat: (payload: ChatPayload): ChatPayload | null => {
+      if (
+        typeof window === 'undefined' ||
+        !this.isCommandAvailable[Command.Chat]
+      ) {
+        console.error(
+          "'chat' command is unavailable. Check MiniKit.install() or update the app version",
+        );
+        return null;
+      }
+
+      if (payload.message.length === 0) {
+        console.error("'chat' command requires a non-empty message");
+        return null;
+      }
+
+      sendMiniKitEvent<WebViewBasePayload>({
+        command: Command.Chat,
+        version: this.miniKitCommandVersion[Command.Chat],
+        payload,
+      });
+
+      return payload;
+    },
   };
 
   /**
@@ -924,6 +1010,25 @@ export class MiniKit {
           resolve({
             commandPayload: response.commandPayload as ShareInput | null,
             finalPayload: response.finalPayload as MiniAppSharePayload,
+          });
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
+    chat: async (
+      payload: ChatPayload,
+    ): AsyncHandlerReturn<ChatPayload | null, MiniAppChatPayload> => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await MiniKit.awaitCommand(
+            ResponseEvent.MiniAppChat,
+            Command.Chat,
+            () => this.commands.chat(payload),
+          );
+          resolve({
+            commandPayload: response.commandPayload as ChatPayload | null,
+            finalPayload: response.finalPayload as MiniAppChatPayload,
           });
         } catch (error) {
           reject(error);

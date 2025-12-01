@@ -258,3 +258,15 @@ export const MicrophoneErrorMessage = {
   [MicrophoneErrorCodes.WorldAppPermissionNotEnabled]:
     'Microphone permission not enabled in World App',
 };
+
+export enum ChatErrorCodes {
+  UserRejected = 'user_rejected',
+  SendFailed = 'send_failed',
+  GenericError = 'generic_error',
+}
+
+export const ChatErrorMessage = {
+  [ChatErrorCodes.UserRejected]: 'User rejected the request.',
+  [ChatErrorCodes.SendFailed]: 'Failed to send the message.',
+  [ChatErrorCodes.GenericError]: 'Something unexpected went wrong.',
+};

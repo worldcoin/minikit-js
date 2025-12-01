@@ -13,9 +13,13 @@ type MiniKitProps = {
   appId: string;
 };
 
-const MiniKitContext = createContext<{ isInstalled: boolean | undefined }>({
-  isInstalled: undefined,
-});
+type MiniKitContextValue = {
+  isInstalled: boolean | undefined;
+};
+
+const MiniKitContext = createContext<MiniKitContextValue | undefined>(
+  undefined,
+);
 
 export const MiniKitProvider = ({
   children,
@@ -31,17 +35,19 @@ export const MiniKitProvider = ({
   useEffect(() => {
     const { success } = MiniKit.install(props?.appId);
     if (!success) return setIsInstalled(false);
-
-    MiniKit.commandsAsync
-      .getPermissions()
-      .then(({ commandPayload: _, finalPayload }) => {
-        if (finalPayload.status === 'success') {
-          MiniKit.user.permissions = {
-            notifications: finalPayload.permissions.notifications,
-            contacts: finalPayload.permissions.contacts,
-          };
-        }
-      });
+    console.warn(
+      'MiniKit permissions not fetched in provider. MiniKit.user.permissions will be inaccurate.',
+    );
+    // MiniKit.commandsAsync
+    //   .getPermissions()
+    //   .then(({ commandPayload: _, finalPayload }) => {
+    //     if (finalPayload.status === 'success') {
+    //       MiniKit.user.permissions = {
+    //         notifications: finalPayload.permissions.notifications,
+    //         contacts: finalPayload.permissions.contacts,
+    //       };
+    //     }
+    //   });
     setIsInstalled(success);
   }, [props?.appId]);
 

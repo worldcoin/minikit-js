@@ -28,5 +28,6 @@ interface Window {
       bottom: number;
       left: number;
     };
+    location: string | null | undefined;
   };
 }

@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.9.8
+
+### Patch Changes
+
+- df9df09: remove permission check
+
+## 1.9.7
+
+### Patch Changes
+
+- 8e1a448: microphone support and improvements to init
+
 ## 1.9.6
 
 ### Patch Changes
