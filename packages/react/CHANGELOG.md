@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.9.10
+
+### Patch Changes
+
+- de45ae3: release chat and fix bugs
+- Updated dependencies [de45ae3]
+  - @worldcoin/minikit-js@1.9.9
+
 ## 1.9.9
 
 ### Patch Changes
