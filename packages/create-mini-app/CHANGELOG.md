@@ -1,5 +1,11 @@
 # @worldcoin/create-mini-app
 
+## 0.4.1
+
+### Patch Changes
+
+- de45ae3: release chat and fix bugs
+
 ## 0.4.0
 
 ### Minor Changes

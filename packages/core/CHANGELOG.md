@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.9
+
+### Patch Changes
+
+- de45ae3: release chat and fix bugs
+
 ## 1.9.8
 
 ### Patch Changes
