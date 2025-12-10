@@ -5,6 +5,10 @@
   "license": "MIT",
   "private": false,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/worldcoin/minikit-js.git"
+  },
   "bin": {
     "create-mini-app": "./dist/index.js"
   },
