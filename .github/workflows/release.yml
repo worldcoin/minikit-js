@@ -16,7 +16,8 @@ permissions:
 jobs:
   release:
     name: Release
-    runs-on: ubuntu-latest
+    runs-on:
+      group: arc-public-large-amd64-runner
     environment: production
     steps:
       - name: Checkout Repo
