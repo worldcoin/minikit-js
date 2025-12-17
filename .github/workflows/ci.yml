@@ -5,7 +5,8 @@ on:
 jobs:
   lint:
     name: Lint
-    runs-on: ubuntu-24.04
+    runs-on:
+      group: arc-public-large-amd64-runner
 
     steps:
       - uses: actions/checkout@v4
@@ -28,7 +29,8 @@ jobs:
 
   typecheck:
     name: Typecheck
-    runs-on: ubuntu-24.04
+    runs-on:
+      group: arc-public-large-amd64-runner
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -53,7 +55,8 @@ jobs:
 
   run-tests:
     name: Run Tests
-    runs-on: ubuntu-24.04
+    runs-on:
+      group: arc-public-large-amd64-runner
     defaults:
       run:
         working-directory: packages/core
