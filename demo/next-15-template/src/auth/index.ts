@@ -4,7 +4,7 @@ import {
   MiniKit,
   verifySiweMessage,
 } from '@worldcoin/minikit-js';
-import NextAuth, { type DefaultSession } from 'next-auth';
+import NextAuth, { type DefaultSession, NextAuthResult } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 
 declare module 'next-auth' {
@@ -26,7 +26,7 @@ declare module 'next-auth' {
 // Auth configuration for Wallet Auth based sessions
 // For more information on each option (and a full list of options) go to
 // https://authjs.dev/getting-started/authentication/credentials
-export const { handlers, signIn, signOut, auth } = NextAuth({
+const nextAuth = NextAuth({
   secret: process.env.NEXTAUTH_SECRET,
   session: { strategy: 'jwt' },
   providers: [
@@ -95,3 +95,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
   },
 });
+
+export const handlers: NextAuthResult['handlers'] = nextAuth.handlers;
+export const signIn: NextAuthResult['signIn'] = nextAuth.signIn;
+export const signOut: NextAuthResult['signOut'] = nextAuth.signOut;
+export const auth: NextAuthResult['auth'] = nextAuth.auth;
