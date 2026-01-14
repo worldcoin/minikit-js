@@ -10,9 +10,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  * Read More: https://docs.world.org/mini-apps/commands/wallet-auth
  */
 export const AuthButton = () => {
+  console.log('AuthButton render');
   const [isPending, setIsPending] = useState(false);
   const { isInstalled } = useMiniKit();
   const hasAttemptedAuth = useRef(false);
+
+  console.log('AuthButton state:', { isPending, isInstalled });
 
   const onClick = useCallback(async () => {
     if (!isInstalled || isPending) {
