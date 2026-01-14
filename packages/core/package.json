@@ -1,4 +1,8 @@
 {
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/worldcoin/minikit-js.git"
+  },
   "dependencies": {
     "@worldcoin/idkit-core": "^2.0.2",
     "abitype": "^1.0.6"
@@ -82,5 +86,5 @@
       ]
     }
   },
-  "version": "1.9.8"
+  "version": "1.9.9"
 }
