@@ -30,3 +30,10 @@ To quick start with a template, run:
 This will create a new directory called `my-first-mini-app` with a basic template setup.
 
 Take a look at the in the template for more information.
+
+## Contributing
+
+### Adding a New Command
+
+1. Create `commands/new-command.ts` — define all types (input, payload, response, errors) and implementation in one file
+2. Update `commands/index.ts` — add to the enum and wire up in `createCommands`/`createAsyncCommands`

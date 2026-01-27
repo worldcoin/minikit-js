@@ -10,7 +10,7 @@ import { useState } from 'react';
 
 const appId = 'your-app-id';
 
-export const Versions = () => {
+export const Versions = (): JSX.Element => {
   const [username, setUsername] = useState('andy');
   const isValid = () => {
     if (
