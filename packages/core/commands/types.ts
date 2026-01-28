@@ -75,12 +75,17 @@ export function isCommandAvailable(command: Command): boolean {
   return commandAvailability[command];
 }
 
-export function setCommandAvailable(command: Command, available: boolean): void {
+export function setCommandAvailable(
+  command: Command,
+  available: boolean,
+): void {
   commandAvailability[command] = available;
 }
 
 export function validateCommands(
-  worldAppSupportedCommands: NonNullable<typeof window.WorldApp>['supported_commands'],
+  worldAppSupportedCommands: NonNullable<
+    typeof window.WorldApp
+  >['supported_commands'],
 ): boolean {
   let allCommandsValid = true;
 
@@ -125,6 +130,18 @@ export interface CommandContext {
   state: MiniKitState;
 }
 
+// Base payload types for command responses
+export type MiniAppBaseSuccessPayload = {
+  status: 'success';
+  version: number;
+};
+
+export type MiniAppBaseErrorPayload<TErrorCode = string> = {
+  status: 'error';
+  error_code: TErrorCode;
+  version: number;
+};
+
 export type AsyncHandlerReturn<CommandPayload, FinalPayload> = Promise<{
   commandPayload: CommandPayload;
   finalPayload: FinalPayload;
@@ -154,8 +171,8 @@ export type MiniKitInstallReturnType =
 // Shared Helpers
 // ============================================================================
 
-export function sendMiniKitEvent<T extends WebViewBasePayload = WebViewBasePayload>(
-  payload: T,
-): void {
+export function sendMiniKitEvent<
+  T extends WebViewBasePayload = WebViewBasePayload,
+>(payload: T): void {
   sendWebviewEvent(payload);
 }

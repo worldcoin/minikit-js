@@ -1,14 +1,16 @@
-import { VerificationLevel, IDKitConfig } from '@worldcoin/idkit-core';
+import { IDKitConfig, VerificationLevel } from '@worldcoin/idkit-core';
 import { encodeAction, generateSignal } from '@worldcoin/idkit-core/hashing';
 import { compressAndPadProof } from '../helpers/proof';
 import {
-  Command,
-  CommandContext,
-  COMMAND_VERSIONS,
-  isCommandAvailable,
-  sendMiniKitEvent,
-  ResponseEvent,
   AsyncHandlerReturn,
+  Command,
+  COMMAND_VERSIONS,
+  CommandContext,
+  isCommandAvailable,
+  MiniAppBaseErrorPayload,
+  MiniAppBaseSuccessPayload,
+  ResponseEvent,
+  sendMiniKitEvent,
 } from './types';
 
 // ============================================================================
@@ -30,20 +32,14 @@ export { VerificationLevel };
 // Re-export from idkit-core for backwards compatibility
 export { AppErrorCodes as VerificationErrorCodes } from '@worldcoin/idkit-core';
 
-export type MiniAppVerifyActionSuccessPayload = {
-  status: 'success';
+export type MiniAppVerifyActionSuccessPayload = MiniAppBaseSuccessPayload & {
   proof: string;
   merkle_root: string;
   nullifier_hash: string;
   verification_level: VerificationLevel;
-  version: number;
 };
 
-export type MiniAppVerifyActionErrorPayload = {
-  status: 'error';
-  error_code: string;
-  version: number;
-};
+export type MiniAppVerifyActionErrorPayload = MiniAppBaseErrorPayload<string>;
 
 export type MiniAppVerifyActionPayload =
   | MiniAppVerifyActionSuccessPayload
@@ -86,7 +82,10 @@ export function createVerifyAsyncCommand(
 ) {
   return async (
     payload: VerifyCommandInput,
-  ): AsyncHandlerReturn<VerifyCommandPayload | null, MiniAppVerifyActionPayload> => {
+  ): AsyncHandlerReturn<
+    VerifyCommandPayload | null,
+    MiniAppVerifyActionPayload
+  > => {
     return new Promise(async (resolve, reject) => {
       try {
         let commandPayload: VerifyCommandPayload | null = null;
@@ -107,7 +106,10 @@ export function createVerifyAsyncCommand(
           resolve({ commandPayload, finalPayload: response });
         };
 
-        ctx.events.subscribe(ResponseEvent.MiniAppVerifyAction, handleResponse as any);
+        ctx.events.subscribe(
+          ResponseEvent.MiniAppVerifyAction,
+          handleResponse as any,
+        );
         commandPayload = syncCommand(payload);
       } catch (error) {
         reject(error);

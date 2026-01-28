@@ -1,11 +1,13 @@
 import {
-  Command,
-  CommandContext,
-  COMMAND_VERSIONS,
-  isCommandAvailable,
-  sendMiniKitEvent,
-  ResponseEvent,
   AsyncHandlerReturn,
+  Command,
+  COMMAND_VERSIONS,
+  CommandContext,
+  isCommandAvailable,
+  MiniAppBaseErrorPayload,
+  MiniAppBaseSuccessPayload,
+  ResponseEvent,
+  sendMiniKitEvent,
 } from './types';
 
 // ============================================================================
@@ -30,19 +32,15 @@ export const SignMessageErrorMessage = {
   [SignMessageErrorCodes.GenericError]: 'Something unexpected went wrong.',
 };
 
-export type MiniAppSignMessageSuccessPayload = {
-  status: 'success';
+export type MiniAppSignMessageSuccessPayload = MiniAppBaseSuccessPayload & {
   signature: string;
   address: string;
-  version: number;
 };
 
-export type MiniAppSignMessageErrorPayload = {
-  status: 'error';
-  error_code: SignMessageErrorCodes;
-  details?: Record<string, any>;
-  version: number;
-};
+export type MiniAppSignMessageErrorPayload =
+  MiniAppBaseErrorPayload<SignMessageErrorCodes> & {
+    details?: Record<string, any>;
+  };
 
 export type MiniAppSignMessagePayload =
   | MiniAppSignMessageSuccessPayload
@@ -80,7 +78,10 @@ export function createSignMessageAsyncCommand(
 ) {
   return async (
     payload: SignMessageInput,
-  ): AsyncHandlerReturn<SignMessagePayload | null, MiniAppSignMessagePayload> => {
+  ): AsyncHandlerReturn<
+    SignMessagePayload | null,
+    MiniAppSignMessagePayload
+  > => {
     return new Promise((resolve, reject) => {
       try {
         let commandPayload: SignMessagePayload | null = null;
@@ -90,7 +91,10 @@ export function createSignMessageAsyncCommand(
           resolve({ commandPayload, finalPayload: response });
         };
 
-        ctx.events.subscribe(ResponseEvent.MiniAppSignMessage, handleResponse as any);
+        ctx.events.subscribe(
+          ResponseEvent.MiniAppSignMessage,
+          handleResponse as any,
+        );
         commandPayload = syncCommand(payload);
       } catch (error) {
         reject(error);

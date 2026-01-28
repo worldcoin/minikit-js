@@ -1,13 +1,15 @@
-import {
-  Command,
-  CommandContext,
-  COMMAND_VERSIONS,
-  isCommandAvailable,
-  sendMiniKitEvent,
-  ResponseEvent,
-  AsyncHandlerReturn,
-} from './types';
 import { Permission } from './get-permissions';
+import {
+  AsyncHandlerReturn,
+  Command,
+  COMMAND_VERSIONS,
+  CommandContext,
+  isCommandAvailable,
+  MiniAppBaseErrorPayload,
+  MiniAppBaseSuccessPayload,
+  ResponseEvent,
+  sendMiniKitEvent,
+} from './types';
 
 // ============================================================================
 // Types
@@ -30,7 +32,8 @@ export enum RequestPermissionErrorCodes {
 
 export const RequestPermissionErrorMessage = {
   [RequestPermissionErrorCodes.UserRejected]: 'User declined sharing contacts',
-  [RequestPermissionErrorCodes.GenericError]: 'Request failed for unknown reason.',
+  [RequestPermissionErrorCodes.GenericError]:
+    'Request failed for unknown reason.',
   [RequestPermissionErrorCodes.AlreadyRequested]:
     'User has already declined turning on notifications once',
   [RequestPermissionErrorCodes.PermissionDisabled]:
@@ -41,19 +44,16 @@ export const RequestPermissionErrorMessage = {
     'The permission requested is not supported by this mini app',
 };
 
-export type MiniAppRequestPermissionSuccessPayload = {
-  status: 'success';
-  permission: Permission;
-  timestamp: string;
-  version: number;
-};
+export type MiniAppRequestPermissionSuccessPayload =
+  MiniAppBaseSuccessPayload & {
+    permission: Permission;
+    timestamp: string;
+  };
 
-export type MiniAppRequestPermissionErrorPayload = {
-  status: 'error';
-  error_code: RequestPermissionErrorCodes;
-  description: string;
-  version: number;
-};
+export type MiniAppRequestPermissionErrorPayload =
+  MiniAppBaseErrorPayload<RequestPermissionErrorCodes> & {
+    description: string;
+  };
 
 export type MiniAppRequestPermissionPayload =
   | MiniAppRequestPermissionSuccessPayload
@@ -104,7 +104,10 @@ export function createRequestPermissionAsyncCommand(
           resolve({ commandPayload, finalPayload: response });
         };
 
-        ctx.events.subscribe(ResponseEvent.MiniAppRequestPermission, handleResponse as any);
+        ctx.events.subscribe(
+          ResponseEvent.MiniAppRequestPermission,
+          handleResponse as any,
+        );
         commandPayload = syncCommand(payload);
       } catch (error) {
         reject(error);

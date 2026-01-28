@@ -1,26 +1,26 @@
 import { VerificationLevel } from '@worldcoin/idkit-core';
-import { compressAndPadProof } from './helpers/proof';
-import { setupMicrophone } from './helpers/microphone';
-import { sendWebviewEvent } from './helpers/send-webview-event';
+import {
+  AsyncCommands,
+  CommandContext,
+  Commands,
+  createAsyncCommands,
+  createCommands,
+  MiniAppVerifyActionPayload,
+  MiniAppWalletAuthPayload,
+  ResponseEvent,
+  validateCommands,
+  VerificationErrorCodes,
+} from './commands';
+import { MiniKitInstallReturnType } from './commands/types';
 import { EventManager } from './core/events';
 import { MiniKitState } from './core/state';
-import {
-  ResponseEvent,
-  CommandContext,
-  validateCommands,
-  createCommands,
-  createAsyncCommands,
-  Commands,
-  AsyncCommands,
-  VerificationErrorCodes,
-  MiniAppWalletAuthPayload,
-  MiniAppVerifyActionPayload,
-} from './commands';
+import { setupMicrophone } from './helpers/microphone';
+import { compressAndPadProof } from './helpers/proof';
+import { sendWebviewEvent } from './helpers/send-webview-event';
 import {
   MiniKitInstallErrorCodes,
   MiniKitInstallErrorMessage,
 } from './types/errors';
-import { MiniKitInstallReturnType } from './commands/types';
 import { UserNameService } from './types/init';
 
 // Re-export for backwards compatibility
@@ -161,7 +161,9 @@ export class MiniKit {
         success: false,
         errorCode: MiniKitInstallErrorCodes.OutsideOfWorldApp,
         errorMessage:
-          MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.OutsideOfWorldApp],
+          MiniKitInstallErrorMessage[
+            MiniKitInstallErrorCodes.OutsideOfWorldApp
+          ],
       };
     }
 

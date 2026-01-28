@@ -1,11 +1,13 @@
 import {
-  Command,
-  CommandContext,
-  COMMAND_VERSIONS,
-  isCommandAvailable,
-  sendMiniKitEvent,
-  ResponseEvent,
   AsyncHandlerReturn,
+  Command,
+  COMMAND_VERSIONS,
+  CommandContext,
+  isCommandAvailable,
+  MiniAppBaseErrorPayload,
+  MiniAppBaseSuccessPayload,
+  ResponseEvent,
+  sendMiniKitEvent,
 } from './types';
 
 // ============================================================================
@@ -34,21 +36,18 @@ export enum SendHapticFeedbackErrorCodes {
 }
 
 export const SendHapticFeedbackErrorMessage = {
-  [SendHapticFeedbackErrorCodes.GenericError]: 'Something unexpected went wrong.',
+  [SendHapticFeedbackErrorCodes.GenericError]:
+    'Something unexpected went wrong.',
   [SendHapticFeedbackErrorCodes.UserRejected]: 'User rejected the request.',
 };
 
-export type MiniAppSendHapticFeedbackSuccessPayload = {
-  status: 'success';
-  version: number;
-  timestamp: string;
-};
+export type MiniAppSendHapticFeedbackSuccessPayload =
+  MiniAppBaseSuccessPayload & {
+    timestamp: string;
+  };
 
-export type MiniAppSendHapticFeedbackErrorPayload = {
-  status: 'error';
-  error_code: SendHapticFeedbackErrorCodes;
-  version: number;
-};
+export type MiniAppSendHapticFeedbackErrorPayload =
+  MiniAppBaseErrorPayload<SendHapticFeedbackErrorCodes>;
 
 export type MiniAppSendHapticFeedbackPayload =
   | MiniAppSendHapticFeedbackSuccessPayload
@@ -59,7 +58,9 @@ export type MiniAppSendHapticFeedbackPayload =
 // ============================================================================
 
 export function createSendHapticFeedbackCommand(_ctx: CommandContext) {
-  return (payload: SendHapticFeedbackInput): SendHapticFeedbackPayload | null => {
+  return (
+    payload: SendHapticFeedbackInput,
+  ): SendHapticFeedbackPayload | null => {
     if (
       typeof window === 'undefined' ||
       !isCommandAvailable(Command.SendHapticFeedback)
@@ -99,7 +100,10 @@ export function createSendHapticFeedbackAsyncCommand(
           resolve({ commandPayload, finalPayload: response });
         };
 
-        ctx.events.subscribe(ResponseEvent.MiniAppSendHapticFeedback, handleResponse as any);
+        ctx.events.subscribe(
+          ResponseEvent.MiniAppSendHapticFeedback,
+          handleResponse as any,
+        );
         commandPayload = syncCommand(payload);
       } catch (error) {
         reject(error);

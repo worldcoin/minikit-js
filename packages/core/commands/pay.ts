@@ -1,13 +1,15 @@
 import { validatePaymentPayload } from '../helpers/payment/client';
 import { Network, Tokens } from '../types/payment';
 import {
-  Command,
-  CommandContext,
-  COMMAND_VERSIONS,
-  isCommandAvailable,
-  sendMiniKitEvent,
-  ResponseEvent,
   AsyncHandlerReturn,
+  Command,
+  COMMAND_VERSIONS,
+  CommandContext,
+  isCommandAvailable,
+  MiniAppBaseErrorPayload,
+  MiniAppBaseSuccessPayload,
+  ResponseEvent,
+  sendMiniKitEvent,
 } from './types';
 
 // ============================================================================
@@ -43,33 +45,33 @@ export enum PaymentErrorCodes {
 export const PaymentErrorMessage: Record<PaymentErrorCodes, string> = {
   [PaymentErrorCodes.InputError]:
     'There was a problem with this request. Please try again or contact the app owner.',
-  [PaymentErrorCodes.UserRejected]: 'You have cancelled the payment in World App.',
-  [PaymentErrorCodes.PaymentRejected]: "You've cancelled the payment in World App.",
+  [PaymentErrorCodes.UserRejected]:
+    'You have cancelled the payment in World App.',
+  [PaymentErrorCodes.PaymentRejected]:
+    "You've cancelled the payment in World App.",
   [PaymentErrorCodes.InvalidReceiver]:
     'The receiver address is invalid. Please contact the app owner.',
   [PaymentErrorCodes.InsufficientBalance]:
     'You do not have enough balance to complete this transaction.',
-  [PaymentErrorCodes.TransactionFailed]: 'The transaction failed. Please try again.',
-  [PaymentErrorCodes.GenericError]: 'Something unexpected went wrong. Please try again.',
-  [PaymentErrorCodes.UserBlocked]: "User's region is blocked from making payments.",
+  [PaymentErrorCodes.TransactionFailed]:
+    'The transaction failed. Please try again.',
+  [PaymentErrorCodes.GenericError]:
+    'Something unexpected went wrong. Please try again.',
+  [PaymentErrorCodes.UserBlocked]:
+    "User's region is blocked from making payments.",
 };
 
-export type MiniAppPaymentSuccessPayload = {
-  status: 'success';
+export type MiniAppPaymentSuccessPayload = MiniAppBaseSuccessPayload & {
   transaction_status: 'submitted';
   transaction_id: string;
   reference: string;
   from: string;
   chain: Network;
   timestamp: string;
-  version: number;
 };
 
-export type MiniAppPaymentErrorPayload = {
-  status: 'error';
-  error_code: PaymentErrorCodes;
-  version: number;
-};
+export type MiniAppPaymentErrorPayload =
+  MiniAppBaseErrorPayload<PaymentErrorCodes>;
 
 export type MiniAppPaymentPayload =
   | MiniAppPaymentSuccessPayload
@@ -123,7 +125,10 @@ export function createPayAsyncCommand(
           resolve({ commandPayload, finalPayload: response });
         };
 
-        ctx.events.subscribe(ResponseEvent.MiniAppPayment, handleResponse as any);
+        ctx.events.subscribe(
+          ResponseEvent.MiniAppPayment,
+          handleResponse as any,
+        );
         commandPayload = syncCommand(payload);
       } catch (error) {
         reject(error);

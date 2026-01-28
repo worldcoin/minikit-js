@@ -1,12 +1,14 @@
 import type { TypedData, TypedDataDomain } from 'abitype';
 import {
-  Command,
-  CommandContext,
-  COMMAND_VERSIONS,
-  isCommandAvailable,
-  sendMiniKitEvent,
-  ResponseEvent,
   AsyncHandlerReturn,
+  Command,
+  COMMAND_VERSIONS,
+  CommandContext,
+  isCommandAvailable,
+  MiniAppBaseErrorPayload,
+  MiniAppBaseSuccessPayload,
+  ResponseEvent,
+  sendMiniKitEvent,
 } from './types';
 
 // ============================================================================
@@ -39,7 +41,8 @@ export const SignTypedDataErrorMessage = {
     'Transaction included an operation that was invalid',
   [SignTypedDataErrorCodes.UserRejected]: 'User rejected the request.',
   [SignTypedDataErrorCodes.InputError]: 'Invalid payload.',
-  [SignTypedDataErrorCodes.SimulationFailed]: 'The transaction simulation failed.',
+  [SignTypedDataErrorCodes.SimulationFailed]:
+    'The transaction simulation failed.',
   [SignTypedDataErrorCodes.GenericError]:
     'Something unexpected went wrong. Please try again.',
   [SignTypedDataErrorCodes.DisallowedOperation]:
@@ -50,19 +53,15 @@ export const SignTypedDataErrorMessage = {
     'The operation requested is considered malicious.',
 };
 
-export type MiniAppSignTypedDataSuccessPayload = {
-  status: 'success';
+export type MiniAppSignTypedDataSuccessPayload = MiniAppBaseSuccessPayload & {
   signature: string;
   address: string;
-  version: number;
 };
 
-export type MiniAppSignTypedDataErrorPayload = {
-  status: 'error';
-  error_code: SignTypedDataErrorCodes;
-  details?: Record<string, any>;
-  version: number;
-};
+export type MiniAppSignTypedDataErrorPayload =
+  MiniAppBaseErrorPayload<SignTypedDataErrorCodes> & {
+    details?: Record<string, any>;
+  };
 
 export type MiniAppSignTypedDataPayload =
   | MiniAppSignTypedDataSuccessPayload
@@ -105,7 +104,10 @@ export function createSignTypedDataAsyncCommand(
 ) {
   return async (
     payload: SignTypedDataInput,
-  ): AsyncHandlerReturn<SignTypedDataPayload | null, MiniAppSignTypedDataPayload> => {
+  ): AsyncHandlerReturn<
+    SignTypedDataPayload | null,
+    MiniAppSignTypedDataPayload
+  > => {
     return new Promise((resolve, reject) => {
       try {
         let commandPayload: SignTypedDataPayload | null = null;
@@ -115,7 +117,10 @@ export function createSignTypedDataAsyncCommand(
           resolve({ commandPayload, finalPayload: response });
         };
 
-        ctx.events.subscribe(ResponseEvent.MiniAppSignTypedData, handleResponse as any);
+        ctx.events.subscribe(
+          ResponseEvent.MiniAppSignTypedData,
+          handleResponse as any,
+        );
         commandPayload = syncCommand(payload);
       } catch (error) {
         reject(error);

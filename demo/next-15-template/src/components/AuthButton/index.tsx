@@ -33,7 +33,10 @@ export const AuthButton = () => {
 
   // Auto-authenticate on load when MiniKit is ready
   useEffect(() => {
-    console.log('AuthButton effect:', { isInstalled, hasAttemptedAuth: hasAttemptedAuth.current });
+    console.log('AuthButton effect:', {
+      isInstalled,
+      hasAttemptedAuth: hasAttemptedAuth.current,
+    });
     if (isInstalled === true && !hasAttemptedAuth.current) {
       console.log('Firing walletAuth automatically');
       hasAttemptedAuth.current = true;

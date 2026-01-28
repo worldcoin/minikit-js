@@ -1,12 +1,14 @@
 import { formatShareInput } from '../helpers/share';
 import {
-  Command,
-  CommandContext,
-  COMMAND_VERSIONS,
-  isCommandAvailable,
-  sendMiniKitEvent,
-  ResponseEvent,
   AsyncHandlerReturn,
+  Command,
+  COMMAND_VERSIONS,
+  CommandContext,
+  isCommandAvailable,
+  MiniAppBaseErrorPayload,
+  MiniAppBaseSuccessPayload,
+  ResponseEvent,
+  sendMiniKitEvent,
 } from './types';
 
 // ============================================================================
@@ -44,20 +46,17 @@ export const ShareFilesErrorMessage = {
     'Invalid file name. Make sure you include the extension',
 };
 
-export type MiniAppShareSuccessPayload = {
-  status: 'success';
+export type MiniAppShareSuccessPayload = MiniAppBaseSuccessPayload & {
   shared_files_count: number;
-  version: number;
   timestamp: string;
 };
 
-export type MiniAppShareErrorPayload = {
-  status: 'error';
-  error_code: ShareFilesErrorCodes;
-  version: number;
-};
+export type MiniAppShareErrorPayload =
+  MiniAppBaseErrorPayload<ShareFilesErrorCodes>;
 
-export type MiniAppSharePayload = MiniAppShareSuccessPayload | MiniAppShareErrorPayload;
+export type MiniAppSharePayload =
+  | MiniAppShareSuccessPayload
+  | MiniAppShareErrorPayload;
 
 // ============================================================================
 // Implementation
@@ -72,7 +71,10 @@ export function createShareCommand(ctx: CommandContext) {
       return null;
     }
 
-    if (ctx.state.deviceProperties.deviceOS === 'ios' && typeof navigator !== 'undefined') {
+    if (
+      ctx.state.deviceProperties.deviceOS === 'ios' &&
+      typeof navigator !== 'undefined'
+    ) {
       // Send the payload to the World App for Analytics
       sendMiniKitEvent({
         command: Command.Share,

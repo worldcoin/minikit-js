@@ -1,11 +1,13 @@
 import {
-  Command,
-  CommandContext,
-  COMMAND_VERSIONS,
-  isCommandAvailable,
-  sendMiniKitEvent,
-  ResponseEvent,
   AsyncHandlerReturn,
+  Command,
+  COMMAND_VERSIONS,
+  CommandContext,
+  isCommandAvailable,
+  MiniAppBaseErrorPayload,
+  MiniAppBaseSuccessPayload,
+  ResponseEvent,
+  sendMiniKitEvent,
 } from './types';
 
 // ============================================================================
@@ -29,20 +31,16 @@ export const ChatErrorMessage = {
   [ChatErrorCodes.GenericError]: 'Something unexpected went wrong.',
 };
 
-export type MiniAppChatSuccessPayload = {
-  status: 'success';
+export type MiniAppChatSuccessPayload = MiniAppBaseSuccessPayload & {
   count: number;
   timestamp: string;
-  version: number;
 };
 
-export type MiniAppChatErrorPayload = {
-  status: 'error';
-  error_code: ChatErrorCodes;
-  version: number;
-};
+export type MiniAppChatErrorPayload = MiniAppBaseErrorPayload<ChatErrorCodes>;
 
-export type MiniAppChatPayload = MiniAppChatSuccessPayload | MiniAppChatErrorPayload;
+export type MiniAppChatPayload =
+  | MiniAppChatSuccessPayload
+  | MiniAppChatErrorPayload;
 
 // ============================================================================
 // Implementation

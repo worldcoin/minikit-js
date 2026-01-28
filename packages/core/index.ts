@@ -5,7 +5,10 @@ export * from './commands';
 
 // Export shared types that didn't move
 // Note: Error codes are now co-located with commands, only MiniKitInstallErrorCodes is needed here
-export { MiniKitInstallErrorCodes, MiniKitInstallErrorMessage } from './types/errors';
+export {
+  MiniKitInstallErrorCodes,
+  MiniKitInstallErrorMessage,
+} from './types/errors';
 export * from './types/init';
 export * from './types/payment';
 export * from './types/transactions';

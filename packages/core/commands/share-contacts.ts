@@ -1,11 +1,13 @@
 import {
-  Command,
-  CommandContext,
-  COMMAND_VERSIONS,
-  isCommandAvailable,
-  sendMiniKitEvent,
-  ResponseEvent,
   AsyncHandlerReturn,
+  Command,
+  COMMAND_VERSIONS,
+  CommandContext,
+  isCommandAvailable,
+  MiniAppBaseErrorPayload,
+  MiniAppBaseSuccessPayload,
+  ResponseEvent,
+  sendMiniKitEvent,
 } from './types';
 
 // ============================================================================
@@ -35,18 +37,13 @@ export type Contact = {
   profilePictureUrl: string | null;
 };
 
-export type MiniAppShareContactsSuccessPayload = {
-  status: 'success';
+export type MiniAppShareContactsSuccessPayload = MiniAppBaseSuccessPayload & {
   contacts: Contact[];
-  version: number;
   timestamp: string;
 };
 
-export type MiniAppShareContactsErrorPayload = {
-  status: 'error';
-  error_code: ShareContactsErrorCodes;
-  version: number;
-};
+export type MiniAppShareContactsErrorPayload =
+  MiniAppBaseErrorPayload<ShareContactsErrorCodes>;
 
 export type MiniAppShareContactsPayload =
   | MiniAppShareContactsSuccessPayload
@@ -84,7 +81,10 @@ export function createShareContactsAsyncCommand(
 ) {
   return async (
     payload: ShareContactsPayload,
-  ): AsyncHandlerReturn<ShareContactsPayload | null, MiniAppShareContactsPayload> => {
+  ): AsyncHandlerReturn<
+    ShareContactsPayload | null,
+    MiniAppShareContactsPayload
+  > => {
     return new Promise((resolve, reject) => {
       try {
         let commandPayload: ShareContactsPayload | null = null;
@@ -94,7 +94,10 @@ export function createShareContactsAsyncCommand(
           resolve({ commandPayload, finalPayload: response });
         };
 
-        ctx.events.subscribe(ResponseEvent.MiniAppShareContacts, handleResponse as any);
+        ctx.events.subscribe(
+          ResponseEvent.MiniAppShareContacts,
+          handleResponse as any,
+        );
         commandPayload = syncCommand(payload);
       } catch (error) {
         reject(error);

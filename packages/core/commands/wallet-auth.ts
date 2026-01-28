@@ -1,13 +1,15 @@
 import { generateSiweMessage } from '../helpers/siwe/siwe';
 import { validateWalletAuthCommandInput } from '../helpers/siwe/validate-wallet-auth-command-input';
 import {
-  Command,
-  CommandContext,
-  COMMAND_VERSIONS,
-  isCommandAvailable,
-  sendMiniKitEvent,
-  ResponseEvent,
   AsyncHandlerReturn,
+  Command,
+  COMMAND_VERSIONS,
+  CommandContext,
+  isCommandAvailable,
+  MiniAppBaseErrorPayload,
+  MiniAppBaseSuccessPayload,
+  ResponseEvent,
+  sendMiniKitEvent,
 } from './types';
 
 // ============================================================================
@@ -39,20 +41,16 @@ export const WalletAuthErrorMessage = {
   [WalletAuthErrorCodes.GenericError]: 'Something unexpected went wrong.',
 };
 
-export type MiniAppWalletAuthSuccessPayload = {
-  status: 'success';
+export type MiniAppWalletAuthSuccessPayload = MiniAppBaseSuccessPayload & {
   message: string;
   signature: string;
   address: string;
-  version: number;
 };
 
-export type MiniAppWalletAuthErrorPayload = {
-  status: 'error';
-  error_code: WalletAuthErrorCodes;
-  details: (typeof WalletAuthErrorMessage)[WalletAuthErrorCodes];
-  version: number;
-};
+export type MiniAppWalletAuthErrorPayload =
+  MiniAppBaseErrorPayload<WalletAuthErrorCodes> & {
+    details: (typeof WalletAuthErrorMessage)[WalletAuthErrorCodes];
+  };
 
 export type MiniAppWalletAuthPayload =
   | MiniAppWalletAuthSuccessPayload
@@ -148,7 +146,10 @@ export function createWalletAuthAsyncCommand(
           resolve({ commandPayload, finalPayload: response });
         };
 
-        ctx.events.subscribe(ResponseEvent.MiniAppWalletAuth, handleResponse as any);
+        ctx.events.subscribe(
+          ResponseEvent.MiniAppWalletAuth,
+          handleResponse as any,
+        );
         commandPayload = syncCommand(payload);
       } catch (error) {
         reject(error);

@@ -1,11 +1,13 @@
 import {
-  Command,
-  CommandContext,
-  COMMAND_VERSIONS,
-  isCommandAvailable,
-  sendMiniKitEvent,
-  ResponseEvent,
   AsyncHandlerReturn,
+  Command,
+  COMMAND_VERSIONS,
+  CommandContext,
+  isCommandAvailable,
+  MiniAppBaseErrorPayload,
+  MiniAppBaseSuccessPayload,
+  ResponseEvent,
+  sendMiniKitEvent,
 } from './types';
 
 // ============================================================================
@@ -37,19 +39,15 @@ export type PermissionSettings = {
   [K in Permission]?: any;
 };
 
-export type MiniAppGetPermissionsSuccessPayload = {
-  status: 'success';
+export type MiniAppGetPermissionsSuccessPayload = MiniAppBaseSuccessPayload & {
   permissions: PermissionSettings;
-  version: number;
   timestamp: string;
 };
 
-export type MiniAppGetPermissionsErrorPayload = {
-  status: 'error';
-  error_code: GetPermissionsErrorCodes;
-  details: string;
-  version: number;
-};
+export type MiniAppGetPermissionsErrorPayload =
+  MiniAppBaseErrorPayload<GetPermissionsErrorCodes> & {
+    details: string;
+  };
 
 export type MiniAppGetPermissionsPayload =
   | MiniAppGetPermissionsSuccessPayload
@@ -100,7 +98,10 @@ export function createGetPermissionsAsyncCommand(
           resolve({ commandPayload, finalPayload: payload });
         };
 
-        ctx.events.subscribe(ResponseEvent.MiniAppGetPermissions, handleResponse as any);
+        ctx.events.subscribe(
+          ResponseEvent.MiniAppGetPermissions,
+          handleResponse as any,
+        );
         commandPayload = syncCommand();
       } catch (error) {
         reject(error);

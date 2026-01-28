@@ -1,14 +1,16 @@
 import { validateSendTransactionPayload } from '../helpers/transaction/validate-payload';
-import { Permit2, Transaction } from '../types/transactions';
 import { Network } from '../types/payment';
+import { Permit2, Transaction } from '../types/transactions';
 import {
-  Command,
-  CommandContext,
-  COMMAND_VERSIONS,
-  isCommandAvailable,
-  sendMiniKitEvent,
-  ResponseEvent,
   AsyncHandlerReturn,
+  Command,
+  COMMAND_VERSIONS,
+  CommandContext,
+  isCommandAvailable,
+  MiniAppBaseErrorPayload,
+  MiniAppBaseSuccessPayload,
+  ResponseEvent,
+  sendMiniKitEvent,
 } from './types';
 
 // ============================================================================
@@ -39,12 +41,16 @@ export enum SendTransactionErrorCodes {
   PermittedAmountNotFound = 'permitted_amount_not_found',
 }
 
-export const SendTransactionErrorMessage: Record<SendTransactionErrorCodes, string> = {
+export const SendTransactionErrorMessage: Record<
+  SendTransactionErrorCodes,
+  string
+> = {
   [SendTransactionErrorCodes.InvalidOperation]:
     'Transaction included an operation that was invalid',
   [SendTransactionErrorCodes.UserRejected]: 'User rejected the request.',
   [SendTransactionErrorCodes.InputError]: 'Invalid payload.',
-  [SendTransactionErrorCodes.SimulationFailed]: 'The transaction simulation failed.',
+  [SendTransactionErrorCodes.SimulationFailed]:
+    'The transaction simulation failed.',
   [SendTransactionErrorCodes.ValidationError]:
     'The transaction validation failed. Please try again.',
   [SendTransactionErrorCodes.TransactionFailed]:
@@ -65,25 +71,21 @@ export const SendTransactionErrorMessage: Record<SendTransactionErrorCodes, stri
     'Permitted amount not found in permit2 payload.',
 };
 
-export type MiniAppSendTransactionSuccessPayload = {
-  status: 'success';
+export type MiniAppSendTransactionSuccessPayload = MiniAppBaseSuccessPayload & {
   transaction_status: 'submitted';
   transaction_id: string;
   reference: string;
   from: string;
   chain: Network;
   timestamp: string;
-  version: number;
   mini_app_id?: string;
 };
 
-export type MiniAppSendTransactionErrorPayload = {
-  status: 'error';
-  error_code: SendTransactionErrorCodes;
-  details?: Record<string, any>;
-  version: number;
-  mini_app_id?: string;
-};
+export type MiniAppSendTransactionErrorPayload =
+  MiniAppBaseErrorPayload<SendTransactionErrorCodes> & {
+    details?: Record<string, any>;
+    mini_app_id?: string;
+  };
 
 export type MiniAppSendTransactionPayload =
   | MiniAppSendTransactionSuccessPayload
@@ -138,7 +140,10 @@ export function createSendTransactionAsyncCommand(
           resolve({ commandPayload, finalPayload: response });
         };
 
-        ctx.events.subscribe(ResponseEvent.MiniAppSendTransaction, handleResponse as any);
+        ctx.events.subscribe(
+          ResponseEvent.MiniAppSendTransaction,
+          handleResponse as any,
+        );
         commandPayload = syncCommand(payload);
       } catch (error) {
         reject(error);
