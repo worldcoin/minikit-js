@@ -35,12 +35,11 @@ type VerifyCommandInputMulti = VerifyCommandInputBase & {
   verification_levels: VerificationLevel[];
 };
 
-// Union type - user must choose one or the other (mutually exclusive)
+// Union type - mutually exclusive
 export type VerifyCommandInput =
   | VerifyCommandInputSingle
   | VerifyCommandInputMulti;
 
-// Full list of values sent to the app
 export type VerifyCommandPayload = VerifyCommandInputBase & {
   verification_level?: VerificationLevel;
   verification_levels?: VerificationLevel[];
@@ -52,7 +51,6 @@ export { VerificationLevel };
 // Re-export from idkit-core for backwards compatibility
 export { AppErrorCodes as VerificationErrorCodes } from '@worldcoin/idkit-core';
 
-// Single verification success payload
 export type MiniAppVerifyActionSuccessPayload = MiniAppBaseSuccessPayload & {
   proof: string;
   merkle_root: string;
@@ -61,10 +59,12 @@ export type MiniAppVerifyActionSuccessPayload = MiniAppBaseSuccessPayload & {
 };
 
 // Individual verification result in array (for verification_levels input)
-export type VerificationResult = Omit<
-  MiniAppVerifyActionSuccessPayload,
-  'status' | 'version'
->;
+export type VerificationResult = {
+  verification_level: VerificationLevel;
+  proof: string;
+  merkle_root: string;
+  nullifier_hash: string;
+};
 
 // Multi-verification success payload (for verification_levels input)
 export type MiniAppVerifyActionMultiSuccessPayload = MiniAppBaseSuccessPayload & {
@@ -91,7 +91,7 @@ export function createVerifyCommand(_ctx: CommandContext) {
       return null;
     }
 
-    // Mutual exclusivity validation (runtime check in addition to TypeScript)
+    // Mutual exclusivity validation
     if (
       (payload as any).verification_level &&
       (payload as any).verification_levels
@@ -145,12 +145,10 @@ export function createVerifyAsyncCommand(
           ctx.events.unsubscribe(ResponseEvent.MiniAppVerifyAction);
 
           if (response.status === 'success') {
-            // Check if this is a multi-verification response
+            // Check if multi-verification response
             if ('verifications' in response) {
-              // Multi-verification response: compress all Orb proofs
-              const multiResponse =
-                response as MiniAppVerifyActionMultiSuccessPayload;
-              for (const verification of multiResponse.verifications) {
+              // Compress all Orb proofs in the array
+              for (const verification of response.verifications) {
                 if (verification.verification_level === VerificationLevel.Orb) {
                   verification.proof = await compressAndPadProof(
                     verification.proof as `0x${string}`,
@@ -159,11 +157,9 @@ export function createVerifyAsyncCommand(
               }
             } else {
               // Single verification response
-              const singleResponse =
-                response as MiniAppVerifyActionSuccessPayload;
-              if (singleResponse.verification_level === VerificationLevel.Orb) {
-                singleResponse.proof = await compressAndPadProof(
-                  singleResponse.proof as `0x${string}`,
+              if (response.verification_level === VerificationLevel.Orb) {
+                response.proof = await compressAndPadProof(
+                  response.proof as `0x${string}`,
                 );
               }
             }
