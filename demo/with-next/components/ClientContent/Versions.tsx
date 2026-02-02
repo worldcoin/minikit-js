@@ -6,10 +6,12 @@ import {
   MiniKitInstallErrorMessage,
 } from '@worldcoin/minikit-js';
 import clsx from 'clsx';
+import { useState } from 'react';
 
 const appId = 'your-app-id';
 
-export const Versions = () => {
+export const Versions = (): JSX.Element => {
+  const [username, setUsername] = useState('andy');
   const isValid = () => {
     if (
       typeof window === 'undefined' ||
@@ -109,11 +111,19 @@ export const Versions = () => {
       </div>
       <div>
         <p>Show profile card:</p>
+        <input
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Enter username"
+          className="w-full p-2 border border-gray-300 rounded-lg mb-2"
+        />
         <button
           className={clsx(
             'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
           )}
-          onClick={() => MiniKit.showProfileCard('andy')}
+          onClick={() => MiniKit.showProfileCard(username)}
+          disabled={!username.trim()}
         >
           Show Profile Card
         </button>
