@@ -43,6 +43,19 @@ export type MiniAppVerifyActionSuccessPayload = {
   version: number;
 };
 
+// Individual verification result in array (for verification_levels input)
+export type VerificationResult = Omit<
+  MiniAppVerifyActionSuccessPayload,
+  'status' | 'version'
+>;
+
+// Multi-verification success payload (for verification_levels input)
+export type MiniAppVerifyActionMultiSuccessPayload = {
+  status: 'success';
+  verifications: VerificationResult[];
+  version: number;
+};
+
 export type MiniAppVerifyActionErrorPayload = {
   status: 'error';
   error_code: VerificationErrorCodes;
@@ -51,6 +64,7 @@ export type MiniAppVerifyActionErrorPayload = {
 
 export type MiniAppVerifyActionPayload =
   | MiniAppVerifyActionSuccessPayload
+  | MiniAppVerifyActionMultiSuccessPayload
   | MiniAppVerifyActionErrorPayload;
 
 export type MiniAppPaymentSuccessPayload = {

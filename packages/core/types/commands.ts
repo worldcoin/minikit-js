@@ -30,15 +30,33 @@ export type AsyncHandlerReturn<CommandPayload, FinalPayload> = Promise<{
   finalPayload: FinalPayload;
 }>;
 
-// Values developers can specify
-export type VerifyCommandInput = {
+// Base type with common fields for verify command
+type VerifyCommandInputBase = {
   action: IDKitConfig['action'];
   signal?: IDKitConfig['signal'];
-  verification_level?: VerificationLevel;
 };
 
+// Single level input
+type VerifyCommandInputSingle = VerifyCommandInputBase & {
+  verification_level?: VerificationLevel;
+  verification_levels?: never;
+};
+
+// Multi level input
+type VerifyCommandInputMulti = VerifyCommandInputBase & {
+  verification_level?: never;
+  verification_levels: VerificationLevel[];
+};
+
+// Union type - user must choose one or the other (mutually exclusive)
+export type VerifyCommandInput =
+  | VerifyCommandInputSingle
+  | VerifyCommandInputMulti;
+
 // Full list of values sent to the app
-export type VerifyCommandPayload = VerifyCommandInput & {
+export type VerifyCommandPayload = VerifyCommandInputBase & {
+  verification_level?: VerificationLevel;
+  verification_levels?: VerificationLevel[];
   timestamp: string;
 };
 

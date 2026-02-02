@@ -5,7 +5,9 @@ import {
   Commands,
   createAsyncCommands,
   createCommands,
+  MiniAppVerifyActionMultiSuccessPayload,
   MiniAppVerifyActionPayload,
+  MiniAppVerifyActionSuccessPayload,
   MiniAppWalletAuthPayload,
   ResponseEvent,
   validateCommands,
@@ -98,16 +100,46 @@ export class MiniKit {
           payload.error_code = VerificationErrorCodes.VerificationRejected;
         }
 
-        if (
-          payload.status === 'success' &&
-          payload.verification_level === VerificationLevel.Orb
-        ) {
-          compressAndPadProof(payload.proof as `0x${string}`).then(
-            (compressedProof) => {
-              payload.proof = compressedProof;
+        if (payload.status === 'success') {
+          // Check if this is a multi-verification response
+          if ('verifications' in payload) {
+            // Multi-verification response: compress all Orb proofs
+            const multiPayload =
+              payload as MiniAppVerifyActionMultiSuccessPayload;
+            const orbVerifications = multiPayload.verifications.filter(
+              (v) => v.verification_level === VerificationLevel.Orb,
+            );
+
+            if (orbVerifications.length > 0) {
+              Promise.all(
+                multiPayload.verifications.map(async (v) => {
+                  if (v.verification_level === VerificationLevel.Orb) {
+                    v.proof = await compressAndPadProof(
+                      v.proof as `0x${string}`,
+                    );
+                  }
+                  return v;
+                }),
+              ).then(() => {
+                originalHandler(payload);
+              });
+            } else {
               originalHandler(payload);
-            },
-          );
+            }
+          } else {
+            // Single verification response
+            const singlePayload = payload as MiniAppVerifyActionSuccessPayload;
+            if (singlePayload.verification_level === VerificationLevel.Orb) {
+              compressAndPadProof(singlePayload.proof as `0x${string}`).then(
+                (compressedProof) => {
+                  singlePayload.proof = compressedProof;
+                  originalHandler(payload);
+                },
+              );
+            } else {
+              originalHandler(payload);
+            }
+          }
         } else {
           originalHandler(payload);
         }
