@@ -39,9 +39,15 @@ export type MiniAppVerifyActionSuccessPayload = MiniAppBaseSuccessPayload & {
   verification_level: VerificationLevel;
 };
 
+// Individual verification result (without status/version per entry)
+export type VerificationResult = Omit<
+  MiniAppVerifyActionSuccessPayload,
+  'status' | 'version'
+>;
+
 export type MiniAppVerifyActionMultiSuccessPayload =
   MiniAppBaseSuccessPayload & {
-    verifications: MiniAppVerifyActionSuccessPayload[];
+    verifications: VerificationResult[];
   };
 
 export type MiniAppVerifyActionErrorPayload = MiniAppBaseErrorPayload<string>;
