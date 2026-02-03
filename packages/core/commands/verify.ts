@@ -17,32 +17,16 @@ import {
 // Types
 // ============================================================================
 
-// Base type with common fields
-type VerifyCommandInputBase = {
+export type VerifyCommandInput = {
   action: IDKitConfig['action'];
   signal?: IDKitConfig['signal'];
+  verification_level?: VerificationLevel | VerificationLevel[];
 };
 
-// Single level input
-type VerifyCommandInputSingle = VerifyCommandInputBase & {
-  verification_level?: VerificationLevel;
-  verification_levels?: never;
-};
-
-// Multi level input
-type VerifyCommandInputMulti = VerifyCommandInputBase & {
-  verification_level?: never;
-  verification_levels: VerificationLevel[];
-};
-
-// Union type - mutually exclusive
-export type VerifyCommandInput =
-  | VerifyCommandInputSingle
-  | VerifyCommandInputMulti;
-
-export type VerifyCommandPayload = VerifyCommandInputBase & {
-  verification_level?: VerificationLevel;
-  verification_levels?: VerificationLevel[];
+export type VerifyCommandPayload = {
+  action: IDKitConfig['action'];
+  signal?: IDKitConfig['signal'];
+  verification_level?: VerificationLevel | VerificationLevel[];
   timestamp: string;
 };
 
@@ -91,30 +75,12 @@ export function createVerifyCommand(_ctx: CommandContext) {
       return null;
     }
 
-    // Mutual exclusivity validation
-    if (
-      (payload as any).verification_level &&
-      (payload as any).verification_levels
-    ) {
-      console.error(
-        "'verify' command: cannot specify both 'verification_level' and 'verification_levels'. Use one or the other.",
-      );
-      return null;
-    }
-
     const timestamp = new Date().toISOString();
-
-    // Build payload based on which field was provided
     const eventPayload: VerifyCommandPayload = {
       action: encodeAction(payload.action),
       signal: generateSignal(payload.signal).digest,
+      verification_level: payload.verification_level || VerificationLevel.Orb,
       timestamp,
-      ...((payload as any).verification_levels
-        ? { verification_levels: (payload as any).verification_levels }
-        : {
-            verification_level:
-              (payload as any).verification_level || VerificationLevel.Orb,
-          }),
     };
 
     sendMiniKitEvent({
@@ -145,7 +111,7 @@ export function createVerifyAsyncCommand(
           ctx.events.unsubscribe(ResponseEvent.MiniAppVerifyAction);
 
           if (response.status === 'success') {
-            // Check if multi-verification response
+            // Check if multi-verification response (array input)
             if ('verifications' in response) {
               // Compress all Orb proofs in the array
               for (const verification of response.verifications) {
@@ -155,13 +121,11 @@ export function createVerifyAsyncCommand(
                   );
                 }
               }
-            } else {
+            } else if (response.verification_level === VerificationLevel.Orb) {
               // Single verification response
-              if (response.verification_level === VerificationLevel.Orb) {
-                response.proof = await compressAndPadProof(
-                  response.proof as `0x${string}`,
-                );
-              }
+              response.proof = await compressAndPadProof(
+                response.proof as `0x${string}`,
+              );
             }
           }
 

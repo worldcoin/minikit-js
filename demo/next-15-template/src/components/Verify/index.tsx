@@ -58,7 +58,7 @@ export const Verify = () => {
     const result = await MiniKit.commandsAsync.verify({
       action: 'test-action',
       // Request multiple verification levels - response only includes what user has
-      verification_levels: [VerificationLevel.Orb, VerificationLevel.Device],
+      verification_level: [VerificationLevel.Orb, VerificationLevel.Device],
     });
     console.log('Multi-verification result:', result.finalPayload);
 
