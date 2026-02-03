@@ -99,41 +99,31 @@ export class MiniKit {
         }
 
         if (payload.status === 'success') {
-          // Check if multi-verification response
           if ('verifications' in payload) {
-            // Compress all Orb proofs in the array
-            const orbVerifications = payload.verifications.filter(
+            // Multi-verification response - find and compress Orb proof if present
+            const orbVerification = payload.verifications.find(
               (v) => v.verification_level === VerificationLevel.Orb,
             );
-
-            if (orbVerifications.length > 0) {
-              Promise.all(
-                payload.verifications.map(async (v) => {
-                  if (v.verification_level === VerificationLevel.Orb) {
-                    v.proof = await compressAndPadProof(
-                      v.proof as `0x${string}`,
-                    );
-                  }
-                  return v;
-                }),
-              ).then(() => {
-                originalHandler(payload);
-              });
-            } else {
-              originalHandler(payload);
-            }
-          } else {
-            // Single verification response
-            if (payload.verification_level === VerificationLevel.Orb) {
-              compressAndPadProof(payload.proof as `0x${string}`).then(
+            if (orbVerification) {
+              compressAndPadProof(orbVerification.proof as `0x${string}`).then(
                 (compressedProof) => {
-                  payload.proof = compressedProof;
+                  orbVerification.proof = compressedProof;
                   originalHandler(payload);
                 },
               );
             } else {
               originalHandler(payload);
             }
+          } else if (payload.verification_level === VerificationLevel.Orb) {
+            // Single verification response
+            compressAndPadProof(payload.proof as `0x${string}`).then(
+              (compressedProof) => {
+                payload.proof = compressedProof;
+                originalHandler(payload);
+              },
+            );
+          } else {
+            originalHandler(payload);
           }
         } else {
           originalHandler(payload);

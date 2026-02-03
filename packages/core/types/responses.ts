@@ -43,16 +43,12 @@ export type MiniAppVerifyActionSuccessPayload = {
   version: number;
 };
 
-// Individual verification result (for array input)
-export type VerificationResult = Omit<
-  MiniAppVerifyActionSuccessPayload,
-  'status' | 'version'
->;
-
-// Multi-verification success payload (for array input)
 export type MiniAppVerifyActionMultiSuccessPayload = {
   status: 'success';
-  verifications: VerificationResult[];
+  verifications: Omit<
+    MiniAppVerifyActionSuccessPayload,
+    'status' | 'version'
+  >[];
   version: number;
 };
 

@@ -23,10 +23,7 @@ export type VerifyCommandInput = {
   verification_level?: VerificationLevel | VerificationLevel[];
 };
 
-export type VerifyCommandPayload = {
-  action: IDKitConfig['action'];
-  signal?: IDKitConfig['signal'];
-  verification_level?: VerificationLevel | VerificationLevel[];
+export type VerifyCommandPayload = VerifyCommandInput & {
   timestamp: string;
 };
 
@@ -42,18 +39,10 @@ export type MiniAppVerifyActionSuccessPayload = MiniAppBaseSuccessPayload & {
   verification_level: VerificationLevel;
 };
 
-// Individual verification result in array (for verification_levels input)
-export type VerificationResult = {
-  verification_level: VerificationLevel;
-  proof: string;
-  merkle_root: string;
-  nullifier_hash: string;
-};
-
-// Multi-verification success payload (for verification_levels input)
-export type MiniAppVerifyActionMultiSuccessPayload = MiniAppBaseSuccessPayload & {
-  verifications: VerificationResult[];
-};
+export type MiniAppVerifyActionMultiSuccessPayload =
+  MiniAppBaseSuccessPayload & {
+    verifications: MiniAppVerifyActionSuccessPayload[];
+  };
 
 export type MiniAppVerifyActionErrorPayload = MiniAppBaseErrorPayload<string>;
 
@@ -111,15 +100,15 @@ export function createVerifyAsyncCommand(
           ctx.events.unsubscribe(ResponseEvent.MiniAppVerifyAction);
 
           if (response.status === 'success') {
-            // Check if multi-verification response (array input)
             if ('verifications' in response) {
-              // Compress all Orb proofs in the array
-              for (const verification of response.verifications) {
-                if (verification.verification_level === VerificationLevel.Orb) {
-                  verification.proof = await compressAndPadProof(
-                    verification.proof as `0x${string}`,
-                  );
-                }
+              // Multi-verification response - find and compress Orb proof if present
+              const orbVerification = response.verifications.find(
+                (v) => v.verification_level === VerificationLevel.Orb,
+              );
+              if (orbVerification) {
+                orbVerification.proof = await compressAndPadProof(
+                  orbVerification.proof as `0x${string}`,
+                );
               }
             } else if (response.verification_level === VerificationLevel.Orb) {
               // Single verification response
