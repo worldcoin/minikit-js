@@ -14,11 +14,10 @@ export const Verify = () => {
     'pending' | 'success' | 'failed' | undefined
   >(undefined);
 
-  const [whichVerification, setWhichVerification] = useState<
-    VerificationLevel | 'multi'
-  >(VerificationLevel.Device);
+  const [whichVerification, setWhichVerification] = useState<VerificationLevel>(
+    VerificationLevel.Device,
+  );
 
-  // Single verification level
   const onClickVerify = async (verificationLevel: VerificationLevel) => {
     setButtonState('pending');
     setWhichVerification(verificationLevel);
@@ -45,32 +44,6 @@ export const Verify = () => {
       setButtonState('failed');
 
       // Reset the button state after 3 seconds
-      setTimeout(() => {
-        setButtonState(undefined);
-      }, 2000);
-    }
-  };
-
-  // Multiple verification levels
-  const onClickVerifyMulti = async () => {
-    setButtonState('pending');
-    setWhichVerification('multi');
-    const result = await MiniKit.commandsAsync.verify({
-      action: 'test-action',
-      // Request multiple verification levels - response only includes what user has
-      verification_level: [VerificationLevel.Orb, VerificationLevel.Device],
-    });
-    console.log('Multi-verification result:', result.finalPayload);
-
-    // For multi-verification, the response contains a `verifications` array
-    if (
-      result.finalPayload.status === 'success' &&
-      'verifications' in result.finalPayload
-    ) {
-      console.log('Verifications:', result.finalPayload.verifications);
-      setButtonState('success');
-    } else {
-      setButtonState('failed');
       setTimeout(() => {
         setButtonState(undefined);
       }, 2000);
@@ -122,25 +95,6 @@ export const Verify = () => {
           className="w-full"
         >
           Verify (Orb)
-        </Button>
-      </LiveFeedback>
-      <LiveFeedback
-        label={{
-          failed: 'Failed to verify',
-          pending: 'Verifying multiple levels',
-          success: 'Verified',
-        }}
-        state={whichVerification === 'multi' ? buttonState : undefined}
-        className="w-full"
-      >
-        <Button
-          onClick={onClickVerifyMulti}
-          disabled={buttonState === 'pending'}
-          size="lg"
-          variant="secondary"
-          className="w-full"
-        >
-          Verify (Multi: Orb + Device)
         </Button>
       </LiveFeedback>
     </div>

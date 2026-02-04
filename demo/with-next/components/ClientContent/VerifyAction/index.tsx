@@ -117,7 +117,7 @@ export const VerifyAction = () => {
     (params: {
       app_id: `app_${string}`;
       action: string;
-      verification_level?: VerificationLevel;
+      verification_level?: VerificationLevel | VerificationLevel[];
       signal?: string;
     }) => {
       setLastUsedAppId(params.app_id);
@@ -142,7 +142,7 @@ export const VerifyAction = () => {
   );
 
   const onProdVerifyClick = useCallback(
-    (verification_level: VerificationLevel) => {
+    (verification_level: VerificationLevel | VerificationLevel[]) => {
       verifyAction({
         app_id: process.env.NEXT_PUBLIC_PROD_VERIFY_APP_ID as `app_${string}`,
         action: process.env.NEXT_PUBLIC_PROD_VERIFY_ACTION as string,
@@ -154,7 +154,7 @@ export const VerifyAction = () => {
   );
 
   const onStagingVerifyClick = useCallback(
-    (verification_level: VerificationLevel) => {
+    (verification_level: VerificationLevel | VerificationLevel[]) => {
       verifyAction({
         app_id: process.env
           .NEXT_PUBLIC_STAGING_VERIFY_APP_ID as `app_${string}`,
@@ -232,6 +232,23 @@ export const VerifyAction = () => {
               </button>
             </div>
 
+            <div className="grid grid-cols-1 gap-x-2">
+              <button
+                className={clsx(
+                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
+                  isProduction ? 'hidden' : '',
+                )}
+                onClick={() =>
+                  onStagingVerifyClick([
+                    VerificationLevel.Orb,
+                    VerificationLevel.Document,
+                  ])
+                }
+              >
+                Send staging app verify (Multi: Orb + Document)
+              </button>
+            </div>
+
             <div className="grid grid-cols-2 gap-x-2">
               <button
                 className={clsx(
@@ -273,6 +290,23 @@ export const VerifyAction = () => {
                 onClick={() => onProdVerifyClick(VerificationLevel.Orb)}
               >
                 Send production app verify (Orb)
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-x-2">
+              <button
+                className={clsx(
+                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
+                  isProduction ? '' : 'hidden',
+                )}
+                onClick={() =>
+                  onProdVerifyClick([
+                    VerificationLevel.Orb,
+                    VerificationLevel.Device,
+                  ])
+                }
+              >
+                Send production app verify (Multi: Orb + Device)
               </button>
             </div>
           </div>
