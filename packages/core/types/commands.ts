@@ -34,7 +34,7 @@ export type AsyncHandlerReturn<CommandPayload, FinalPayload> = Promise<{
 export type VerifyCommandInput = {
   action: IDKitConfig['action'];
   signal?: IDKitConfig['signal'];
-  verification_level?: VerificationLevel;
+  verification_level?: VerificationLevel | VerificationLevel[];
 };
 
 // Full list of values sent to the app

@@ -20,7 +20,7 @@ import {
 export type VerifyCommandInput = {
   action: IDKitConfig['action'];
   signal?: IDKitConfig['signal'];
-  verification_level?: VerificationLevel;
+  verification_level?: VerificationLevel | VerificationLevel[];
 };
 
 export type VerifyCommandPayload = VerifyCommandInput & {
@@ -39,10 +39,22 @@ export type MiniAppVerifyActionSuccessPayload = MiniAppBaseSuccessPayload & {
   verification_level: VerificationLevel;
 };
 
+// Individual verification result (without status/version per entry)
+export type VerificationResult = Omit<
+  MiniAppVerifyActionSuccessPayload,
+  'status' | 'version'
+>;
+
+export type MiniAppVerifyActionMultiSuccessPayload =
+  MiniAppBaseSuccessPayload & {
+    verifications: VerificationResult[];
+  };
+
 export type MiniAppVerifyActionErrorPayload = MiniAppBaseErrorPayload<string>;
 
 export type MiniAppVerifyActionPayload =
   | MiniAppVerifyActionSuccessPayload
+  | MiniAppVerifyActionMultiSuccessPayload
   | MiniAppVerifyActionErrorPayload;
 
 // ============================================================================
@@ -93,14 +105,23 @@ export function createVerifyAsyncCommand(
         const handleResponse = async (response: MiniAppVerifyActionPayload) => {
           ctx.events.unsubscribe(ResponseEvent.MiniAppVerifyAction);
 
-          // Compress proof for Orb verification
-          if (
-            response.status === 'success' &&
-            response.verification_level === VerificationLevel.Orb
-          ) {
-            response.proof = await compressAndPadProof(
-              response.proof as `0x${string}`,
-            );
+          if (response.status === 'success') {
+            if ('verifications' in response) {
+              // Multi-verification response - find and compress Orb proof if present
+              const orbVerification = response.verifications.find(
+                (v) => v.verification_level === VerificationLevel.Orb,
+              );
+              if (orbVerification) {
+                orbVerification.proof = await compressAndPadProof(
+                  orbVerification.proof as `0x${string}`,
+                );
+              }
+            } else if (response.verification_level === VerificationLevel.Orb) {
+              // Single verification response
+              response.proof = await compressAndPadProof(
+                response.proof as `0x${string}`,
+              );
+            }
           }
 
           resolve({ commandPayload, finalPayload: response });

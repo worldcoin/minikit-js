@@ -98,16 +98,33 @@ export class MiniKit {
           payload.error_code = VerificationErrorCodes.VerificationRejected;
         }
 
-        if (
-          payload.status === 'success' &&
-          payload.verification_level === VerificationLevel.Orb
-        ) {
-          compressAndPadProof(payload.proof as `0x${string}`).then(
-            (compressedProof) => {
-              payload.proof = compressedProof;
+        if (payload.status === 'success') {
+          if ('verifications' in payload) {
+            // Multi-verification response - find and compress Orb proof if present
+            const orbVerification = payload.verifications.find(
+              (v) => v.verification_level === VerificationLevel.Orb,
+            );
+            if (orbVerification) {
+              compressAndPadProof(orbVerification.proof as `0x${string}`).then(
+                (compressedProof) => {
+                  orbVerification.proof = compressedProof;
+                  originalHandler(payload);
+                },
+              );
+            } else {
               originalHandler(payload);
-            },
-          );
+            }
+          } else if (payload.verification_level === VerificationLevel.Orb) {
+            // Single verification response
+            compressAndPadProof(payload.proof as `0x${string}`).then(
+              (compressedProof) => {
+                payload.proof = compressedProof;
+                originalHandler(payload);
+              },
+            );
+          } else {
+            originalHandler(payload);
+          }
         } else {
           originalHandler(payload);
         }
