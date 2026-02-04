@@ -108,7 +108,10 @@ export const VerifyOnchainProof = () => {
       action: 'onchain-verify-test',
       signal: signal,
     });
-    if (finalPayload.status === 'success' && !('verifications' in finalPayload)) {
+    if (
+      finalPayload.status === 'success' &&
+      !('verifications' in finalPayload)
+    ) {
       const merkleRoot = finalPayload.merkle_root;
       const nullifierHash = finalPayload.nullifier_hash;
       const proof = finalPayload.proof;
