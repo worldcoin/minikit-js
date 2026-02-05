@@ -1,8 +1,7 @@
-import { VerificationLevel } from '@worldcoin/idkit-core';
-import { AppErrorCodes } from '@worldcoin/idkit-core';
+import { AppErrorCodes, VerificationLevel } from '@worldcoin/idkit-core';
 import { ResponseEvent } from '../commands/types';
-import { compressAndPadProof } from '../helpers/proof';
 import type { MiniAppVerifyActionPayload } from '../commands/verify';
+import { compressAndPadProof } from '../helpers/proof';
 
 // Event handler and payload types
 export type EventPayload<T extends ResponseEvent = ResponseEvent> = any; // Will be properly typed per-command
