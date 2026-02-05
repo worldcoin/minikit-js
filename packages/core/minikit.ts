@@ -1,21 +1,17 @@
-import { VerificationLevel } from '@worldcoin/idkit-core';
 import {
   AsyncCommands,
   CommandContext,
   Commands,
   createAsyncCommands,
   createCommands,
-  MiniAppVerifyActionPayload,
   MiniAppWalletAuthPayload,
   ResponseEvent,
   validateCommands,
-  VerificationErrorCodes,
 } from './commands';
 import { MiniKitInstallReturnType } from './commands/types';
 import { EventManager } from './core/events';
 import { MiniKitState } from './core/state';
 import { setupMicrophone } from './helpers/microphone';
-import { compressAndPadProof } from './helpers/proof';
 import { sendWebviewEvent } from './helpers/send-webview-event';
 import {
   MiniKitInstallErrorCodes,
@@ -85,35 +81,9 @@ export class MiniKit {
         originalHandler(payload);
       };
       this.eventManager.subscribe(event, wrappedHandler as any);
-    }
-    // Special handling for VerifyAction - normalize errors and compress proofs
-    else if (event === ResponseEvent.MiniAppVerifyAction) {
-      const originalHandler = handler;
-      const wrappedHandler = (payload: MiniAppVerifyActionPayload) => {
-        // Align error codes on iOS and Android
-        if (
-          payload.status === 'error' &&
-          (payload.error_code as string) === 'user_rejected'
-        ) {
-          payload.error_code = VerificationErrorCodes.VerificationRejected;
-        }
-
-        if (
-          payload.status === 'success' &&
-          payload.verification_level === VerificationLevel.Orb
-        ) {
-          compressAndPadProof(payload.proof as `0x${string}`).then(
-            (compressedProof) => {
-              payload.proof = compressedProof;
-              originalHandler(payload);
-            },
-          );
-        } else {
-          originalHandler(payload);
-        }
-      };
-      this.eventManager.subscribe(event, wrappedHandler as any);
     } else {
+      // VerifyAction processing (error normalization, proof compression) is
+      // handled centrally in EventManager.trigger()
       this.eventManager.subscribe(event, handler);
     }
   }

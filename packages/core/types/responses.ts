@@ -43,6 +43,15 @@ export type MiniAppVerifyActionSuccessPayload = {
   version: number;
 };
 
+export type MiniAppVerifyActionMultiSuccessPayload = {
+  status: 'success';
+  verifications: Omit<
+    MiniAppVerifyActionSuccessPayload,
+    'status' | 'version'
+  >[];
+  version: number;
+};
+
 export type MiniAppVerifyActionErrorPayload = {
   status: 'error';
   error_code: VerificationErrorCodes;
@@ -51,6 +60,7 @@ export type MiniAppVerifyActionErrorPayload = {
 
 export type MiniAppVerifyActionPayload =
   | MiniAppVerifyActionSuccessPayload
+  | MiniAppVerifyActionMultiSuccessPayload
   | MiniAppVerifyActionErrorPayload;
 
 export type MiniAppPaymentSuccessPayload = {
