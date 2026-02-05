@@ -1,6 +1,5 @@
 import { IDKitConfig, VerificationLevel } from '@worldcoin/idkit-core';
 import { encodeAction, generateSignal } from '@worldcoin/idkit-core/hashing';
-import { compressAndPadProof } from '../helpers/proof';
 import {
   AsyncHandlerReturn,
   Command,
@@ -98,32 +97,13 @@ export function createVerifyAsyncCommand(
     VerifyCommandPayload | null,
     MiniAppVerifyActionPayload
   > => {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       try {
         let commandPayload: VerifyCommandPayload | null = null;
 
-        const handleResponse = async (response: MiniAppVerifyActionPayload) => {
+        const handleResponse = (response: MiniAppVerifyActionPayload) => {
           ctx.events.unsubscribe(ResponseEvent.MiniAppVerifyAction);
-
-          if (response.status === 'success') {
-            if ('verifications' in response) {
-              // Multi-verification response - find and compress Orb proof if present
-              const orbVerification = response.verifications.find(
-                (v) => v.verification_level === VerificationLevel.Orb,
-              );
-              if (orbVerification) {
-                orbVerification.proof = await compressAndPadProof(
-                  orbVerification.proof as `0x${string}`,
-                );
-              }
-            } else if (response.verification_level === VerificationLevel.Orb) {
-              // Single verification response
-              response.proof = await compressAndPadProof(
-                response.proof as `0x${string}`,
-              );
-            }
-          }
-
+          // Proof compression and error normalization handled by EventManager.trigger()
           resolve({ commandPayload, finalPayload: response });
         };
 
