@@ -13,6 +13,7 @@ import { validateSchema } from '../helpers/validate-schema';
 import { verifyProof } from './verify-cloud-proof';
 import { VerifyOnchainProof } from './verify-onchain';
 
+// Schema for single verification response
 const verifyActionSuccessPayloadSchema = yup.object({
   status: yup
     .string<'success' | 'error'>()
@@ -25,6 +26,23 @@ const verifyActionSuccessPayloadSchema = yup.object({
     .string<VerificationLevel>()
     .oneOf(Object.values(VerificationLevel))
     .required(),
+});
+
+// Schema for individual verification result in multi-verification response
+const verificationResultSchema = yup.object({
+  proof: yup.string().required(),
+  merkle_root: yup.string().required(),
+  nullifier_hash: yup.string().required(),
+  verification_level: yup
+    .string<VerificationLevel>()
+    .oneOf(Object.values(VerificationLevel))
+    .required(),
+});
+
+// Schema for multi-verification response
+const verifyActionMultiSuccessPayloadSchema = yup.object({
+  status: yup.string().equals(['success']).required(),
+  verifications: yup.array().of(verificationResultSchema).required().min(1),
 });
 
 const verifyActionErrorPayloadSchema = yup.object({
@@ -69,6 +87,7 @@ export const VerifyAction = () => {
     MiniKit.subscribe(ResponseEvent.MiniAppVerifyAction, async (payload) => {
       console.log('MiniAppVerifyAction, SUBSCRIBE PAYLOAD', payload);
 
+      // Handle error response
       if (payload.status === 'error') {
         const errorMessage = await validateSchema(
           verifyActionErrorPayloadSchema,
@@ -78,10 +97,28 @@ export const VerifyAction = () => {
           return setVerifyActionAppPayloadValidationMessage(errorMessage);
         }
         setVerifyActionAppPayloadValidationMessage(`Payload is valid!`);
-
         setVerifyActionAppPayload(payload);
+        return;
       }
 
+      // Handle multi-verification response
+      if ('verifications' in payload) {
+        const errorMessage = await validateSchema(
+          verifyActionMultiSuccessPayloadSchema,
+          payload,
+        );
+        if (errorMessage) {
+          return setVerifyActionAppPayloadValidationMessage(errorMessage);
+        }
+        setVerifyActionAppPayloadValidationMessage(
+          `Payload is valid (multi-verification: ${payload.verifications.length} proofs)`,
+        );
+        setVerifyActionAppPayload(payload);
+        // Skip cloud verification for multi-verification (not supported yet)
+        return;
+      }
+
+      // Handle single verification response
       const errorMessage = await validateSchema(
         verifyActionSuccessPayloadSchema,
         payload,
