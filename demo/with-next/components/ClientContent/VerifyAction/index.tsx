@@ -154,7 +154,7 @@ export const VerifyAction = () => {
     (params: {
       app_id: `app_${string}`;
       action: string;
-      verification_level?: VerificationLevel | VerificationLevel[];
+      verification_level?: VerifyCommandInput['verification_level'];
       signal?: string;
     }) => {
       setLastUsedAppId(params.app_id);
@@ -179,7 +179,7 @@ export const VerifyAction = () => {
   );
 
   const onProdVerifyClick = useCallback(
-    (verification_level: VerificationLevel | VerificationLevel[]) => {
+    (verification_level: VerifyCommandInput['verification_level']) => {
       verifyAction({
         app_id: process.env.NEXT_PUBLIC_PROD_VERIFY_APP_ID as `app_${string}`,
         action: process.env.NEXT_PUBLIC_PROD_VERIFY_ACTION as string,
@@ -191,7 +191,7 @@ export const VerifyAction = () => {
   );
 
   const onStagingVerifyClick = useCallback(
-    (verification_level: VerificationLevel | VerificationLevel[]) => {
+    (verification_level: VerifyCommandInput['verification_level']) => {
       verifyAction({
         app_id: process.env
           .NEXT_PUBLIC_STAGING_VERIFY_APP_ID as `app_${string}`,

@@ -47,9 +47,13 @@ export class EventManager {
 
     // Process VerifyAction responses (error normalization + proof compression)
     if (event === ResponseEvent.MiniAppVerifyAction) {
+      // Capture and unsubscribe immediately to prevent duplicate triggers
+      // during async proof compression
+      const handler = this.listeners[event];
+      this.unsubscribe(event);
       this.processVerifyActionPayload(
         payload as MiniAppVerifyActionPayload,
-        this.listeners[event],
+        handler,
       );
       return;
     }
