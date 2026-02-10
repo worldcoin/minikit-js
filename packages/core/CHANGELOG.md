@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.10
+
+### Patch Changes
+
+- 60c6c8b: multi proofs
+
 ## 1.9.9
 
 ### Patch Changes
