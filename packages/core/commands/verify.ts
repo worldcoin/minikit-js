@@ -1,6 +1,5 @@
 import { IDKitConfig, VerificationLevel } from '@worldcoin/idkit-core';
 import { encodeAction, generateSignal } from '@worldcoin/idkit-core/hashing';
-import { compressAndPadProof } from '../helpers/proof';
 import {
   AsyncHandlerReturn,
   Command,
@@ -20,7 +19,9 @@ import {
 export type VerifyCommandInput = {
   action: IDKitConfig['action'];
   signal?: IDKitConfig['signal'];
-  verification_level?: VerificationLevel;
+  verification_level?:
+    | VerificationLevel
+    | [VerificationLevel, ...VerificationLevel[]];
 };
 
 export type VerifyCommandPayload = VerifyCommandInput & {
@@ -39,10 +40,22 @@ export type MiniAppVerifyActionSuccessPayload = MiniAppBaseSuccessPayload & {
   verification_level: VerificationLevel;
 };
 
+// Individual verification result (without status/version per entry)
+export type VerificationResult = Omit<
+  MiniAppVerifyActionSuccessPayload,
+  'status' | 'version'
+>;
+
+export type MiniAppVerifyActionMultiSuccessPayload =
+  MiniAppBaseSuccessPayload & {
+    verifications: VerificationResult[];
+  };
+
 export type MiniAppVerifyActionErrorPayload = MiniAppBaseErrorPayload<string>;
 
 export type MiniAppVerifyActionPayload =
   | MiniAppVerifyActionSuccessPayload
+  | MiniAppVerifyActionMultiSuccessPayload
   | MiniAppVerifyActionErrorPayload;
 
 // ============================================================================
@@ -55,6 +68,14 @@ export function createVerifyCommand(_ctx: CommandContext) {
       console.error(
         "'verify' command is unavailable. Check MiniKit.install() or update the app version",
       );
+      return null;
+    }
+
+    if (
+      Array.isArray(payload.verification_level) &&
+      payload.verification_level.length === 0
+    ) {
+      console.error("'verification_level' must not be an empty array");
       return null;
     }
 
@@ -86,23 +107,13 @@ export function createVerifyAsyncCommand(
     VerifyCommandPayload | null,
     MiniAppVerifyActionPayload
   > => {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       try {
         let commandPayload: VerifyCommandPayload | null = null;
 
-        const handleResponse = async (response: MiniAppVerifyActionPayload) => {
+        const handleResponse = (response: MiniAppVerifyActionPayload) => {
           ctx.events.unsubscribe(ResponseEvent.MiniAppVerifyAction);
-
-          // Compress proof for Orb verification
-          if (
-            response.status === 'success' &&
-            response.verification_level === VerificationLevel.Orb
-          ) {
-            response.proof = await compressAndPadProof(
-              response.proof as `0x${string}`,
-            );
-          }
-
+          // Proof compression and error normalization handled by EventManager.trigger()
           resolve({ commandPayload, finalPayload: response });
         };
 
