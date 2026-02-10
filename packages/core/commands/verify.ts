@@ -19,7 +19,9 @@ import {
 export type VerifyCommandInput = {
   action: IDKitConfig['action'];
   signal?: IDKitConfig['signal'];
-  verification_level?: VerificationLevel | VerificationLevel[];
+  verification_level?:
+    | VerificationLevel
+    | [VerificationLevel, ...VerificationLevel[]];
 };
 
 export type VerifyCommandPayload = VerifyCommandInput & {
@@ -66,6 +68,14 @@ export function createVerifyCommand(_ctx: CommandContext) {
       console.error(
         "'verify' command is unavailable. Check MiniKit.install() or update the app version",
       );
+      return null;
+    }
+
+    if (
+      Array.isArray(payload.verification_level) &&
+      payload.verification_level.length === 0
+    ) {
+      console.error("'verification_level' must not be an empty array");
       return null;
     }
 
