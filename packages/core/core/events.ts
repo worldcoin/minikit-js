@@ -77,18 +77,53 @@ export class EventManager {
           (v) => v.verification_level === VerificationLevel.Orb,
         );
         if (orbVerification) {
-          orbVerification.proof = await compressAndPadProof(
+          orbVerification.proof = await this.compressProofSafely(
             orbVerification.proof as `0x${string}`,
+            {
+              mode: 'multi',
+              payloadVersion: payload.version,
+              verificationsCount: payload.verifications.length,
+              verificationLevel: orbVerification.verification_level,
+            },
           );
         }
       } else if (payload.verification_level === VerificationLevel.Orb) {
         // Single verification response
-        payload.proof = await compressAndPadProof(
+        payload.proof = await this.compressProofSafely(
           payload.proof as `0x${string}`,
+          {
+            mode: 'single',
+            payloadVersion: payload.version,
+            verificationLevel: payload.verification_level,
+          },
         );
       }
     }
 
     handler(payload);
+  }
+
+  private async compressProofSafely(
+    proof: `0x${string}`,
+    context: {
+      mode: 'single' | 'multi';
+      payloadVersion: number;
+      verificationLevel: VerificationLevel;
+      verificationsCount?: number;
+    },
+  ): Promise<`0x${string}`> {
+    try {
+      return await compressAndPadProof(proof);
+    } catch (error) {
+      console.error(
+        'Failed to compress verification proof. Delivering payload with uncompressed proof.',
+        {
+          ...context,
+          error,
+        },
+      );
+
+      return proof;
+    }
   }
 }
