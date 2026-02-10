@@ -345,6 +345,20 @@ export const VerifyAction = () => {
               >
                 Send production app verify (Multi: Orb + Device)
               </button>
+              <button
+                className={clsx(
+                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
+                  isProduction ? '' : 'hidden',
+                )}
+                onClick={() =>
+                  onProdVerifyClick([
+                    VerificationLevel.Orb,
+                    VerificationLevel.SecureDocument,
+                  ])
+                }
+              >
+                Send production app verify (Multi: Orb + SecureDocument)
+              </button>
             </div>
           </div>
         </div>
