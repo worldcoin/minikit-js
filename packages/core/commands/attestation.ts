@@ -97,8 +97,6 @@ export function createAttestationAsyncCommand(
   > => {
     return new Promise((resolve, reject) => {
       try {
-        let commandPayload: AttestationPayload | null = null;
-
         const handleResponse = (response: MiniAppAttestationPayload) => {
           ctx.events.unsubscribe(ResponseEvent.MiniAppAttestation);
           resolve({ commandPayload, finalPayload: response });
@@ -108,8 +106,21 @@ export function createAttestationAsyncCommand(
           ResponseEvent.MiniAppAttestation,
           handleResponse as any,
         );
-        commandPayload = syncCommand(payload);
+
+        const commandPayload = syncCommand(payload);
+
+        // If dispatch failed locally, clean up the subscription and reject
+        // immediately — no response event will ever arrive.
+        if (!commandPayload) {
+          ctx.events.unsubscribe(ResponseEvent.MiniAppAttestation);
+          reject(
+            new Error(
+              "'attestation' command failed: command unavailable or invalid input",
+            ),
+          );
+        }
       } catch (error) {
+        ctx.events.unsubscribe(ResponseEvent.MiniAppAttestation);
         reject(error);
       }
     });
