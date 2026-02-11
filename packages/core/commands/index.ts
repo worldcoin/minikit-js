@@ -4,6 +4,7 @@ export * from './types';
 // Re-export all command types and implementations
 export * from './attestation';
 export * from './chat';
+export * from './close-miniapp';
 export * from './get-permissions';
 export * from './pay';
 export * from './request-permission';
@@ -27,6 +28,7 @@ import {
   createAttestationCommand,
 } from './attestation';
 import { createChatAsyncCommand, createChatCommand } from './chat';
+import { createCloseMiniAppCommand } from './close-miniapp';
 import {
   createGetPermissionsAsyncCommand,
   createGetPermissionsCommand,
@@ -78,6 +80,7 @@ export function createCommands(ctx: CommandContext) {
     share: createShareCommand(ctx),
     chat: createChatCommand(ctx),
     attestation: createAttestationCommand(ctx),
+    closeMiniApp: createCloseMiniAppCommand(ctx),
   };
 }
 

@@ -18,6 +18,7 @@ export enum Command {
   Share = 'share',
   Chat = 'chat',
   Attestation = 'attestation',
+  CloseMiniApp = 'close-miniapp',
 }
 
 export type WebViewBasePayload = {
