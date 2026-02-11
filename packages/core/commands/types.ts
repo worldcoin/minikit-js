@@ -20,6 +20,7 @@ export enum Command {
   Share = 'share',
   Chat = 'chat',
   Attestation = 'attestation',
+  CloseMiniApp = 'close-miniapp',
 }
 
 export enum ResponseEvent {
@@ -57,6 +58,7 @@ export const COMMAND_VERSIONS: Record<Command, number> = {
   [Command.Share]: 1,
   [Command.Chat]: 1,
   [Command.Attestation]: 1,
+  [Command.CloseMiniApp]: 1,
 };
 
 const commandAvailability: Record<Command, boolean> = {
@@ -73,6 +75,7 @@ const commandAvailability: Record<Command, boolean> = {
   [Command.Share]: false,
   [Command.Chat]: false,
   [Command.Attestation]: false,
+  [Command.CloseMiniApp]: false,
 };
 
 export function isCommandAvailable(command: Command): boolean {
