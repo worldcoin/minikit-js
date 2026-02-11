@@ -32,7 +32,6 @@ import {
   isInWorldApp,
   pay,
   sendTransaction,
-  setWagmiConfig,
   shareContacts,
   walletAuth,
 } from './src/unified';
@@ -191,24 +190,6 @@ export class MiniKit {
    * Check if running inside World App
    */
   static isInWorldApp = isInWorldApp;
-
-  /**
-   * Configure Wagmi for web fallback support
-   *
-   * Call this during app initialization to enable Wagmi-based
-   * fallbacks for walletAuth and sendTransaction on web.
-   *
-   * @example
-   * ```typescript
-   * import { createConfig } from 'wagmi';
-   *
-   * const wagmiConfig = createConfig({ ... });
-   * MiniKit.configureWagmi(wagmiConfig);
-   * ```
-   */
-  static configureWagmi(config: unknown): void {
-    setWagmiConfig(config);
-  }
 
   // ============================================================================
   // Public State Accessors

@@ -1,8 +1,9 @@
 'use client';
 
 import {
+  type ComponentType,
   createContext,
-  ReactNode,
+  type ReactNode,
   useContext,
   useEffect,
   useState,
@@ -38,25 +39,40 @@ export const MiniKitProvider = ({
     console.warn(
       'MiniKit permissions not fetched in provider. MiniKit.user.permissions will be inaccurate.',
     );
-    // MiniKit.commandsAsync
-    //   .getPermissions()
-    //   .then(({ commandPayload: _, finalPayload }) => {
-    //     if (finalPayload.status === 'success') {
-    //       MiniKit.user.permissions = {
-    //         notifications: finalPayload.permissions.notifications,
-    //         contacts: finalPayload.permissions.contacts,
-    //       };
-    //     }
-    //   });
     setIsInstalled(success);
   }, [props?.appId]);
 
   return (
     <MiniKitContext.Provider value={{ isInstalled }}>
+      <WagmiAutoDetect />
       {children}
     </MiniKitContext.Provider>
   );
 };
+
+/**
+ * Auto-detects Wagmi config from the provider tree.
+ *
+ * When MiniKitProvider is wrapped inside WagmiProvider (per RFC),
+ * this dynamically loads a bridge component that reads Wagmi's config
+ * via useConfig() and wires it into MiniKit's fallback system.
+ *
+ * If wagmi is not installed, the dynamic import fails silently.
+ * No manual configureWagmi() call needed.
+ */
+function WagmiAutoDetect() {
+  const [Bridge, setBridge] = useState<ComponentType | null>(null);
+
+  useEffect(() => {
+    import('./src/wagmi-bridge')
+      .then((mod) => setBridge(() => mod.WagmiConfigBridge))
+      .catch(() => {
+        // wagmi not installed — expected, no-op
+      });
+  }, []);
+
+  return Bridge ? <Bridge /> : null;
+}
 
 // Custom hook to see when minikit is installed
 export const useMiniKit = () => {

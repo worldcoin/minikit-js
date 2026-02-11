@@ -103,4 +103,4 @@ export {
   type FallbackReason,
 } from '../fallback/types';
 
-export { hasWagmiConfig, setWagmiConfig } from '../fallback/wagmi';
+export { hasWagmiConfig } from '../fallback/wagmi';

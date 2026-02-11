@@ -24,7 +24,7 @@
     "ts-node": "^10.9.2",
     "tsup": "^8.0.2",
     "typescript": "^5.4.5",
-    "viem": "2.23.5"
+    "viem": "2.45.3"
   },
   "engines": {
     "node": ">= 16"
@@ -76,8 +76,8 @@
   "peerDependencies": {
     "react": "^17 || ^18 || ^19",
     "siwe": "^3.0.0",
-    "viem": "^2.23.5",
-    "wagmi": "^2.0.0"
+    "viem": "^2.21.0",
+    "wagmi": "^3.0.0"
   },
   "peerDependenciesMeta": {
     "wagmi": {
