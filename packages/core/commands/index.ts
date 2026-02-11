@@ -2,6 +2,7 @@
 export * from './types';
 
 // Re-export all command types and implementations
+export * from './attestation';
 export * from './chat';
 export * from './get-permissions';
 export * from './pay';
@@ -21,6 +22,10 @@ export * from './wallet-auth';
 
 import { CommandContext } from './types';
 
+import {
+  createAttestationAsyncCommand,
+  createAttestationCommand,
+} from './attestation';
 import { createChatAsyncCommand, createChatCommand } from './chat';
 import {
   createGetPermissionsAsyncCommand,
@@ -72,6 +77,7 @@ export function createCommands(ctx: CommandContext) {
     sendHapticFeedback: createSendHapticFeedbackCommand(ctx),
     share: createShareCommand(ctx),
     chat: createChatCommand(ctx),
+    attestation: createAttestationCommand(ctx),
   };
 }
 
@@ -103,6 +109,7 @@ export function createAsyncCommands(ctx: CommandContext, commands: Commands) {
     ),
     share: createShareAsyncCommand(ctx, commands.share),
     chat: createChatAsyncCommand(ctx, commands.chat),
+    attestation: createAttestationAsyncCommand(ctx, commands.attestation),
   };
 }
 

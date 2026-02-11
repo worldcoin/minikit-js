@@ -27,6 +27,7 @@ export class EventManager {
     [ResponseEvent.MiniAppShare]: () => {},
     [ResponseEvent.MiniAppMicrophone]: () => {},
     [ResponseEvent.MiniAppChat]: () => {},
+    [ResponseEvent.MiniAppAttestation]: () => {},
   };
 
   subscribe<E extends ResponseEvent>(event: E, handler: EventHandler<E>): void {
