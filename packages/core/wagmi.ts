@@ -16,4 +16,4 @@
  * ```
  */
 
-export * from './src/wagmi';
+export * from './wagmi/index';

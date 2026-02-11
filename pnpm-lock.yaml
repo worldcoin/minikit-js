@@ -99,8 +99,8 @@ importers:
         specifier: ^1.4.0
         version: 1.4.0(bufferutil@4.1.0)(utf-8-validate@5.0.10)
       '@wagmi/core':
-        specifier: ^3.0.0
-        version: 3.0.0(@tanstack/query-core@5.90.20)(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(use-sync-external-store@1.4.0(react@19.1.0))(viem@2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76))
+        specifier: ^3.3.3
+        version: 3.3.3(@tanstack/query-core@5.90.20)(@types/react@19.1.1)(ox@0.12.1(typescript@5.5.4)(zod@3.25.76))(react@19.1.0)(typescript@5.5.4)(use-sync-external-store@1.4.0(react@19.1.0))(viem@2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76))
       '@worldcoin/minikit-js':
         specifier: workspace:*
         version: link:../../packages/core
@@ -209,8 +209,8 @@ importers:
   packages/core:
     dependencies:
       '@worldcoin/idkit-core':
-        specifier: ^4.0.1
-        version: 4.0.1
+        specifier: link:/users/andy.wang/Documents/worldcoin/idkit/js/packages/core
+        version: link:../../../../../../../users/andy.wang/Documents/worldcoin/idkit/js/packages/core
       abitype:
         specifier: ^1.0.6
         version: 1.0.6(typescript@5.5.4)(zod@3.25.76)
@@ -2361,18 +2361,6 @@ packages:
       typescript:
         optional: true
 
-  '@wagmi/core@3.0.0':
-    resolution: {integrity: sha512-wOn8jwB9GNYTdrc4CP/huf1aAhDoQ5GKl5OhxGBZx9X4qE+wReW05dTcurEc+XBl9B/ZVis2JdXVU3ZiYqyS8Q==}
-    peerDependencies:
-      '@tanstack/query-core': '>=5.0.0'
-      typescript: '>=5.7.3'
-      viem: 2.x
-    peerDependenciesMeta:
-      '@tanstack/query-core':
-        optional: true
-      typescript:
-        optional: true
-
   '@wagmi/core@3.3.3':
     resolution: {integrity: sha512-Yg7fZgLDReh5TzCyFEHsaoDgk9FaQ0lAI+RSGYk7qFBs3SAnRXlHzc9NxEsv9E91JEzWaEzYI0WvgDFALT0Msw==}
     peerDependencies:
@@ -2484,9 +2472,6 @@ packages:
   '@worldcoin/idkit-core@2.0.2':
     resolution: {integrity: sha512-GqBNAI+OyG+YXoMOI9PJDlO+MeiUnclrdjaXDYYCjmXBQi+tx0rQjNJfxwS9H6jQSVPSYaa/crcgYYMJvwdS0A==}
     engines: {node: '>=12.4'}
-
-  '@worldcoin/idkit-core@4.0.1':
-    resolution: {integrity: sha512-ykDuesfSsuERh4T0cShQlrnaBQiHS5qSJtEUiLiehoFln4nIbK93004l2EWjEDK989pbkC6hEy7yA6fPh6tMOQ==}
 
   '@worldcoin/mini-apps-ui-kit-react@1.0.2':
     resolution: {integrity: sha512-sodGHG76bFCnKS7rlocDW0ILhPmQXCntJWB0FHaCKcqhiySB+8dCwWdwFO5Kl4zwJ3wbCVz4kidLP6YLECAwQA==}
@@ -9173,14 +9158,15 @@ snapshots:
       porto: 0.2.35(@tanstack/react-query@5.90.20(react@17.0.2))(@types/react@17.0.85)(@wagmi/core@3.3.3(@tanstack/query-core@5.90.20)(@types/react@17.0.85)(ox@0.12.1(typescript@5.5.4)(zod@3.25.76))(react@17.0.2)(typescript@5.5.4)(use-sync-external-store@1.4.0(react@17.0.2))(viem@2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76)))(react@17.0.2)(typescript@5.5.4)(use-sync-external-store@1.4.0(react@17.0.2))(viem@2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76))(wagmi@3.4.3)
       typescript: 5.5.4
 
-  '@wagmi/core@3.0.0(@tanstack/query-core@5.90.20)(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(use-sync-external-store@1.4.0(react@19.1.0))(viem@2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76))':
+  '@wagmi/core@3.3.3(@tanstack/query-core@5.90.20)(@types/react@17.0.85)(ox@0.12.1(typescript@5.5.4)(zod@3.25.76))(react@17.0.2)(typescript@5.5.4)(use-sync-external-store@1.4.0(react@17.0.2))(viem@2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76))':
     dependencies:
       eventemitter3: 5.0.1
       mipd: 0.0.7(typescript@5.5.4)
       viem: 2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76)
-      zustand: 5.0.0(@types/react@19.1.1)(react@19.1.0)(use-sync-external-store@1.4.0(react@19.1.0))
+      zustand: 5.0.0(@types/react@17.0.85)(react@17.0.2)(use-sync-external-store@1.4.0(react@17.0.2))
     optionalDependencies:
       '@tanstack/query-core': 5.90.20
+      ox: 0.12.1(typescript@5.5.4)(zod@3.25.76)
       typescript: 5.5.4
     transitivePeerDependencies:
       - '@types/react'
@@ -9188,12 +9174,12 @@ snapshots:
       - react
       - use-sync-external-store
 
-  '@wagmi/core@3.3.3(@tanstack/query-core@5.90.20)(@types/react@17.0.85)(ox@0.12.1(typescript@5.5.4)(zod@3.25.76))(react@17.0.2)(typescript@5.5.4)(use-sync-external-store@1.4.0(react@17.0.2))(viem@2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76))':
+  '@wagmi/core@3.3.3(@tanstack/query-core@5.90.20)(@types/react@19.1.1)(ox@0.12.1(typescript@5.5.4)(zod@3.25.76))(react@19.1.0)(typescript@5.5.4)(use-sync-external-store@1.4.0(react@19.1.0))(viem@2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76))':
     dependencies:
       eventemitter3: 5.0.1
       mipd: 0.0.7(typescript@5.5.4)
       viem: 2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76)
-      zustand: 5.0.0(@types/react@17.0.85)(react@17.0.2)(use-sync-external-store@1.4.0(react@17.0.2))
+      zustand: 5.0.0(@types/react@19.1.1)(react@19.1.0)(use-sync-external-store@1.4.0(react@19.1.0))
     optionalDependencies:
       '@tanstack/query-core': 5.90.20
       ox: 0.12.1(typescript@5.5.4)(zod@3.25.76)
@@ -10174,8 +10160,6 @@ snapshots:
       - react
       - typescript
       - zod
-
-  '@worldcoin/idkit-core@4.0.1': {}
 
   '@worldcoin/mini-apps-ui-kit-react@1.0.2(@types/react-dom@19.1.2(@types/react@19.1.1))(@types/react@19.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@4.1.4)':
     dependencies:

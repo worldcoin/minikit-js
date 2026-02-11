@@ -1,7 +1,7 @@
-// Re-export shared types and utilities
+// Re-export shared types
 export * from './types';
 
-// Re-export all command types and implementations
+// Re-export all commands
 export * from './chat';
 export * from './get-permissions';
 export * from './pay';
@@ -14,6 +14,10 @@ export * from './sign-message';
 export * from './sign-typed-data';
 export * from './verify';
 export * from './wallet-auth';
+
+// Fallback infrastructure
+export * from './fallback';
+export { hasWagmiConfig } from './fallback-wagmi';
 
 // ============================================================================
 // Command Aggregation

@@ -1,5 +1,5 @@
-import { EventManager } from '../core/events';
-import { MiniKitState } from '../core/state';
+import { EventManager } from '../events';
+import { MiniKitState } from '../state';
 import { sendWebviewEvent } from '../helpers/send-webview-event';
 
 // ============================================================================

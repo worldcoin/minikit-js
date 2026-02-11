@@ -16,7 +16,7 @@ export * from './types/transactions';
 // Re-export wallet-auth types that are used by helpers
 export * from './types/wallet-auth';
 
-export { tokenToDecimals } from 'helpers/payment/client';
+export { tokenToDecimals } from 'helpers/payment';
 
 // Backward compatibility — VerificationLevel and legacy types
 export {
@@ -64,9 +64,9 @@ export type {
   WaitOptions,
 } from '@worldcoin/idkit-core';
 
-// isInWorldApp from local fallback (same implementation as IDKit's version)
-export { isInWorldApp } from './src/fallback';
+// isInWorldApp — re-export from IDKit (canonical implementation)
+export { isInWorldApp } from '@worldcoin/idkit-core';
 
-export { parseSiweMessage, verifySiweMessage } from 'helpers/siwe/siwe';
+export { parseSiweMessage, verifySiweMessage } from 'helpers/siwe';
 
 export { getIsUserVerified } from 'helpers/address-book';

@@ -64,7 +64,7 @@ function WagmiAutoDetect() {
   const [Bridge, setBridge] = useState<ComponentType | null>(null);
 
   useEffect(() => {
-    import('./src/wagmi-bridge')
+    import('./wagmi/bridge')
       .then((mod) => setBridge(() => mod.WagmiConfigBridge))
       .catch(() => {
         // wagmi not installed — expected, no-op

@@ -1,7 +1,7 @@
 import { JsonRpcProvider } from 'ethers';
-import { parseSiweMessage, verifySiweMessage } from 'helpers/siwe/siwe';
+import { parseSiweMessage, verifySiweMessage } from 'helpers/siwe';
 import { SiweMessage } from 'siwe';
-import { MiniAppWalletAuthSuccessPayload } from 'types/responses';
+import { MiniAppWalletAuthSuccessPayload } from 'commands/wallet-auth';
 import { createPublicClient, http } from 'viem';
 import { worldchain } from 'viem/chains';
 

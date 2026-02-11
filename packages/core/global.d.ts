@@ -19,7 +19,7 @@ interface Window {
     device_os: 'ios' | 'android';
     is_optional_analytics: boolean;
     supported_commands: Array<{
-      name: import('./types/commands').Command;
+      name: import('./commands/types').Command;
       supported_versions: Array<number>;
     }>;
     safe_area_insets: {

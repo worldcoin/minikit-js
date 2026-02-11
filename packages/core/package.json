@@ -4,7 +4,7 @@
     "url": "git+https://github.com/worldcoin/minikit-js.git"
   },
   "dependencies": {
-    "@worldcoin/idkit-core": "^4.0.1",
+    "@worldcoin/idkit-core": "link:/users/andy.wang/Documents/worldcoin/idkit/js/packages/core",
     "abitype": "^1.0.6"
   },
   "description": "minikit-js is our SDK for building mini-apps.",

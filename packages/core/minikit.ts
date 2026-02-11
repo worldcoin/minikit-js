@@ -9,8 +9,8 @@ import {
   validateCommands,
 } from './commands';
 import { MiniKitInstallReturnType } from './commands/types';
-import { EventManager } from './core/events';
-import { MiniKitState } from './core/state';
+import { EventManager } from './events';
+import { MiniKitState } from './state';
 import { setupMicrophone } from './helpers/microphone';
 import { sendWebviewEvent } from './helpers/send-webview-event';
 import {
@@ -27,14 +27,13 @@ import type {
   IDKitSessionConfig,
   Preset,
 } from '@worldcoin/idkit-core';
+import { IDKit, isInWorldApp } from '@worldcoin/idkit-core';
 import {
-  IDKit,
-  isInWorldApp,
   pay,
   sendTransaction,
   shareContacts,
   walletAuth,
-} from './src/unified';
+} from './commands';
 
 /**
  * Builder interface for IDKit verification requests.
@@ -77,7 +76,7 @@ export class MiniKit {
    * import { MiniKit, orbLegacy, CredentialRequest, any } from '@worldcoin/minikit-js';
    *
    * // With preset (legacy support)
-   * const request = await MiniKit.verify({
+   * const request = await MiniKit.request({
    *   app_id: 'app_xxx',
    *   action: 'login',
    *   rp_context: { ... },
@@ -85,7 +84,7 @@ export class MiniKit {
    * }).preset(orbLegacy({ signal: 'user-123' }));
    *
    * // With constraints (v4 only)
-   * const request = await MiniKit.verify({
+   * const request = await MiniKit.request({
    *   app_id: 'app_xxx',
    *   action: 'login',
    *   rp_context: { ... },
@@ -98,7 +97,7 @@ export class MiniKit {
    * const result = await request.pollUntilCompletion();
    * ```
    */
-  static verify(config: IDKitRequestConfig): IDKitVerifyBuilder {
+  static request(config: IDKitRequestConfig): IDKitVerifyBuilder {
     return IDKit.request(config);
   }
 

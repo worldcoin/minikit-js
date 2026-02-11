@@ -6,13 +6,13 @@ import { Card } from './Card';
 import { ResultDisplay } from './ResultDisplay';
 
 /**
- * Demonstrates the new IDKit-based verification via MiniKit.verify() builder.
+ * Demonstrates the new IDKit-based verification via MiniKit.request() builder.
  *
  * In World App: uses native postMessage transport
  * On web: uses IDKit bridge (QR code + polling)
  *
  * Both paths go through the same builder API:
- *   MiniKit.verify(config).preset(orbLegacy({ signal }))
+ *   MiniKit.request(config).preset(orbLegacy({ signal }))
  */
 export function VerifyDemo() {
   const [status, setStatus] = useState<'idle' | 'pending'>('idle');
@@ -27,10 +27,10 @@ export function VerifyDemo() {
     setResult({});
 
     try {
-      // New builder pattern: MiniKit.verify(config).preset(...)
+      // New builder pattern: MiniKit.request(config).preset(...)
       // In World App: native postMessage, no QR
       // On web: IDKit bridge with QR code and polling
-      const request = await MiniKit.verify({
+      const request = await MiniKit.request({
         app_id: (process.env.NEXT_PUBLIC_APP_ID ?? 'app_staging_xxx') as `app_${string}`,
         action: 'test-action',
         // rp_context is required for web (bridge) verification
@@ -89,7 +89,7 @@ export function VerifyDemo() {
   return (
     <Card
       title="Verify (IDKit Builder)"
-      description="MiniKit.verify() uses the IDKit builder pattern. Native postMessage in World App, QR + polling on web."
+      description="MiniKit.request() uses the IDKit builder pattern. Native postMessage in World App, QR + polling on web."
     >
       <div className="flex gap-2">
         <button
@@ -109,7 +109,7 @@ export function VerifyDemo() {
       </div>
 
       <p className="text-xs text-muted">
-        Builder: <code>MiniKit.verify(config).preset(orbLegacy(...))</code>
+        Builder: <code>MiniKit.request(config).preset(orbLegacy(...))</code>
         <br />
         Legacy: <code>MiniKit.commandsAsync.verify(...)</code>
       </p>

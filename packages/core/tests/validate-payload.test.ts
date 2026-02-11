@@ -1,7 +1,7 @@
 import {
   objectValuesToArrayRecursive,
   validateSendTransactionPayload,
-} from '../helpers/transaction/validate-payload';
+} from '../commands/send-transaction/validate';
 const ABI = [
   {
     inputs: [
