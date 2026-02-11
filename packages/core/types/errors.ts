@@ -1,29 +1,29 @@
-import { AppErrorCodes } from '@worldcoin/idkit-core';
+import { VerificationErrorCodes } from './verification';
 
-export { AppErrorCodes as VerificationErrorCodes } from '@worldcoin/idkit-core';
+export { VerificationErrorCodes } from './verification';
 
-export const VerificationErrorMessage: Record<AppErrorCodes, string> = {
-  [AppErrorCodes.VerificationRejected]:
+export const VerificationErrorMessage: Record<VerificationErrorCodes, string> = {
+  [VerificationErrorCodes.VerificationRejected]:
     "You've cancelled the request in World App.",
-  [AppErrorCodes.MaxVerificationsReached]:
+  [VerificationErrorCodes.MaxVerificationsReached]:
     'You have already verified the maximum number of times for this action.',
-  [AppErrorCodes.CredentialUnavailable]:
+  [VerificationErrorCodes.CredentialUnavailable]:
     'It seems you do not have the verification level required by this app.',
-  [AppErrorCodes.MalformedRequest]:
+  [VerificationErrorCodes.MalformedRequest]:
     'There was a problem with this request. Please try again or contact the app owner.',
-  [AppErrorCodes.InvalidNetwork]:
+  [VerificationErrorCodes.InvalidNetwork]:
     'Invalid network. If you are the app owner, visit docs.worldcoin.org/test for details.',
-  [AppErrorCodes.InclusionProofFailed]:
+  [VerificationErrorCodes.InclusionProofFailed]:
     'There was an issue fetching your credential. Please try again.',
-  [AppErrorCodes.InclusionProofPending]:
+  [VerificationErrorCodes.InclusionProofPending]:
     'Your identity is still being registered. Please wait a few minutes and try again.',
-  [AppErrorCodes.UnexpectedResponse]:
+  [VerificationErrorCodes.UnexpectedResponse]:
     'Unexpected response from your wallet. Please try again.',
-  [AppErrorCodes.FailedByHostApp]:
+  [VerificationErrorCodes.FailedByHostApp]:
     'Verification failed by the app. Please contact the app owner for details.',
-  [AppErrorCodes.GenericError]:
+  [VerificationErrorCodes.GenericError]:
     'Something unexpected went wrong. Please try again.',
-  [AppErrorCodes.ConnectionFailed]:
+  [VerificationErrorCodes.ConnectionFailed]:
     'Connection to your wallet failed. Please try again.',
 };
 

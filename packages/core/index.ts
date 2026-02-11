@@ -18,11 +18,54 @@ export * from './types/wallet-auth';
 
 export { tokenToDecimals } from 'helpers/payment/client';
 
-export { VerificationLevel, type ISuccessResult } from '@worldcoin/idkit-core';
+// Backward compatibility — VerificationLevel and legacy types
 export {
-  verifyCloudProof,
-  type IVerifyResponse,
-} from '@worldcoin/idkit-core/backend';
+  VerificationErrorCodes,
+  VerificationLevel,
+  type VerifyResult,
+} from './types/verification';
+
+// IDKit verification — re-export everything developers need
+export {
+  CredentialRequest,
+  IDKit,
+  IDKitErrorCodes,
+  all,
+  any,
+  documentLegacy,
+  hashSignal,
+  orbLegacy,
+  secureDocumentLegacy,
+  signRequest,
+} from '@worldcoin/idkit-core';
+
+export type {
+  AbiEncodedValue,
+  ConstraintNode,
+  CredentialRequestType,
+  CredentialType,
+  DocumentLegacyPreset,
+  IDKitCompletionResult,
+  IDKitErrorCode,
+  IDKitRequest,
+  IDKitRequestConfig,
+  IDKitResult,
+  IDKitResultSession,
+  IDKitSessionConfig,
+  OrbLegacyPreset,
+  Preset,
+  ResponseItemSession,
+  ResponseItemV3,
+  ResponseItemV4,
+  RpContext,
+  RpSignature,
+  SecureDocumentLegacyPreset,
+  Status,
+  WaitOptions,
+} from '@worldcoin/idkit-core';
+
+// isInWorldApp from local fallback (same implementation as IDKit's version)
+export { isInWorldApp } from './src/fallback';
 
 export { parseSiweMessage, verifySiweMessage } from 'helpers/siwe/siwe';
 

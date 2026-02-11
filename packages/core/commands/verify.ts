@@ -1,5 +1,8 @@
-import { IDKitConfig, VerificationLevel } from '@worldcoin/idkit-core';
-import { encodeAction, generateSignal } from '@worldcoin/idkit-core/hashing';
+import {
+  VerifyConfig,
+  VerificationLevel,
+  VerificationErrorCodes,
+} from '../types/verification';
 import {
   AsyncHandlerReturn,
   Command,
@@ -17,8 +20,8 @@ import {
 // ============================================================================
 
 export type VerifyCommandInput = {
-  action: IDKitConfig['action'];
-  signal?: IDKitConfig['signal'];
+  action: VerifyConfig['action'];
+  signal?: VerifyConfig['signal'];
   verification_level?:
     | VerificationLevel
     | [VerificationLevel, ...VerificationLevel[]];
@@ -28,10 +31,7 @@ export type VerifyCommandPayload = VerifyCommandInput & {
   timestamp: string;
 };
 
-export { VerificationLevel };
-
-// Re-export from idkit-core for backwards compatibility
-export { AppErrorCodes as VerificationErrorCodes } from '@worldcoin/idkit-core';
+export { VerificationLevel, VerificationErrorCodes };
 
 export type MiniAppVerifyActionSuccessPayload = MiniAppBaseSuccessPayload & {
   proof: string;
@@ -81,8 +81,8 @@ export function createVerifyCommand(_ctx: CommandContext) {
 
     const timestamp = new Date().toISOString();
     const eventPayload: VerifyCommandPayload = {
-      action: encodeAction(payload.action),
-      signal: generateSignal(payload.signal).digest,
+      action: payload.action,
+      signal: payload.signal,
       verification_level: payload.verification_level || VerificationLevel.Orb,
       timestamp,
     };

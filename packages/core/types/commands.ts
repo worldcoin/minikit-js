@@ -1,4 +1,4 @@
-import { IDKitConfig, VerificationLevel } from '@worldcoin/idkit-core';
+import { VerifyConfig, VerificationLevel } from './verification';
 import type { TypedData, TypedDataDomain } from 'abitype';
 import { MiniKitInstallErrorCodes, MiniKitInstallErrorMessage } from './errors';
 import { Network, Tokens } from './payment';
@@ -32,8 +32,8 @@ export type AsyncHandlerReturn<CommandPayload, FinalPayload> = Promise<{
 
 // Values developers can specify
 export type VerifyCommandInput = {
-  action: IDKitConfig['action'];
-  signal?: IDKitConfig['signal'];
+  action: VerifyConfig['action'];
+  signal?: VerifyConfig['signal'];
   verification_level?:
     | VerificationLevel
     | [VerificationLevel, ...VerificationLevel[]];

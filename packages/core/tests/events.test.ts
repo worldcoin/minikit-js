@@ -1,4 +1,4 @@
-import { VerificationLevel } from '@worldcoin/idkit-core';
+import { VerificationLevel } from '../types/verification';
 import { ResponseEvent } from '../commands/types';
 import type { MiniAppVerifyActionPayload } from '../commands/verify';
 import { EventManager } from '../core/events';

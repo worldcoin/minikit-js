@@ -1,37 +1,56 @@
 'use server';
 
-import {
-  ISuccessResult,
-  IVerifyResponse,
-  verifyCloudProof,
-} from '@worldcoin/minikit-js';
+import type { VerifyResult } from '@worldcoin/minikit-js';
 
+export interface VerifyResponse {
+  success: boolean;
+  code?: string;
+  detail?: string;
+  attribute?: string | null;
+}
+
+/**
+ * Verify a proof using the Developer Portal API
+ *
+ * For v3 proofs (current), use /api/v2/verify endpoint
+ * For v4 proofs (upcoming), use /api/v4/verify endpoint
+ */
 export const verifyProof = async (params: {
   app_id: `app_${string}`;
   action: string;
   signal?: string;
-  payload: ISuccessResult;
-}) => {
+  payload: VerifyResult;
+}): Promise<VerifyResponse | null> => {
   const { app_id, action, payload, signal } = params;
-  let verifyResponse: IVerifyResponse | null = null;
-  const stagingEndpoint = `${process.env.NEXT_SERVER_DEV_PORTAL_URL}/api/v2/verify/${app_id}`;
+
+  const isStaging = process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging';
+  const baseUrl = isStaging
+    ? process.env.NEXT_SERVER_DEV_PORTAL_URL
+    : 'https://developer.worldcoin.org';
 
   try {
-    verifyResponse = await verifyCloudProof(
-      payload,
-      app_id,
-      action,
-      signal,
-
-      process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging'
-        ? stagingEndpoint
-        : undefined,
+    // V3 proof verification (current format)
+    const response = await fetch(
+      `${baseUrl}/api/v2/verify/${app_id}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          proof: payload.proof,
+          merkle_root: payload.merkle_root,
+          nullifier_hash: payload.nullifier_hash,
+          verification_level: payload.verification_level,
+          action,
+          signal,
+        }),
+      }
     );
 
-    console.log('verifyResponse', verifyResponse);
+    const result = await response.json();
+    console.log('verifyResponse', result);
+    return result;
   } catch (error) {
-    console.log('Error in verifyCloudProof', error);
+    console.error('Error in verifyProof', error);
+    return null;
   }
-
-  return verifyResponse;
 };

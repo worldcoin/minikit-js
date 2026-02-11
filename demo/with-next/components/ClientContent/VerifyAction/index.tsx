@@ -1,10 +1,10 @@
 import {
-  ISuccessResult,
   MiniKit,
   ResponseEvent,
   VerificationErrorCodes,
   VerificationLevel,
   VerifyCommandInput,
+  VerifyResult,
 } from '@worldcoin/minikit-js';
 import { clsx } from 'clsx';
 import { useCallback, useEffect, useState } from 'react';
@@ -136,7 +136,7 @@ export const VerifyAction = () => {
       }
 
       const verifyResponse = await verifyProof({
-        payload: payload as ISuccessResult,
+        payload: payload as VerifyResult,
         app_id: lastUsedAppId,
         action: lastUsedAction,
         signal: 'test',
@@ -233,30 +233,7 @@ export const VerifyAction = () => {
                 )}
                 onClick={() => onStagingVerifyClick(VerificationLevel.Device)}
               >
-                Send staging app verify (Device)
-              </button>
-              <button
-                className={clsx(
-                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  isProduction ? 'hidden' : '',
-                )}
-                onClick={() => onStagingVerifyClick(VerificationLevel.Document)}
-              >
-                Send staging app verify (Document)
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-x-2">
-              <button
-                className={clsx(
-                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  isProduction ? 'hidden' : '',
-                )}
-                onClick={() =>
-                  onStagingVerifyClick(VerificationLevel.SecureDocument)
-                }
-              >
-                Send staging app verify (SecureDocument)
+                Send staging verify (Device)
               </button>
               <button
                 className={clsx(
@@ -265,7 +242,7 @@ export const VerifyAction = () => {
                 )}
                 onClick={() => onStagingVerifyClick(VerificationLevel.Orb)}
               >
-                Send staging app verify (Orb)
+                Send staging verify (Orb)
               </button>
             </div>
 
@@ -278,11 +255,11 @@ export const VerifyAction = () => {
                 onClick={() =>
                   onStagingVerifyClick([
                     VerificationLevel.Orb,
-                    VerificationLevel.Document,
+                    VerificationLevel.Device,
                   ])
                 }
               >
-                Send staging app verify (Multi: Orb + Document)
+                Send staging verify (Multi: Orb + Device)
               </button>
             </div>
 
@@ -294,30 +271,7 @@ export const VerifyAction = () => {
                 )}
                 onClick={() => onProdVerifyClick(VerificationLevel.Device)}
               >
-                Send production app verify (Device)
-              </button>
-              <button
-                className={clsx(
-                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  isProduction ? '' : 'hidden',
-                )}
-                onClick={() => onProdVerifyClick(VerificationLevel.Document)}
-              >
-                Send production app verify (Document)
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-x-2">
-              <button
-                className={clsx(
-                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  isProduction ? '' : 'hidden',
-                )}
-                onClick={() =>
-                  onProdVerifyClick(VerificationLevel.SecureDocument)
-                }
-              >
-                Send production app verify (SecureDocument)
+                Send production verify (Device)
               </button>
               <button
                 className={clsx(
@@ -326,7 +280,7 @@ export const VerifyAction = () => {
                 )}
                 onClick={() => onProdVerifyClick(VerificationLevel.Orb)}
               >
-                Send production app verify (Orb)
+                Send production verify (Orb)
               </button>
             </div>
 
@@ -343,7 +297,7 @@ export const VerifyAction = () => {
                   ])
                 }
               >
-                Send production app verify (Multi: Orb + Device)
+                Send production verify (Multi: Orb + Device)
               </button>
             </div>
           </div>

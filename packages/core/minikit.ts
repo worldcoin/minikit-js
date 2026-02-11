@@ -19,6 +19,34 @@ import {
 } from './types/errors';
 import { UserNameService } from './types/init';
 
+// Unified API imports
+import type {
+  ConstraintNode,
+  IDKitRequest,
+  IDKitRequestConfig,
+  IDKitSessionConfig,
+  Preset,
+} from '@worldcoin/idkit-core';
+import {
+  IDKit,
+  isInWorldApp,
+  pay,
+  sendTransaction,
+  setWagmiConfig,
+  shareContacts,
+  walletAuth,
+} from './src/unified';
+
+/**
+ * Builder interface for IDKit verification requests.
+ * Local definition avoids DTS emit issues with IDKitBuilder's private fields.
+ * Note: `constraints()` is optional — available when IDKit enables it (v4.0+).
+ */
+interface IDKitVerifyBuilder {
+  preset(preset: Preset): Promise<IDKitRequest>;
+  constraints?(constraints: ConstraintNode): Promise<IDKitRequest>;
+}
+
 // Re-export for backwards compatibility
 export type { MiniKitInstallReturnType } from './commands/types';
 
@@ -34,6 +62,153 @@ export class MiniKit {
   private static stateManager = new MiniKitState();
   private static commandsInstance: Commands | null = null;
   private static asyncCommandsInstance: AsyncCommands | null = null;
+
+  // ============================================================================
+  // Unified API (auto-detects environment)
+  // ============================================================================
+
+  /**
+   * Create a World ID verification request (delegates to IDKit)
+   *
+   * Works in both World App (native postMessage) and web (QR + polling).
+   * Transport detection happens automatically inside the builder.
+   *
+   * @example
+   * ```typescript
+   * import { MiniKit, orbLegacy, CredentialRequest, any } from '@worldcoin/minikit-js';
+   *
+   * // With preset (legacy support)
+   * const request = await MiniKit.verify({
+   *   app_id: 'app_xxx',
+   *   action: 'login',
+   *   rp_context: { ... },
+   *   allow_legacy_proofs: true,
+   * }).preset(orbLegacy({ signal: 'user-123' }));
+   *
+   * // With constraints (v4 only)
+   * const request = await MiniKit.verify({
+   *   app_id: 'app_xxx',
+   *   action: 'login',
+   *   rp_context: { ... },
+   *   allow_legacy_proofs: false,
+   * }).constraints(any(CredentialRequest('orb'), CredentialRequest('device')));
+   *
+   * // In World App: connectorURI is empty, result via postMessage
+   * // On web: connectorURI is QR URL
+   * console.log(request.connectorURI);
+   * const result = await request.pollUntilCompletion();
+   * ```
+   */
+  static verify(config: IDKitRequestConfig): IDKitVerifyBuilder {
+    return IDKit.request(config);
+  }
+
+  /**
+   * Create a new session (delegates to IDKit)
+   */
+  static createSession(config: IDKitSessionConfig): IDKitVerifyBuilder {
+    return IDKit.createSession(config);
+  }
+
+  /**
+   * Prove an existing session (delegates to IDKit)
+   */
+  static proveSession(
+    sessionId: string,
+    config: IDKitSessionConfig,
+  ): IDKitVerifyBuilder {
+    return IDKit.proveSession(sessionId, config);
+  }
+
+  /**
+   * Authenticate user via wallet signature (SIWE)
+   *
+   * Works in World App (native SIWE) and web (Wagmi + SIWE fallback).
+   *
+   * @example
+   * ```typescript
+   * const result = await MiniKit.walletAuth({ nonce: 'random-nonce' });
+   * console.log(result.data.address);
+   * console.log(result.via); // 'minikit' | 'wagmi' | 'fallback'
+   * ```
+   */
+  static walletAuth = walletAuth;
+
+  /**
+   * Send one or more transactions
+   *
+   * World App: batch + permit2 + gas sponsorship
+   * Web: sequential execution via Wagmi
+   *
+   * @example
+   * ```typescript
+   * const result = await MiniKit.sendTransaction({
+   *   transaction: [{
+   *     address: '0x...',
+   *     abi: ContractABI,
+   *     functionName: 'mint',
+   *     args: [],
+   *   }],
+   * });
+   * ```
+   */
+  static sendTransaction = sendTransaction;
+
+  /**
+   * Send a payment (World App only)
+   *
+   * Requires custom fallback on web.
+   *
+   * @example
+   * ```typescript
+   * const result = await MiniKit.pay({
+   *   reference: crypto.randomUUID(),
+   *   to: '0x...',
+   *   tokens: [{ symbol: Tokens.WLD, token_amount: '1.0' }],
+   *   description: 'Payment for coffee',
+   *   fallback: () => showStripeCheckout(),
+   * });
+   * ```
+   */
+  static pay = pay;
+
+  /**
+   * Open the contact picker (World App only)
+   *
+   * Requires custom fallback on web.
+   *
+   * @example
+   * ```typescript
+   * const result = await MiniKit.shareContacts({
+   *   isMultiSelectEnabled: true,
+   *   fallback: () => showManualAddressInput(),
+   * });
+   * ```
+   */
+  static shareContacts = shareContacts;
+
+  /**
+   * Check if running inside World App
+   */
+  static isInWorldApp = isInWorldApp;
+
+  /**
+   * Configure Wagmi for web fallback support
+   *
+   * Call this during app initialization to enable Wagmi-based
+   * fallbacks for walletAuth and sendTransaction on web.
+   *
+   * @example
+   * ```typescript
+   * import { createConfig } from 'wagmi';
+   *
+   * const wagmiConfig = createConfig({ ... });
+   * MiniKit.configureWagmi(wagmiConfig);
+   * ```
+   */
+  static configureWagmi(config: unknown): void {
+    setWagmiConfig(config);
+  }
 
   // ============================================================================
   // Public State Accessors

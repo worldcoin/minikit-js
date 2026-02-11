@@ -71,8 +71,8 @@ const commandAvailability: Record<Command, boolean> = {
   [Command.Chat]: false,
 };
 
-export function isCommandAvailable(command: Command): boolean {
-  return commandAvailability[command];
+export function isCommandAvailable(command: Command | string): boolean {
+  return commandAvailability[command as Command] ?? false;
 }
 
 export function setCommandAvailable(

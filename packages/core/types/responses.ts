@@ -1,4 +1,4 @@
-import { VerificationLevel } from '@worldcoin/idkit-core';
+import { VerificationLevel } from './verification';
 import { Permission } from './commands';
 import {
   ChatErrorCodes,

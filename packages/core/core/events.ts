@@ -1,4 +1,4 @@
-import { AppErrorCodes, VerificationLevel } from '@worldcoin/idkit-core';
+import { VerificationErrorCodes, VerificationLevel } from '../types/verification';
 import { ResponseEvent } from '../commands/types';
 import type { MiniAppVerifyActionPayload } from '../commands/verify';
 import { compressAndPadProof } from '../helpers/proof';
@@ -70,7 +70,7 @@ export class EventManager {
       payload.status === 'error' &&
       (payload.error_code as string) === 'user_rejected'
     ) {
-      payload.error_code = AppErrorCodes.VerificationRejected;
+      payload.error_code = VerificationErrorCodes.VerificationRejected;
     }
 
     if (payload.status === 'success') {
