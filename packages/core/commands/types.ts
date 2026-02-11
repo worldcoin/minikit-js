@@ -19,6 +19,7 @@ export enum Command {
   SendHapticFeedback = 'send-haptic-feedback',
   Share = 'share',
   Chat = 'chat',
+  Attestation = 'attestation',
 }
 
 export enum ResponseEvent {
@@ -35,6 +36,7 @@ export enum ResponseEvent {
   MiniAppShare = 'miniapp-share',
   MiniAppMicrophone = 'miniapp-microphone',
   MiniAppChat = 'miniapp-chat',
+  MiniAppAttestation = 'miniapp-attestation',
 }
 
 // ============================================================================
@@ -54,6 +56,7 @@ export const COMMAND_VERSIONS: Record<Command, number> = {
   [Command.SendHapticFeedback]: 1,
   [Command.Share]: 1,
   [Command.Chat]: 1,
+  [Command.Attestation]: 1,
 };
 
 const commandAvailability: Record<Command, boolean> = {
@@ -69,6 +72,7 @@ const commandAvailability: Record<Command, boolean> = {
   [Command.SendHapticFeedback]: false,
   [Command.Share]: false,
   [Command.Chat]: false,
+  [Command.Attestation]: false,
 };
 
 export function isCommandAvailable(command: Command): boolean {

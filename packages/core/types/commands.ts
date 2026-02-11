@@ -17,6 +17,7 @@ export enum Command {
   SendHapticFeedback = 'send-haptic-feedback',
   Share = 'share',
   Chat = 'chat',
+  Attestation = 'attestation',
 }
 
 export type WebViewBasePayload = {
@@ -174,6 +175,15 @@ export type ChatPayload = {
   message: string; // Required field
 };
 
+// Anchor: Attestation Payload
+export type AttestationPayload = {
+  /**
+   * Base64URL-encoded hash of the request to be attested.
+   * Hash must be generated per hashing spec documented in MiniKit docs.
+   */
+  requestHash: string;
+};
+
 type CommandReturnPayloadMap = {
   [Command.Verify]: VerifyCommandPayload;
   [Command.Pay]: PayCommandPayload;
@@ -187,6 +197,7 @@ type CommandReturnPayloadMap = {
   [Command.SendHapticFeedback]: SendHapticFeedbackPayload;
   [Command.Share]: SharePayload;
   [Command.Chat]: ChatPayload;
+  [Command.Attestation]: AttestationPayload;
 };
 export type CommandReturnPayload<T extends Command> =
   T extends keyof CommandReturnPayloadMap ? CommandReturnPayloadMap[T] : never;

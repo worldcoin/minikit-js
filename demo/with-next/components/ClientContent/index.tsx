@@ -8,6 +8,7 @@ import {
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useState } from 'react';
+import { Attestation } from './Attestation';
 import { CameraComponent } from './Camera';
 import { Chat } from './Chat';
 import CheckRequests from './CheckRequests';
@@ -140,6 +141,8 @@ export const ClientContent = () => {
           <Share />
           <hr />
           <Chat />
+          <hr />
+          <Attestation />
           <hr />
           <input className="text-xs border-black border-2" />
           <ExternalLinks />
