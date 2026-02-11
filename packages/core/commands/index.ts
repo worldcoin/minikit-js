@@ -15,10 +15,6 @@ export * from './sign-typed-data';
 export * from './verify';
 export * from './wallet-auth';
 
-// Fallback infrastructure
-export * from './fallback';
-export { hasWagmiConfig } from './fallback-wagmi';
-
 // ============================================================================
 // Command Aggregation
 // ============================================================================
