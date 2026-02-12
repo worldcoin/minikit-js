@@ -1,15 +1,18 @@
 /**
  * World App Wagmi Connector
  *
- * Allows using World App as a Wagmi connector. When connected through this
- * connector, wallet operations use native MiniKit commands under the hood.
- *
- * Returns an EIP-1193-compliant provider from getProvider() so wagmi hooks
- * (useSignMessage, useSendTransaction, etc.) work transparently.
+ * Thin wrapper that delegates to the shared EIP-1193 provider from
+ * `@worldcoin/minikit-js`. All auth and RPC logic lives in the provider;
+ * this connector just adapts the interface for wagmi.
  */
 
 import { MiniKit } from '../minikit';
-import { createWorldAppProvider, type WorldAppProvider } from './provider';
+import {
+  getWorldAppProvider,
+  _getAddress,
+  _setAddress,
+  _clearAddress,
+} from '../provider';
 
 export type WorldAppConnectorOptions = {
   /** Custom name for the connector */
@@ -19,9 +22,9 @@ export type WorldAppConnectorOptions = {
 /**
  * Create a World App connector for Wagmi
  *
- * When running inside World App, this connector uses native MiniKit commands.
- * It should be placed first in the connectors list so it's used automatically
- * in World App.
+ * When running inside World App, this connector uses native MiniKit commands
+ * via the shared EIP-1193 provider. It should be placed first in the
+ * connectors list so it's used automatically in World App.
  *
  * @example
  * ```typescript
@@ -51,11 +54,7 @@ export function worldApp(options: WorldAppConnectorOptions = {}) {
 function createConnectorFn(name: string) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (config: any) => {
-    let address: `0x${string}` | undefined;
-
-    const provider: WorldAppProvider = createWorldAppProvider(
-      () => address,
-    );
+    const provider = getWorldAppProvider();
 
     return {
       id: 'worldApp',
@@ -63,44 +62,35 @@ function createConnectorFn(name: string) {
       type: 'worldApp' as const,
 
       async setup() {
-        // Try to restore address from MiniKit state if already authenticated
+        // Restore address from MiniKit state if already authenticated
         const existing = MiniKit.user?.walletAddress;
         if (existing) {
-          address = existing as `0x${string}`;
+          _setAddress(existing as `0x${string}`);
         }
       },
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       async connect(_parameters?: any): Promise<any> {
-        if (!MiniKit.isInWorldApp()) {
-          throw new Error('worldApp connector only works inside World App');
-        }
-
-        const { finalPayload } = await MiniKit.commandsAsync.walletAuth({
-          nonce: crypto.randomUUID(),
-          statement: 'Sign in with World App',
-        });
-
-        if (finalPayload.status !== 'success') {
-          const errorCode =
-            'error_code' in finalPayload ? finalPayload.error_code : 'unknown';
-          throw new Error(`World App wallet auth failed: ${errorCode}`);
-        }
-
-        address = finalPayload.address as `0x${string}`;
+        // eth_requestAccounts triggers walletAuth inside the provider
+        const accounts = (await provider.request({
+          method: 'eth_requestAccounts',
+        })) as `0x${string}`[];
 
         return {
-          accounts: [address] as readonly `0x${string}`[],
+          accounts: accounts as readonly `0x${string}`[],
           chainId: 480,
         };
       },
 
       async disconnect() {
-        address = undefined;
+        _clearAddress();
       },
 
       async getAccounts() {
-        return address ? [address] as readonly `0x${string}`[] : [] as readonly `0x${string}`[];
+        const addr = _getAddress();
+        return addr
+          ? ([addr] as readonly `0x${string}`[])
+          : ([] as readonly `0x${string}`[]);
       },
 
       async getChainId() {
@@ -112,7 +102,7 @@ function createConnectorFn(name: string) {
       },
 
       async isAuthorized() {
-        return MiniKit.isInWorldApp() && !!address;
+        return MiniKit.isInWorldApp() && !!_getAddress();
       },
 
       async switchChain({ chainId }: { chainId: number }) {

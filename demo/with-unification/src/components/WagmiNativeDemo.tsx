@@ -1,9 +1,25 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAccount, useConnect, useDisconnect, useSignMessage, useSendTransaction } from 'wagmi';
+import { useAccount, useConnect, useConnectors, useDisconnect, useSignMessage, useSendTransaction, useWriteContract } from 'wagmi';
 import { parseEther } from 'viem';
 import { Card } from './Card';
+
+const ERC20_ABI = [
+  {
+    type: 'function',
+    name: 'transfer',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'to', type: 'address' },
+      { name: 'amount', type: 'uint256' },
+    ],
+    outputs: [{ name: '', type: 'bool' }],
+  },
+] as const;
+
+// WLD token on World Chain
+const WLD_TOKEN = '0x2cFc85d8E48F8EAB294be644d9E25C3030863003' as const;
 
 /**
  * Direction 1: Standard Wagmi App → World App
@@ -15,10 +31,12 @@ import { Card } from './Card';
  */
 export function WagmiNativeDemo() {
   const { address, isConnected, connector } = useAccount();
-  const { connect, connectors, isPending: isConnecting } = useConnect();
-  const { disconnect } = useDisconnect();
-  const { signMessageAsync } = useSignMessage();
-  const { sendTransactionAsync } = useSendTransaction();
+  const { mutate: connect, isPending: isConnecting } = useConnect();
+  const connectors = useConnectors();
+  const { mutate: disconnect } = useDisconnect();
+  const { mutateAsync: signMessageAsync } = useSignMessage();
+  const { mutateAsync: sendTransactionAsync } = useSendTransaction();
+  const { mutateAsync: writeContractAsync } = useWriteContract();
 
   // Defer connector list rendering to avoid SSR hydration mismatch —
   // wagmi discovers connectors (EIP-6963) only on the client.
@@ -27,6 +45,7 @@ export function WagmiNativeDemo() {
 
   const [signResult, setSignResult] = useState<string>();
   const [txResult, setTxResult] = useState<string>();
+  const [writeResult, setWriteResult] = useState<string>();
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
 
@@ -55,6 +74,26 @@ export function WagmiNativeDemo() {
         value: parseEther('0'),
       });
       setTxResult(hash);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleWriteContract = async () => {
+    if (!address) return;
+    setBusy(true);
+    setWriteResult(undefined);
+    setError(undefined);
+    try {
+      const hash = await writeContractAsync({
+        address: WLD_TOKEN,
+        abi: ERC20_ABI,
+        functionName: 'transfer',
+        args: [address, BigInt(0)],
+      });
+      setWriteResult(hash);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -133,6 +172,22 @@ export function WagmiNativeDemo() {
               {txResult && (
                 <pre className="text-xs text-muted overflow-x-auto whitespace-pre-wrap break-all bg-card border border-border rounded-md p-2">
                   {txResult}
+                </pre>
+              )}
+
+              {/* Write Contract (useWriteContract) */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleWriteContract}
+                  disabled={busy}
+                  className="px-4 py-2 rounded-lg bg-accent text-white text-sm font-medium disabled:opacity-50"
+                >
+                  {busy && !signResult && !txResult ? 'Writing...' : 'Write Contract (ERC-20 transfer)'}
+                </button>
+              </div>
+              {writeResult && (
+                <pre className="text-xs text-muted overflow-x-auto whitespace-pre-wrap break-all bg-card border border-border rounded-md p-2">
+                  {writeResult}
                 </pre>
               )}
             </div>

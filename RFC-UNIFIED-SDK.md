@@ -207,16 +207,164 @@ export function worldApp() {
 
 ### Mini App → Web
 
-1. Install Wagmi: `npm install wagmi viem @tanstack/react-query`
-2. Add providers (QueryClient, Wagmi, MiniKit)
-3. Add fallbacks for pay/contacts
+Your existing MiniKit code stays the same. Add wagmi so the unified API has a web fallback.
 
-No code changes for verify/connect/sendTransaction.
+**Step 1: Install dependencies**
+
+```bash
+pnpm i wagmi viem @tanstack/react-query
+```
+
+**Step 2: Create a wagmi config**
+
+```ts
+// wagmi-config.ts
+import { http, createConfig } from 'wagmi';
+import { worldchain } from 'viem/chains';
+import { injected, walletConnect } from 'wagmi/connectors';
+import { worldApp } from '@worldcoin/minikit/wagmi';
+
+export const wagmiConfig = createConfig({
+  chains: [worldchain],
+  connectors: [
+    worldApp(),   // Auto-detected in World App, skipped on web
+    injected(),   // MetaMask, Rabby, etc.
+    walletConnect({ projectId: 'YOUR_WC_PROJECT_ID' }),
+  ],
+  transports: {
+    [worldchain.id]: http(),
+  },
+});
+```
+
+**Step 3: Wrap your app with providers**
+
+Pass the wagmi config to both `WagmiProvider` and `MiniKitProvider` — this enables the web fallback.
+
+```tsx
+// providers.tsx
+import { MiniKitProvider } from '@worldcoin/minikit';
+import { WagmiProvider } from 'wagmi';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { wagmiConfig } from './wagmi-config';
+
+const queryClient = new QueryClient();
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <WagmiProvider config={wagmiConfig}>
+        <MiniKitProvider
+          props={{ appId: 'app_YOUR_APP_ID' }}
+          wagmiConfig={wagmiConfig}
+        >
+          {children}
+        </MiniKitProvider>
+      </WagmiProvider>
+    </QueryClientProvider>
+  );
+}
+```
+
+**Step 4: No code changes — your MiniKit calls now work on web**
+
+```ts
+// This already works in both environments
+const result = await MiniKit.walletAuth({
+  nonce: crypto.randomUUID(),
+  statement: 'Sign in',
+});
+console.log(result.via);          // 'minikit' (World App) or 'wagmi' (web)
+console.log(result.data.address); // '0x...'
+
+const txResult = await MiniKit.sendTransaction({
+  transaction: [{
+    address: '0xContractAddress',
+    abi: contractAbi,
+    functionName: 'mint',
+    args: [],
+  }],
+});
+console.log(txResult.via);         // 'minikit' or 'wagmi'
+console.log(txResult.data.hashes); // transaction hashes
+```
+
+In World App: native MiniKit commands (batch transactions, permit2, gas sponsorship).
+On web: wagmi fallback (sequential transactions, user pays gas).
+
+**Step 5: Add fallbacks for native-only commands**
+
+`pay()` and `getContacts()` have no built-in web fallback — provide your own:
+
+```ts
+await MiniKit.pay(
+  { to: '0x...', amount: '10' },
+  { fallback: () => showStripeCheckout() },
+);
+
+const contacts = await MiniKit.getContacts({
+  fallback: () => showManualInput(),
+});
+```
 
 ### Web → Mini App
 
-1. Install MiniKit: `npm install @worldcoin/minikit`
-2. Add `worldApp()` connector to Wagmi config
-3. Wrap with MiniKitProvider
+Your existing wagmi code stays the same. Add the `worldApp()` connector so wagmi hooks route through MiniKit natively in World App.
 
-Existing Wagmi code works unchanged.
+**Step 1: Install MiniKit**
+
+```bash
+pnpm i @worldcoin/minikit
+```
+
+**Step 2: Add the `worldApp()` connector to your existing wagmi config**
+
+```ts
+import { worldApp } from '@worldcoin/minikit/wagmi';
+
+const config = createConfig({
+  connectors: [
+    worldApp(),           // Add this — works natively in World App
+    injected(),           // Your existing connectors
+    walletConnect({ ... }),
+  ],
+  // ... rest of your config
+});
+```
+
+**Step 3: Wrap with MiniKitProvider**
+
+```tsx
+<WagmiProvider config={wagmiConfig}>
+  <MiniKitProvider props={{ appId: 'app_YOUR_APP_ID' }} wagmiConfig={wagmiConfig}>
+    {children}
+  </MiniKitProvider>
+</WagmiProvider>
+```
+
+**Step 4: No code changes — wagmi hooks work in World App**
+
+```tsx
+import { useConnect, useConnectors, useSendTransaction, useWriteContract } from 'wagmi';
+
+// Connect — worldApp() connector handles World App, others handle web
+const { mutate: connect } = useConnect();
+const connectors = useConnectors();
+connect({ connector: connectors[0] });
+
+// Send transaction — routed through MiniKit in World App, real wallet on web
+const { mutateAsync: sendTransaction } = useSendTransaction();
+await sendTransaction({ to: '0x...', value: parseEther('0.01') });
+
+// Contract write — same transparent routing
+const { mutateAsync: writeContract } = useWriteContract();
+await writeContract({
+  address: '0x...',
+  abi: contractAbi,
+  functionName: 'transfer',
+  args: [to, amount],
+});
+```
+
+In World App: the `worldApp()` connector intercepts all calls and routes them through MiniKit.
+On web: `worldApp()` is skipped, and injected/WalletConnect connectors handle it as usual.

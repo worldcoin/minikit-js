@@ -24,6 +24,28 @@ export function hasWagmiConfig(): boolean {
   return wagmiConfig !== undefined;
 }
 
+/**
+ * Try connectors in order until one succeeds.
+ * worldApp() connector only works inside World App, so on web it will
+ * fail and we fall through to injected / WalletConnect.
+ */
+async function connectWithFallback(
+  config: WagmiConfig,
+  connectors: WagmiConfig[],
+  connect: (config: WagmiConfig, opts: { connector: WagmiConfig }) => Promise<unknown>,
+): Promise<void> {
+  let lastError: unknown;
+  for (const connector of connectors) {
+    try {
+      await connect(config, { connector });
+      return;
+    } catch (err) {
+      lastError = err;
+    }
+  }
+  throw lastError ?? new Error('Failed to connect wallet');
+}
+
 export interface WalletAuthParams {
   nonce: string;
   statement?: string;
@@ -60,7 +82,7 @@ export async function wagmiWalletAuth(
       if (!connectors || connectors.length === 0) {
         throw new Error('No Wagmi connectors configured');
       }
-      await connect(config, { connector: connectors[0] });
+      await connectWithFallback(config, connectors, connect);
     }
     account = getAccount(config);
   }
@@ -129,7 +151,7 @@ export async function wagmiSendTransaction(
       if (!connectors || connectors.length === 0) {
         throw new Error('No Wagmi connectors configured');
       }
-      await connect(config, { connector: connectors[0] });
+      await connectWithFallback(config, connectors, connect);
     }
     account = getAccount(config);
   }

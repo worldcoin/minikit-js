@@ -68,3 +68,5 @@ export type {
 export { parseSiweMessage, verifySiweMessage } from 'helpers/siwe';
 
 export { getIsUserVerified } from 'helpers/address-book';
+
+export { getWorldAppProvider, type WorldAppProvider } from './provider';
