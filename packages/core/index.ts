@@ -64,9 +64,6 @@ export type {
   WaitOptions,
 } from '@worldcoin/idkit-core';
 
-// isInWorldApp — re-export from IDKit (canonical implementation)
-export { isInWorldApp } from '@worldcoin/idkit-core';
-
 export { parseSiweMessage, verifySiweMessage } from 'helpers/siwe';
 
 export { getIsUserVerified } from 'helpers/address-book';

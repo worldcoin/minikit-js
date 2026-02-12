@@ -1,6 +1,6 @@
 'use client';
 
-import { isInWorldApp } from '@worldcoin/minikit-js';
+import { MiniKit } from '@worldcoin/minikit-js';
 import { MiniKitProvider } from '@worldcoin/minikit-js/minikit-provider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider } from 'wagmi';
@@ -26,7 +26,7 @@ export function Providers({ children }: { children: ReactNode }) {
   >('loading');
 
   useEffect(() => {
-    setEnvironment(isInWorldApp() ? 'world-app' : 'web');
+    setEnvironment(MiniKit.isInWorldApp() ? 'world-app' : 'web');
   }, []);
 
   return (

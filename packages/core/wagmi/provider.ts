@@ -77,17 +77,19 @@ export function createWorldAppProvider(
             { to: string; data?: string; value?: string },
           ];
 
-          // World App only supports ABI-typed transactions.
-          // Raw calldata cannot be decoded back to ABI format.
+          // World App requires abi + functionName + args — raw calldata
+          // can't be decoded back. useWriteContract encodes ABI before
+          // reaching the provider so it can't be supported here.
+          // Use MiniKit.sendTransaction() for contract interactions.
           if (tx.data && tx.data !== '0x') {
             throw rpcError(
               4200,
               'World App does not support raw calldata via eth_sendTransaction. ' +
-                'Use MiniKit.sendTransaction() for contract interactions.',
+                'Use MiniKit.sendTransaction() with abi + functionName + args for contract interactions.',
             );
           }
 
-          // Simple value transfer (no contract call)
+          // Simple value transfer
           const { finalPayload } =
             await MiniKit.commandsAsync.sendTransaction({
               transaction: [

@@ -318,11 +318,7 @@ async function wagmiSendTransactionAdapter(
  * Encode transaction data from ABI + function name + args
  */
 function encodeTransactionData(tx: Transaction): string | undefined {
-  // For web fallback, we need to encode the function call
-  // This requires viem's encodeFunctionData which is available via Wagmi
-  // The wagmiSendTransaction will handle this encoding
   try {
-    // Dynamic import to avoid bundling viem if not used
     const { encodeFunctionData } = require('viem');
     return encodeFunctionData({
       abi: tx.abi,
@@ -330,7 +326,6 @@ function encodeTransactionData(tx: Transaction): string | undefined {
       args: tx.args,
     });
   } catch {
-    // If viem is not available, return undefined and let wagmiSendTransaction handle it
     return undefined;
   }
 }

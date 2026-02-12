@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAccount, useConnect, useDisconnect, useSignMessage, useSendTransaction } from 'wagmi';
 import { parseEther } from 'viem';
 import { Card } from './Card';
@@ -19,6 +19,11 @@ export function WagmiNativeDemo() {
   const { disconnect } = useDisconnect();
   const { signMessageAsync } = useSignMessage();
   const { sendTransactionAsync } = useSendTransaction();
+
+  // Defer connector list rendering to avoid SSR hydration mismatch —
+  // wagmi discovers connectors (EIP-6963) only on the client.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const [signResult, setSignResult] = useState<string>();
   const [txResult, setTxResult] = useState<string>();
@@ -62,9 +67,11 @@ export function WagmiNativeDemo() {
       title="Standard Wagmi App"
       description="Zero MiniKit code — wagmi hooks only. In World App the worldApp() connector routes through native MiniKit."
     >
-      {/* Connect / Disconnect */}
+      {/* Connect / Disconnect — only rendered after mount to avoid hydration mismatch */}
       <div className="flex items-center gap-2 flex-wrap">
-        {!isConnected ? (
+        {!mounted ? (
+          <span className="text-sm text-muted">Loading connectors...</span>
+        ) : !isConnected ? (
           connectors.map((c) => (
             <button
               key={c.uid}
@@ -111,7 +118,7 @@ export function WagmiNativeDemo() {
             </pre>
           )}
 
-          {/* Send Transaction */}
+          {/* Send Transaction (value transfer) */}
           <div className="flex items-center gap-2">
             <button
               onClick={handleSend}

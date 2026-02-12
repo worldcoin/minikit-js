@@ -10,28 +10,27 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type WagmiConfig = any;
 
-// Wagmi config storage
-let wagmiConfig: WagmiConfig | undefined;
+// Stored on globalThis so the value is shared across CJS entry points.
+// tsup inlines fallback-wagmi.ts into both index.cjs and
+// minikit-provider.cjs — without globalThis each gets its own variable
+// and setWagmiConfig (provider) never reaches hasWagmiConfig (index).
+const STORE_KEY = '__minikit_wagmi_config__';
 
-/**
- * Set the Wagmi config for fallback support
- */
+function getStore(): { value?: WagmiConfig } {
+  const g = globalThis as Record<string, unknown>;
+  return (g[STORE_KEY] ??= {}) as { value?: WagmiConfig };
+}
+
 export function setWagmiConfig(config: WagmiConfig): void {
-  wagmiConfig = config;
+  getStore().value = config;
 }
 
-/**
- * Get the current Wagmi config
- */
 export function getWagmiConfig(): WagmiConfig | undefined {
-  return wagmiConfig;
+  return getStore().value;
 }
 
-/**
- * Check if Wagmi is configured for fallback
- */
 export function hasWagmiConfig(): boolean {
-  return wagmiConfig !== undefined;
+  return getStore().value !== undefined;
 }
 
 export interface WalletAuthParams {
@@ -52,36 +51,37 @@ export interface WalletAuthResult {
 export async function wagmiWalletAuth(
   params: WalletAuthParams
 ): Promise<WalletAuthResult> {
-  if (!wagmiConfig) {
-    throw new Error('Wagmi config not available. Call MiniKit.configureWagmi() first.');
+  const config = getWagmiConfig();
+  if (!config) {
+    throw new Error('Wagmi config not available. Pass wagmiConfig to MiniKitProvider.');
   }
 
-  // Dynamic imports to avoid bundling Wagmi if not used
   const wagmiActions = await import('wagmi/actions');
   const { SiweMessage } = await import('siwe');
-
   const { connect, signMessage, getAccount, getConnections } = wagmiActions;
 
   // Connect if not already connected
-  let account = getAccount(wagmiConfig);
+  let account = getAccount(config);
   if (!account.isConnected) {
-    const connections = getConnections(wagmiConfig);
+    const connections = getConnections(config);
     if (connections.length === 0) {
-      // Get available connectors and try to connect
-      const connectors = wagmiConfig.connectors;
+      const connectors = config.connectors;
       if (!connectors || connectors.length === 0) {
         throw new Error('No Wagmi connectors configured');
       }
-      await connect(wagmiConfig, { connector: connectors[0] });
+      await connect(config, { connector: connectors[0] });
     }
-    account = getAccount(wagmiConfig);
+    account = getAccount(config);
   }
 
   if (!account.address) {
     throw new Error('Failed to connect wallet');
   }
 
-  // Generate SIWE message
+  // EIP-4361 requires nonce to be alphanumeric (>= 8 chars).
+  // callers often pass crypto.randomUUID() which contains hyphens.
+  const nonce = params.nonce.replace(/[^a-zA-Z0-9]/g, '');
+
   const siweMessage = new SiweMessage({
     domain: typeof window !== 'undefined' ? window.location.host : 'localhost',
     address: account.address,
@@ -89,12 +89,12 @@ export async function wagmiWalletAuth(
     uri: typeof window !== 'undefined' ? window.location.origin : 'http://localhost',
     version: '1',
     chainId: 480, // World Chain
-    nonce: params.nonce,
+    nonce,
     expirationTime: params.expirationTime?.toISOString(),
   });
 
   const message = siweMessage.prepareMessage();
-  const signature = await signMessage(wagmiConfig, { message });
+  const signature = await signMessage(config, { message });
 
   return {
     address: account.address,
@@ -121,31 +121,32 @@ export interface SendTransactionResult {
 export async function wagmiSendTransaction(
   params: SendTransactionParams
 ): Promise<SendTransactionResult> {
-  if (!wagmiConfig) {
-    throw new Error('Wagmi config not available. Call MiniKit.configureWagmi() first.');
+  const config = getWagmiConfig();
+  if (!config) {
+    throw new Error('Wagmi config not available. Pass wagmiConfig to MiniKitProvider.');
   }
 
   const wagmiActions = await import('wagmi/actions');
   const { sendTransaction, getAccount, connect, getConnections } = wagmiActions;
 
   // Ensure connected
-  let account = getAccount(wagmiConfig);
+  let account = getAccount(config);
   if (!account.isConnected) {
-    const connections = getConnections(wagmiConfig);
+    const connections = getConnections(config);
     if (connections.length === 0) {
-      const connectors = wagmiConfig.connectors;
+      const connectors = config.connectors;
       if (!connectors || connectors.length === 0) {
         throw new Error('No Wagmi connectors configured');
       }
-      await connect(wagmiConfig, { connector: connectors[0] });
+      await connect(config, { connector: connectors[0] });
     }
-    account = getAccount(wagmiConfig);
+    account = getAccount(config);
   }
 
   // Execute transactions sequentially (Wagmi doesn't support batch natively)
   const hashes: string[] = [];
   for (const tx of params.transactions) {
-    const hash = await sendTransaction(wagmiConfig, {
+    const hash = await sendTransaction(config, {
       to: tx.address as `0x${string}`,
       data: tx.data as `0x${string}` | undefined,
       value: tx.value ? BigInt(tx.value) : undefined,

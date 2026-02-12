@@ -5,7 +5,7 @@ export default defineConfig({
   clean: true,
   outDir: 'build',
   format: ['esm', 'cjs'],
-  external: ['@worldcoin/idkit-core', 'wagmi', 'siwe', 'viem'],
+  external: ['@worldcoin/idkit-core', 'wagmi', 'siwe', 'viem', 'react'],
   entry: ['index.ts', 'minikit-provider.tsx', 'wagmi.ts'],
   define: { 'process.env.NODE_ENV': '"production"' },
 });
