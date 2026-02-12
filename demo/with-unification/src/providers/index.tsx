@@ -1,7 +1,6 @@
 'use client';
 
-import { MiniKit } from '@worldcoin/minikit-js';
-import { MiniKitProvider } from '@worldcoin/minikit-js/minikit-provider';
+import { MiniKit, MiniKitProvider } from '@worldcoin/minikit-js';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider } from 'wagmi';
 import { createContext, type ReactNode, useContext, useEffect, useState } from 'react';
@@ -32,7 +31,7 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <WagmiProvider config={wagmiConfig}>
-        <MiniKitProvider props={{ appId: process.env.NEXT_PUBLIC_APP_ID ?? '' }} wagmiConfig={wagmiConfig}>
+        <MiniKitProvider props={{ appId: process.env.NEXT_PUBLIC_APP_ID ?? '' }}>
           <EnvironmentContext.Provider value={environment}>
             {children}
           </EnvironmentContext.Provider>

@@ -39,26 +39,6 @@
         "types": "./build/index.d.cts",
         "default": "./build/index.cjs"
       }
-    },
-    "./minikit-provider": {
-      "import": {
-        "types": "./build/minikit-provider.d.ts",
-        "default": "./build/minikit-provider.js"
-      },
-      "require": {
-        "types": "./build/minikit-provider.d.cts",
-        "default": "./build/minikit-provider.cjs"
-      }
-    },
-    "./wagmi": {
-      "import": {
-        "types": "./build/wagmi.d.ts",
-        "default": "./build/wagmi.js"
-      },
-      "require": {
-        "types": "./build/wagmi.d.cts",
-        "default": "./build/wagmi.cjs"
-      }
     }
   },
   "files": [

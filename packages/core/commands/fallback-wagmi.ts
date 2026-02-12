@@ -10,27 +10,18 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type WagmiConfig = any;
 
-// Stored on globalThis so the value is shared across CJS entry points.
-// tsup inlines fallback-wagmi.ts into both index.cjs and
-// minikit-provider.cjs — without globalThis each gets its own variable
-// and setWagmiConfig (provider) never reaches hasWagmiConfig (index).
-const STORE_KEY = '__minikit_wagmi_config__';
-
-function getStore(): { value?: WagmiConfig } {
-  const g = globalThis as Record<string, unknown>;
-  return (g[STORE_KEY] ??= {}) as { value?: WagmiConfig };
-}
+let wagmiConfig: WagmiConfig | undefined;
 
 export function setWagmiConfig(config: WagmiConfig): void {
-  getStore().value = config;
+  wagmiConfig = config;
 }
 
 export function getWagmiConfig(): WagmiConfig | undefined {
-  return getStore().value;
+  return wagmiConfig;
 }
 
 export function hasWagmiConfig(): boolean {
-  return getStore().value !== undefined;
+  return wagmiConfig !== undefined;
 }
 
 export interface WalletAuthParams {

@@ -3,7 +3,7 @@
 import { http, createConfig } from 'wagmi';
 import { worldchain } from 'viem/chains';
 import { injected, walletConnect } from 'wagmi/connectors';
-import { worldApp } from '@worldcoin/minikit-js/wagmi';
+import { worldApp } from '@worldcoin/minikit-js';
 
 /**
  * Wagmi config with World App connector + web fallbacks.
