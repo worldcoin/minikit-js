@@ -12,6 +12,10 @@ export type EventHandler<E extends ResponseEvent = ResponseEvent> = <
   data: T,
 ) => void;
 
+export type VerifyActionProcessingOptions = {
+  skipProofCompression: boolean;
+};
+
 export class EventManager {
   private listeners: Record<ResponseEvent, EventHandler> = {
     [ResponseEvent.MiniAppVerifyAction]: () => {},
@@ -28,6 +32,9 @@ export class EventManager {
     [ResponseEvent.MiniAppMicrophone]: () => {},
     [ResponseEvent.MiniAppChat]: () => {},
   };
+  private verifyActionProcessingOptions: VerifyActionProcessingOptions = {
+    skipProofCompression: false,
+  };
 
   subscribe<E extends ResponseEvent>(event: E, handler: EventHandler<E>): void {
     this.listeners[event] = handler;
@@ -35,6 +42,19 @@ export class EventManager {
 
   unsubscribe(event: ResponseEvent): void {
     delete this.listeners[event];
+  }
+
+  setVerifyActionProcessingOptions(options?: {
+    skip_proof_compression?: boolean;
+    skipProofCompression?: boolean;
+  }): void {
+    this.verifyActionProcessingOptions = {
+      skipProofCompression: Boolean(
+        options?.skip_proof_compression ??
+          options?.skipProofCompression ??
+          false,
+      ),
+    };
   }
 
   trigger(event: ResponseEvent, payload: EventPayload): void {
@@ -51,9 +71,12 @@ export class EventManager {
       // during async proof compression
       const handler = this.listeners[event];
       this.unsubscribe(event);
+      const processingOptions = this.verifyActionProcessingOptions;
+      this.verifyActionProcessingOptions = { skipProofCompression: false };
       this.processVerifyActionPayload(
         payload as MiniAppVerifyActionPayload,
         handler,
+        processingOptions,
       );
       return;
     }
@@ -64,6 +87,7 @@ export class EventManager {
   private async processVerifyActionPayload(
     payload: MiniAppVerifyActionPayload,
     handler: EventHandler,
+    processingOptions: VerifyActionProcessingOptions,
   ): Promise<void> {
     // Normalize error codes across iOS and Android
     if (
@@ -73,7 +97,7 @@ export class EventManager {
       payload.error_code = AppErrorCodes.VerificationRejected;
     }
 
-    if (payload.status === 'success') {
+    if (payload.status === 'success' && !processingOptions.skipProofCompression) {
       if ('verifications' in payload) {
         // Multi-verification response - find and compress Orb proof if present
         const orbVerification = payload.verifications.find(
