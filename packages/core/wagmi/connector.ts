@@ -3,18 +3,18 @@
  *
  * Allows using World App as a Wagmi connector. When connected through this
  * connector, wallet operations use native MiniKit commands under the hood.
+ *
+ * Returns an EIP-1193-compliant provider from getProvider() so wagmi hooks
+ * (useSignMessage, useSendTransaction, etc.) work transparently.
  */
 
 import { MiniKit } from '../minikit';
+import { createWorldAppProvider, type WorldAppProvider } from './provider';
 
 export type WorldAppConnectorOptions = {
   /** Custom name for the connector */
   name?: string;
 };
-
-// Type definition for the connector config parameter
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type WagmiCreateConnectorConfig = any;
 
 /**
  * Create a World App connector for Wagmi
@@ -41,21 +41,33 @@ type WagmiCreateConnectorConfig = any;
 export function worldApp(options: WorldAppConnectorOptions = {}) {
   const name = options.name ?? 'World App';
 
-  // Dynamically import wagmi to avoid bundling if not used
-  // We use a variable to store the module path to avoid TypeScript
-  // resolving 'wagmi' to our local wagmi.ts file
-  return async () => {
-    // Dynamic import using a variable to prevent TS from resolving to local file
-    const wagmiModule = 'wagmi';
-    const { createConnector } = await import(/* webpackIgnore: true */ wagmiModule);
+  // wagmi's createConnector is an identity function for type inference.
+  // We return the CreateConnectorFn directly to avoid importing 'wagmi'
+  // (which collides with the local wagmi/ directory due to baseUrl).
+  return createConnectorFn(name);
+}
 
-    return createConnector((config: WagmiCreateConnectorConfig) => ({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function createConnectorFn(name: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (config: any) => {
+    let address: `0x${string}` | undefined;
+
+    const provider: WorldAppProvider = createWorldAppProvider(
+      () => address,
+    );
+
+    return {
       id: 'worldApp',
       name,
       type: 'worldApp' as const,
 
       async setup() {
-        // No setup needed - MiniKit.install() handles initialization
+        // Try to restore address from MiniKit state if already authenticated
+        const existing = MiniKit.user?.walletAddress;
+        if (existing) {
+          address = existing as `0x${string}`;
+        }
       },
 
       async connect() {
@@ -63,68 +75,60 @@ export function worldApp(options: WorldAppConnectorOptions = {}) {
           throw new Error('worldApp connector only works inside World App');
         }
 
-        // Use MiniKit wallet auth to get the address
-        const result = await MiniKit.walletAuth({
+        const { finalPayload } = await MiniKit.commandsAsync.walletAuth({
           nonce: crypto.randomUUID(),
           statement: 'Sign in with World App',
         });
 
-        const address = result.data.address as `0x${string}`;
+        if (finalPayload.status !== 'success') {
+          const errorCode =
+            'error_code' in finalPayload ? finalPayload.error_code : 'unknown';
+          throw new Error(`World App wallet auth failed: ${errorCode}`);
+        }
+
+        address = finalPayload.address as `0x${string}`;
 
         return {
-          accounts: [address],
-          chainId: 480, // World Chain
+          accounts: [address] as const,
+          chainId: 480,
         };
       },
 
       async disconnect() {
-        // World App doesn't support disconnect - session persists
+        address = undefined;
       },
 
       async getAccounts() {
-        const walletAddress = MiniKit.user?.walletAddress;
-        if (!walletAddress) {
-          return [];
-        }
-        return [walletAddress as `0x${string}`];
+        return address ? ([address] as const) : ([] as const);
       },
 
       async getChainId() {
-        return 480; // World Chain
+        return 480;
       },
 
       async getProvider() {
-        // World App doesn't expose a traditional provider
-        // Return undefined or a minimal shim
-        return undefined;
+        return provider;
       },
 
       async isAuthorized() {
-        if (!MiniKit.isInWorldApp()) {
-          return false;
-        }
-        return Boolean(MiniKit.user?.walletAddress);
+        return MiniKit.isInWorldApp() && !!address;
       },
 
       async switchChain({ chainId }: { chainId: number }) {
-        // World App only supports World Chain
         if (chainId !== 480) {
-          throw new Error('World App only supports World Chain (chainId: 480)');
+          throw new Error(
+            'World App only supports World Chain (chainId: 480)',
+          );
         }
-        return config.chains.find((c: { id: number }) => c.id === 480) ?? config.chains[0];
+        return (
+          config.chains.find((c: { id: number }) => c.id === 480) ??
+          config.chains[0]
+        );
       },
 
-      onAccountsChanged(_accounts: string[]) {
-        // World App doesn't emit account changes
-      },
-
-      onChainChanged(_chainId: string) {
-        // World App doesn't emit chain changes
-      },
-
-      onDisconnect() {
-        // World App doesn't emit disconnect
-      },
-    }));
+      onAccountsChanged(_accounts: string[]) {},
+      onChainChanged(_chainId: string) {},
+      onDisconnect() {},
+    };
   };
 }

@@ -1,13 +1,13 @@
 'use client';
 
 import {
-  type ComponentType,
   createContext,
   type ReactNode,
   useContext,
   useEffect,
   useState,
 } from 'react';
+import { setWagmiConfig } from './commands/fallback-wagmi';
 import { MiniKit } from './minikit';
 
 type MiniKitProps = {
@@ -25,9 +25,13 @@ const MiniKitContext = createContext<MiniKitContextValue | undefined>(
 export const MiniKitProvider = ({
   children,
   props,
+  wagmiConfig,
 }: {
   children: ReactNode;
   props?: MiniKitProps;
+  /** Pass your Wagmi config to enable web fallback via Wagmi. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  wagmiConfig?: any;
 }) => {
   const [isInstalled, setIsInstalled] = useState<boolean | undefined>(
     undefined,
@@ -42,37 +46,18 @@ export const MiniKitProvider = ({
     setIsInstalled(success);
   }, [props?.appId]);
 
+  useEffect(() => {
+    if (wagmiConfig) {
+      setWagmiConfig(wagmiConfig);
+    }
+  }, [wagmiConfig]);
+
   return (
     <MiniKitContext.Provider value={{ isInstalled }}>
-      <WagmiAutoDetect />
       {children}
     </MiniKitContext.Provider>
   );
 };
-
-/**
- * Auto-detects Wagmi config from the provider tree.
- *
- * When MiniKitProvider is wrapped inside WagmiProvider (per RFC),
- * this dynamically loads a bridge component that reads Wagmi's config
- * via useConfig() and wires it into MiniKit's fallback system.
- *
- * If wagmi is not installed, the dynamic import fails silently.
- * No manual configureWagmi() call needed.
- */
-function WagmiAutoDetect() {
-  const [Bridge, setBridge] = useState<ComponentType | null>(null);
-
-  useEffect(() => {
-    import('./wagmi/bridge')
-      .then((mod) => setBridge(() => mod.WagmiConfigBridge))
-      .catch(() => {
-        // wagmi not installed — expected, no-op
-      });
-  }, []);
-
-  return Bridge ? <Bridge /> : null;
-}
 
 // Custom hook to see when minikit is installed
 export const useMiniKit = () => {
