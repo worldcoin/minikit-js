@@ -1,46 +1,60 @@
 'use client';
 
 import { EnvironmentBanner } from '@/components/EnvironmentBanner';
-import { VerifyDemo } from '@/components/VerifyDemo';
-import { WalletAuthDemo } from '@/components/WalletAuthDemo';
-import { SendTransactionDemo } from '@/components/SendTransactionDemo';
-import { PayDemo } from '@/components/PayDemo';
-import { ShareContactsDemo } from '@/components/ShareContactsDemo';
+import { WagmiNativeDemo } from '@/components/WagmiNativeDemo';
+import { UnifiedApiDemo } from '@/components/UnifiedApiDemo';
 
 /**
- * Unified MiniKit Demo
+ * Unified MiniKit Demo — Bidirectional
  *
- * Every command on this page uses the same code regardless of environment.
- * The SDK auto-detects whether it's running in World App or on the web
- * and picks the best transport:
+ * Section 1: Wagmi App → World App
+ *   A standard wagmi app with worldApp() connector. Pure wagmi hooks,
+ *   zero MiniKit API calls. "Just works" in World App.
  *
- *   Native (World App) -> Wagmi (web + Wagmi configured) -> Custom Fallback -> Error
- *
- * Each result includes a `via` field showing which path was used.
+ * Section 2: Mini App → Web
+ *   MiniKit unified API (request, walletAuth, sendTransaction) with
+ *   automatic wagmi fallback on web. No code changes needed.
  */
 export default function Home() {
   return (
-    <div className="min-h-dvh p-4 pb-12 max-w-lg mx-auto space-y-4">
+    <div className="min-h-dvh p-4 pb-12 max-w-lg mx-auto space-y-6">
       <header className="pt-4 pb-2">
         <h1 className="text-2xl font-bold">Unified MiniKit Demo</h1>
         <p className="text-sm text-muted mt-1">
-          Same code, any environment. Watch the <code>via</code> badge to see
-          which transport path each command used.
+          Bidirectional: wagmi apps work in World App, MiniKit apps work on web.
         </p>
       </header>
 
       <EnvironmentBanner />
-      <VerifyDemo />
-      <WalletAuthDemo />
-      <SendTransactionDemo />
-      <PayDemo />
-      <ShareContactsDemo />
+
+      {/* Direction 1: Wagmi → World App */}
+      <section className="space-y-3">
+        <div>
+          <h2 className="text-lg font-semibold">1. Wagmi App &rarr; World App</h2>
+          <p className="text-sm text-muted">
+            Standard wagmi hooks route through native MiniKit via the{' '}
+            <code>worldApp()</code> connector.
+          </p>
+        </div>
+        <WagmiNativeDemo />
+      </section>
+
+      {/* Direction 2: MiniKit → Web */}
+      <section className="space-y-3">
+        <div>
+          <h2 className="text-lg font-semibold">2. Mini App &rarr; Web</h2>
+          <p className="text-sm text-muted">
+            Unified MiniKit API falls back to wagmi / IDKit on web automatically.
+          </p>
+        </div>
+        <UnifiedApiDemo />
+      </section>
 
       <footer className="text-center text-xs text-muted pt-4 border-t border-border">
         <p>
-          Open this page in World App to see native transports.
+          Open in World App to see native transports.
           <br />
-          Open in a browser to see Wagmi and fallback transports.
+          Open in a browser to see wagmi and IDKit fallbacks.
         </p>
       </footer>
     </div>

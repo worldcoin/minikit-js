@@ -70,7 +70,8 @@ function createConnectorFn(name: string) {
         }
       },
 
-      async connect() {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      async connect(_parameters?: any): Promise<any> {
         if (!MiniKit.isInWorldApp()) {
           throw new Error('worldApp connector only works inside World App');
         }
@@ -89,7 +90,7 @@ function createConnectorFn(name: string) {
         address = finalPayload.address as `0x${string}`;
 
         return {
-          accounts: [address] as const,
+          accounts: [address] as readonly `0x${string}`[],
           chainId: 480,
         };
       },
@@ -99,7 +100,7 @@ function createConnectorFn(name: string) {
       },
 
       async getAccounts() {
-        return address ? ([address] as const) : ([] as const);
+        return address ? [address] as readonly `0x${string}`[] : [] as readonly `0x${string}`[];
       },
 
       async getChainId() {

@@ -10,15 +10,15 @@ import { wagmiConfig } from './wagmi-config';
 const queryClient = new QueryClient();
 
 /**
- * Provider setup:
+ * Provider setup — enables both directions:
  *
- *   <QueryClientProvider>
- *     <WagmiProvider>
- *       <MiniKitProvider wagmiConfig={wagmiConfig}>
- *         {children}
- *       </MiniKitProvider>
- *     </WagmiProvider>
- *   </QueryClientProvider>
+ *   Direction 1 (Wagmi → World App):
+ *     wagmiConfig includes worldApp() connector, so standard wagmi hooks
+ *     route through MiniKit natively when running in World App.
+ *
+ *   Direction 2 (MiniKit → Web):
+ *     wagmiConfig is passed to MiniKitProvider so the unified API
+ *     (MiniKit.walletAuth, MiniKit.sendTransaction) falls back to wagmi on web.
  */
 export function Providers({ children }: { children: ReactNode }) {
   const [environment, setEnvironment] = useState<

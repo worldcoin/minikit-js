@@ -3,21 +3,21 @@
 import { http, createConfig } from 'wagmi';
 import { worldchain } from 'viem/chains';
 import { injected, walletConnect } from 'wagmi/connectors';
+import { worldApp } from '@worldcoin/minikit-js/wagmi';
 
 /**
  * Wagmi config with World App connector + web fallbacks.
  *
- * The worldApp() connector is intentionally omitted here because it requires
- * an async factory (dynamic import) which is not supported by createConfig.
- * Instead, MiniKit.configureWagmi(wagmiConfig) is called in the provider
- * to wire up the unified fallback system.
+ * worldApp() is listed first so it auto-connects in World App.
+ * On web it's skipped (throws during connect) and injected/WC take over.
  *
- * In World App: unified commands use native postMessage (no Wagmi needed).
- * On web: unified commands fall back to Wagmi using this config.
+ * This same config is also passed to MiniKitProvider so the unified API
+ * (MiniKit.walletAuth, MiniKit.sendTransaction) can fall back to wagmi on web.
  */
 export const wagmiConfig = createConfig({
   chains: [worldchain],
   connectors: [
+    worldApp(), // Auto-detected in World App, skipped on web
     injected(),
     ...(process.env.NEXT_PUBLIC_WC_PROJECT_ID
       ? [
