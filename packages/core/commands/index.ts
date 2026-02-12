@@ -1,7 +1,7 @@
-// Re-export shared types and utilities
+// Re-export shared types
 export * from './types';
 
-// Re-export all command types and implementations
+// Re-export all commands
 export * from './chat';
 export * from './get-permissions';
 export * from './pay';

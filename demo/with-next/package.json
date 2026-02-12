@@ -12,7 +12,7 @@
   "dependencies": {
     "@safe-global/protocol-kit": "^6.1.2",
     "@uniswap/permit2-sdk": "^1.4.0",
-    "@wagmi/core": "^3.0.0",
+    "@wagmi/core": "^3.3.3",
     "@worldcoin/minikit-js": "workspace:*",
     "@worldcoin/minikit-react": "workspace:*",
     "clsx": "^2.1.1",
@@ -22,7 +22,7 @@
     "permit2-sdk": "link:@uniswap/v3-sdk/permit2-sdk",
     "prettier-plugin-sort-imports-desc": "^1.0.0",
     "react-dom": "^19.0.3",
-    "viem": "2.23.5",
+    "viem": "2.45.3",
     "yup": "^1.4.0"
   },
   "devDependencies": {

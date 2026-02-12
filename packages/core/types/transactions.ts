@@ -29,6 +29,8 @@ export type Transaction = {
     'payable' | 'nonpayable',
     ContractFunctionName<Abi | readonly unknown[], 'payable' | 'nonpayable'>
   >;
+  /** Raw calldata — when present, sent directly to World App. */
+  data?: string;
 };
 
 export type ContractFunctionName<

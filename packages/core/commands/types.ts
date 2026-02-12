@@ -1,5 +1,5 @@
-import { EventManager } from '../core/events';
-import { MiniKitState } from '../core/state';
+import { EventManager } from '../events';
+import { MiniKitState } from '../state';
 import { sendWebviewEvent } from '../helpers/send-webview-event';
 
 // ============================================================================
@@ -71,8 +71,8 @@ const commandAvailability: Record<Command, boolean> = {
   [Command.Chat]: false,
 };
 
-export function isCommandAvailable(command: Command): boolean {
-  return commandAvailability[command];
+export function isCommandAvailable(command: Command | string): boolean {
+  return commandAvailability[command as Command] ?? false;
 }
 
 export function setCommandAvailable(

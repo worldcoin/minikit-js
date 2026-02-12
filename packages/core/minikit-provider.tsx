@@ -2,11 +2,12 @@
 
 import {
   createContext,
-  ReactNode,
+  type ReactNode,
   useContext,
   useEffect,
   useState,
 } from 'react';
+import { setWagmiConfig } from './commands/fallback-wagmi';
 import { MiniKit } from './minikit';
 
 type MiniKitProps = {
@@ -24,9 +25,13 @@ const MiniKitContext = createContext<MiniKitContextValue | undefined>(
 export const MiniKitProvider = ({
   children,
   props,
+  wagmiConfig,
 }: {
   children: ReactNode;
   props?: MiniKitProps;
+  /** Pass your Wagmi config to enable web fallback via Wagmi. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  wagmiConfig?: any;
 }) => {
   const [isInstalled, setIsInstalled] = useState<boolean | undefined>(
     undefined,
@@ -38,18 +43,14 @@ export const MiniKitProvider = ({
     console.warn(
       'MiniKit permissions not fetched in provider. MiniKit.user.permissions will be inaccurate.',
     );
-    // MiniKit.commandsAsync
-    //   .getPermissions()
-    //   .then(({ commandPayload: _, finalPayload }) => {
-    //     if (finalPayload.status === 'success') {
-    //       MiniKit.user.permissions = {
-    //         notifications: finalPayload.permissions.notifications,
-    //         contacts: finalPayload.permissions.contacts,
-    //       };
-    //     }
-    //   });
     setIsInstalled(success);
   }, [props?.appId]);
+
+  useEffect(() => {
+    if (wagmiConfig) {
+      setWagmiConfig(wagmiConfig);
+    }
+  }, [wagmiConfig]);
 
   return (
     <MiniKitContext.Provider value={{ isInstalled }}>
