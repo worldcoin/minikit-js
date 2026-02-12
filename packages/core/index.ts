@@ -1,6 +1,5 @@
 export { MiniKit } from './minikit';
 export { MiniKitProvider, useMiniKit } from './minikit-provider';
-export { worldApp, type WorldAppConnectorOptions } from './wagmi/connector';
 
 // Export all command types from the new location
 export * from './commands';

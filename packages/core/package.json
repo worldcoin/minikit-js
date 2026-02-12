@@ -39,6 +39,16 @@
         "types": "./build/index.d.cts",
         "default": "./build/index.cjs"
       }
+    },
+    "./wagmi": {
+      "import": {
+        "types": "./build/wagmi.d.ts",
+        "default": "./build/wagmi.js"
+      },
+      "require": {
+        "types": "./build/wagmi.d.cts",
+        "default": "./build/wagmi.cjs"
+      }
     }
   },
   "files": [

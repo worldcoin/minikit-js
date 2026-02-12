@@ -8,7 +8,6 @@
  * (useSignMessage, useSendTransaction, etc.) work transparently.
  */
 
-import { setWagmiConfig } from '../commands/fallback-wagmi';
 import { MiniKit } from '../minikit';
 import { createWorldAppProvider, type WorldAppProvider } from './provider';
 
@@ -64,10 +63,6 @@ function createConnectorFn(name: string) {
       type: 'worldApp' as const,
 
       async setup() {
-        // Register the wagmi config so MiniKit's unified API can fall back
-        // to wagmi on web (e.g. MiniKit.walletAuth() → wagmi connect + SIWE).
-        setWagmiConfig(config);
-
         // Try to restore address from MiniKit state if already authenticated
         const existing = MiniKit.user?.walletAddress;
         if (existing) {
