@@ -29,5 +29,6 @@ interface Window {
       left: number;
     };
     location: string | null | undefined;
+    preferred_currency?: string;
   };
 }
