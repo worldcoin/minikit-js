@@ -13,7 +13,7 @@ export type EventHandler<E extends ResponseEvent = ResponseEvent> = <
 ) => void;
 
 export type VerifyActionProcessingOptions = {
-  skipProofCompression: boolean;
+  skip_proof_compression: boolean;
 };
 
 export class EventManager {
@@ -33,7 +33,7 @@ export class EventManager {
     [ResponseEvent.MiniAppChat]: () => {},
   };
   private verifyActionProcessingOptions: VerifyActionProcessingOptions = {
-    skipProofCompression: false,
+    skip_proof_compression: false,
   };
 
   subscribe<E extends ResponseEvent>(event: E, handler: EventHandler<E>): void {
@@ -46,14 +46,9 @@ export class EventManager {
 
   setVerifyActionProcessingOptions(options?: {
     skip_proof_compression?: boolean;
-    skipProofCompression?: boolean;
   }): void {
     this.verifyActionProcessingOptions = {
-      skipProofCompression: Boolean(
-        options?.skip_proof_compression ??
-          options?.skipProofCompression ??
-          false,
-      ),
+      skip_proof_compression: Boolean(options?.skip_proof_compression ?? false),
     };
   }
 
@@ -72,7 +67,7 @@ export class EventManager {
       const handler = this.listeners[event];
       this.unsubscribe(event);
       const processingOptions = this.verifyActionProcessingOptions;
-      this.verifyActionProcessingOptions = { skipProofCompression: false };
+      this.verifyActionProcessingOptions = { skip_proof_compression: false };
       this.processVerifyActionPayload(
         payload as MiniAppVerifyActionPayload,
         handler,
@@ -97,7 +92,10 @@ export class EventManager {
       payload.error_code = AppErrorCodes.VerificationRejected;
     }
 
-    if (payload.status === 'success' && !processingOptions.skipProofCompression) {
+    if (
+      payload.status === 'success' &&
+      !processingOptions.skip_proof_compression
+    ) {
       if ('verifications' in payload) {
         // Multi-verification response - find and compress Orb proof if present
         const orbVerification = payload.verifications.find(
