@@ -156,6 +156,7 @@ export const VerifyAction = () => {
       action: string;
       verification_level?: VerifyCommandInput['verification_level'];
       signal?: string;
+      skip_proof_compression?: boolean;
     }) => {
       setLastUsedAppId(params.app_id);
       setLastUsedAction(params.action);
@@ -170,6 +171,7 @@ export const VerifyAction = () => {
         action: params.action,
         verification_level: params.verification_level,
         signal: params.signal,
+        skip_proof_compression: params.skip_proof_compression,
       };
 
       const payload = MiniKit.commands.verify(verifyPayload);
@@ -179,25 +181,33 @@ export const VerifyAction = () => {
   );
 
   const onProdVerifyClick = useCallback(
-    (verification_level: VerifyCommandInput['verification_level']) => {
+    (
+      verification_level: VerifyCommandInput['verification_level'],
+      skip_proof_compression = false,
+    ) => {
       verifyAction({
         app_id: process.env.NEXT_PUBLIC_PROD_VERIFY_APP_ID as `app_${string}`,
         action: process.env.NEXT_PUBLIC_PROD_VERIFY_ACTION as string,
         verification_level,
         signal: 'test',
+        skip_proof_compression,
       });
     },
     [verifyAction],
   );
 
   const onStagingVerifyClick = useCallback(
-    (verification_level: VerifyCommandInput['verification_level']) => {
+    (
+      verification_level: VerifyCommandInput['verification_level'],
+      skip_proof_compression = false,
+    ) => {
       verifyAction({
         app_id: process.env
           .NEXT_PUBLIC_STAGING_VERIFY_APP_ID as `app_${string}`,
         action: process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION as string,
         verification_level,
         signal: 'test',
+        skip_proof_compression,
       });
     },
     [verifyAction],
@@ -284,6 +294,17 @@ export const VerifyAction = () => {
               >
                 Send staging app verify (Multi: Orb + Document)
               </button>
+              <button
+                className={clsx(
+                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
+                  isProduction ? 'hidden' : '',
+                )}
+                onClick={() =>
+                  onStagingVerifyClick(VerificationLevel.Orb, true)
+                }
+              >
+                Send staging app verify (Orb, no compression)
+              </button>
             </div>
 
             <div className="grid grid-cols-2 gap-x-2">
@@ -358,6 +379,15 @@ export const VerifyAction = () => {
                 }
               >
                 Send production app verify (Multi: Orb + SecureDocument)
+              </button>
+              <button
+                className={clsx(
+                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
+                  isProduction ? '' : 'hidden',
+                )}
+                onClick={() => onProdVerifyClick(VerificationLevel.Orb, true)}
+              >
+                Send production app verify (Orb, no compression)
               </button>
             </div>
           </div>
