@@ -16,7 +16,7 @@ import {
 
 export type AttestationPayload = {
   /**
-   * Base64URL-encoded hash of the request to be attested.
+   * Hex-encoded hash of the request to be attested.
    * Hash must be generated per hashing spec documented in MiniKit docs.
    */
   requestHash: string;

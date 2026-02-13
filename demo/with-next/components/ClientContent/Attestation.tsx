@@ -103,7 +103,7 @@ export const Attestation = () => {
         <div className="grid gap-y-2">
           <input
             type="text"
-            placeholder="Request hash (Base64URL-encoded)"
+            placeholder="Request hash (hex-encoded)"
             value={requestHash}
             onChange={(e) => setRequestHash(e.target.value)}
             className="border-2 border-gray-400 rounded-lg p-2"
