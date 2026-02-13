@@ -279,7 +279,7 @@ export const VerifyAction = () => {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 gap-x-2">
+            <div className="grid grid-cols-2 gap-x-2">
               <button
                 className={clsx(
                   'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
@@ -351,7 +351,7 @@ export const VerifyAction = () => {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 gap-x-2">
+            <div className="grid grid-cols-2 gap-x-2">
               <button
                 className={clsx(
                   'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
@@ -380,6 +380,8 @@ export const VerifyAction = () => {
               >
                 Send production app verify (Multi: Orb + SecureDocument)
               </button>
+            </div>
+            <div className="grid grid-cols-1 gap-x-2">
               <button
                 className={clsx(
                   'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
