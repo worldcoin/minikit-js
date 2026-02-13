@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.11
+
+### Patch Changes
+
+- 51d30cb: optional proof compression
+
 ## 1.9.10
 
 ### Patch Changes
