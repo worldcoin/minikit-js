@@ -1,6 +1,7 @@
 import { VerificationLevel } from '@worldcoin/idkit-core';
 import { Permission } from './commands';
 import {
+  AttestationErrorCodes,
   ChatErrorCodes,
   GetPermissionsErrorCodes,
   MicrophoneErrorCodes,
@@ -32,6 +33,7 @@ export enum ResponseEvent {
   MiniAppShare = 'miniapp-share',
   MiniAppMicrophone = 'miniapp-microphone',
   MiniAppChat = 'miniapp-chat',
+  MiniAppAttestation = 'miniapp-attestation',
 }
 
 export type MiniAppVerifyActionSuccessPayload = {
@@ -297,6 +299,24 @@ export type MiniAppChatPayload =
   | MiniAppChatSuccessPayload
   | MiniAppChatErrorPayload;
 
+// Anchor: Attestation Payload
+export type MiniAppAttestationSuccessPayload = {
+  status: 'success';
+  token: string;
+  version: number;
+};
+
+export type MiniAppAttestationErrorPayload = {
+  status: 'error';
+  error_code: AttestationErrorCodes;
+  description: string;
+  version: number;
+};
+
+export type MiniAppAttestationPayload =
+  | MiniAppAttestationSuccessPayload
+  | MiniAppAttestationErrorPayload;
+
 type EventPayloadMap = {
   [ResponseEvent.MiniAppVerifyAction]: MiniAppVerifyActionPayload;
   [ResponseEvent.MiniAppPayment]: MiniAppPaymentPayload;
@@ -311,6 +331,7 @@ type EventPayloadMap = {
   [ResponseEvent.MiniAppShare]: MiniAppSharePayload;
   [ResponseEvent.MiniAppMicrophone]: MiniAppMicrophonePayload;
   [ResponseEvent.MiniAppChat]: MiniAppChatPayload;
+  [ResponseEvent.MiniAppAttestation]: MiniAppAttestationPayload;
 };
 
 export type EventPayload<T extends ResponseEvent = ResponseEvent> =

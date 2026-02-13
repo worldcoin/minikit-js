@@ -270,3 +270,22 @@ export const ChatErrorMessage = {
   [ChatErrorCodes.SendFailed]: 'Failed to send the message.',
   [ChatErrorCodes.GenericError]: 'Something unexpected went wrong.',
 };
+
+export enum AttestationErrorCodes {
+  Unauthorized = 'unauthorized',
+  AttestationFailed = 'attestation_failed',
+  IntegrityFailed = 'integrity_failed',
+  InvalidInput = 'invalid_input',
+  UnsupportedVersion = 'unsupported_version',
+}
+
+export const AttestationErrorMessage: Record<AttestationErrorCodes, string> = {
+  [AttestationErrorCodes.Unauthorized]:
+    'App is not whitelisted for attestation.',
+  [AttestationErrorCodes.AttestationFailed]:
+    'Failed to obtain token from attestation gateway.',
+  [AttestationErrorCodes.IntegrityFailed]: 'Platform integrity check failed.',
+  [AttestationErrorCodes.InvalidInput]: 'Invalid request payload.',
+  [AttestationErrorCodes.UnsupportedVersion]:
+    'Command version is not supported.',
+};

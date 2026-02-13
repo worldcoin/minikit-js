@@ -19,6 +19,7 @@ export class MiniKitState {
 
     // Set user properties
     this.user.optedIntoOptionalAnalytics = worldApp.is_optional_analytics;
+    this.user.preferredCurrency = worldApp.preferred_currency;
     this.user.deviceOS = worldApp.device_os;
     this.user.worldAppVersion = worldApp.world_app_version;
 

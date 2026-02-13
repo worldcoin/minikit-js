@@ -17,6 +17,7 @@ export type User = {
   //   };
   // };
   optedIntoOptionalAnalytics?: boolean;
+  preferredCurrency?: string;
   /** @deprecated Moved to DeviceProperties */
   worldAppVersion?: number;
   /** @deprecated Moved to DeviceProperties */

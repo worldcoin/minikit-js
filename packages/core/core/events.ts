@@ -31,6 +31,7 @@ export class EventManager {
     [ResponseEvent.MiniAppShare]: () => {},
     [ResponseEvent.MiniAppMicrophone]: () => {},
     [ResponseEvent.MiniAppChat]: () => {},
+    [ResponseEvent.MiniAppAttestation]: () => {},
   };
   private verifyActionProcessingOptionsQueue: VerifyActionProcessingOptions[] =
     [];
