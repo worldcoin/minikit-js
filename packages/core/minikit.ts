@@ -27,13 +27,14 @@ import type {
   IDKitSessionConfig,
   Preset,
 } from '@worldcoin/idkit-core';
-import { IDKit, isInWorldApp } from '@worldcoin/idkit-core';
+import { IDKit } from '@worldcoin/idkit-core';
 import {
   pay,
   sendTransaction,
   shareContacts,
   walletAuth,
 } from './commands';
+import { isInWorldApp } from './commands/fallback';
 
 /**
  * Builder interface for IDKit verification requests.

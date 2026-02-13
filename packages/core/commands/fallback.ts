@@ -86,7 +86,7 @@ export class CommandUnavailableError extends Error {
 // ============================================================================
 
 /** Check if running inside World App */
-function isInWorldApp(): boolean {
+export function isInWorldApp(): boolean {
   return typeof window !== 'undefined' && Boolean((window as any).WorldApp);
 }
 
