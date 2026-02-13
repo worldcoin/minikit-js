@@ -130,7 +130,9 @@ export class MiniKit {
    * console.log(result.via); // 'minikit' | 'wagmi' | 'fallback'
    * ```
    */
-  static walletAuth = walletAuth;
+  static walletAuth(...args: Parameters<typeof walletAuth>) {
+    return walletAuth(args[0], this.getContext());
+  }
 
   /**
    * Send one or more transactions
@@ -150,7 +152,9 @@ export class MiniKit {
    * });
    * ```
    */
-  static sendTransaction = sendTransaction;
+  static sendTransaction(...args: Parameters<typeof sendTransaction>) {
+    return sendTransaction(args[0], this.getContext());
+  }
 
   /**
    * Send a payment (World App only)
@@ -168,7 +172,9 @@ export class MiniKit {
    * });
    * ```
    */
-  static pay = pay;
+  static pay(...args: Parameters<typeof pay>) {
+    return pay(args[0], this.getContext());
+  }
 
   /**
    * Open the contact picker (World App only)
@@ -183,7 +189,9 @@ export class MiniKit {
    * });
    * ```
    */
-  static shareContacts = shareContacts;
+  static shareContacts(...args: Parameters<typeof shareContacts>) {
+    return shareContacts(args[0], this.getContext());
+  }
 
   /**
    * Check if running inside World App

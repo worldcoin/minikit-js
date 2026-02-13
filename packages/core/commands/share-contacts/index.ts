@@ -151,11 +151,12 @@ export function createShareContactsAsyncCommand(
  * ```
  */
 export async function shareContacts(
-  options: UnifiedShareContactsOptions = {}
+  options: UnifiedShareContactsOptions = {},
+  ctx?: CommandContext
 ): Promise<CommandResult<ShareContactsResult>> {
   return executeWithFallback({
-    command: 'shareContacts',
-    nativeExecutor: () => nativeShareContacts(options),
+    command: Command.ShareContacts,
+    nativeExecutor: () => nativeShareContacts(options, ctx),
     // No Wagmi fallback - contacts is native only
     customFallback: options.fallback,
     requiresFallback: true, // Must provide fallback on web
@@ -170,11 +171,12 @@ export const getContacts = shareContacts;
 // ============================================================================
 
 async function nativeShareContacts(
-  options: UnifiedShareContactsOptions
+  options: UnifiedShareContactsOptions,
+  ctx?: CommandContext
 ): Promise<ShareContactsResult> {
-  const eventManager = new EventManager();
-  const stateManager = new MiniKitState();
-  const ctx = { events: eventManager, state: stateManager };
+  if (!ctx) {
+    ctx = { events: new EventManager(), state: new MiniKitState() };
+  }
 
   const syncCommand = createShareContactsCommand(ctx);
   const asyncCommand = createShareContactsAsyncCommand(ctx, syncCommand);

@@ -201,11 +201,12 @@ export function createPayAsyncCommand(
  * ```
  */
 export async function pay(
-  options: UnifiedPayOptions
+  options: UnifiedPayOptions,
+  ctx?: CommandContext
 ): Promise<CommandResult<PayResult>> {
   return executeWithFallback({
-    command: 'pay',
-    nativeExecutor: () => nativePay(options),
+    command: Command.Pay,
+    nativeExecutor: () => nativePay(options, ctx),
     // No Wagmi fallback - pay is native only
     customFallback: options.fallback,
     requiresFallback: true, // Must provide fallback on web
@@ -216,10 +217,10 @@ export async function pay(
 // Native Implementation (World App)
 // ============================================================================
 
-async function nativePay(options: UnifiedPayOptions): Promise<PayResult> {
-  const eventManager = new EventManager();
-  const stateManager = new MiniKitState();
-  const ctx = { events: eventManager, state: stateManager };
+async function nativePay(options: UnifiedPayOptions, ctx?: CommandContext): Promise<PayResult> {
+  if (!ctx) {
+    ctx = { events: new EventManager(), state: new MiniKitState() };
+  }
 
   const syncCommand = createPayCommand(ctx);
   const asyncCommand = createPayAsyncCommand(ctx, syncCommand);

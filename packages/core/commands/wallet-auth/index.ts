@@ -215,11 +215,12 @@ export function createWalletAuthAsyncCommand(
  * ```
  */
 export async function walletAuth(
-  options: UnifiedWalletAuthOptions
+  options: UnifiedWalletAuthOptions,
+  ctx?: CommandContext
 ): Promise<CommandResult<WalletAuthResult>> {
   return executeWithFallback({
-    command: 'walletAuth',
-    nativeExecutor: () => nativeWalletAuth(options),
+    command: Command.WalletAuth,
+    nativeExecutor: () => nativeWalletAuth(options, ctx),
     wagmiFallback: () =>
       wagmiWalletAuth({
         nonce: options.nonce,
@@ -235,11 +236,12 @@ export async function walletAuth(
 // ============================================================================
 
 async function nativeWalletAuth(
-  options: UnifiedWalletAuthOptions
+  options: UnifiedWalletAuthOptions,
+  ctx?: CommandContext
 ): Promise<WalletAuthResult> {
-  const eventManager = new EventManager();
-  const stateManager = new MiniKitState();
-  const ctx = { events: eventManager, state: stateManager };
+  if (!ctx) {
+    ctx = { events: new EventManager(), state: new MiniKitState() };
+  }
 
   const syncCommand = createWalletAuthCommand(ctx);
   const asyncCommand = createWalletAuthAsyncCommand(ctx, syncCommand);

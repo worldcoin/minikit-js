@@ -233,11 +233,12 @@ export function createSendTransactionAsyncCommand(
  * ```
  */
 export async function sendTransaction(
-  options: UnifiedSendTransactionOptions
+  options: UnifiedSendTransactionOptions,
+  ctx?: CommandContext
 ): Promise<CommandResult<SendTransactionResult>> {
   return executeWithFallback({
-    command: 'sendTransaction',
-    nativeExecutor: () => nativeSendTransaction(options),
+    command: Command.SendTransaction,
+    nativeExecutor: () => nativeSendTransaction(options, ctx),
     wagmiFallback: () => wagmiSendTransactionAdapter(options),
     customFallback: options.fallback,
   });
@@ -248,11 +249,12 @@ export async function sendTransaction(
 // ============================================================================
 
 async function nativeSendTransaction(
-  options: UnifiedSendTransactionOptions
+  options: UnifiedSendTransactionOptions,
+  ctx?: CommandContext
 ): Promise<SendTransactionResult> {
-  const eventManager = new EventManager();
-  const stateManager = new MiniKitState();
-  const ctx = { events: eventManager, state: stateManager };
+  if (!ctx) {
+    ctx = { events: new EventManager(), state: new MiniKitState() };
+  }
 
   const syncCommand = createSendTransactionCommand(ctx);
   const asyncCommand = createSendTransactionAsyncCommand(ctx, syncCommand);
