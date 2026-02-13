@@ -23,6 +23,10 @@ export const verifyProof = async (params: {
 }): Promise<VerifyResponse | null> => {
   const { app_id, action, payload, signal } = params;
 
+  if (!/^app_[a-zA-Z0-9_]+$/.test(app_id)) {
+    throw new Error('Invalid app_id format');
+  }
+
   const isStaging = process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging';
   const baseUrl = isStaging
     ? process.env.NEXT_SERVER_DEV_PORTAL_URL
@@ -31,7 +35,7 @@ export const verifyProof = async (params: {
   try {
     // V3 proof verification (current format)
     const response = await fetch(
-      `${baseUrl}/api/v2/verify/${app_id}`,
+      `${baseUrl}/api/v2/verify/${encodeURIComponent(app_id)}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
