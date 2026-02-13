@@ -22,11 +22,13 @@ export type VerifyCommandInput = {
   verification_level?:
     | VerificationLevel
     | [VerificationLevel, ...VerificationLevel[]];
+  skip_proof_compression?: boolean;
 };
 
-export type VerifyCommandPayload = VerifyCommandInput & {
-  timestamp: string;
-};
+export type VerifyCommandPayload = Omit<
+  VerifyCommandInput,
+  'skip_proof_compression'
+> & { timestamp: string };
 
 export { VerificationLevel };
 
@@ -62,7 +64,7 @@ export type MiniAppVerifyActionPayload =
 // Implementation
 // ============================================================================
 
-export function createVerifyCommand(_ctx: CommandContext) {
+export function createVerifyCommand(ctx: CommandContext) {
   return (payload: VerifyCommandInput): VerifyCommandPayload | null => {
     if (typeof window === 'undefined' || !isCommandAvailable(Command.Verify)) {
       console.error(
@@ -86,6 +88,10 @@ export function createVerifyCommand(_ctx: CommandContext) {
       verification_level: payload.verification_level || VerificationLevel.Orb,
       timestamp,
     };
+
+    ctx.events.setVerifyActionProcessingOptions({
+      skip_proof_compression: payload.skip_proof_compression,
+    });
 
     sendMiniKitEvent({
       command: Command.Verify,

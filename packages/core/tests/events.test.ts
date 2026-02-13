@@ -103,4 +103,62 @@ describe('EventManager verify-action payload handling', () => {
       }),
     );
   });
+
+  it('skips single payload proof compression when enabled with snake_case option', async () => {
+    const manager = new EventManager();
+    const handler = jest.fn();
+    manager.subscribe(ResponseEvent.MiniAppVerifyAction, handler);
+    manager.setVerifyActionProcessingOptions({
+      skip_proof_compression: true,
+    });
+
+    const payload: MiniAppVerifyActionPayload = {
+      status: 'success',
+      version: 1,
+      proof: '0x1234',
+      merkle_root: '0x1',
+      nullifier_hash: '0x2',
+      verification_level: VerificationLevel.Orb,
+    };
+
+    manager.trigger(ResponseEvent.MiniAppVerifyAction, payload);
+    await flushAsync();
+
+    expect(handler).toHaveBeenCalledWith(payload);
+    expect(mockedCompressAndPadProof).not.toHaveBeenCalled();
+  });
+
+  it('skips multi payload proof compression when enabled with snake_case option', async () => {
+    const manager = new EventManager();
+    const handler = jest.fn();
+    manager.subscribe(ResponseEvent.MiniAppVerifyAction, handler);
+    manager.setVerifyActionProcessingOptions({
+      skip_proof_compression: true,
+    });
+
+    const payload: MiniAppVerifyActionPayload = {
+      status: 'success',
+      version: 1,
+      verifications: [
+        {
+          proof: '0x1234',
+          merkle_root: '0x1',
+          nullifier_hash: '0x2',
+          verification_level: VerificationLevel.Orb,
+        },
+        {
+          proof: '0x5678',
+          merkle_root: '0x3',
+          nullifier_hash: '0x4',
+          verification_level: VerificationLevel.Device,
+        },
+      ],
+    };
+
+    manager.trigger(ResponseEvent.MiniAppVerifyAction, payload);
+    await flushAsync();
+
+    expect(handler).toHaveBeenCalledWith(payload);
+    expect(mockedCompressAndPadProof).not.toHaveBeenCalled();
+  });
 });
