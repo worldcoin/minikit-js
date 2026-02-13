@@ -61,10 +61,7 @@ export class EventManager {
 
     // Process VerifyAction responses (error normalization + proof compression)
     if (event === ResponseEvent.MiniAppVerifyAction) {
-      // Capture and unsubscribe immediately to prevent duplicate triggers
-      // during async proof compression
       const handler = this.listeners[event];
-      this.unsubscribe(event);
       const processingOptions =
         this.verifyActionProcessingOptionsQueue.shift() ?? {
           skip_proof_compression: false,

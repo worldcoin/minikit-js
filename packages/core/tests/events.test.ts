@@ -164,8 +164,13 @@ describe('EventManager verify-action payload handling', () => {
 
   it('associates queued processing options with each verify response', async () => {
     mockedCompressAndPadProof.mockResolvedValueOnce('0xbeef' as `0x${string}`);
+    const consoleErrorSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
 
     const manager = new EventManager();
+    const handler = jest.fn();
+    manager.subscribe(ResponseEvent.MiniAppVerifyAction, handler);
 
     manager.setVerifyActionProcessingOptions({
       skip_proof_compression: true,
@@ -174,8 +179,6 @@ describe('EventManager verify-action payload handling', () => {
       skip_proof_compression: false,
     });
 
-    const firstHandler = jest.fn();
-    manager.subscribe(ResponseEvent.MiniAppVerifyAction, firstHandler);
     const firstPayload: MiniAppVerifyActionPayload = {
       status: 'success',
       version: 1,
@@ -188,12 +191,9 @@ describe('EventManager verify-action payload handling', () => {
     manager.trigger(ResponseEvent.MiniAppVerifyAction, firstPayload);
     await flushAsync();
 
-    expect(firstHandler).toHaveBeenCalledWith(firstPayload);
+    expect(handler).toHaveBeenCalledWith(firstPayload);
     expect(firstPayload.proof).toBe('0x1234');
     expect(mockedCompressAndPadProof).not.toHaveBeenCalled();
-
-    const secondHandler = jest.fn();
-    manager.subscribe(ResponseEvent.MiniAppVerifyAction, secondHandler);
     const secondPayload: MiniAppVerifyActionPayload = {
       status: 'success',
       version: 1,
@@ -206,9 +206,13 @@ describe('EventManager verify-action payload handling', () => {
     manager.trigger(ResponseEvent.MiniAppVerifyAction, secondPayload);
     await flushAsync();
 
-    expect(secondHandler).toHaveBeenCalledWith(secondPayload);
+    expect(handler).toHaveBeenCalledWith(secondPayload);
+    expect(handler).toHaveBeenCalledTimes(2);
     expect(secondPayload.proof).toBe('0xbeef');
     expect(mockedCompressAndPadProof).toHaveBeenCalledTimes(1);
     expect(mockedCompressAndPadProof).toHaveBeenCalledWith('0x5678');
+    expect(consoleErrorSpy).not.toHaveBeenCalledWith(
+      expect.stringContaining('No handler for event miniapp-verify-action'),
+    );
   });
 });
