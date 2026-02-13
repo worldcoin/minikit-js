@@ -33,9 +33,8 @@ export class EventManager {
     [ResponseEvent.MiniAppChat]: () => {},
     [ResponseEvent.MiniAppAttestation]: () => {},
   };
-  private verifyActionProcessingOptions: VerifyActionProcessingOptions = {
-    skip_proof_compression: false,
-  };
+  private verifyActionProcessingOptionsQueue: VerifyActionProcessingOptions[] =
+    [];
 
   subscribe<E extends ResponseEvent>(event: E, handler: EventHandler<E>): void {
     this.listeners[event] = handler;
@@ -48,9 +47,9 @@ export class EventManager {
   setVerifyActionProcessingOptions(options?: {
     skip_proof_compression?: boolean;
   }): void {
-    this.verifyActionProcessingOptions = {
+    this.verifyActionProcessingOptionsQueue.push({
       skip_proof_compression: Boolean(options?.skip_proof_compression ?? false),
-    };
+    });
   }
 
   trigger(event: ResponseEvent, payload: EventPayload): void {
@@ -67,8 +66,10 @@ export class EventManager {
       // during async proof compression
       const handler = this.listeners[event];
       this.unsubscribe(event);
-      const processingOptions = this.verifyActionProcessingOptions;
-      this.verifyActionProcessingOptions = { skip_proof_compression: false };
+      const processingOptions =
+        this.verifyActionProcessingOptionsQueue.shift() ?? {
+          skip_proof_compression: false,
+        };
       this.processVerifyActionPayload(
         payload as MiniAppVerifyActionPayload,
         handler,
