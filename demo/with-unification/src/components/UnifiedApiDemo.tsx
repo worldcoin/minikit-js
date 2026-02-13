@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import { MiniKit, orbLegacy } from '@worldcoin/minikit-js';
+import { useState } from 'react';
 import { Card } from './Card';
 import { ResultDisplay } from './ResultDisplay';
 
@@ -51,16 +51,23 @@ export function UnifiedApiDemo() {
   const handleVerify = async () => {
     setVerifyStatus('pending');
     setVerifyResult({});
+    const rpSig = await fetch('/api/rp-signature', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'test-action' }),
+    }).then((r) => r.json());
+
     try {
       const request = await MiniKit.request({
-        app_id: (process.env.NEXT_PUBLIC_APP_ID ?? 'app_staging_xxx') as `app_${string}`,
+        app_id: (process.env.NEXT_PUBLIC_APP_ID ??
+          'app_staging_xxx') as `app_${string}`,
         action: 'test-action',
         rp_context: {
-          rp_id: typeof window !== 'undefined' ? window.location.host : 'localhost',
-          nonce: crypto.randomUUID(),
-          created_at: Math.floor(Date.now() / 1000),
-          expires_at: Math.floor(Date.now() / 1000) + 300,
-          signature: '',
+          rp_id: process.env.NEXT_PUBLIC_RP_ID ?? 'rp_765bb8d478f75a03',
+          nonce: rpSig.nonce,
+          created_at: rpSig.created_at,
+          expires_at: rpSig.expires_at,
+          signature: rpSig.sig,
         },
         allow_legacy_proofs: true,
       }).preset(orbLegacy({ signal: 'demo-signal' }));
@@ -75,7 +82,9 @@ export function UnifiedApiDemo() {
         data: completion,
       });
     } catch (err: unknown) {
-      setVerifyResult({ error: err instanceof Error ? err.message : String(err) });
+      setVerifyResult({
+        error: err instanceof Error ? err.message : String(err),
+      });
     } finally {
       setVerifyStatus('idle');
     }
@@ -99,7 +108,9 @@ export function UnifiedApiDemo() {
         },
       });
     } catch (err: unknown) {
-      setAuthResult({ error: err instanceof Error ? err.message : String(err) });
+      setAuthResult({
+        error: err instanceof Error ? err.message : String(err),
+      });
     } finally {
       setAuthStatus('idle');
     }
@@ -151,12 +162,18 @@ export function UnifiedApiDemo() {
             disabled={verifyStatus === 'pending'}
             className="px-4 py-2 rounded-lg bg-accent text-white text-sm font-medium disabled:opacity-50"
           >
-            {verifyStatus === 'pending' ? 'Verifying...' : 'Verify with World ID'}
+            {verifyStatus === 'pending'
+              ? 'Verifying...'
+              : 'Verify with World ID'}
           </button>
           <p className="text-xs text-muted mt-1">
             <code>MiniKit.request(config).preset(orbLegacy(...))</code>
           </p>
-          <ResultDisplay via={verifyResult.via} data={verifyResult.data} error={verifyResult.error} />
+          <ResultDisplay
+            via={verifyResult.via}
+            data={verifyResult.data}
+            error={verifyResult.error}
+          />
         </div>
 
         {/* Wallet Auth */}
@@ -166,12 +183,18 @@ export function UnifiedApiDemo() {
             disabled={authStatus === 'pending'}
             className="px-4 py-2 rounded-lg bg-accent text-white text-sm font-medium disabled:opacity-50"
           >
-            {authStatus === 'pending' ? 'Authenticating...' : 'Connect & Sign (SIWE)'}
+            {authStatus === 'pending'
+              ? 'Authenticating...'
+              : 'Connect & Sign (SIWE)'}
           </button>
           <p className="text-xs text-muted mt-1">
             <code>MiniKit.walletAuth(opts)</code>
           </p>
-          <ResultDisplay via={authResult.via} data={authResult.data} error={authResult.error} />
+          <ResultDisplay
+            via={authResult.via}
+            data={authResult.data}
+            error={authResult.error}
+          />
         </div>
 
         {/* Send Transaction */}
@@ -186,7 +209,11 @@ export function UnifiedApiDemo() {
           <p className="text-xs text-muted mt-1">
             <code>MiniKit.sendTransaction(opts)</code>
           </p>
-          <ResultDisplay via={txResult.via} data={txResult.data} error={txResult.error} />
+          <ResultDisplay
+            via={txResult.via}
+            data={txResult.data}
+            error={txResult.error}
+          />
         </div>
       </div>
 
