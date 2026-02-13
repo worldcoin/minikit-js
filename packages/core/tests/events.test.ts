@@ -128,12 +128,12 @@ describe('EventManager verify-action payload handling', () => {
     expect(mockedCompressAndPadProof).not.toHaveBeenCalled();
   });
 
-  it('skips multi payload proof compression when enabled with camelCase option', async () => {
+  it('skips multi payload proof compression when enabled with snake_case option', async () => {
     const manager = new EventManager();
     const handler = jest.fn();
     manager.subscribe(ResponseEvent.MiniAppVerifyAction, handler);
     manager.setVerifyActionProcessingOptions({
-      skipProofCompression: true,
+      skip_proof_compression: true,
     });
 
     const payload: MiniAppVerifyActionPayload = {

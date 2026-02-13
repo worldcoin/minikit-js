@@ -38,13 +38,12 @@ export type VerifyCommandInput = {
     | VerificationLevel
     | [VerificationLevel, ...VerificationLevel[]];
   skip_proof_compression?: boolean;
-  skipProofCompression?: boolean;
 };
 
 // Full list of values sent to the app
 export type VerifyCommandPayload = Omit<
   VerifyCommandInput,
-  'skip_proof_compression' | 'skipProofCompression'
+  'skip_proof_compression'
 > & { timestamp: string };
 
 export type TokensPayload = {

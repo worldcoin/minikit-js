@@ -23,12 +23,11 @@ export type VerifyCommandInput = {
     | VerificationLevel
     | [VerificationLevel, ...VerificationLevel[]];
   skip_proof_compression?: boolean;
-  skipProofCompression?: boolean;
 };
 
 export type VerifyCommandPayload = Omit<
   VerifyCommandInput,
-  'skip_proof_compression' | 'skipProofCompression'
+  'skip_proof_compression'
 > & { timestamp: string };
 
 export { VerificationLevel };
@@ -92,7 +91,6 @@ export function createVerifyCommand(ctx: CommandContext) {
 
     ctx.events.setVerifyActionProcessingOptions({
       skip_proof_compression: payload.skip_proof_compression,
-      skipProofCompression: payload.skipProofCompression,
     });
 
     sendMiniKitEvent({
