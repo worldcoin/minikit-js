@@ -22,11 +22,13 @@ export type VerifyCommandInput = {
   verification_level?:
     | VerificationLevel
     | [VerificationLevel, ...VerificationLevel[]];
+  skip_proof_compression?: boolean;
 };
 
-export type VerifyCommandPayload = VerifyCommandInput & {
-  timestamp: string;
-};
+export type VerifyCommandPayload = Omit<
+  VerifyCommandInput,
+  'skip_proof_compression'
+> & { timestamp: string };
 
 export { VerificationLevel };
 
@@ -62,7 +64,7 @@ export type MiniAppVerifyActionPayload =
 // Implementation
 // ============================================================================
 
-export function createVerifyCommand(_ctx: CommandContext) {
+export function createVerifyCommand(ctx: CommandContext) {
   return (payload: VerifyCommandInput): VerifyCommandPayload | null => {
     if (typeof window === 'undefined' || !isCommandAvailable(Command.Verify)) {
       console.error(
@@ -87,6 +89,10 @@ export function createVerifyCommand(_ctx: CommandContext) {
       timestamp,
     };
 
+    ctx.events.setVerifyActionProcessingOptions({
+      skip_proof_compression: payload.skip_proof_compression,
+    });
+
     sendMiniKitEvent({
       command: Command.Verify,
       version: COMMAND_VERSIONS[Command.Verify],
@@ -101,18 +107,30 @@ export function createVerifyAsyncCommand(
   ctx: CommandContext,
   syncCommand: ReturnType<typeof createVerifyCommand>,
 ) {
+  let hasInFlightVerifyRequest = false;
+
   return async (
     payload: VerifyCommandInput,
   ): AsyncHandlerReturn<
     VerifyCommandPayload | null,
     MiniAppVerifyActionPayload
   > => {
+    if (hasInFlightVerifyRequest) {
+      return Promise.reject(
+        new Error(
+          'A verify request is already in flight. Wait for the current request to complete before sending another.',
+        ),
+      );
+    }
+
     return new Promise((resolve, reject) => {
       try {
+        hasInFlightVerifyRequest = true;
         let commandPayload: VerifyCommandPayload | null = null;
 
         const handleResponse = (response: MiniAppVerifyActionPayload) => {
           ctx.events.unsubscribe(ResponseEvent.MiniAppVerifyAction);
+          hasInFlightVerifyRequest = false;
           // Proof compression and error normalization handled by EventManager.trigger()
           resolve({ commandPayload, finalPayload: response });
         };
@@ -122,7 +140,18 @@ export function createVerifyAsyncCommand(
           handleResponse as any,
         );
         commandPayload = syncCommand(payload);
+
+        if (commandPayload === null) {
+          ctx.events.unsubscribe(ResponseEvent.MiniAppVerifyAction);
+          hasInFlightVerifyRequest = false;
+          reject(
+            new Error(
+              'Failed to send verify command. Ensure MiniKit is installed and the verify command is available.',
+            ),
+          );
+        }
       } catch (error) {
+        hasInFlightVerifyRequest = false;
         reject(error);
       }
     });
