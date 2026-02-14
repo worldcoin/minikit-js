@@ -181,6 +181,13 @@ export interface SendTransactionResult {
   chain?: string;
   /** Timestamp */
   timestamp?: string;
+
+  // ---- Deprecated aliases (old event payload field names) ----
+
+  /** @deprecated Use `transactionId` instead */
+  transaction_id?: string;
+  /** @deprecated Success is implicit (errors throw). Always `'submitted'` when present. */
+  transaction_status?: 'submitted';
 }
 
 export interface FeatureSupport {

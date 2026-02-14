@@ -121,6 +121,10 @@ async function nativeSendTransaction(
     from: finalPayload.from,
     chain: finalPayload.chain,
     timestamp: finalPayload.timestamp,
+
+    // Deprecated aliases
+    transaction_id: finalPayload.transaction_id,
+    transaction_status: 'submitted',
   };
 }
 
