@@ -40,6 +40,16 @@
         "default": "./build/index.cjs"
       }
     },
+    "./provider": {
+      "import": {
+        "types": "./build/minikit-provider.d.ts",
+        "default": "./build/minikit-provider.js"
+      },
+      "require": {
+        "types": "./build/minikit-provider.d.cts",
+        "default": "./build/minikit-provider.cjs"
+      }
+    },
     "./wagmi": {
       "import": {
         "types": "./build/wagmi.d.ts",

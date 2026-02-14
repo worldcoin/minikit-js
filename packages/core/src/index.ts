@@ -1,5 +1,4 @@
 export { MiniKit } from './minikit';
-export { MiniKitProvider, useMiniKit } from './minikit-provider';
 
 export * from './types';
 export * from './commands';
