@@ -1,5 +1,5 @@
 'use client';
-import { MiniKitProvider } from '@worldcoin/minikit-js/minikit-provider';
+import { MiniKitProvider } from '@worldcoin/minikit-js';
 import dynamic from 'next/dynamic';
 import type { ReactNode } from 'react';
 import SessionProvider from './SessionProvider'; // Assuming SessionProvider is also client-side or compatible
