@@ -4,8 +4,8 @@
     "url": "git+https://github.com/worldcoin/minikit-js.git"
   },
   "dependencies": {
-    "@worldcoin/idkit-core": "link:/users/andy.wang/Documents/worldcoin/idkit/js/packages/core",
-    "abitype": "^1.0.6"
+    "@worldcoin/idkit-core": "4.0.1-dev.8abccc4",
+    "abitype": "^1.2.3"
   },
   "description": "minikit-js is our SDK for building mini-apps.",
   "devDependencies": {
@@ -61,7 +61,7 @@
     "miniapps"
   ],
   "license": "MIT",
-  "main": "index.ts",
+  "main": "src/index.ts",
   "name": "@worldcoin/minikit-js",
   "peerDependencies": {
     "react": "^17 || ^18 || ^19",
@@ -87,7 +87,7 @@
     "type-check": "tsc --noEmit"
   },
   "type": "module",
-  "types": "index.ts",
+  "types": "src/index.ts",
   "typesVersions": {
     "*": {
       "*": [

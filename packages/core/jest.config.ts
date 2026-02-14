@@ -2,7 +2,7 @@ import type { Config } from 'jest';
 
 const config: Config = {
   preset: 'ts-jest',
-  moduleDirectories: ['node_modules', '<rootDir>'],
+  moduleDirectories: ['node_modules', '<rootDir>/src'],
   modulePathIgnorePatterns: ['<rootDir>/deploy/cdk.out'],
   testMatch: ['**/*.test.ts'],
   testPathIgnorePatterns: ['node_modules'],

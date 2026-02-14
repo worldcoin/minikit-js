@@ -3,14 +3,14 @@
   "compilerOptions": {
     "types": ["node", "jest"],
     "moduleResolution": "bundler",
-    "rootDir": ".",
-    "baseUrl": ".",
+    "rootDir": "src",
+    "baseUrl": "src",
     "typeRoots": ["./node_modules/@types"],
     "noEmit": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "skipLibCheck": true
   },
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "build", ".turbo", "coverage"]
 }
