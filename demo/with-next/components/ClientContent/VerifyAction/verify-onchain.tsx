@@ -1,6 +1,6 @@
 'use client';
 
-import { MiniKit } from '@worldcoin/minikit-js';
+import { MiniKit, orbLegacy, type RpContext } from '@worldcoin/minikit-js';
 import { useState } from 'react';
 import { decodeAbiParameters, parseAbiParameters } from 'viem';
 
@@ -104,17 +104,35 @@ export const VerifyOnchainProof = () => {
         return { success: false, error: 'No wallet address' };
       }
     }
-    const { finalPayload } = await MiniKit.commandsAsync.verify({
-      action: 'onchain-verify-test',
-      signal: signal,
+    // Fetch RP signature for IDKit
+    const rpRes = await fetch('/api/rp-signature', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'onchain-verify-test' }),
     });
-    if (
-      finalPayload.status === 'success' &&
-      !('verifications' in finalPayload)
-    ) {
-      const merkleRoot = finalPayload.merkle_root;
-      const nullifierHash = finalPayload.nullifier_hash;
-      const proof = finalPayload.proof;
+    const rpSig = await rpRes.json();
+    const rpContext: RpContext = {
+      rp_id: rpSig.rp_id,
+      nonce: rpSig.nonce,
+      created_at: rpSig.created_at,
+      expires_at: rpSig.expires_at,
+      signature: rpSig.sig,
+    };
+
+    const request = await MiniKit.request({
+      app_id: process.env.NEXT_PUBLIC_PROD_VERIFY_APP_ID as `app_${string}`,
+      action: 'onchain-verify-test',
+      rp_context: rpContext,
+      allow_legacy_proofs: true,
+    }).preset(orbLegacy({ signal: signal }));
+
+    const idkitResult = await request.pollUntilCompletion();
+    const firstResponse = idkitResult.responses?.[0] as Record<string, any> | undefined;
+
+    if (firstResponse?.proof) {
+      const merkleRoot = firstResponse.merkle_root;
+      const nullifierHash = firstResponse.nullifier_hash;
+      const proof = firstResponse.proof;
 
       try {
         // Using a fixed signal address for simplicity

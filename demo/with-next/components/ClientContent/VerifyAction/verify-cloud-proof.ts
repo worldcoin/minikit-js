@@ -1,12 +1,17 @@
 'use server';
 
-import type { VerifyResult } from '@worldcoin/minikit-js';
-
 export interface VerifyResponse {
   success: boolean;
   code?: string;
   detail?: string;
   attribute?: string | null;
+}
+
+interface VerifyPayload {
+  proof: string;
+  merkle_root: string;
+  nullifier_hash: string;
+  verification_level: string;
 }
 
 /**
@@ -19,7 +24,7 @@ export const verifyProof = async (params: {
   app_id: `app_${string}`;
   action: string;
   signal?: string;
-  payload: VerifyResult;
+  payload: VerifyPayload;
 }): Promise<VerifyResponse | null> => {
   const { app_id, action, payload, signal } = params;
 

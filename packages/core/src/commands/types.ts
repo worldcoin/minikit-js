@@ -6,7 +6,6 @@ import type { DeviceProperties } from '../types';
 // ============================================================================
 
 export enum Command {
-  Verify = 'verify',
   Pay = 'pay',
   WalletAuth = 'wallet-auth',
   SendTransaction = 'send-transaction',
@@ -21,7 +20,6 @@ export enum Command {
 }
 
 export enum ResponseEvent {
-  MiniAppVerifyAction = 'miniapp-verify-action',
   MiniAppPayment = 'miniapp-payment',
   MiniAppWalletAuth = 'miniapp-wallet-auth',
   MiniAppSendTransaction = 'miniapp-send-transaction',
@@ -37,7 +35,6 @@ export enum ResponseEvent {
 }
 
 export const COMMAND_VERSIONS: Record<Command, number> = {
-  [Command.Verify]: 1,
   [Command.Pay]: 1,
   [Command.WalletAuth]: 2,
   [Command.SendTransaction]: 1,
@@ -52,7 +49,6 @@ export const COMMAND_VERSIONS: Record<Command, number> = {
 };
 
 const commandAvailability: Record<Command, boolean> = {
-  [Command.Verify]: false,
   [Command.Pay]: false,
   [Command.WalletAuth]: false,
   [Command.SendTransaction]: false,

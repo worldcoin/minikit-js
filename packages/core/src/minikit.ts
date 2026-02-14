@@ -318,8 +318,6 @@ export class MiniKit {
       };
       this.eventManager.subscribe(event, wrappedHandler as any);
     } else {
-      // VerifyAction processing (error normalization, proof compression) is
-      // handled centrally in EventManager.trigger()
       this.eventManager.subscribe(event, handler);
     }
   }
