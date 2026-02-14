@@ -70,11 +70,10 @@ export const Share = () => {
   };
 
   const onSendShareFiles = useCallback(async (input: ShareInput) => {
-    const { commandPayload, finalPayload } =
-      await MiniKit.commandsAsync.share(input);
+    const finalPayload = await MiniKit.share(input);
 
     setSentShareFilesPayload({
-      commandPayload,
+      input,
     });
 
     await validateResponse(finalPayload);

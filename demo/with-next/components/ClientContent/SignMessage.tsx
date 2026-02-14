@@ -107,7 +107,7 @@ export const SignMessage = () => {
     };
 
     setMessageToSign(message);
-    const payload = MiniKit.commands.signMessage(signMessagePayload);
+    const payload = MiniKit.signMessage(signMessagePayload);
     setSentSignMessagePayload({
       payload,
     });

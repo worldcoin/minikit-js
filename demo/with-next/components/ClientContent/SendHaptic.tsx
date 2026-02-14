@@ -80,7 +80,7 @@ export const SendHapticFeedback = () => {
 
   const onSendHapticFeedback = useCallback(
     async (input: SendHapticFeedbackInput) => {
-      const payload = MiniKit.commands.sendHapticFeedback(input);
+      const payload = MiniKit.sendHapticFeedback(input);
 
       setSentHapticFeedbackPayload({
         payload,

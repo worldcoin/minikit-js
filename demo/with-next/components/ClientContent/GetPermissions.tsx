@@ -79,7 +79,7 @@ export const GetPermissions = () => {
   }, [tempInstallFix]);
 
   const onGetPermissions = useCallback(async () => {
-    const payload = MiniKit.commands.getPermissions();
+    const payload = MiniKit.getPermissions();
     setSentGetPermissionsPayload({
       payload,
     });

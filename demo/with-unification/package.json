@@ -12,13 +12,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.62.8",
+    "@worldcoin/idkit": "4.0.0-dev.2039000",
     "@worldcoin/minikit-js": "workspace:*",
     "next": "^15.2.8",
     "react": "^19.0.3",
     "react-dom": "^19.0.3",
     "viem": "2.45.3",
-    "wagmi": "^3.4.3",
-    "@tanstack/react-query": "^5.62.8"
+    "wagmi": "^3.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

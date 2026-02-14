@@ -230,7 +230,7 @@ export const SignTypedData = () => {
   }, [tempInstallFix]);
 
   const onSignTypedData = useCallback(async (stateChanges?: boolean) => {
-    const payload = MiniKit.commands.signTypedData(
+    const payload = MiniKit.signTypedData(
       stateChanges ? stateChangesPayload : signTypedDataPayload,
     );
 
@@ -241,7 +241,7 @@ export const SignTypedData = () => {
   }, []);
 
   const signBenignPayload = (chainId?: number) => {
-    const payload = MiniKit.commands.signTypedData({
+    const payload = MiniKit.signTypedData({
       ...benignPayload,
       chainId,
     });

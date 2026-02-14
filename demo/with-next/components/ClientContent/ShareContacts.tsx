@@ -85,7 +85,7 @@ export const ShareContacts = () => {
         inviteMessage,
       };
 
-      const payload = MiniKit.commands.shareContacts(shareContactsPayload);
+      const payload = MiniKit.shareContacts(shareContactsPayload);
       setSentShareContactsPayload({
         payload,
       });

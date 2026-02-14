@@ -1,6 +1,12 @@
 'use client';
 
-import { MiniKit, orbLegacy } from '@worldcoin/minikit-js';
+import { MiniKit } from '@worldcoin/minikit-js';
+import {
+  IDKitRequestWidget,
+  orbLegacy,
+  type IDKitResult,
+  type RpContext,
+} from '@worldcoin/idkit';
 import { useState } from 'react';
 import { Card } from './Card';
 import { ResultDisplay } from './ResultDisplay';
@@ -18,15 +24,21 @@ const MINT_ABI = [
 
 const TEST_CONTRACT = '0xF0882554ee924278806d708396F1a7975b732522';
 
+const APP_ID = (process.env.NEXT_PUBLIC_APP_ID ??
+  'app_staging_xxx') as `app_${string}`;
+const RP_ID = process.env.NEXT_PUBLIC_RP_ID ?? 'rp_765bb8d478f75a03';
+const ACTION = 'test-action';
+
 /**
  * Direction 2: Unified MiniKit API → Works Everywhere
  *
- * Uses MiniKit.request(), MiniKit.walletAuth(), MiniKit.sendTransaction().
- * In World App: native postMessage. On web: wagmi fallback / IDKit bridge.
+ * Uses IDKitRequestWidget for verify (handles native + web automatically),
+ * MiniKit.walletAuth() and MiniKit.sendTransaction() with wagmi fallback.
  * Each result shows a `via` badge indicating which transport was used.
  */
 export function UnifiedApiDemo() {
-  const [verifyStatus, setVerifyStatus] = useState<'idle' | 'pending'>('idle');
+  const [widgetOpen, setWidgetOpen] = useState(false);
+  const [rpContext, setRpContext] = useState<RpContext | null>(null);
   const [verifyResult, setVerifyResult] = useState<{
     via?: string;
     data?: unknown;
@@ -47,46 +59,35 @@ export function UnifiedApiDemo() {
     error?: string;
   }>({});
 
-  // IDKit Verify
+  // IDKit Verify — fetch RP signature then open widget
   const handleVerify = async () => {
-    setVerifyStatus('pending');
     setVerifyResult({});
-    const rpSig = await fetch('/api/rp-signature', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'test-action' }),
-    }).then((r) => r.json());
-
     try {
-      const request = await MiniKit.request({
-        app_id: (process.env.NEXT_PUBLIC_APP_ID ??
-          'app_staging_xxx') as `app_${string}`,
-        action: 'test-action',
-        rp_context: {
-          rp_id: process.env.NEXT_PUBLIC_RP_ID ?? 'rp_765bb8d478f75a03',
-          nonce: rpSig.nonce,
-          created_at: rpSig.created_at,
-          expires_at: rpSig.expires_at,
-          signature: rpSig.sig,
-        },
-        allow_legacy_proofs: true,
-      }).preset(orbLegacy({ signal: 'demo-signal' }));
+      const res = await fetch('/api/rp-signature', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: ACTION }),
+      });
 
-      if (request.connectorURI) {
-        console.log('QR URL (display to user):', request.connectorURI);
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `RP signature request failed (${res.status})`);
       }
 
-      const completion = await request.pollUntilCompletion();
-      setVerifyResult({
-        via: request.connectorURI ? 'idkit-bridge' : 'native',
-        data: completion,
+      const rpSig = await res.json();
+
+      setRpContext({
+        rp_id: RP_ID,
+        nonce: rpSig.nonce,
+        created_at: rpSig.created_at,
+        expires_at: rpSig.expires_at,
+        signature: rpSig.sig,
       });
+      setWidgetOpen(true);
     } catch (err: unknown) {
       setVerifyResult({
         error: err instanceof Error ? err.message : String(err),
       });
-    } finally {
-      setVerifyStatus('idle');
     }
   };
 
@@ -159,15 +160,13 @@ export function UnifiedApiDemo() {
         <div>
           <button
             onClick={handleVerify}
-            disabled={verifyStatus === 'pending'}
+            disabled={widgetOpen}
             className="px-4 py-2 rounded-lg bg-accent text-white text-sm font-medium disabled:opacity-50"
           >
-            {verifyStatus === 'pending'
-              ? 'Verifying...'
-              : 'Verify with World ID'}
+            {widgetOpen ? 'Verifying...' : 'Verify with World ID'}
           </button>
           <p className="text-xs text-muted mt-1">
-            <code>MiniKit.request(config).preset(orbLegacy(...))</code>
+            <code>IDKitRequestWidget</code> — native in World App, QR on web
           </p>
           <ResultDisplay
             via={verifyResult.via}
@@ -220,8 +219,26 @@ export function UnifiedApiDemo() {
       <p className="text-xs text-muted border-t border-border pt-3">
         In World App: native postMessage transport.
         <br />
-        On web: wagmi fallback (walletAuth, sendTx) / IDKit bridge (verify).
+        On web: wagmi fallback (walletAuth, sendTx) / IDKit widget (verify).
       </p>
+
+      {rpContext && (
+        <IDKitRequestWidget
+          open={widgetOpen}
+          onOpenChange={setWidgetOpen}
+          app_id={APP_ID}
+          action={ACTION}
+          rp_context={rpContext}
+          allow_legacy_proofs={true}
+          preset={orbLegacy({ signal: 'demo-signal' })}
+          onSuccess={(result: IDKitResult) => {
+            setVerifyResult({ via: 'idkit', data: result });
+          }}
+          onError={(errorCode) => {
+            setVerifyResult({ error: `Verification failed: ${errorCode}` });
+          }}
+        />
+      )}
     </Card>
   );
 }

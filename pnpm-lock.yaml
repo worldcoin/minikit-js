@@ -30,10 +30,10 @@ importers:
         version: 1.0.2(@types/react-dom@19.1.2(@types/react@19.1.1))(@types/react@19.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@4.1.4)
       '@worldcoin/minikit-js':
         specifier: latest
-        version: 1.9.10(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 1.9.11(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       '@worldcoin/minikit-react':
         specifier: latest
-        version: 1.9.11(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        version: 1.9.12(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -168,6 +168,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.62.8
         version: 5.90.20(react@19.1.0)
+      '@worldcoin/idkit':
+        specifier: 4.0.0-dev.2039000
+        version: 4.0.0-dev.2039000(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@worldcoin/minikit-js':
         specifier: workspace:*
         version: link:../../packages/core
@@ -209,8 +212,8 @@ importers:
   packages/core:
     dependencies:
       '@worldcoin/idkit-core':
-        specifier: 4.0.1-dev.8abccc4
-        version: 4.0.1-dev.8abccc4
+        specifier: 4.0.1-dev.2039000
+        version: 4.0.1-dev.2039000
       abitype:
         specifier: ^1.2.3
         version: 1.2.3(typescript@5.5.4)(zod@4.3.6)
@@ -2467,8 +2470,17 @@ packages:
     resolution: {integrity: sha512-GqBNAI+OyG+YXoMOI9PJDlO+MeiUnclrdjaXDYYCjmXBQi+tx0rQjNJfxwS9H6jQSVPSYaa/crcgYYMJvwdS0A==}
     engines: {node: '>=12.4'}
 
-  '@worldcoin/idkit-core@4.0.1-dev.8abccc4':
-    resolution: {integrity: sha512-zET0vLLLoecrEZKSlkq1WdV6DVMv8FimsS2KE0DbMjRi0knE/m6TaEXQyS9tX0vJS2U6TjKGIjFWG3HsWdab9g==}
+  '@worldcoin/idkit-core@4.0.1':
+    resolution: {integrity: sha512-ykDuesfSsuERh4T0cShQlrnaBQiHS5qSJtEUiLiehoFln4nIbK93004l2EWjEDK989pbkC6hEy7yA6fPh6tMOQ==}
+
+  '@worldcoin/idkit-core@4.0.1-dev.2039000':
+    resolution: {integrity: sha512-PhWMcPdYdVvDsAcaOCPjnKvkcOkxUudXf8l2lGfsYr8+FgRvSRBxL34jtoXR5AHLf7eoxS1rzYgN84XF37BfKA==}
+
+  '@worldcoin/idkit@4.0.0-dev.2039000':
+    resolution: {integrity: sha512-rthqkfuOl6ArH/zcKQ+0krCVrMpxw37OkguWYwbbRWxFRnOlw0O1QoqmVHAPVwXLvBN7ZgzBnJBvrbq5LvaJbw==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
 
   '@worldcoin/mini-apps-ui-kit-react@1.0.2':
     resolution: {integrity: sha512-sodGHG76bFCnKS7rlocDW0ILhPmQXCntJWB0FHaCKcqhiySB+8dCwWdwFO5Kl4zwJ3wbCVz4kidLP6YLECAwQA==}
@@ -2480,15 +2492,15 @@ packages:
       tailwindcss:
         optional: true
 
-  '@worldcoin/minikit-js@1.9.10':
-    resolution: {integrity: sha512-H+bTk/EIU8cu0j0NtBR9Ro3iuCOq/hMfp9L8y93647Ai9odxIvJM012muUGmC2MIsjAlWtYdr1JkKYd4MVyGrw==}
+  '@worldcoin/minikit-js@1.9.11':
+    resolution: {integrity: sha512-KuCERWM2cUEfwQCp/g6wetrLkGvouAGdGJ8f44YDPp4jUviX061O/tmeE3WtcI1DoGrfkicDhR1MAq4J99BurQ==}
     engines: {node: '>= 16'}
     peerDependencies:
       react: ^17 || ^18 || ^19
       viem: ^2.23.5
 
-  '@worldcoin/minikit-react@1.9.11':
-    resolution: {integrity: sha512-wXvelZQEIYN1/P3AImdZctlOAtag7D0T0nY4QDdkpzqS4L53+z7lqPJh2P/jwgARznG+qQj7h4JGyaFrU4+QWA==}
+  '@worldcoin/minikit-react@1.9.12':
+    resolution: {integrity: sha512-4i/v0mB3OUIQeOznGL72LnQB7wJKZiq8Rf9N3evFhP8JE31bSIoOaSU/rX9rYICyhyXPbZjoHtFdVSWw1p+LxA==}
     engines: {node: '>= 16'}
     peerDependencies:
       react: ^18 || ^19
@@ -4994,6 +5006,11 @@ packages:
 
   qrcode@1.5.3:
     resolution: {integrity: sha512-puyri6ApkEHYiVl4CFzo1tDkAZ+ATcnbJrJ6RiBM1Fhctdn/ix9MTE3hRph33omisEbC/2fcfemsseiKgBPKZg==}
+    engines: {node: '>=10.13.0'}
+    hasBin: true
+
+  qrcode@1.5.4:
+    resolution: {integrity: sha512-1ca71Zgiu6ORjHqFBDpnSMTR2ReToX4l1Au1VFLyVeBTFavzQnv5JxMFr3ukHVKpSrSA2MCk0lNJSykjUfz7Zg==}
     engines: {node: '>=10.13.0'}
     hasBin: true
 
@@ -9439,7 +9456,16 @@ snapshots:
       - typescript
       - zod
 
-  '@worldcoin/idkit-core@4.0.1-dev.8abccc4': {}
+  '@worldcoin/idkit-core@4.0.1': {}
+
+  '@worldcoin/idkit-core@4.0.1-dev.2039000': {}
+
+  '@worldcoin/idkit@4.0.0-dev.2039000(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+    dependencies:
+      '@worldcoin/idkit-core': 4.0.1
+      qrcode: 1.5.4
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
 
   '@worldcoin/mini-apps-ui-kit-react@1.0.2(@types/react-dom@19.1.2(@types/react@19.1.1))(@types/react@19.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@4.1.4)':
     dependencies:
@@ -9469,7 +9495,7 @@ snapshots:
       - '@types/react'
       - '@types/react-dom'
 
-  '@worldcoin/minikit-js@1.9.10(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)':
+  '@worldcoin/minikit-js@1.9.11(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)':
     dependencies:
       '@worldcoin/idkit-core': 2.0.2(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(zod@3.25.76)
       abitype: 1.0.8(typescript@5.5.4)(zod@3.25.76)
@@ -9481,9 +9507,9 @@ snapshots:
       - typescript
       - zod
 
-  '@worldcoin/minikit-react@1.9.11(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)':
+  '@worldcoin/minikit-react@1.9.12(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)':
     dependencies:
-      '@worldcoin/minikit-js': 1.9.10(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+      '@worldcoin/minikit-js': 1.9.11(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       abitype: 1.0.8(typescript@5.5.4)(zod@3.25.76)
       react: 19.1.0
       turbo: 2.6.1
@@ -9921,7 +9947,6 @@ snapshots:
       string-width: 4.2.3
       strip-ansi: 6.0.1
       wrap-ansi: 6.2.0
-    optional: true
 
   cliui@8.0.1:
     dependencies:
@@ -10083,8 +10108,7 @@ snapshots:
       ms: 2.1.3
     optional: true
 
-  decamelize@1.2.0:
-    optional: true
+  decamelize@1.2.0: {}
 
   decode-uri-component@0.2.2:
     optional: true
@@ -10140,8 +10164,7 @@ snapshots:
 
   diff@4.0.2: {}
 
-  dijkstrajs@1.0.3:
-    optional: true
+  dijkstrajs@1.0.3: {}
 
   dir-glob@3.0.1:
     dependencies:
@@ -12573,8 +12596,7 @@ snapshots:
     dependencies:
       find-up: 4.1.0
 
-  pngjs@5.0.0:
-    optional: true
+  pngjs@5.0.0: {}
 
   pony-cause@2.1.11:
     optional: true
@@ -12746,6 +12768,12 @@ snapshots:
       yargs: 15.4.1
     optional: true
 
+  qrcode@1.5.4:
+    dependencies:
+      dijkstrajs: 1.0.3
+      pngjs: 5.0.0
+      yargs: 15.4.1
+
   quansync@0.2.11: {}
 
   query-string@7.1.3:
@@ -12894,8 +12922,7 @@ snapshots:
 
   require-directory@2.1.1: {}
 
-  require-main-filename@2.0.0:
-    optional: true
+  require-main-filename@2.0.0: {}
 
   resolve-cwd@3.0.0:
     dependencies:
@@ -13012,8 +13039,7 @@ snapshots:
 
   semver@7.7.3: {}
 
-  set-blocking@2.0.0:
-    optional: true
+  set-blocking@2.0.0: {}
 
   set-function-length@1.2.2:
     dependencies:
@@ -13940,8 +13966,7 @@ snapshots:
       is-weakmap: 2.0.2
       is-weakset: 2.0.3
 
-  which-module@2.0.1:
-    optional: true
+  which-module@2.0.1: {}
 
   which-typed-array@1.1.15:
     dependencies:
@@ -13972,7 +13997,6 @@ snapshots:
       ansi-styles: 4.3.0
       string-width: 4.2.3
       strip-ansi: 6.0.1
-    optional: true
 
   wrap-ansi@7.0.0:
     dependencies:
@@ -14001,8 +14025,7 @@ snapshots:
   xmlhttprequest-ssl@2.1.2:
     optional: true
 
-  y18n@4.0.3:
-    optional: true
+  y18n@4.0.3: {}
 
   y18n@5.0.8: {}
 
@@ -14014,7 +14037,6 @@ snapshots:
     dependencies:
       camelcase: 5.3.1
       decamelize: 1.2.0
-    optional: true
 
   yargs-parser@21.1.1: {}
 
@@ -14031,7 +14053,6 @@ snapshots:
       which-module: 2.0.1
       y18n: 4.0.3
       yargs-parser: 18.1.3
-    optional: true
 
   yargs@17.7.2:
     dependencies:

@@ -1,6 +1,5 @@
 import {
   ChatErrorCodes,
-  ChatPayload,
   MiniAppChatPayload,
   MiniKit,
   ResponseEvent,
@@ -78,12 +77,12 @@ export const Chat = () => {
   }, []);
 
   const onSendChat = useCallback(() => {
-    const chatPayload: ChatPayload = {
+    const chatPayload = {
       message: message || '',
       ...(toAddress && { to: toAddress.split(',').map((addr) => addr.trim()) }),
     };
 
-    const payload = MiniKit.commands.chat(chatPayload);
+    const payload = MiniKit.chat(chatPayload);
 
     setSentChatPayload({
       sent: payload,

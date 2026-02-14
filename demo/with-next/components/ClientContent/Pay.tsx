@@ -107,9 +107,8 @@ export const Pay = () => {
         reference: new Date().toISOString(),
       };
 
-      const { commandPayload, finalPayload } =
-        await MiniKit.commandsAsync.pay(payPayload);
-      setSentPayPayload(commandPayload);
+      const finalPayload = await MiniKit.pay(payPayload);
+      setSentPayPayload(payPayload);
       await validateResponse(finalPayload);
     },
     [],

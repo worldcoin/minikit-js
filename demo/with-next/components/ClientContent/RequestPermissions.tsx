@@ -2,7 +2,7 @@ import {
   MiniKit,
   Permission,
   RequestPermissionErrorCodes,
-  RequestPermissionPayload,
+  RequestPermissionInput,
   ResponseEvent,
 } from '@worldcoin/minikit-js';
 import { useCallback, useEffect, useState } from 'react';
@@ -83,17 +83,14 @@ export const RequestPermission = () => {
   }, [tempInstallFix]);
 
   const onRequestPermission = useCallback(async (permission: Permission) => {
-    const requestPermissionPayload: RequestPermissionPayload = {
+    const requestPermissionPayload: RequestPermissionInput = {
       permission,
     };
 
-    const payload = MiniKit.commands.requestPermission(
-      requestPermissionPayload,
-    );
+    const payload = MiniKit.requestPermission(requestPermissionPayload);
     setSentRequestPermissionPayload({
       payload,
     });
-    console.log('payload', payload);
     setTempInstallFix((prev) => prev + 1);
   }, []);
 
