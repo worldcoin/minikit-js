@@ -1,3 +1,4 @@
+'use client';
 import { MiniKit, orbLegacy, type RpContext } from '@worldcoin/minikit-js';
 import { clsx } from 'clsx';
 import { useCallback, useState } from 'react';
