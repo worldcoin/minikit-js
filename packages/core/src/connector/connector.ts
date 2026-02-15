@@ -6,6 +6,7 @@
  * this connector just adapts the interface for wagmi.
  */
 
+import { setWagmiConfig } from '../commands/wagmi-fallback';
 import { MiniKit } from '../minikit';
 import {
   getWorldAppProvider,
@@ -54,6 +55,9 @@ export function worldApp(options: WorldAppConnectorOptions = {}) {
 function createConnectorFn(name: string) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (config: any) => {
+    // Auto-register wagmi config for MiniKit's fallback system
+    setWagmiConfig(config);
+
     const provider = getWorldAppProvider();
 
     return {
