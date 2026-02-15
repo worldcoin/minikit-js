@@ -53,7 +53,7 @@ export const verifyOnchain = async (payload: {
     console.log('NullifierHash:', nullifierHash);
     console.log('Proof:', proof);
 
-    const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
+    const result = await MiniKit.sendTransaction({
       transaction: [
         {
           address: TEST_VERIFY_CONTRACT_ADDRESS,
@@ -64,17 +64,10 @@ export const verifyOnchain = async (payload: {
       ],
     });
 
-    if (finalPayload.status === 'success') {
-      return {
-        success: true,
-        transactionHash: finalPayload.transaction_id,
-      };
-    } else {
-      return {
-        success: false,
-        error: `Transaction failed: ${finalPayload.error_code || 'Unknown error'} \n ${JSON.stringify(finalPayload.details)}`,
-      };
-    }
+    return {
+      success: true,
+      transactionHash: result.data.transactionId,
+    };
   } catch (error) {
     console.error('Error verifying on-chain:', error);
     return {
@@ -95,14 +88,14 @@ export const VerifyOnchainProof = () => {
   const handleOnchainVerify = async () => {
     let signal = MiniKit.user.walletAddress;
     if (!signal) {
-      const { finalPayload } = await MiniKit.commandsAsync.walletAuth({
+      const authResult = await MiniKit.walletAuth({
         nonce: 'i-trust-you',
       });
-      if (finalPayload.status === 'success') {
-        signal = finalPayload.address;
-      } else {
-        return { success: false, error: 'No wallet address' };
-      }
+      signal = authResult.data.address;
+    }
+    if (!signal) {
+      setOnchainVerifyResult({ success: false, error: 'No wallet address' });
+      return;
     }
     // Fetch RP signature for IDKit
     const rpRes = await fetch('/api/rp-signature', {
@@ -124,10 +117,20 @@ export const VerifyOnchainProof = () => {
       action: 'onchain-verify-test',
       rp_context: rpContext,
       allow_legacy_proofs: true,
-    }).preset(orbLegacy({ signal: signal }));
+    }).preset(orbLegacy({ signal }));
 
-    const idkitResult = await request.pollUntilCompletion();
-    const firstResponse = idkitResult.responses?.[0] as Record<string, any> | undefined;
+    const completion = await request.pollUntilCompletion();
+    if (!completion.success) {
+      setOnchainVerifyResult({
+        success: false,
+        error: `Verification failed: ${completion.error}`,
+        isLoading: false,
+      });
+      return;
+    }
+    const firstResponse = completion.result.responses?.[0] as
+      | Record<string, any>
+      | undefined;
 
     if (firstResponse?.proof) {
       const merkleRoot = firstResponse.merkle_root;
@@ -135,9 +138,8 @@ export const VerifyOnchainProof = () => {
       const proof = firstResponse.proof;
 
       try {
-        // Using a fixed signal address for simplicity
         const result = await verifyOnchain({
-          signal: signal,
+          signal,
           root: merkleRoot,
           nullifierHash: nullifierHash,
           proof: proof,

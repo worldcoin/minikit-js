@@ -29,11 +29,11 @@ importers:
         specifier: ^1.0.2
         version: 1.0.2(@types/react-dom@19.1.2(@types/react@19.1.1))(@types/react@19.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@4.1.4)
       '@worldcoin/minikit-js':
-        specifier: latest
-        version: 1.9.11(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        specifier: workspace:*
+        version: link:../../packages/core
       '@worldcoin/minikit-react':
-        specifier: latest
-        version: 1.9.12(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+        specifier: workspace:*
+        version: link:../../packages/react
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -57,7 +57,7 @@ importers:
         version: 3.2.0
       viem:
         specifier: 2.45.3
-        version: 2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76)
+        version: 2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@4.3.6)
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3
@@ -2466,10 +2466,6 @@ packages:
   '@walletconnect/window-metadata@1.0.1':
     resolution: {integrity: sha512-9koTqyGrM2cqFRW517BPY/iEtUDx2r1+Pwwu5m7sJ7ka79wi3EyqhqcICk/yDmv6jAS1rjKgTKXlEhanYjijcA==}
 
-  '@worldcoin/idkit-core@2.0.2':
-    resolution: {integrity: sha512-GqBNAI+OyG+YXoMOI9PJDlO+MeiUnclrdjaXDYYCjmXBQi+tx0rQjNJfxwS9H6jQSVPSYaa/crcgYYMJvwdS0A==}
-    engines: {node: '>=12.4'}
-
   '@worldcoin/idkit-core@4.0.1':
     resolution: {integrity: sha512-ykDuesfSsuERh4T0cShQlrnaBQiHS5qSJtEUiLiehoFln4nIbK93004l2EWjEDK989pbkC6hEy7yA6fPh6tMOQ==}
 
@@ -2491,20 +2487,6 @@ packages:
     peerDependenciesMeta:
       tailwindcss:
         optional: true
-
-  '@worldcoin/minikit-js@1.9.11':
-    resolution: {integrity: sha512-KuCERWM2cUEfwQCp/g6wetrLkGvouAGdGJ8f44YDPp4jUviX061O/tmeE3WtcI1DoGrfkicDhR1MAq4J99BurQ==}
-    engines: {node: '>= 16'}
-    peerDependencies:
-      react: ^17 || ^18 || ^19
-      viem: ^2.23.5
-
-  '@worldcoin/minikit-react@1.9.12':
-    resolution: {integrity: sha512-4i/v0mB3OUIQeOznGL72LnQB7wJKZiq8Rf9N3evFhP8JE31bSIoOaSU/rX9rYICyhyXPbZjoHtFdVSWw1p+LxA==}
-    engines: {node: '>= 16'}
-    peerDependencies:
-      react: ^18 || ^19
-      viem: ^2.23.5
 
   abitype@1.0.6:
     resolution: {integrity: sha512-MMSqYh4+C/aVqI2RQaWqbvI4Kxo5cQV40WQ4QFtDnNzCkqChm8MuENhElmynZlO0qUy/ObkEUaXtKqYnx1Kp3A==}
@@ -2768,9 +2750,6 @@ packages:
 
   brorand@1.1.0:
     resolution: {integrity: sha512-cKV8tMCEpQs4hK/ik71d6LrPOnpkpGBR0wzxqr68g2m/LB2GxVYQroAjMJZRVM1Y4BCjCKc3vAamxSzOY2RP+w==}
-
-  browser-or-node@3.0.0-pre.0:
-    resolution: {integrity: sha512-J6/RvtjajlHVJMBZ/Xk+5O9E8CKUHOZDz5e/eG8UBjWBSB/d/tgqFOua/xxqP+eGfgZlaJHELHnC3mdsVTTMIQ==}
 
   browserslist@4.24.4:
     resolution: {integrity: sha512-KDi1Ny1gSePi1vm0q4oxSF8b4DR44GF4BbmS2YdhPLOEqd8pDviZOGH/GsmRwoWJ2+5Lr085X7naowMwKHDG1A==}
@@ -4659,14 +4638,6 @@ packages:
     resolution: {integrity: sha512-qFOyK5PjiWZd+QQIh+1jhdb9LpxTF0qs7Pm8o5QHYZ0M3vKqSqzsZaEB6oWlxZ+q2sJBMI/Ktgd2N5ZwQoRHfg==}
     engines: {node: '>= 0.4'}
 
-  ox@0.1.8:
-    resolution: {integrity: sha512-GJl6uKXxhPq/XgyvAnIokGuGU/pt9CU8reRJjzi4a02HOpLc2CEXXD4bRCITFFAzdRqHj3DQ6GDS7PlCytPM/A==}
-    peerDependencies:
-      typescript: '>=5.4.0'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-
   ox@0.12.1:
     resolution: {integrity: sha512-uU0llpthaaw4UJoXlseCyBHmQ3bLrQmz9rRLIAUHqv46uHuae9SE+ukYBRIPVCnlEnHKuWjDUcDFHWx9gbGNoA==}
     peerDependencies:
@@ -5870,11 +5841,6 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
 
-  use-sync-external-store@1.2.2:
-    resolution: {integrity: sha512-PElTlVMwpblvbNqQ82d2n6RjStvdSoNe9FG28kNfz3WiXilJm4DdNkEzRhCZuIDwY8U08WVihhGR5iRqAwfDiw==}
-    peerDependencies:
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0
-
   use-sync-external-store@1.4.0:
     resolution: {integrity: sha512-9WXSPC5fMv61vaupRkCKCxsPxBocVnwakBEkMIHHpkTTg6icbJtg6jzgtLDm4bl3cSHAca52rYWih0k4K3PfHw==}
     peerDependencies:
@@ -6096,21 +6062,6 @@ packages:
 
   zod@4.3.6:
     resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
-
-  zustand@4.5.5:
-    resolution: {integrity: sha512-+0PALYNJNgK6hldkgDq2vLrw5f6g/jCInz52n9RTpropGgeAf/ioFUCdtsjCqu4gNhW9D01rUQBROoRjdzyn2Q==}
-    engines: {node: '>=12.7.0'}
-    peerDependencies:
-      '@types/react': '>=16.8'
-      immer: '>=9.0.6'
-      react: '>=16.8'
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-      immer:
-        optional: true
-      react:
-        optional: true
 
   zustand@5.0.0:
     resolution: {integrity: sha512-LE+VcmbartOPM+auOjCCLQOsQ05zUTp8RkgwRzefUk+2jISdMMFnxvyTjA4YNWr5ZGXYbVsEMZosttuxUBkojQ==}
@@ -9443,19 +9394,6 @@ snapshots:
       tslib: 1.14.1
     optional: true
 
-  '@worldcoin/idkit-core@2.0.2(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(zod@3.25.76)':
-    dependencies:
-      browser-or-node: 3.0.0-pre.0
-      buffer: 6.0.3
-      ox: 0.1.8(typescript@5.5.4)(zod@3.25.76)
-      zustand: 4.5.5(@types/react@19.1.1)(react@19.1.0)
-    transitivePeerDependencies:
-      - '@types/react'
-      - immer
-      - react
-      - typescript
-      - zod
-
   '@worldcoin/idkit-core@4.0.1': {}
 
   '@worldcoin/idkit-core@4.0.1-dev.2039000': {}
@@ -9494,31 +9432,6 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
       - '@types/react-dom'
-
-  '@worldcoin/minikit-js@1.9.11(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)':
-    dependencies:
-      '@worldcoin/idkit-core': 2.0.2(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(zod@3.25.76)
-      abitype: 1.0.8(typescript@5.5.4)(zod@3.25.76)
-      react: 19.1.0
-      viem: 2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76)
-    transitivePeerDependencies:
-      - '@types/react'
-      - immer
-      - typescript
-      - zod
-
-  '@worldcoin/minikit-react@1.9.12(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)':
-    dependencies:
-      '@worldcoin/minikit-js': 1.9.11(@types/react@19.1.1)(react@19.1.0)(typescript@5.5.4)(viem@2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
-      abitype: 1.0.8(typescript@5.5.4)(zod@3.25.76)
-      react: 19.1.0
-      turbo: 2.6.1
-      viem: 2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76)
-    transitivePeerDependencies:
-      - '@types/react'
-      - immer
-      - typescript
-      - zod
 
   abitype@1.0.6(typescript@5.5.4)(zod@3.25.76):
     optionalDependencies:
@@ -9793,7 +9706,8 @@ snapshots:
   base-x@5.0.1:
     optional: true
 
-  base64-js@1.5.1: {}
+  base64-js@1.5.1:
+    optional: true
 
   bech32@1.1.4: {}
 
@@ -9828,8 +9742,6 @@ snapshots:
 
   brorand@1.1.0: {}
 
-  browser-or-node@3.0.0-pre.0: {}
-
   browserslist@4.24.4:
     dependencies:
       caniuse-lite: 1.0.30001690
@@ -9856,6 +9768,7 @@ snapshots:
     dependencies:
       base64-js: 1.5.1
       ieee754: 1.2.1
+    optional: true
 
   bufferutil@4.1.0:
     dependencies:
@@ -11336,7 +11249,8 @@ snapshots:
   idb-keyval@6.2.2:
     optional: true
 
-  ieee754@1.2.1: {}
+  ieee754@1.2.1:
+    optional: true
 
   ignore@5.3.2: {}
 
@@ -12389,20 +12303,6 @@ snapshots:
       get-intrinsic: 1.3.0
       object-keys: 1.1.1
       safe-push-apply: 1.0.0
-
-  ox@0.1.8(typescript@5.5.4)(zod@3.25.76):
-    dependencies:
-      '@adraffy/ens-normalize': 1.11.0
-      '@noble/curves': 1.9.7
-      '@noble/hashes': 1.8.0
-      '@scure/bip32': 1.7.0
-      '@scure/bip39': 1.6.0
-      abitype: 1.2.3(typescript@5.5.4)(zod@3.25.76)
-      eventemitter3: 5.0.1
-    optionalDependencies:
-      typescript: 5.5.4
-    transitivePeerDependencies:
-      - zod
 
   ox@0.12.1(typescript@5.5.4)(zod@3.22.4):
     dependencies:
@@ -13737,10 +13637,6 @@ snapshots:
       react: 19.1.0
     optional: true
 
-  use-sync-external-store@1.2.2(react@19.1.0):
-    dependencies:
-      react: 19.1.0
-
   use-sync-external-store@1.4.0(react@19.1.0):
     dependencies:
       react: 19.1.0
@@ -14085,13 +13981,6 @@ snapshots:
 
   zod@4.3.6:
     optional: true
-
-  zustand@4.5.5(@types/react@19.1.1)(react@19.1.0):
-    dependencies:
-      use-sync-external-store: 1.2.2(react@19.1.0)
-    optionalDependencies:
-      '@types/react': 19.1.1
-      react: 19.1.0
 
   zustand@5.0.0(@types/react@19.1.1)(react@19.1.0)(use-sync-external-store@1.4.0(react@19.1.0)):
     optionalDependencies:

@@ -50,6 +50,16 @@
         "default": "./build/minikit-provider.cjs"
       }
     },
+    "./minikit-provider": {
+      "import": {
+        "types": "./build/minikit-provider.d.ts",
+        "default": "./build/minikit-provider.js"
+      },
+      "require": {
+        "types": "./build/minikit-provider.d.cts",
+        "default": "./build/minikit-provider.cjs"
+      }
+    },
     "./wagmi": {
       "import": {
         "types": "./build/wagmi.d.ts",
@@ -71,7 +81,7 @@
     "miniapps"
   ],
   "license": "MIT",
-  "main": "src/index.ts",
+  "main": "./build/index.js",
   "name": "@worldcoin/minikit-js",
   "peerDependencies": {
     "react": "^17 || ^18 || ^19",
@@ -97,7 +107,7 @@
     "type-check": "tsc --noEmit"
   },
   "type": "module",
-  "types": "src/index.ts",
+  "types": "./build/index.d.ts",
   "typesVersions": {
     "*": {
       "*": [

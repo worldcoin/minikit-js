@@ -20,11 +20,9 @@ export const ViewPermissions = () => {
         try {
           // You can also fetch this by grabbing from user
           // MiniKit.user.permissions
-          const permissions = await MiniKit.commandsAsync.getPermissions();
-          if (permissions?.finalPayload.status === 'success') {
-            setPermissions(permissions?.finalPayload.permissions || {});
-            console.log('permissions', permissions);
-          }
+          const result = await MiniKit.getPermissions();
+          setPermissions(result.permissions || {});
+          console.log('permissions', result);
         } catch (error) {
           console.error('Failed to fetch permissions:', error);
         }

@@ -1,4 +1,4 @@
-import { IDKit, signRequest } from "@worldcoin/idkit-core";
+import { IDKit, signRequest } from "@worldcoin/minikit-js";
 import { NextResponse } from "next/server";
 
 // Initialize for Node.js (call once at startup)

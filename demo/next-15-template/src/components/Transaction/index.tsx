@@ -74,7 +74,7 @@ export const Transaction = () => {
     setButtonState('pending');
 
     try {
-      const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
+      const result = await MiniKit.sendTransaction({
         transaction: [
           {
             address: myContractToken,
@@ -85,19 +85,11 @@ export const Transaction = () => {
         ],
       });
 
-      if (finalPayload.status === 'success') {
-        console.log(
-          'Transaction submitted, waiting for confirmation:',
-          finalPayload.transaction_id,
-        );
-        setTransactionId(finalPayload.transaction_id);
-      } else {
-        console.error('Transaction submission failed:', finalPayload);
-        setButtonState('failed');
-        setTimeout(() => {
-          setButtonState(undefined);
-        }, 3000);
-      }
+      console.log(
+        'Transaction submitted, waiting for confirmation:',
+        result.data.transactionId,
+      );
+      setTransactionId(result.data.transactionId ?? result.data.hashes[0]);
     } catch (err) {
       console.error('Error sending transaction:', err);
       setButtonState('failed');
@@ -131,7 +123,7 @@ export const Transaction = () => {
     };
 
     try {
-      const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
+      const result = await MiniKit.sendTransaction({
         transaction: [
           {
             address: myContractToken,
@@ -159,16 +151,11 @@ export const Transaction = () => {
         ],
       });
 
-      if (finalPayload.status === 'success') {
-        console.log(
-          'Transaction submitted, waiting for confirmation:',
-          finalPayload.transaction_id,
-        );
-        setTransactionId(finalPayload.transaction_id);
-      } else {
-        console.error('Transaction submission failed:', finalPayload);
-        setButtonState('failed');
-      }
+      console.log(
+        'Transaction submitted, waiting for confirmation:',
+        result.data.transactionId,
+      );
+      setTransactionId(result.data.transactionId ?? result.data.hashes[0]);
     } catch (err) {
       console.error('Error sending transaction:', err);
       setButtonState('failed');

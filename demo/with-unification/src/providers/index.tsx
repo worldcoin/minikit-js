@@ -1,6 +1,7 @@
 'use client';
 
-import { MiniKit, MiniKitProvider } from '@worldcoin/minikit-js';
+import { MiniKit } from '@worldcoin/minikit-js';
+import { MiniKitProvider } from '@worldcoin/minikit-js/provider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider } from 'wagmi';
 import { createContext, type ReactNode, useContext, useEffect, useState } from 'react';
