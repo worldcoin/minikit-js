@@ -1,6 +1,8 @@
 import { IDKit, signRequest } from '@worldcoin/idkit-core';
 import { NextResponse } from 'next/server';
 
+export const runtime = 'nodejs';
+
 const SIGNING_KEY = process.env.RP_SIGNING_KEY; // 32-byte hex private key
 const RP_ID = process.env.RP_ID ?? 'rp_765bb8d478f75a03';
 const initPromise = IDKit.initServer();

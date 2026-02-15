@@ -3,9 +3,20 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   allowedDevOrigins: ['*'],
   reactStrictMode: false,
-  // Compile idkit-core as app source so webpack processes its
-  // new URL('...wasm', import.meta.url) patterns and emits the WASM file.
+  // Compile idkit-core as app source so webpack can bundle server-side WASM usage.
   transpilePackages: ['@worldcoin/idkit-core'],
+  experimental: {
+    outputFileTracingIncludes: {
+      '/api/rp-signature': [
+        './node_modules/@worldcoin/idkit-core/dist/idkit_wasm_bg.wasm',
+        './node_modules/.pnpm/@worldcoin+idkit-core@*/node_modules/@worldcoin/idkit-core/dist/idkit_wasm_bg.wasm',
+      ],
+      '/api/rp-signature/route': [
+        './node_modules/@worldcoin/idkit-core/dist/idkit_wasm_bg.wasm',
+        './node_modules/.pnpm/@worldcoin+idkit-core@*/node_modules/@worldcoin/idkit-core/dist/idkit_wasm_bg.wasm',
+      ],
+    },
+  },
   webpack: (config) => {
     // Wagmi v3 bundles MetaMask SDK and other connectors that pull in
     // optional native/server dependencies. These are not used at runtime
