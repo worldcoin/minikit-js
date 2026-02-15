@@ -1,5 +1,14 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "AUTH_SECRET",
+    "AUTH_URL",
+    "WORLDCOIN_API_KEY",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "RP_SIGNING_KEY",
+    "RP_ID"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
