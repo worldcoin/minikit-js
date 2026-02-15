@@ -1,6 +1,7 @@
 'use client';
 
-import { MiniKit, orbLegacy, type RpContext } from '@worldcoin/minikit-js';
+import { IDKit, orbLegacy, type RpContext } from '@worldcoin/idkit';
+import { MiniKit } from '@worldcoin/minikit-js';
 import { useState } from 'react';
 import { decodeAbiParameters, parseAbiParameters } from 'viem';
 
@@ -112,7 +113,7 @@ export const VerifyOnchainProof = () => {
       signature: rpSig.sig,
     };
 
-    const request = await MiniKit.request({
+    const request = await IDKit.request({
       app_id: process.env.NEXT_PUBLIC_PROD_VERIFY_APP_ID as `app_${string}`,
       action: 'onchain-verify-test',
       rp_context: rpContext,

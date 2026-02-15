@@ -1,6 +1,5 @@
 import {
   CommandContext,
-  IDKit,
   MiniAppWalletAuthPayload,
   ResponseEvent,
   chat,
@@ -18,37 +17,20 @@ import {
   validateCommands,
   walletAuth,
 } from './commands';
-import type {
-  ConstraintNode,
-  IDKitRequest,
-  IDKitRequestConfig,
-  IDKitSessionConfig,
-  Preset,
-} from './commands';
-import {
-  MiniAppLaunchLocation,
-  MiniKitInstallErrorCodes,
-  MiniKitInstallErrorMessage,
-} from './types';
+import { EventManager } from './events';
+import { setupMicrophone } from './helpers/microphone';
+import { getUserProfile } from './helpers/usernames';
 import type {
   DeviceProperties,
   MiniKitInstallReturnType,
   User,
   UserNameService,
 } from './types';
-import { EventManager } from './events';
-import { getUserProfile } from './helpers/usernames';
-import { setupMicrophone } from './helpers/microphone';
-
-/**
- * Builder interface for IDKit verification requests.
- * Local definition avoids DTS emit issues with IDKitBuilder's private fields.
- * Note: `constraints()` is optional — available when IDKit enables it (v4.0+).
- */
-interface IDKitVerifyBuilder {
-  preset(preset: Preset): Promise<IDKitRequest>;
-  constraints?(constraints: ConstraintNode): Promise<IDKitRequest>;
-}
+import {
+  MiniAppLaunchLocation,
+  MiniKitInstallErrorCodes,
+  MiniKitInstallErrorMessage,
+} from './types';
 
 // Re-export for backwards compatibility
 export type { MiniKitInstallReturnType } from './types';
@@ -88,59 +70,6 @@ export class MiniKit {
   // ============================================================================
   // Unified API (auto-detects environment)
   // ============================================================================
-
-  /**
-   * Create a World ID verification request (delegates to IDKit)
-   *
-   * Works in both World App (native postMessage) and web (QR + polling).
-   * Transport detection happens automatically inside the builder.
-   *
-   * @example
-   * ```typescript
-   * import { MiniKit, orbLegacy, CredentialRequest, any } from '@worldcoin/minikit-js';
-   *
-   * // With preset (legacy support)
-   * const request = await MiniKit.request({
-   *   app_id: 'app_xxx',
-   *   action: 'login',
-   *   rp_context: { ... },
-   *   allow_legacy_proofs: true,
-   * }).preset(orbLegacy({ signal: 'user-123' }));
-   *
-   * // With constraints (v4 only)
-   * const request = await MiniKit.request({
-   *   app_id: 'app_xxx',
-   *   action: 'login',
-   *   rp_context: { ... },
-   *   allow_legacy_proofs: false,
-   * }).constraints(any(CredentialRequest('orb'), CredentialRequest('device')));
-   *
-   * // In World App: connectorURI is empty, result via postMessage
-   * // On web: connectorURI is QR URL
-   * console.log(request.connectorURI);
-   * const result = await request.pollUntilCompletion();
-   * ```
-   */
-  static request(config: IDKitRequestConfig): IDKitVerifyBuilder {
-    return IDKit.request(config);
-  }
-
-  /**
-   * Create a new session (delegates to IDKit)
-   */
-  static createSession(config: IDKitSessionConfig): IDKitVerifyBuilder {
-    return IDKit.createSession(config);
-  }
-
-  /**
-   * Prove an existing session (delegates to IDKit)
-   */
-  static proveSession(
-    sessionId: string,
-    config: IDKitSessionConfig,
-  ): IDKitVerifyBuilder {
-    return IDKit.proveSession(sessionId, config);
-  }
 
   /**
    * Authenticate user via wallet signature (SIWE)
@@ -408,7 +337,7 @@ export class MiniKit {
   public static isInstalled(debug?: boolean): boolean {
     const isInstalled = this._isReady && Boolean(window.MiniKit);
     if (!isInstalled) {
-      console.error(
+      console.warn(
         "MiniKit is not installed. Make sure you're running the application inside of World App",
       );
     }
@@ -537,7 +466,6 @@ export class MiniKit {
    *
    * Migration guide:
    * - `MiniKit.commands.pay(payload)` → `await MiniKit.pay(options)`
-   * - `MiniKit.commands.verify(payload)` → `await MiniKit.request(config).preset(...)`
    * - `MiniKit.commands.walletAuth(payload)` → `await MiniKit.walletAuth(options)`
    * - `MiniKit.commands.sendTransaction(payload)` → `await MiniKit.sendTransaction(options)`
    * - `MiniKit.commands.signMessage(payload)` → `await MiniKit.signMessage(input)`

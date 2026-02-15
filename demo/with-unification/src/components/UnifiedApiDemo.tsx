@@ -1,12 +1,12 @@
 'use client';
 
-import { MiniKit } from '@worldcoin/minikit-js';
 import {
   IDKitRequestWidget,
   orbLegacy,
   type IDKitResult,
   type RpContext,
 } from '@worldcoin/idkit';
+import { MiniKit } from '@worldcoin/minikit-js';
 import { useState } from 'react';
 import { Card } from './Card';
 import { ResultDisplay } from './ResultDisplay';

@@ -1,10 +1,9 @@
-import { IDKit, signRequest } from "@worldcoin/minikit-js";
+import { IDKit, signRequest } from "@worldcoin/idkit";
 import { NextResponse } from "next/server";
 
-// Initialize for Node.js (call once at startup)
-const initPromise = IDKit.initServer();
-
 const SIGNING_KEY = process.env.RP_SIGNING_KEY; // 32-byte hex private key
+const RP_ID = process.env.NEXT_PUBLIC_RP_ID ?? "rp_765bb8d478f75a03";
+const initPromise = IDKit.initServer();
 
 export async function POST(req: Request) {
   await initPromise;
@@ -20,6 +19,7 @@ export async function POST(req: Request) {
   const sig = signRequest(action, SIGNING_KEY);
 
   return NextResponse.json({
+    rp_id: RP_ID,
     sig: sig.sig,
     nonce: sig.nonce,
     created_at: Number(sig.createdAt),

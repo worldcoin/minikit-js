@@ -13,6 +13,8 @@
     "@safe-global/protocol-kit": "^6.1.2",
     "@uniswap/permit2-sdk": "^1.4.0",
     "@wagmi/core": "^3.3.3",
+    "@worldcoin/idkit": "4.0.0-dev.2039000",
+    "@worldcoin/idkit-core": "4.0.1-dev.2039000",
     "@worldcoin/minikit-js": "workspace:*",
     "@worldcoin/minikit-react": "workspace:*",
     "clsx": "^2.1.1",
@@ -27,7 +29,7 @@
   },
   "devDependencies": {
     "@types/node": "^20",
-    "@types/react": "^19.0.1",
+    "@types/react": "^19.1.1",
     "@types/react-dom": "^19.0.1",
     "eslint": "^8",
     "eslint-config-next": "15.2.3",

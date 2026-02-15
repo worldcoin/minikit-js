@@ -12,5 +12,4 @@ export * from './share';
 export * from './share-contacts';
 export * from './sign-message';
 export * from './sign-typed-data';
-export * from './verify';
 export * from './wallet-auth';

@@ -10,6 +10,23 @@ or use the CDN:
 
 For comprehensive setup instructions and usage examples, visit our [developer documentation](https://docs.world.org/mini-apps).
 
+## Scope
+
+`@worldcoin/minikit-js` is the mini-app command SDK:
+
+- `MiniKit.walletAuth()`
+- `MiniKit.sendTransaction()`
+- `MiniKit.pay()`
+- `MiniKit.shareContacts()`
+- `MiniKit.signMessage()`
+- `MiniKit.signTypedData()`
+- and related mini-app commands
+
+World ID verification belongs to IDKit:
+
+- Use `@worldcoin/idkit` for verification requests and widget UI
+- Use `@worldcoin/idkit-core` for backend signing helpers such as `signRequest`
+
 ## 🛠 ️Developing Locally
 
 To run the example mini app locally:

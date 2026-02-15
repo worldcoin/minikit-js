@@ -1,18 +1,35 @@
 'use client';
-import { MiniKit, orbLegacy, type RpContext } from '@worldcoin/minikit-js';
+import {
+  IDKit,
+  IDKitRequestWidget,
+  orbLegacy,
+  type IDKitResult,
+  type RpContext,
+} from '@worldcoin/idkit';
 import { clsx } from 'clsx';
 import { useCallback, useState } from 'react';
 import { verifyProof } from './verify-cloud-proof';
 import { VerifyOnchainProof } from './verify-onchain';
-
 export const VerifyAction = () => {
   const isProduction = process.env.NEXT_PUBLIC_ENVIRONMENT === 'production';
 
-  const [verifyResult, setVerifyResult] = useState<Record<string, any> | undefined>();
-  const [sentVerifyPayload, setSentVerifyPayload] = useState<Record<string, any> | null>(null);
-  const [devPortalVerifyResponse, setDevPortalVerifyResponse] = useState<Record<string, any> | null>(null);
+  const [verifyResult, setVerifyResult] = useState<
+    Record<string, any> | undefined
+  >();
+  const [sentVerifyPayload, setSentVerifyPayload] = useState<Record<
+    string,
+    any
+  > | null>(null);
+  const [devPortalVerifyResponse, setDevPortalVerifyResponse] = useState<Record<
+    string,
+    any
+  > | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [lastUsedAppId, setLastUsedAppId] = useState<`app_${string}` | null>(null);
+  const [lastUsedAppId, setLastUsedAppId] = useState<`app_${string}` | null>(
+    null,
+  );
+  const [widgetOpen, setWidgetOpen] = useState(false);
+  const [rpContext, setRpContext] = useState<RpContext | null>(null);
 
   const verifyAction = useCallback(
     async (params: {
@@ -62,7 +79,7 @@ export const VerifyAction = () => {
         setSentVerifyPayload(config);
 
         // Use IDKit request API
-        const request = await MiniKit.request(config).preset(
+        const request = await IDKit.request(config).preset(
           orbLegacy({ signal: signal ?? '' }),
         );
 
@@ -72,7 +89,9 @@ export const VerifyAction = () => {
         setStatusMessage('Verification complete');
 
         // Verify with dev portal
-        const responses = completion.success ? (completion.result as any)?.responses : undefined;
+        const responses = completion.success
+          ? (completion.result as any)?.responses
+          : undefined;
         if (responses && responses.length > 0) {
           const firstResponse = responses[0] as Record<string, any>;
           if (firstResponse.proof) {
@@ -115,10 +134,59 @@ export const VerifyAction = () => {
     });
   }, [verifyAction]);
 
+  const onStagingIDKitVerifyClick = useCallback(async () => {
+    setVerifyResult(undefined);
+    setStatusMessage(null);
+    setDevPortalVerifyResponse(null);
+
+    const res = await fetch('/api/rp-signature', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION as string,
+      }),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      setStatusMessage(`RP signature request failed: ${text}`);
+      return;
+    }
+
+    const rpSig = await res.json();
+    const rpContext: RpContext = {
+      rp_id: rpSig.rp_id,
+      nonce: rpSig.nonce,
+      created_at: rpSig.created_at,
+      expires_at: rpSig.expires_at,
+      signature: rpSig.sig,
+    };
+    setRpContext(rpContext);
+    setWidgetOpen(true);
+  }, []);
+
   return (
     <div className="grid gap-y-4">
       <h2 className="font-bold text-2xl">Verify (IDKit)</h2>
-
+      {rpContext && (
+        <IDKitRequestWidget
+          open={widgetOpen}
+          onOpenChange={setWidgetOpen}
+          app_id={
+            process.env.NEXT_PUBLIC_STAGING_VERIFY_APP_ID as `app_${string}`
+          }
+          action={process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION as string}
+          rp_context={rpContext}
+          allow_legacy_proofs={true}
+          preset={orbLegacy({ signal: 'demo-signal' })}
+          onSuccess={(result: IDKitResult) => {
+            setVerifyResult({ via: 'idkit', data: result });
+          }}
+          onError={(errorCode) => {
+            setVerifyResult({ error: `Verification failed: ${errorCode}` });
+          }}
+        />
+      )}
       <p className="border p-1 border-gray-400">
         <span className="font-bold block">App ID:</span>
         <span className="text-[12px] break-all">{lastUsedAppId ?? ''}</span>
@@ -135,7 +203,19 @@ export const VerifyAction = () => {
               </pre>
             </div>
           </div>
-
+          <div className="grid gap-y-2">
+            <div className="grid grid-cols-2 gap-x-2">
+              <button
+                className={clsx(
+                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
+                  isProduction ? 'hidden' : '',
+                )}
+                onClick={onStagingIDKitVerifyClick}
+              >
+                Send IDKit Staging Verify
+              </button>
+            </div>
+          </div>
           <div className="grid gap-y-2">
             <div className="grid grid-cols-2 gap-x-2">
               <button
@@ -168,8 +248,7 @@ export const VerifyAction = () => {
 
           <div className="bg-gray-300 min-h-[100px] p-2">
             <pre className="break-all whitespace-break-spaces">
-              {JSON.stringify(verifyResult, null, 2) ??
-                JSON.stringify(null)}
+              {JSON.stringify(verifyResult, null, 2) ?? JSON.stringify(null)}
             </pre>
           </div>
 

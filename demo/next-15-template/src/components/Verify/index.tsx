@@ -1,6 +1,6 @@
 'use client';
 import { Button, LiveFeedback } from '@worldcoin/mini-apps-ui-kit-react';
-import { MiniKit, orbLegacy, type RpContext } from '@worldcoin/minikit-js';
+import { IDKit, orbLegacy, type RpContext } from '@worldcoin/idkit';
 import { useState } from 'react';
 
 /**
@@ -38,7 +38,7 @@ export const Verify = () => {
       };
 
       // Use IDKit request API
-      const request = await MiniKit.request({
+      const request = await IDKit.request({
         app_id: process.env.NEXT_PUBLIC_APP_ID as `app_${string}`,
         action: 'test-action',
         rp_context: rpContext,
