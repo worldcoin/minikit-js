@@ -16,7 +16,7 @@ export async function POST(req: Request) {
   }
   if (!RP_ID) {
     return NextResponse.json(
-      { error: 'RP_ID (or NEXT_PUBLIC_RP_ID) not configured' },
+      { error: 'RP_ID (or NEXT_PUBLIC_RP_ID) is not configured' },
       { status: 500 },
     );
   }
