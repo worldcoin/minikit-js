@@ -14,6 +14,7 @@
   "dependencies": {
     "@tanstack/react-query": "^5.62.8",
     "@worldcoin/idkit": "4.0.0-dev.2039000",
+    "@worldcoin/idkit-core": "4.0.1-dev.2039000",
     "@worldcoin/minikit-js": "workspace:*",
     "next": "^15.2.8",
     "react": "^19.0.3",

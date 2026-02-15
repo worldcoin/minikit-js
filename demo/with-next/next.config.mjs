@@ -6,17 +6,12 @@ const nextConfig = {
   // Ensure IDKit core's WASM file is bundled for server routes that call
   // IDKit.initServer()/signRequest.
   transpilePackages: ['@worldcoin/idkit-core'],
-  experimental: {
-    outputFileTracingIncludes: {
-      '/api/rp-signature': [
-        './node_modules/@worldcoin/idkit-core/dist/idkit_wasm_bg.wasm',
-        './node_modules/.pnpm/@worldcoin+idkit-core@*/node_modules/@worldcoin/idkit-core/dist/idkit_wasm_bg.wasm',
-      ],
-      '/api/rp-signature/route': [
-        './node_modules/@worldcoin/idkit-core/dist/idkit_wasm_bg.wasm',
-        './node_modules/.pnpm/@worldcoin+idkit-core@*/node_modules/@worldcoin/idkit-core/dist/idkit_wasm_bg.wasm',
-      ],
-    },
+  // NOTE: outputFileTracingIncludes is a top-level Next.js config key.
+  outputFileTracingIncludes: {
+    '/api/**': [
+      './node_modules/@worldcoin/idkit-core/dist/idkit_wasm_bg.wasm',
+      './node_modules/.pnpm/@worldcoin+idkit-core@*/node_modules/@worldcoin/idkit-core/dist/idkit_wasm_bg.wasm',
+    ],
   },
 };
 
