@@ -7,6 +7,7 @@ import {
   useEffect,
   useState,
 } from 'react';
+import { useConfig } from 'wagmi';
 import { setWagmiConfig } from './commands/wagmi-fallback';
 import { MiniKit } from './minikit';
 
@@ -22,17 +23,22 @@ const MiniKitContext = createContext<MiniKitContextValue | undefined>(
   undefined,
 );
 
+function useWagmiConfigSafe() {
+  try {
+    return useConfig();
+  } catch {
+    return undefined;
+  }
+}
+
 export const MiniKitProvider = ({
   children,
   props,
-  wagmiConfig,
 }: {
   children: ReactNode;
   props?: MiniKitProps;
-  /** Pass your Wagmi config to enable web fallback via Wagmi. */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  wagmiConfig?: any;
 }) => {
+  const wagmiConfig = useWagmiConfigSafe();
   const [isInstalled, setIsInstalled] = useState<boolean | undefined>(
     undefined,
   );

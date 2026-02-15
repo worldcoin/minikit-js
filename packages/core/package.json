@@ -61,12 +61,12 @@
     },
     "./wagmi": {
       "import": {
-        "types": "./build/wagmi.d.ts",
-        "default": "./build/wagmi.js"
+        "types": "./build/connector/index.d.ts",
+        "default": "./build/connector/index.js"
       },
       "require": {
-        "types": "./build/wagmi.d.cts",
-        "default": "./build/wagmi.cjs"
+        "types": "./build/connector/index.d.cts",
+        "default": "./build/connector/index.cjs"
       }
     }
   },

@@ -81,12 +81,14 @@ export type ContractFunctionArgs<
 // Send Transaction Types
 // ============================================================================
 
+/** @deprecated Use {@link SendTransactionOptions} instead */
 export type SendTransactionInput = {
   transaction: Transaction[];
   permit2?: Permit2[];
   formatPayload?: boolean;
 };
 
+/** @deprecated Use {@link SendTransactionOptions} instead */
 export type SendTransactionPayload = SendTransactionInput;
 
 export enum SendTransactionErrorCodes {
@@ -156,7 +158,7 @@ export type MiniAppSendTransactionPayload =
   | MiniAppSendTransactionSuccessPayload
   | MiniAppSendTransactionErrorPayload;
 
-export interface UnifiedSendTransactionOptions
+export interface SendTransactionOptions
   extends FallbackConfig<SendTransactionResult> {
   /** Transactions to execute */
   transaction: Transaction[];

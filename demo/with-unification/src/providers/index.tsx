@@ -32,7 +32,7 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <WagmiProvider config={wagmiConfig}>
-        <MiniKitProvider props={{ appId: process.env.NEXT_PUBLIC_APP_ID ?? '' }} wagmiConfig={wagmiConfig}>
+        <MiniKitProvider props={{ appId: process.env.NEXT_PUBLIC_APP_ID ?? '' }}>
           <EnvironmentContext.Provider value={environment}>
             {children}
           </EnvironmentContext.Provider>

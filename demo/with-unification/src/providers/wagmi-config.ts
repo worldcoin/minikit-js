@@ -1,9 +1,9 @@
 'use client';
 
-import { http, createConfig } from 'wagmi';
-import { worldchain } from 'viem/chains';
-import { injected, walletConnect } from 'wagmi/connectors';
 import { worldApp } from '@worldcoin/minikit-js/wagmi';
+import { createConfig, http } from 'wagmi';
+import { worldchain } from 'wagmi/chains';
+import { injected, walletConnect } from 'wagmi/connectors';
 
 /**
  * Wagmi config with World App connector + web fallbacks.

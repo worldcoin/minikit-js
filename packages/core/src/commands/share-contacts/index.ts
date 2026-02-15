@@ -14,7 +14,7 @@ export * from './types';
 import type {
   ShareContactsInput,
   ShareContactsPayload,
-  UnifiedShareContactsOptions,
+  ShareContactsOptions,
   ShareContactsResult,
   MiniAppShareContactsPayload,
 } from './types';
@@ -41,7 +41,7 @@ import { ShareContactsError } from './types';
  * ```
  */
 export async function shareContacts(
-  options: UnifiedShareContactsOptions = {},
+  options: ShareContactsOptions = {},
   ctx?: CommandContext,
 ): Promise<CommandResult<ShareContactsResult>> {
   return executeWithFallback({
@@ -61,7 +61,7 @@ export const getContacts = shareContacts;
 // ============================================================================
 
 async function nativeShareContacts(
-  options: UnifiedShareContactsOptions,
+  options: ShareContactsOptions,
   ctx?: CommandContext,
 ): Promise<ShareContactsResult> {
   if (!ctx) {

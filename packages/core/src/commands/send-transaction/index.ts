@@ -15,7 +15,7 @@ import { EventManager } from '../../events';
 export * from './types';
 import type {
   SendTransactionInput,
-  UnifiedSendTransactionOptions,
+  SendTransactionOptions,
   SendTransactionResult,
   MiniAppSendTransactionPayload,
   Transaction,
@@ -45,7 +45,7 @@ import { SendTransactionError } from './types';
  * ```
  */
 export async function sendTransaction(
-  options: UnifiedSendTransactionOptions,
+  options: SendTransactionOptions,
   ctx?: CommandContext,
 ): Promise<CommandResult<SendTransactionResult>> {
   return executeWithFallback({
@@ -61,7 +61,7 @@ export async function sendTransaction(
 // ============================================================================
 
 async function nativeSendTransaction(
-  options: UnifiedSendTransactionOptions,
+  options: SendTransactionOptions,
   ctx?: CommandContext,
 ): Promise<SendTransactionResult> {
   if (!ctx) {
@@ -133,7 +133,7 @@ async function nativeSendTransaction(
 // ============================================================================
 
 async function wagmiSendTransactionAdapter(
-  options: UnifiedSendTransactionOptions,
+  options: SendTransactionOptions,
 ): Promise<SendTransactionResult> {
   // Warn about unsupported features
   if (options.permit2 && options.permit2.length > 0) {

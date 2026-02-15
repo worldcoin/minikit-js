@@ -7,7 +7,7 @@ export default defineConfig([
     outDir: 'build',
     format: ['esm', 'cjs'],
     external: ['wagmi', 'siwe', 'viem', 'react'],
-    entry: ['src/index.ts', 'src/wagmi.ts'],
+    entry: ['src/index.ts', 'src/connector/index.ts'],
     define: { 'process.env.NODE_ENV': '"production"' },
   },
   {

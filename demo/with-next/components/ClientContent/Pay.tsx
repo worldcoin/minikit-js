@@ -1,6 +1,6 @@
 import {
   MiniKit,
-  PayCommandInput,
+  PayOptions,
   PaymentErrorCodes,
   ResponseEvent,
   Tokens,
@@ -90,7 +90,7 @@ export const Pay = () => {
         },
       ];
 
-      const payPayload: PayCommandInput = {
+      const payPayload: PayOptions = {
         to: address,
         tokens: token
           ? [
@@ -105,6 +105,19 @@ export const Pay = () => {
           : tokenPayload,
         description: 'Test example payment for minikit on Worldchain',
         reference: new Date().toISOString(),
+
+        fallback: async () => {
+          console.warn('MiniKit.pay fallback called');
+          // Implement your own payment logic here, e.g. using a web3 provider
+          // This is just a placeholder to simulate a successful payment response
+          return {
+            transactionId: '0x1234567890abcdef',
+            reference: new Date().toISOString(),
+            from: '0xabcdef1234567890',
+            chain: 'worldchain' as any,
+            timestamp: new Date().toISOString(),
+          };
+        },
       };
 
       const finalPayload = await MiniKit.pay(payPayload);

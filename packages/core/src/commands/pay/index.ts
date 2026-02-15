@@ -16,7 +16,7 @@ export * from './types';
 import type {
   PayCommandInput,
   PayCommandPayload,
-  UnifiedPayOptions,
+  PayOptions,
   PayResult,
   MiniAppPaymentPayload,
 } from './types';
@@ -45,7 +45,7 @@ import { PayError } from './types';
  * ```
  */
 export async function pay(
-  options: UnifiedPayOptions,
+  options: PayOptions,
   ctx?: CommandContext,
 ): Promise<CommandResult<PayResult>> {
   return executeWithFallback({
@@ -62,7 +62,7 @@ export async function pay(
 // ============================================================================
 
 async function nativePay(
-  options: UnifiedPayOptions,
+  options: PayOptions,
   ctx?: CommandContext,
 ): Promise<PayResult> {
   if (!ctx) {

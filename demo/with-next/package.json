@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@safe-global/protocol-kit": "^6.1.2",
+    "@tanstack/react-query": "^5.62.8",
     "@uniswap/permit2-sdk": "^1.4.0",
     "@wagmi/core": "^3.3.3",
     "@worldcoin/idkit": "4.0.0-dev.2039000",
@@ -25,6 +26,7 @@
     "prettier-plugin-sort-imports-desc": "^1.0.0",
     "react-dom": "^19.0.3",
     "viem": "2.45.3",
+    "wagmi": "^3.4.3",
     "yup": "^1.4.0"
   },
   "devDependencies": {

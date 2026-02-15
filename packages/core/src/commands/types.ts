@@ -180,7 +180,7 @@ export class FallbackRequiredError extends Error {
   constructor(command: string) {
     super(
       `${command} requires a fallback function when running outside World App. ` +
-        `Provide a fallback option: MiniKit.commands.${command}({ ..., fallback: () => yourFallback() })`,
+        `Provide a fallback option: MiniKit.${command}({ ..., fallback: () => yourFallback() })`,
     );
     this.name = 'FallbackRequiredError';
   }
@@ -201,4 +201,3 @@ export class CommandUnavailableError extends Error {
     this.reason = reason;
   }
 }
-

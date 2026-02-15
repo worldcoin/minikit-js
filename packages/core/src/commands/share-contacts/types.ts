@@ -39,7 +39,7 @@ export type MiniAppShareContactsPayload =
   | MiniAppShareContactsSuccessPayload
   | MiniAppShareContactsErrorPayload;
 
-export interface UnifiedShareContactsOptions
+export interface ShareContactsOptions
   extends FallbackConfig<ShareContactsResult> {
   /** Enable multi-select in the contact picker */
   isMultiSelectEnabled?: boolean;

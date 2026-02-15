@@ -10,18 +10,20 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type WagmiConfig = any;
 
-let wagmiConfig: WagmiConfig | undefined;
+// Store wagmi config on globalThis so it's shared across entry points
+// (minikit-provider.js sets it, index.js reads it).
+const WAGMI_KEY = '__minikit_wagmi_config__' as const;
 
 export function setWagmiConfig(config: WagmiConfig): void {
-  wagmiConfig = config;
+  (globalThis as any)[WAGMI_KEY] = config;
 }
 
 export function getWagmiConfig(): WagmiConfig | undefined {
-  return wagmiConfig;
+  return (globalThis as any)[WAGMI_KEY];
 }
 
 export function hasWagmiConfig(): boolean {
-  return wagmiConfig !== undefined;
+  return (globalThis as any)[WAGMI_KEY] !== undefined;
 }
 
 /**

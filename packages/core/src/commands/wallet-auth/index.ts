@@ -16,7 +16,7 @@ import { EventManager } from '../../events';
 export * from './types';
 import type {
   WalletAuthInput,
-  UnifiedWalletAuthOptions,
+  WalletAuthOptions,
   WalletAuthResult,
   MiniAppWalletAuthPayload,
 } from './types';
@@ -44,7 +44,7 @@ import { WalletAuthError } from './types';
  * ```
  */
 export async function walletAuth(
-  options: UnifiedWalletAuthOptions,
+  options: WalletAuthOptions,
   ctx?: CommandContext,
 ): Promise<CommandResult<WalletAuthResult>> {
   return executeWithFallback({
@@ -65,7 +65,7 @@ export async function walletAuth(
 // ============================================================================
 
 async function nativeWalletAuth(
-  options: UnifiedWalletAuthOptions,
+  options: WalletAuthOptions,
   ctx?: CommandContext,
 ): Promise<WalletAuthResult> {
   if (!ctx) {
