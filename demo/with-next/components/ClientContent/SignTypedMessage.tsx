@@ -1,28 +1,11 @@
 import Safe, { hashSafeMessage } from '@safe-global/protocol-kit';
 import {
-  MiniAppSignTypedDataPayload,
   MiniKit,
+  MiniKitSignTypedDataOptions,
   ResponseEvent,
-  SignTypedDataErrorCodes,
 } from '@worldcoin/minikit-js';
-import { useCallback, useEffect, useState } from 'react';
-import * as yup from 'yup';
-import { validateSchema } from './helpers/validate-schema';
-
-const signTypedDataSuccessPayloadSchema = yup.object({
-  status: yup.string<'success'>().oneOf(['success']),
-  signature: yup.string().required(),
-  address: yup.string().required(),
-});
-
-const signTypedDataErrorPayloadSchema = yup.object({
-  error_code: yup
-    .string<SignTypedDataErrorCodes>()
-    .oneOf(Object.values(SignTypedDataErrorCodes))
-    .required(),
-  status: yup.string<'error'>().equals(['error']).required(),
-  version: yup.number().required(),
-});
+import { useCallback, useState } from 'react';
+import { verifyTypedData } from 'viem';
 
 const signTypedDataPayload = {
   types: {
@@ -148,11 +131,27 @@ const benignPayload = {
   domain: { name: 'PWNMultiproposal' },
 };
 
+const toSafeEip712TypedData = (
+  input: MiniKitSignTypedDataOptions,
+): {
+  types: Record<string, unknown>;
+  primaryType: string;
+  domain: Record<string, unknown>;
+  message: Record<string, unknown>;
+} => ({
+  types: input.types as Record<string, unknown>,
+  primaryType: input.primaryType,
+  domain: {
+    ...(input.domain ? (input.domain as Record<string, unknown>) : {}),
+    ...(input.chainId !== undefined ? { chainId: input.chainId } : {}),
+  },
+  message: input.message as Record<string, unknown>,
+});
+
 export const SignTypedData = () => {
   const [signTypedDataAppPayload, setSignTypedDataAppPayload] = useState<
     string | undefined
   >();
-  const [tempInstallFix, setTempInstallFix] = useState(0);
 
   const [
     signTypedDataPayloadValidationMessage,
@@ -167,88 +166,110 @@ export const SignTypedData = () => {
   const [sentSignTypedDataPayload, setSentSignTypedDataPayload] =
     useState<Record<string, any> | null>(null);
 
-  useEffect(() => {
-    if (!MiniKit.isInstalled()) {
+  const onSignTypedData = useCallback(async (stateChanges?: boolean) => {
+    const signTypedDataInput: MiniKitSignTypedDataOptions = stateChanges
+      ? stateChangesPayload
+      : signTypedDataPayload;
+
+    setSentSignTypedDataPayload({
+      signTypedDataInput,
+    });
+    const payload = await MiniKit.signTypedData(signTypedDataInput);
+    setSignTypedDataAppPayload(JSON.stringify(payload.data, null, 2));
+    setSignTypedDataPayloadValidationMessage('Payload is valid');
+
+    if (payload.executedWith === 'minikit') {
+      const response = payload.data;
+      const messageHash = hashSafeMessage(
+        toSafeEip712TypedData(signTypedDataInput) as any,
+      );
+
+      const isValid = await (
+        await Safe.init({
+          provider: 'https://worldchain-mainnet.g.alchemy.com/public',
+          safeAddress: response.address,
+        })
+      ).isValidSignature(messageHash, response.signature);
+
+      setSignTypedDataPayloadVerificationMessage(
+        isValid ? 'Signature is valid' : 'Signature is invalid',
+      );
       return;
     }
 
-    MiniKit.subscribe(
-      ResponseEvent.MiniAppSignTypedData,
-      async (payload: MiniAppSignTypedDataPayload) => {
-        console.log('MiniAppSignTypedData, SUBSCRIBE PAYLOAD', payload);
-        setSignTypedDataAppPayload(JSON.stringify(payload, null, 2));
+    if (payload.executedWith === 'wagmi') {
+      const response = payload.data;
 
-        if (payload.status === 'error') {
-          const errorMessage = await validateSchema(
-            signTypedDataErrorPayloadSchema,
-            payload,
-          );
+      const isValid = await verifyTypedData({
+        address: response.address as `0x${string}`,
+        types: signTypedDataInput.types as Record<string, any>,
+        primaryType: signTypedDataInput.primaryType as any,
+        domain: signTypedDataInput.domain as Record<string, any> | undefined,
+        message: signTypedDataInput.message as Record<string, any>,
+        signature: response.signature as `0x${string}`,
+      });
 
-          if (!errorMessage) {
-            setSignTypedDataPayloadValidationMessage('Payload is valid');
-          } else {
-            setSignTypedDataPayloadValidationMessage(errorMessage);
-          }
-        } else {
-          const errorMessage = await validateSchema(
-            signTypedDataSuccessPayloadSchema,
-            payload,
-          );
+      setSignTypedDataPayloadVerificationMessage(
+        isValid ? 'Signature is valid' : 'Signature is invalid',
+      );
+      return;
+    }
 
-          // This checks if the response format is correct
-          if (!errorMessage) {
-            setSignTypedDataPayloadValidationMessage('Payload is valid');
-          } else {
-            setSignTypedDataPayloadValidationMessage(errorMessage);
-          }
-
-          const messageHash = hashSafeMessage(signTypedDataPayload);
-
-          const isValid = await (
-            await Safe.init({
-              provider:
-                'https://opt-mainnet.g.alchemy.com/v2/Ha76ahWcm6iDVBU7GNr5n-ONLgzWnkWc',
-              safeAddress: payload.address,
-            })
-          ).isValidSignature(messageHash, payload.signature);
-
-          // Checks functionally if the signature is correct
-          if (isValid) {
-            setSignTypedDataPayloadVerificationMessage('Signature is valid');
-          } else {
-            setSignTypedDataPayloadVerificationMessage(
-              'Signature is invalid (We are verifying on optimism, if you are using worldchain message andy',
-            );
-          }
-        }
-      },
-    );
-
-    return () => {
-      MiniKit.unsubscribe(ResponseEvent.MiniAppSignTypedData);
-    };
-  }, [tempInstallFix]);
-
-  const onSignTypedData = useCallback(async (stateChanges?: boolean) => {
-    const payload = MiniKit.signTypedData(
-      stateChanges ? stateChangesPayload : signTypedDataPayload,
-    );
-
-    setSentSignTypedDataPayload({
-      payload,
-    });
-    setTempInstallFix((prev) => prev + 1);
+    setSignTypedDataPayloadVerificationMessage('Signature is invalid');
   }, []);
 
-  const signBenignPayload = (chainId?: number) => {
-    const payload = MiniKit.signTypedData({
+  const signBenignPayload = async (chainId?: number) => {
+    const signTypedDataPayload: MiniKitSignTypedDataOptions = {
+      ...benignPayload,
+      chainId,
+    };
+
+    setSentSignTypedDataPayload(signTypedDataPayload);
+    const payload = await MiniKit.signTypedData({
       ...benignPayload,
       chainId,
     });
-    setSentSignTypedDataPayload({
-      payload,
-    });
-    setTempInstallFix((prev) => prev + 1);
+    setSignTypedDataAppPayload(JSON.stringify(payload.data, null, 2));
+    setSignTypedDataPayloadValidationMessage('Payload is valid');
+
+    if (payload.executedWith === 'minikit') {
+      const messageHash = hashSafeMessage(
+        toSafeEip712TypedData({
+          ...benignPayload,
+          chainId,
+        }) as any,
+      );
+
+      const isValid = await (
+        await Safe.init({
+          provider: 'https://worldchain-mainnet.g.alchemy.com/public',
+          safeAddress: payload.data.address,
+        })
+      ).isValidSignature(messageHash, payload.data.signature);
+
+      setSignTypedDataPayloadVerificationMessage(
+        isValid ? 'Signature is valid' : 'Signature is invalid',
+      );
+      return;
+    }
+
+    if (payload.executedWith === 'wagmi') {
+      const isValid = await verifyTypedData({
+        address: payload.data.address as `0x${string}`,
+        types: benignPayload.types as Record<string, any>,
+        primaryType: benignPayload.primaryType as any,
+        domain: benignPayload.domain as Record<string, any> | undefined,
+        message: benignPayload.message as Record<string, any>,
+        signature: payload.data.signature as `0x${string}`,
+      });
+
+      setSignTypedDataPayloadVerificationMessage(
+        isValid ? 'Signature is valid' : 'Signature is invalid',
+      );
+      return;
+    }
+
+    setSignTypedDataPayloadVerificationMessage('Signature is invalid');
   };
 
   return (

@@ -1,13 +1,13 @@
 import Safe, { hashSafeMessage } from '@safe-global/protocol-kit';
 import {
   MiniKit,
+  MiniKitSignMessageOptions,
   ResponseEvent,
   SignMessageErrorCodes,
-  SignMessageInput,
 } from '@worldcoin/minikit-js';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { verifyMessage } from 'viem';
 import * as yup from 'yup';
-import { validateSchema } from './helpers/validate-schema';
 
 const signMessageSuccessPayloadSchema = yup.object({
   status: yup.string<'success'>().oneOf(['success']),
@@ -43,75 +43,53 @@ export const SignMessage = () => {
     string,
     any
   > | null>(null);
-  const [tempInstallFix, setTempInstallFix] = useState(0);
   const [messageToSign, setMessageToSign] = useState('hello world');
 
-  useEffect(() => {
-    if (!MiniKit.isInstalled()) {
-      return;
-    }
-
-    MiniKit.subscribe(ResponseEvent.MiniAppSignMessage, async (payload) => {
-      console.log('MiniAppSignMessage, SUBSCRIBE PAYLOAD', payload);
-      setSignMessageAppPayload(JSON.stringify(payload, null, 2));
-      if (payload.status === 'error') {
-        const errorMessage = await validateSchema(
-          signMessageErrorPayloadSchema,
-          payload,
-        );
-
-        if (!errorMessage) {
-          setSignMessagePayloadValidationMessage('Payload is valid');
-        } else {
-          setSignMessagePayloadValidationMessage(errorMessage);
-        }
-      } else {
-        const errorMessage = await validateSchema(
-          signMessageSuccessPayloadSchema,
-          payload,
-        );
-
-        // This checks if the response format is correct
-        if (!errorMessage) {
-          setSignMessagePayloadValidationMessage('Payload is valid');
-        } else {
-          setSignMessagePayloadValidationMessage(errorMessage);
-        }
-
-        const messageHash = hashSafeMessage(messageToSign);
-
-        const isValid = await (
-          await Safe.init({
-            provider: 'https://worldchain-mainnet.g.alchemy.com/public',
-            safeAddress: payload.address,
-          })
-        ).isValidSignature(messageHash, payload.signature);
-
-        // Checks functionally if the signature is correct
-        if (isValid) {
-          setSignMessagePayloadVerificationMessage('Signature is valid');
-        } else {
-          setSignMessagePayloadVerificationMessage('Signature is invalid');
-        }
-      }
-    });
-
-    return () => {
-      MiniKit.unsubscribe(ResponseEvent.MiniAppSignMessage);
-    };
-  }, [messageToSign, tempInstallFix]);
-
   const onSignMessage = async (message: string) => {
-    const signMessagePayload: SignMessageInput = {
+    const signMessagePayload: MiniKitSignMessageOptions = {
       message,
     };
 
     setMessageToSign(message);
-    const payload = MiniKit.signMessage(signMessagePayload);
     setSentSignMessagePayload({
-      payload,
+      signMessagePayload,
     });
-    setTempInstallFix((prev) => prev + 1);
+    const payload = await MiniKit.signMessage(signMessagePayload);
+    if (payload.executedWith === 'minikit') {
+      const response = payload.data;
+      const messageHash = hashSafeMessage(messageToSign);
+      setSignMessageAppPayload(JSON.stringify(response, null, 2));
+
+      const isValid = await (
+        await Safe.init({
+          provider: 'https://worldchain-mainnet.g.alchemy.com/public',
+          safeAddress: response.address,
+        })
+      ).isValidSignature(messageHash, response.signature);
+
+      setSignMessagePayloadVerificationMessage(
+        isValid ? 'Signature is valid' : 'Signature is invalid',
+      );
+    } else if (payload.executedWith === 'wagmi') {
+      const response = payload.data;
+
+      setSignMessageAppPayload(JSON.stringify(response, null, 2));
+      // Verify EOA signed message
+
+      const isValid = await verifyMessage({
+        address: response.address as `0x${string}`,
+        message: messageToSign,
+        signature: response.signature as `0x${string}`,
+      });
+
+      setSignMessagePayloadVerificationMessage(
+        isValid ? 'Signature is valid' : 'Signature is invalid',
+      );
+    } else {
+      // Fallback
+      setSignMessageAppPayload(JSON.stringify(payload, null, 2));
+      setSignMessagePayloadVerificationMessage('Signature is invalid');
+    }
   };
 
   return (
