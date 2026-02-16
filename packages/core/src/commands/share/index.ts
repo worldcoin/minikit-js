@@ -7,7 +7,7 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import type { CommandResult } from '../types';
+import type { CommandResultByVia } from '../types';
 import { executeWithFallback } from '../fallback';
 import { EventManager } from '../../events';
 
@@ -23,15 +23,33 @@ import { ShareError } from './types';
 // Unified API (auto-detects environment)
 // ============================================================================
 
-export async function share<TFallback = MiniAppShareSuccessPayload>(
+export async function share(
+  options: MiniKitShareOptions,
+  ctx?: CommandContext,
+): Promise<CommandResultByVia<MiniAppShareSuccessPayload, MiniAppShareSuccessPayload, 'minikit'>>;
+export async function share<TFallback>(
   options: MiniKitShareOptions<TFallback>,
   ctx?: CommandContext,
-): Promise<CommandResult<MiniAppShareSuccessPayload | TFallback>> {
-  return executeWithFallback({
+): Promise<
+  CommandResultByVia<MiniAppShareSuccessPayload, TFallback, 'minikit'>
+> {
+  const result = await executeWithFallback({
     command: Command.Share,
     nativeExecutor: () => nativeShare(options, ctx),
     customFallback: options.fallback,
   });
+
+  if (result.via === 'fallback') {
+    return {
+      via: 'fallback',
+      data: result.data as TFallback,
+    };
+  }
+
+  return {
+    via: 'minikit',
+    data: result.data as MiniAppShareSuccessPayload,
+  };
 }
 
 // ============================================================================

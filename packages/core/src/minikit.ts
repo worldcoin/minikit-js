@@ -10,7 +10,7 @@ import {
   sendHapticFeedback,
   sendMiniKitEvent,
   sendTransaction,
-  share,
+  share as runShare,
   shareContacts,
   signMessage,
   signTypedData,
@@ -20,6 +20,7 @@ import {
 import type {
   MiniKitChatOptions,
   CommandResult,
+  CommandResultByVia,
   MiniKitGetPermissionsOptions,
   MiniAppChatSuccessPayload,
   MiniAppGetPermissionsSuccessPayload,
@@ -210,10 +211,26 @@ export class MiniKit {
   /**
    * Share files/text/URL
    */
-  static share<TFallback = MiniAppShareSuccessPayload>(
+  static share(
+    options: MiniKitShareOptions,
+  ): Promise<
+    CommandResultByVia<
+      MiniAppShareSuccessPayload,
+      MiniAppShareSuccessPayload,
+      'minikit'
+    >
+  >;
+  static share<TFallback>(
     options: MiniKitShareOptions<TFallback>,
-  ): Promise<CommandResult<MiniAppShareSuccessPayload | TFallback>> {
-    return share<TFallback>(options, this.getContext());
+  ): Promise<
+    CommandResultByVia<MiniAppShareSuccessPayload, TFallback, 'minikit'>
+  >;
+  static share(
+    options: MiniKitShareOptions<any>,
+  ): Promise<
+    CommandResultByVia<MiniAppShareSuccessPayload, any, 'minikit'>
+  > {
+    return runShare(options, this.getContext());
   }
 
   /**

@@ -167,6 +167,20 @@ export interface CommandResult<T> {
   via: CommandVia;
 }
 
+export type CommandResultByVia<
+  TNative,
+  TFallback = TNative,
+  TViaNative extends CommandVia = Exclude<CommandVia, 'fallback'>,
+> =
+  | {
+      via: TViaNative;
+      data: TNative;
+    }
+  | {
+      via: 'fallback';
+      data: TFallback;
+    };
+
 export interface FallbackConfig<TFallback = unknown> {
   /**
    * Optional custom fallback executor.

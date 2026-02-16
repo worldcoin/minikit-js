@@ -1,7 +1,6 @@
 import {
   MiniAppSharePayload,
   MiniKit,
-  MiniKitShareOptions,
   SendHapticFeedbackErrorCodes,
   ShareInput,
 } from '@worldcoin/minikit-js';
@@ -71,7 +70,7 @@ export const Share = () => {
   };
 
   const onSendShareFiles = useCallback(async (input: ShareInput) => {
-    const sharePayload: MiniKitShareOptions = {
+    const sharePayload = {
       ...input,
       fallback() {
         console.log('Share fallback called');
@@ -82,8 +81,9 @@ export const Share = () => {
     setSentShareFilesPayload({
       input,
     });
-
-    await validateResponse(finalPayload);
+    if (finalPayload.via === 'minikit') {
+      await validateResponse(finalPayload.data);
+    }
   }, []);
 
   return (

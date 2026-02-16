@@ -14,7 +14,9 @@ type ShareParams = {
 /** @deprecated Use {@link MiniKitShareOptions} instead */
 export type ShareInput = ShareParams;
 
-export interface MiniKitShareOptions<TCustomFallback = unknown>
+export interface MiniKitShareOptions<
+  TCustomFallback = MiniAppShareSuccessPayload,
+>
   extends ShareParams,
     FallbackConfig<TCustomFallback> {}
 
