@@ -17,18 +17,18 @@ import {
 import type { CommandResult, CommandVia, FallbackReason } from './types';
 import { hasWagmiConfig } from './wagmi-fallback';
 
-export interface ExecuteWithFallbackOptions<T> {
+export interface ExecuteWithFallbackOptions<TNative, TFallback = TNative> {
   /** Command name for availability checking */
   command: string;
 
   /** Native execution function (runs in World App) */
-  nativeExecutor: () => Promise<T>;
+  nativeExecutor: () => Promise<TNative>;
 
   /** Wagmi fallback function (runs on web with Wagmi) */
-  wagmiFallback?: () => Promise<T>;
+  wagmiFallback?: () => Promise<TNative>;
 
   /** Custom fallback function (user-provided) */
-  customFallback?: () => Promise<T> | T;
+  customFallback?: () => Promise<TFallback> | TFallback;
 
   /** If true, requires fallback on web (e.g., pay, getContacts) */
   requiresFallback?: boolean;
@@ -49,9 +49,9 @@ export interface ExecuteWithFallbackOptions<T> {
  * console.log(result.via); // 'minikit' | 'wagmi' | 'fallback'
  * ```
  */
-export async function executeWithFallback<T>(
-  options: ExecuteWithFallbackOptions<T>,
-): Promise<CommandResult<T>> {
+export async function executeWithFallback<TNative, TFallback = TNative>(
+  options: ExecuteWithFallbackOptions<TNative, TFallback>,
+): Promise<CommandResult<TNative | TFallback>> {
   const {
     command,
     nativeExecutor,

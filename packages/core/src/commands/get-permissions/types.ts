@@ -33,8 +33,9 @@ export type MiniAppGetPermissionsPayload =
   | MiniAppGetPermissionsSuccessPayload
   | MiniAppGetPermissionsErrorPayload;
 
-export interface GetPermissionsOptions
-  extends FallbackConfig<MiniAppGetPermissionsSuccessPayload> {}
+export interface MiniKitGetPermissionsOptions<
+  TCustomFallback = unknown,
+> extends FallbackConfig<TCustomFallback> {}
 
 export class GetPermissionsError extends Error {
   constructor(public readonly error_code: GetPermissionsErrorCodes) {

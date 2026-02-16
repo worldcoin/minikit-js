@@ -14,7 +14,7 @@ export * from './types';
 import type {
   MiniAppSendHapticFeedbackPayload,
   MiniAppSendHapticFeedbackSuccessPayload,
-  SendHapticFeedbackOptions,
+  MiniKitSendHapticFeedbackOptions,
 } from './types';
 import { SendHapticFeedbackError } from './types';
 
@@ -22,10 +22,14 @@ import { SendHapticFeedbackError } from './types';
 // Unified API (auto-detects environment)
 // ============================================================================
 
-export async function sendHapticFeedback(
-  options: SendHapticFeedbackOptions,
+export async function sendHapticFeedback<
+  TFallback = MiniAppSendHapticFeedbackSuccessPayload,
+>(
+  options: MiniKitSendHapticFeedbackOptions<TFallback>,
   ctx?: CommandContext,
-): Promise<CommandResult<MiniAppSendHapticFeedbackSuccessPayload>> {
+): Promise<
+  CommandResult<MiniAppSendHapticFeedbackSuccessPayload | TFallback>
+> {
   return executeWithFallback({
     command: Command.SendHapticFeedback,
     nativeExecutor: () => nativeSendHapticFeedback(options, ctx),
@@ -38,7 +42,7 @@ export async function sendHapticFeedback(
 // ============================================================================
 
 async function nativeSendHapticFeedback(
-  options: SendHapticFeedbackOptions,
+  options: MiniKitSendHapticFeedbackOptions<any>,
   ctx?: CommandContext,
 ): Promise<MiniAppSendHapticFeedbackSuccessPayload> {
   if (!ctx) {

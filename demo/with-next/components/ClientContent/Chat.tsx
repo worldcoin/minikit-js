@@ -1,8 +1,8 @@
 import {
   ChatErrorCodes,
-  ChatInput,
   MiniAppChatPayload,
   MiniKit,
+  MiniKitChatOptions,
   ResponseEvent,
 } from '@worldcoin/minikit-js';
 import { useCallback, useEffect, useState } from 'react';
@@ -77,16 +77,19 @@ export const Chat = () => {
     };
   }, []);
 
-  const onSendChat = useCallback(() => {
-    const chatPayload: ChatInput = {
+  const onSendChat = useCallback(async () => {
+    const chatPayload: MiniKitChatOptions = {
       message: message || '',
       ...(toAddress && { to: toAddress.split(',').map((addr) => addr.trim()) }),
+      fallback: () => {
+        console.log('here');
+      },
     };
 
-    const payload = MiniKit.chat(chatPayload);
-
+    const payload = await MiniKit.chat(chatPayload);
+    payload;
     setSentChatPayload({
-      sent: payload,
+      sent: chatPayload,
     });
   }, [toAddress, message]);
 

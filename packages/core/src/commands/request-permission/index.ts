@@ -14,7 +14,7 @@ export * from './types';
 import type {
   MiniAppRequestPermissionPayload,
   MiniAppRequestPermissionSuccessPayload,
-  RequestPermissionOptions,
+  MiniKitRequestPermissionOptions,
 } from './types';
 import { RequestPermissionError } from './types';
 
@@ -22,10 +22,14 @@ import { RequestPermissionError } from './types';
 // Unified API (auto-detects environment)
 // ============================================================================
 
-export async function requestPermission(
-  options: RequestPermissionOptions,
+export async function requestPermission<
+  TFallback = MiniAppRequestPermissionSuccessPayload,
+>(
+  options: MiniKitRequestPermissionOptions<TFallback>,
   ctx?: CommandContext,
-): Promise<CommandResult<MiniAppRequestPermissionSuccessPayload>> {
+): Promise<
+  CommandResult<MiniAppRequestPermissionSuccessPayload | TFallback>
+> {
   return executeWithFallback({
     command: Command.RequestPermission,
     nativeExecutor: () => nativeRequestPermission(options, ctx),
@@ -38,7 +42,7 @@ export async function requestPermission(
 // ============================================================================
 
 async function nativeRequestPermission(
-  options: RequestPermissionOptions,
+  options: MiniKitRequestPermissionOptions<any>,
   ctx?: CommandContext,
 ): Promise<MiniAppRequestPermissionSuccessPayload> {
   if (!ctx) {

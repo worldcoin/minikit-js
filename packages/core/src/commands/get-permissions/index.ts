@@ -12,7 +12,7 @@ import { EventManager } from '../../events';
 
 export * from './types';
 import type {
-  GetPermissionsOptions,
+  MiniKitGetPermissionsOptions,
   MiniAppGetPermissionsPayload,
   MiniAppGetPermissionsSuccessPayload,
 } from './types';
@@ -22,10 +22,12 @@ import { GetPermissionsError } from './types';
 // Unified API (auto-detects environment)
 // ============================================================================
 
-export async function getPermissions(
-  options: GetPermissionsOptions = {},
+export async function getPermissions<
+  TFallback = MiniAppGetPermissionsSuccessPayload,
+>(
+  options: MiniKitGetPermissionsOptions<TFallback> = {},
   ctx?: CommandContext,
-): Promise<CommandResult<MiniAppGetPermissionsSuccessPayload>> {
+): Promise<CommandResult<MiniAppGetPermissionsSuccessPayload | TFallback>> {
   return executeWithFallback({
     command: Command.GetPermissions,
     nativeExecutor: () => nativeGetPermissions(ctx),

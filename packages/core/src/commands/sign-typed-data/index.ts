@@ -13,9 +13,9 @@ import { EventManager } from '../../events';
 
 export * from './types';
 import type {
+  MiniKitSignTypedDataOptions,
   MiniAppSignTypedDataPayload,
   MiniAppSignTypedDataSuccessPayload,
-  SignTypedDataOptions,
 } from './types';
 import { SignTypedDataError } from './types';
 
@@ -23,10 +23,12 @@ import { SignTypedDataError } from './types';
 // Unified API (auto-detects environment)
 // ============================================================================
 
-export async function signTypedData(
-  options: SignTypedDataOptions,
+export async function signTypedData<
+  TFallback = MiniAppSignTypedDataSuccessPayload,
+>(
+  options: MiniKitSignTypedDataOptions<TFallback>,
   ctx?: CommandContext,
-): Promise<CommandResult<MiniAppSignTypedDataSuccessPayload>> {
+): Promise<CommandResult<MiniAppSignTypedDataSuccessPayload | TFallback>> {
   return executeWithFallback({
     command: Command.SignTypedData,
     nativeExecutor: () => nativeSignTypedData(options, ctx),
@@ -47,7 +49,7 @@ export async function signTypedData(
 // ============================================================================
 
 async function nativeSignTypedData(
-  options: SignTypedDataOptions,
+  options: MiniKitSignTypedDataOptions<any>,
   ctx?: CommandContext,
 ): Promise<MiniAppSignTypedDataSuccessPayload> {
   if (!ctx) {

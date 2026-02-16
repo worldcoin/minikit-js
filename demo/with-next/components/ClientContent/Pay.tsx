@@ -1,6 +1,6 @@
 import {
   MiniKit,
-  PayOptions,
+  MiniKitPayOptions,
   PaymentErrorCodes,
   ResponseEvent,
   Tokens,
@@ -90,7 +90,7 @@ export const Pay = () => {
         },
       ];
 
-      const payPayload: PayOptions = {
+      const payPayload: MiniKitPayOptions = {
         to: address,
         tokens: token
           ? [

@@ -18,7 +18,7 @@ type SendHapticFeedbackParams =
       style: 'light' | 'medium' | 'heavy';
     };
 
-/** @deprecated Use {@link SendHapticFeedbackOptions} instead */
+/** @deprecated Use {@link MiniKitSendHapticFeedbackOptions} instead */
 export type SendHapticFeedbackInput = SendHapticFeedbackParams;
 
 export enum SendHapticFeedbackErrorCodes {
@@ -38,8 +38,9 @@ export type MiniAppSendHapticFeedbackPayload =
   | MiniAppSendHapticFeedbackSuccessPayload
   | MiniAppSendHapticFeedbackErrorPayload;
 
-export type SendHapticFeedbackOptions = SendHapticFeedbackParams &
-  FallbackConfig<MiniAppSendHapticFeedbackSuccessPayload>;
+export type MiniKitSendHapticFeedbackOptions<
+  TCustomFallback = unknown,
+> = SendHapticFeedbackParams & FallbackConfig<TCustomFallback>;
 
 export class SendHapticFeedbackError extends Error {
   constructor(public readonly error_code: SendHapticFeedbackErrorCodes) {

@@ -167,8 +167,12 @@ export interface CommandResult<T> {
   via: CommandVia;
 }
 
-export interface FallbackConfig<T> {
-  fallback?: () => Promise<T> | T;
+export interface FallbackConfig<TFallback = unknown> {
+  /**
+   * Optional custom fallback executor.
+   * The fallback return type can differ from the native/Wagmi success payload.
+   */
+  fallback?: () => Promise<TFallback> | TFallback;
 }
 
 export type FallbackReason =

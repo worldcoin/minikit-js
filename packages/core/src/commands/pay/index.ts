@@ -16,7 +16,7 @@ export * from './types';
 import type {
   PayCommandInput,
   PayCommandPayload,
-  PayOptions,
+  MiniKitPayOptions,
   PayResult,
   MiniAppPaymentPayload,
 } from './types';
@@ -44,10 +44,10 @@ import { PayError } from './types';
  * console.log(result.via); // 'minikit' | 'fallback'
  * ```
  */
-export async function pay(
-  options: PayOptions,
+export async function pay<TFallback = PayResult>(
+  options: MiniKitPayOptions<TFallback>,
   ctx?: CommandContext,
-): Promise<CommandResult<PayResult>> {
+): Promise<CommandResult<PayResult | TFallback>> {
   return executeWithFallback({
     command: Command.Pay,
     nativeExecutor: () => nativePay(options, ctx),
@@ -61,7 +61,7 @@ export async function pay(
 // ============================================================================
 
 async function nativePay(
-  options: PayOptions,
+  options: MiniKitPayOptions<any>,
   ctx?: CommandContext,
 ): Promise<PayResult> {
   if (!ctx) {

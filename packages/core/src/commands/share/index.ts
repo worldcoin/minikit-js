@@ -15,7 +15,7 @@ export * from './types';
 import type {
   MiniAppSharePayload,
   MiniAppShareSuccessPayload,
-  ShareOptions,
+  MiniKitShareOptions,
 } from './types';
 import { ShareError } from './types';
 
@@ -23,10 +23,10 @@ import { ShareError } from './types';
 // Unified API (auto-detects environment)
 // ============================================================================
 
-export async function share(
-  options: ShareOptions,
+export async function share<TFallback = MiniAppShareSuccessPayload>(
+  options: MiniKitShareOptions<TFallback>,
   ctx?: CommandContext,
-): Promise<CommandResult<MiniAppShareSuccessPayload>> {
+): Promise<CommandResult<MiniAppShareSuccessPayload | TFallback>> {
   return executeWithFallback({
     command: Command.Share,
     nativeExecutor: () => nativeShare(options, ctx),
@@ -39,7 +39,7 @@ export async function share(
 // ============================================================================
 
 async function nativeShare(
-  options: ShareOptions,
+  options: MiniKitShareOptions<any>,
   ctx?: CommandContext,
 ): Promise<MiniAppShareSuccessPayload> {
   if (!ctx) {

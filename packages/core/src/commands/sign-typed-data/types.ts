@@ -13,12 +13,12 @@ type SignTypedDataParams = {
   chainId?: number;
 };
 
-/** @deprecated Use {@link SignTypedDataOptions} instead */
+/** @deprecated Use {@link MiniKitSignTypedDataOptions} instead */
 export type SignTypedDataInput = SignTypedDataParams;
 
-export interface SignTypedDataOptions
+export interface MiniKitSignTypedDataOptions<TCustomFallback = unknown>
   extends SignTypedDataParams,
-    FallbackConfig<MiniAppSignTypedDataSuccessPayload> {}
+    FallbackConfig<TCustomFallback> {}
 
 export enum SignTypedDataErrorCodes {
   InvalidOperation = 'invalid_operation',

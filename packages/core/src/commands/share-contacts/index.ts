@@ -12,7 +12,7 @@ import { EventManager } from '../../events';
 
 export * from './types';
 import type {
-  ShareContactsOptions,
+  MiniKitShareContactsOptions,
   ShareContactsResult,
   MiniAppShareContactsPayload,
 } from './types';
@@ -38,10 +38,10 @@ import { ShareContactsError } from './types';
  * console.log(result.via); // 'minikit' | 'fallback'
  * ```
  */
-export async function shareContacts(
-  options: ShareContactsOptions = {},
+export async function shareContacts<TFallback = ShareContactsResult>(
+  options: MiniKitShareContactsOptions<TFallback> = {},
   ctx?: CommandContext,
-): Promise<CommandResult<ShareContactsResult>> {
+): Promise<CommandResult<ShareContactsResult | TFallback>> {
   return executeWithFallback({
     command: Command.ShareContacts,
     nativeExecutor: () => nativeShareContacts(options, ctx),
@@ -58,7 +58,7 @@ export const getContacts = shareContacts;
 // ============================================================================
 
 async function nativeShareContacts(
-  options: ShareContactsOptions,
+  options: MiniKitShareContactsOptions<any>,
   ctx?: CommandContext,
 ): Promise<ShareContactsResult> {
   if (!ctx) {

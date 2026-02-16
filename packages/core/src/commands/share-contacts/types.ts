@@ -9,10 +9,10 @@ type ShareContactsParams = {
   inviteMessage?: string;
 };
 
-/** @deprecated Use {@link ShareContactsOptions} instead */
+/** @deprecated Use {@link MiniKitShareContactsOptions} instead */
 export type ShareContactsInput = ShareContactsParams;
 
-/** @deprecated Use {@link ShareContactsOptions} instead */
+/** @deprecated Use {@link MiniKitShareContactsOptions} instead */
 export type ShareContactsPayload = ShareContactsInput;
 
 export enum ShareContactsErrorCodes {
@@ -43,8 +43,8 @@ export type MiniAppShareContactsPayload =
   | MiniAppShareContactsSuccessPayload
   | MiniAppShareContactsErrorPayload;
 
-export interface ShareContactsOptions
-  extends FallbackConfig<ShareContactsResult> {
+export interface MiniKitShareContactsOptions<TCustomFallback = unknown>
+  extends FallbackConfig<TCustomFallback> {
   /** Enable multi-select in the contact picker */
   isMultiSelectEnabled?: boolean;
 

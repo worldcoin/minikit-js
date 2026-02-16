@@ -1,6 +1,6 @@
-import type { ShareOptions, SharePayload } from './';
+import type { MiniKitShareOptions, SharePayload } from './';
 
-type ShareFormatInput = Omit<ShareOptions, 'fallback'>;
+type ShareFormatInput = Omit<MiniKitShareOptions, 'fallback'>;
 
 const MAX_FILES = 10;
 const MAX_TOTAL_SIZE_MB = 50;

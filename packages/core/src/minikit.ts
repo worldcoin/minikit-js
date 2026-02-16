@@ -17,6 +17,31 @@ import {
   validateCommands,
   walletAuth,
 } from './commands';
+import type {
+  MiniKitChatOptions,
+  CommandResult,
+  MiniKitGetPermissionsOptions,
+  MiniAppChatSuccessPayload,
+  MiniAppGetPermissionsSuccessPayload,
+  MiniAppRequestPermissionSuccessPayload,
+  MiniAppSendHapticFeedbackSuccessPayload,
+  MiniAppShareSuccessPayload,
+  MiniAppSignMessageSuccessPayload,
+  MiniAppSignTypedDataSuccessPayload,
+  MiniKitSignMessageOptions,
+  MiniKitSignTypedDataOptions,
+  MiniKitPayOptions,
+  PayResult,
+  MiniKitRequestPermissionOptions,
+  MiniKitSendHapticFeedbackOptions,
+  MiniKitSendTransactionOptions,
+  SendTransactionResult,
+  MiniKitShareContactsOptions,
+  ShareContactsResult,
+  MiniKitShareOptions,
+  MiniKitWalletAuthOptions,
+  WalletAuthResult,
+} from './commands';
 import { EventManager } from './events';
 import { setupMicrophone } from './helpers/microphone';
 import { getUserProfile } from './helpers/usernames';
@@ -83,8 +108,10 @@ export class MiniKit {
    * console.log(result.via); // 'minikit' | 'wagmi' | 'fallback'
    * ```
    */
-  static walletAuth(...args: Parameters<typeof walletAuth>) {
-    return walletAuth(args[0], this.getContext());
+  static walletAuth<TFallback = WalletAuthResult>(
+    options: MiniKitWalletAuthOptions<TFallback>,
+  ): Promise<CommandResult<WalletAuthResult | TFallback>> {
+    return walletAuth<TFallback>(options, this.getContext());
   }
 
   /**
@@ -106,8 +133,10 @@ export class MiniKit {
    * });
    * ```
    */
-  static sendTransaction(...args: Parameters<typeof sendTransaction>) {
-    return sendTransaction(args[0], this.getContext());
+  static sendTransaction<TFallback = SendTransactionResult>(
+    options: MiniKitSendTransactionOptions<TFallback>,
+  ): Promise<CommandResult<SendTransactionResult | TFallback>> {
+    return sendTransaction<TFallback>(options, this.getContext());
   }
 
   /**
@@ -126,8 +155,10 @@ export class MiniKit {
    * });
    * ```
    */
-  static pay(...args: Parameters<typeof pay>) {
-    return pay(args[0], this.getContext());
+  static pay<TFallback = PayResult>(
+    options: MiniKitPayOptions<TFallback>,
+  ): Promise<CommandResult<PayResult | TFallback>> {
+    return pay<TFallback>(options, this.getContext());
   }
 
   /**
@@ -143,57 +174,83 @@ export class MiniKit {
    * });
    * ```
    */
-  static shareContacts(...args: Parameters<typeof shareContacts>) {
-    return shareContacts(args[0], this.getContext());
+  static shareContacts<TFallback = ShareContactsResult>(
+    options: MiniKitShareContactsOptions<TFallback> = {},
+  ): Promise<CommandResult<ShareContactsResult | TFallback>> {
+    return shareContacts<TFallback>(options, this.getContext());
   }
 
   /**
    * Sign a message
    */
-  static signMessage(...args: Parameters<typeof signMessage>) {
-    return signMessage(args[0], this.getContext());
+  static signMessage<TFallback = MiniAppSignMessageSuccessPayload>(
+    options: MiniKitSignMessageOptions<TFallback>,
+  ): Promise<CommandResult<MiniAppSignMessageSuccessPayload | TFallback>> {
+    return signMessage<TFallback>(options, this.getContext());
   }
 
   /**
    * Sign typed data (EIP-712)
    */
-  static signTypedData(...args: Parameters<typeof signTypedData>) {
-    return signTypedData(args[0], this.getContext());
+  static signTypedData<TFallback = MiniAppSignTypedDataSuccessPayload>(
+    options: MiniKitSignTypedDataOptions<TFallback>,
+  ): Promise<CommandResult<MiniAppSignTypedDataSuccessPayload | TFallback>> {
+    return signTypedData<TFallback>(options, this.getContext());
   }
 
   /**
    * Send a chat message
    */
-  static chat(...args: Parameters<typeof chat>) {
-    return chat(args[0], this.getContext());
+  static chat<TFallback = MiniAppChatSuccessPayload>(
+    options: MiniKitChatOptions<TFallback>,
+  ): Promise<CommandResult<MiniAppChatSuccessPayload | TFallback>> {
+    return chat<TFallback>(options, this.getContext());
   }
 
   /**
    * Share files/text/URL
    */
-  static share(...args: Parameters<typeof share>) {
-    return share(args[0], this.getContext());
+  static share<TFallback = MiniAppShareSuccessPayload>(
+    options: MiniKitShareOptions<TFallback>,
+  ): Promise<CommandResult<MiniAppShareSuccessPayload | TFallback>> {
+    return share<TFallback>(options, this.getContext());
   }
 
   /**
    * Get current permission settings
    */
-  static getPermissions(...args: Parameters<typeof getPermissions>) {
-    return getPermissions(args[0], this.getContext());
+  static getPermissions<TFallback = MiniAppGetPermissionsSuccessPayload>(
+    options: MiniKitGetPermissionsOptions<TFallback> = {},
+  ): Promise<
+    CommandResult<MiniAppGetPermissionsSuccessPayload | TFallback>
+  > {
+    return getPermissions<TFallback>(options, this.getContext());
   }
 
   /**
    * Request a permission from the user
    */
-  static requestPermission(...args: Parameters<typeof requestPermission>) {
-    return requestPermission(args[0], this.getContext());
+  static requestPermission<
+    TFallback = MiniAppRequestPermissionSuccessPayload,
+  >(
+    options: MiniKitRequestPermissionOptions<TFallback>,
+  ): Promise<
+    CommandResult<MiniAppRequestPermissionSuccessPayload | TFallback>
+  > {
+    return requestPermission<TFallback>(options, this.getContext());
   }
 
   /**
    * Trigger haptic feedback
    */
-  static sendHapticFeedback(...args: Parameters<typeof sendHapticFeedback>) {
-    return sendHapticFeedback(args[0], this.getContext());
+  static sendHapticFeedback<
+    TFallback = MiniAppSendHapticFeedbackSuccessPayload,
+  >(
+    options: MiniKitSendHapticFeedbackOptions<TFallback>,
+  ): Promise<
+    CommandResult<MiniAppSendHapticFeedbackSuccessPayload | TFallback>
+  > {
+    return sendHapticFeedback<TFallback>(options, this.getContext());
   }
 
   /**

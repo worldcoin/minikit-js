@@ -15,7 +15,7 @@ import { EventManager } from '../../events';
 export * from './types';
 import type {
   SendTransactionInput,
-  SendTransactionOptions,
+  MiniKitSendTransactionOptions,
   SendTransactionResult,
   MiniAppSendTransactionPayload,
   Transaction,
@@ -47,10 +47,10 @@ const WORLD_CHAIN_ID = 480;
  * console.log(result.via); // 'minikit' | 'wagmi' | 'fallback'
  * ```
  */
-export async function sendTransaction(
-  options: SendTransactionOptions,
+export async function sendTransaction<TFallback = SendTransactionResult>(
+  options: MiniKitSendTransactionOptions<TFallback>,
   ctx?: CommandContext,
-): Promise<CommandResult<SendTransactionResult>> {
+): Promise<CommandResult<SendTransactionResult | TFallback>> {
   return executeWithFallback({
     command: Command.SendTransaction,
     nativeExecutor: () => nativeSendTransaction(options, ctx),
@@ -64,7 +64,7 @@ export async function sendTransaction(
 // ============================================================================
 
 async function nativeSendTransaction(
-  options: SendTransactionOptions,
+  options: MiniKitSendTransactionOptions<any>,
   ctx?: CommandContext,
 ): Promise<SendTransactionResult> {
   if (!ctx) {
@@ -145,7 +145,7 @@ async function nativeSendTransaction(
 // ============================================================================
 
 async function wagmiSendTransactionAdapter(
-  options: SendTransactionOptions,
+  options: MiniKitSendTransactionOptions<any>,
 ): Promise<SendTransactionResult> {
   // Warn about unsupported features
   if (options.permit2 && options.permit2.length > 0) {

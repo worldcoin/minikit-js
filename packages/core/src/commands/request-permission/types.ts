@@ -9,7 +9,7 @@ type RequestPermissionParams = {
   permission: Permission;
 };
 
-/** @deprecated Use {@link RequestPermissionOptions} instead */
+/** @deprecated Use {@link MiniKitRequestPermissionOptions} instead */
 export type RequestPermissionInput = RequestPermissionParams;
 
 export enum RequestPermissionErrorCodes {
@@ -36,9 +36,11 @@ export type MiniAppRequestPermissionPayload =
   | MiniAppRequestPermissionSuccessPayload
   | MiniAppRequestPermissionErrorPayload;
 
-export interface RequestPermissionOptions
+export interface MiniKitRequestPermissionOptions<
+  TCustomFallback = unknown,
+>
   extends RequestPermissionParams,
-    FallbackConfig<MiniAppRequestPermissionSuccessPayload> {}
+    FallbackConfig<TCustomFallback> {}
 
 export class RequestPermissionError extends Error {
   constructor(public readonly error_code: RequestPermissionErrorCodes) {

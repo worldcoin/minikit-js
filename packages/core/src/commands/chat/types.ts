@@ -9,12 +9,12 @@ type ChatParams = {
   message: string;
 };
 
-/** @deprecated Use {@link ChatOptions} instead */
+/** @deprecated Use {@link MiniKitChatOptions} instead */
 export type ChatInput = ChatParams;
 
-export interface ChatOptions
+export interface MiniKitChatOptions<TCustomFallback = unknown>
   extends ChatParams,
-    FallbackConfig<MiniAppChatSuccessPayload> {}
+    FallbackConfig<TCustomFallback> {}
 
 export enum ChatErrorCodes {
   UserRejected = 'user_rejected',

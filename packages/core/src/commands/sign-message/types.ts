@@ -8,12 +8,12 @@ type SignMessageParams = {
   message: string;
 };
 
-/** @deprecated Use {@link SignMessageOptions} instead */
+/** @deprecated Use {@link MiniKitSignMessageOptions} instead */
 export type SignMessageInput = SignMessageParams;
 
-export interface SignMessageOptions
+export interface MiniKitSignMessageOptions<TCustomFallback = unknown>
   extends SignMessageParams,
-    FallbackConfig<MiniAppSignMessageSuccessPayload> {}
+    FallbackConfig<TCustomFallback> {}
 
 export enum SignMessageErrorCodes {
   InvalidMessage = 'invalid_message',

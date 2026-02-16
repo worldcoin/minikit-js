@@ -32,7 +32,7 @@ export type TokensPayload = {
   token_amount: string;
 };
 
-/** @deprecated Use {@link PayOptions} instead */
+/** @deprecated Use {@link MiniKitPayOptions} instead */
 export type PayCommandInput = {
   reference: string;
   to: `0x${string}` | string;
@@ -41,7 +41,7 @@ export type PayCommandInput = {
   description: string;
 };
 
-/** @deprecated Use {@link PayOptions} instead */
+/** @deprecated Use {@link MiniKitPayOptions} instead */
 export type PayCommandPayload = PayCommandInput;
 
 export enum PaymentErrorCodes {
@@ -90,7 +90,8 @@ export type MiniAppPaymentPayload =
   | MiniAppPaymentSuccessPayload
   | MiniAppPaymentErrorPayload;
 
-export interface PayOptions extends FallbackConfig<PayResult> {
+export interface MiniKitPayOptions<TCustomFallback = unknown>
+  extends FallbackConfig<TCustomFallback> {
   /** Unique reference for this payment (for tracking) */
   reference: string;
 

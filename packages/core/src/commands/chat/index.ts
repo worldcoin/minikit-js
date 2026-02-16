@@ -12,7 +12,7 @@ import { EventManager } from '../../events';
 
 export * from './types';
 import type {
-  ChatOptions,
+  MiniKitChatOptions,
   MiniAppChatSuccessPayload,
   MiniAppChatPayload,
 } from './types';
@@ -22,10 +22,10 @@ import { ChatError } from './types';
 // Unified API (auto-detects environment)
 // ============================================================================
 
-export async function chat(
-  options: ChatOptions,
+export async function chat<TFallback = MiniAppChatSuccessPayload>(
+  options: MiniKitChatOptions<TFallback>,
   ctx?: CommandContext,
-): Promise<CommandResult<MiniAppChatSuccessPayload>> {
+): Promise<CommandResult<MiniAppChatSuccessPayload | TFallback>> {
   return executeWithFallback({
     command: Command.Chat,
     nativeExecutor: () => nativeChat(options, ctx),
@@ -38,7 +38,7 @@ export async function chat(
 // ============================================================================
 
 async function nativeChat(
-  options: ChatOptions,
+  options: MiniKitChatOptions<any>,
   ctx?: CommandContext,
 ): Promise<MiniAppChatSuccessPayload> {
   if (!ctx) {

@@ -11,12 +11,12 @@ type ShareParams = {
   url?: string;
 };
 
-/** @deprecated Use {@link ShareOptions} instead */
+/** @deprecated Use {@link MiniKitShareOptions} instead */
 export type ShareInput = ShareParams;
 
-export interface ShareOptions
+export interface MiniKitShareOptions<TCustomFallback = unknown>
   extends ShareParams,
-    FallbackConfig<MiniAppShareSuccessPayload> {}
+    FallbackConfig<TCustomFallback> {}
 
 export type SharePayload = {
   files?: Array<{

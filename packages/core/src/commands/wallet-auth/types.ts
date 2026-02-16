@@ -4,7 +4,7 @@ import type {
   MiniAppBaseSuccessPayload,
 } from '../types';
 
-/** @deprecated Use {@link WalletAuthOptions} instead */
+/** @deprecated Use {@link MiniKitWalletAuthOptions} instead */
 export type WalletAuthInput = {
   nonce: string;
   statement?: string;
@@ -45,8 +45,8 @@ export type MiniAppWalletAuthPayload =
   | MiniAppWalletAuthSuccessPayload
   | MiniAppWalletAuthErrorPayload;
 
-export interface WalletAuthOptions
-  extends FallbackConfig<WalletAuthResult> {
+export interface MiniKitWalletAuthOptions<TCustomFallback = unknown>
+  extends FallbackConfig<TCustomFallback> {
   /** Nonce for SIWE message (alphanumeric, at least 8 chars) */
   nonce: string;
 

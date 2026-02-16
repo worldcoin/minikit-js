@@ -13,9 +13,9 @@ import { EventManager } from '../../events';
 
 export * from './types';
 import type {
+  MiniKitSignMessageOptions,
   MiniAppSignMessagePayload,
   MiniAppSignMessageSuccessPayload,
-  SignMessageOptions,
 } from './types';
 import { SignMessageError } from './types';
 
@@ -23,10 +23,12 @@ import { SignMessageError } from './types';
 // Unified API (auto-detects environment)
 // ============================================================================
 
-export async function signMessage(
-  options: SignMessageOptions,
+export async function signMessage<
+  TFallback = MiniAppSignMessageSuccessPayload,
+>(
+  options: MiniKitSignMessageOptions<TFallback>,
   ctx?: CommandContext,
-): Promise<CommandResult<MiniAppSignMessageSuccessPayload>> {
+): Promise<CommandResult<MiniAppSignMessageSuccessPayload | TFallback>> {
   return executeWithFallback({
     command: Command.SignMessage,
     nativeExecutor: () => nativeSignMessage(options, ctx),
@@ -43,7 +45,7 @@ export async function signMessage(
 // ============================================================================
 
 async function nativeSignMessage(
-  options: SignMessageOptions,
+  options: MiniKitSignMessageOptions<any>,
   ctx?: CommandContext,
 ): Promise<MiniAppSignMessageSuccessPayload> {
   if (!ctx) {
