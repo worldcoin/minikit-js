@@ -1,3 +1,4 @@
+import { encodeFunctionData } from 'viem';
 import { EventManager } from '../../events';
 import { executeWithFallback } from '../fallback';
 import type { CommandResultByVia } from '../types';
@@ -13,7 +14,6 @@ import { wagmiSendTransaction } from '../wagmi-fallback';
 import type {
   MiniAppSendTransactionPayload,
   MiniKitSendTransactionOptions,
-  SendTransactionInput,
   SendTransactionResult,
   Transaction,
 } from './types';
@@ -102,7 +102,7 @@ async function nativeSendTransaction(
     );
   }
 
-  const input: SendTransactionInput = {
+  const input: MiniKitSendTransactionOptions = {
     transaction: options.transaction,
     permit2: options.permit2,
     formatPayload: options.formatPayload !== false,
@@ -162,7 +162,7 @@ async function wagmiSendTransactionAdapter(
   // Warn about unsupported features
   if (options.permit2 && options.permit2.length > 0) {
     console.warn(
-      'Permit2 is not supported via Wagmi fallback. Transactions will execute without permit2.',
+      'Permit2 signature is not automatically supported via Wagmi fallback. Transactions will execute without permit2.',
     );
   }
 
@@ -188,14 +188,11 @@ async function wagmiSendTransactionAdapter(
  * Encode transaction data from ABI + function name + args
  */
 function encodeTransactionData(tx: Transaction): string | undefined {
-  try {
-    const { encodeFunctionData } = require('viem');
-    return encodeFunctionData({
-      abi: tx.abi,
-      functionName: tx.functionName,
-      args: tx.args,
-    });
-  } catch {
-    return undefined;
-  }
+  if (tx.data) return tx.data;
+
+  return encodeFunctionData({
+    abi: tx.abi,
+    functionName: tx.functionName,
+    args: tx.args,
+  });
 }

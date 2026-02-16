@@ -1,7 +1,7 @@
 'use client';
 import {
   MiniKit,
-  ResponseEvent,
+  type MiniKitSendTransactionOptions,
   type SendTransactionResult,
 } from '@worldcoin/minikit-js';
 import { useWaitForTransactionReceipt } from '@worldcoin/minikit-react';
@@ -108,6 +108,18 @@ export const SendTransaction = () => {
     setReceivedSendTransactionPayload(errorData);
   };
 
+  const executeTransaction = async (
+    txOptions: MiniKitSendTransactionOptions,
+  ) => {
+    setTransactionData(txOptions);
+    try {
+      const result = await MiniKit.sendTransaction(txOptions);
+      await handleResult(result);
+    } catch (err) {
+      handleError(err);
+    }
+  };
+
   const onSendTransactionClick = async () => {
     const deadline = Math.floor(
       (Date.now() + 30 * 60 * 1000) / 1000,
@@ -138,7 +150,8 @@ export const SendTransaction = () => {
       transferDetails.to,
       transferDetails.requestedAmount,
     ];
-    const transaction = {
+    const txOptions: MiniKitSendTransactionOptions = {
+      chainId: 480,
       transaction: [
         {
           address: '0x78c9b378b47c1700838c599e42edd4ffd1865ccd',
@@ -158,14 +171,8 @@ export const SendTransaction = () => {
         },
       ],
     };
-    try {
-      const result = await MiniKit.sendTransaction(transaction);
-      setTransactionData(transaction);
-      await handleResult(result);
-    } catch (err) {
-      setTransactionData(transaction);
-      handleError(err);
-    }
+
+    await executeTransaction(txOptions);
   };
 
   const onSendNestedTransactionClick = async () => {
@@ -223,7 +230,8 @@ export const SendTransaction = () => {
       transferDetails2.requestedAmount,
     ];
 
-    const txOptions = {
+    const txOptions: MiniKitSendTransactionOptions = {
+      chainId: 480,
       transaction: [
         {
           address: '0x78c9b378b47c1700838c599e42edd4ffd1865ccd',
@@ -258,14 +266,7 @@ export const SendTransaction = () => {
       ],
     };
 
-    try {
-      const result = await MiniKit.sendTransaction(txOptions);
-      setTransactionData(txOptions);
-      await handleResult(result);
-    } catch (err) {
-      setTransactionData(txOptions);
-      handleError(err);
-    }
+    await executeTransaction(txOptions);
   };
 
   const testNFTPurchase = async () => {
@@ -298,7 +299,8 @@ export const SendTransaction = () => {
       transferDetails.requestedAmount,
     ];
 
-    const txOptions = {
+    const txOptions: MiniKitSendTransactionOptions = {
+      chainId: 480,
       transaction: [
         {
           address: '0x640487Ce2c45bD05D03b65783c15aa1ac694cDb6',
@@ -319,18 +321,12 @@ export const SendTransaction = () => {
       ],
     };
 
-    try {
-      const result = await MiniKit.sendTransaction(txOptions);
-      setTransactionData(txOptions);
-      await handleResult(result);
-    } catch (err) {
-      setTransactionData(txOptions);
-      handleError(err);
-    }
+    await executeTransaction(txOptions);
   };
 
   const mintToken = async () => {
-    const txOptions = {
+    const txOptions: MiniKitSendTransactionOptions = {
+      chainId: 480,
       transaction: [
         {
           address: mainContract,
@@ -340,14 +336,7 @@ export const SendTransaction = () => {
         },
       ],
     };
-    try {
-      const result = await MiniKit.sendTransaction(txOptions);
-      setTransactionData(txOptions);
-      await handleResult(result);
-    } catch (err) {
-      setTransactionData(txOptions);
-      handleError(err);
-    }
+    await executeTransaction(txOptions);
   };
 
   const bumpFunctionCalls = async () => {
@@ -361,14 +350,7 @@ export const SendTransaction = () => {
         },
       ],
     };
-    try {
-      const result = await MiniKit.sendTransaction(txOptions);
-      setTransactionData(txOptions);
-      await handleResult(result);
-    } catch (err) {
-      setTransactionData(txOptions);
-      handleError(err);
-    }
+    await executeTransaction(txOptions);
   };
 
   const getTotalTokensMinted = async () => {
@@ -382,14 +364,7 @@ export const SendTransaction = () => {
         },
       ],
     };
-    try {
-      const result = await MiniKit.sendTransaction(txOptions);
-      setTransactionData(txOptions);
-      await handleResult(result);
-    } catch (err) {
-      setTransactionData(txOptions);
-      handleError(err);
-    }
+    await executeTransaction(txOptions);
   };
 
   const intentionallyRevert = async () => {
@@ -403,14 +378,7 @@ export const SendTransaction = () => {
         },
       ],
     };
-    try {
-      const result = await MiniKit.sendTransaction(txOptions);
-      setTransactionData(txOptions);
-      await handleResult(result);
-    } catch (err) {
-      setTransactionData(txOptions);
-      handleError(err);
-    }
+    await executeTransaction(txOptions);
   };
 
   const nonExistantFunction = async () => {
@@ -424,18 +392,12 @@ export const SendTransaction = () => {
         },
       ],
     };
-    try {
-      const result = await MiniKit.sendTransaction(txOptions);
-      setTransactionData(txOptions);
-      await handleResult(result);
-    } catch (err) {
-      setTransactionData(txOptions);
-      handleError(err);
-    }
+    await executeTransaction(txOptions);
   };
 
   const testEthTransaction = async () => {
-    const txOptions = {
+    const txOptions: MiniKitSendTransactionOptions = {
+      chainId: 480,
       transaction: [
         {
           address: '0x2E7BeBAB990076A10fBb5e8C2Ff16Fc1434387ad',
@@ -446,14 +408,7 @@ export const SendTransaction = () => {
         },
       ],
     };
-    try {
-      const result = await MiniKit.sendTransaction(txOptions);
-      setTransactionData(txOptions);
-      await handleResult(result);
-    } catch (err) {
-      setTransactionData(txOptions);
-      handleError(err);
-    }
+    await executeTransaction(txOptions);
   };
 
   return (
@@ -562,9 +517,7 @@ export const SendTransaction = () => {
       </div>
 
       <div className="grid gap-y-1">
-        <p>
-          Received from &quot;{ResponseEvent.MiniAppSendTransaction}&quot;:{' '}
-        </p>
+        <p>Result from `MiniKit.sendTransaction()`:</p>
         <div className="bg-gray-300 min-h-[100px] p-2">
           <pre className="break-all whitespace-break-spaces">
             {JSON.stringify(receivedSendTransactionPayload, null, 2)}

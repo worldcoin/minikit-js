@@ -6,7 +6,7 @@
     "dev": "turbo run dev",
     "lint": "prettier --check .",
     "format": "prettier --write .",
-    "build": "turbo run build",
+    "build": "turbo run build --concurrency=1",
     "prepublishOnly": "npm run build",
     "type-check": "pnpm --recursive type-check",
     "release": "turbo build && changeset publish"

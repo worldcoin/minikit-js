@@ -65,27 +65,27 @@ async function ensureConnected(config: WagmiConfig): Promise<`0x${string}`> {
     );
   }
 
-  let lastError: unknown;
-  for (const connector of candidateConnectors) {
-    try {
-      const result = await connect(config, { connector });
-      if (result.accounts.length > 0) {
-        const account = result.accounts[0];
-        const address =
-          typeof account === 'string'
-            ? account
-            : (account as { address?: `0x${string}` }).address;
-        if (address) {
-          return address;
-        }
-      }
-    } catch (error) {
-      lastError = error;
-    }
-  }
+  const selectedConnector = candidateConnectors[0];
 
-  if (lastError instanceof Error) {
-    throw lastError;
+  try {
+    const result = await connect(config, { connector: selectedConnector });
+    if (result.accounts.length > 0) {
+      const account = result.accounts[0];
+      const address =
+        typeof account === 'string'
+          ? account
+          : (account as { address?: `0x${string}` }).address;
+      if (address) {
+        return address;
+      }
+    }
+  } catch (error) {
+    const connectorId = (selectedConnector as { id?: string }).id ?? 'unknown';
+    const wrappedError = new Error(
+      `Failed to connect with connector "${connectorId}". Reorder connectors to change the default connector.`,
+    );
+    (wrappedError as Error & { cause?: unknown }).cause = error;
+    throw wrappedError;
   }
 
   throw new Error('Failed to connect wallet');
@@ -261,6 +261,11 @@ export interface SendTransactionResult {
   hashes: string[];
 }
 
+function isChainMismatchError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes('does not match the target chain');
+}
+
 /**
  * Execute transactions via Wagmi (sequential, no batching)
  */
@@ -274,28 +279,62 @@ export async function wagmiSendTransaction(
     );
   }
 
-  const { getChainId, sendTransaction, switchChain } = await import(
-    'wagmi/actions'
-  );
+  const { getChainId, getWalletClient, sendTransaction, switchChain } =
+    await import('wagmi/actions');
 
   await ensureConnected(config);
 
-  if (params.chainId !== undefined) {
+  const targetChainId =
+    params.chainId ??
+    (config as { chains?: Array<{ id: number }> }).chains?.[0]?.id;
+
+  const ensureTargetChain = async () => {
+    if (targetChainId === undefined) return;
+
     const currentChainId = await getChainId(config);
-    if (currentChainId !== params.chainId) {
-      await switchChain(config, { chainId: params.chainId });
+    if (currentChainId !== targetChainId) {
+      await switchChain(config, { chainId: targetChainId });
     }
-  }
+
+    // Confirm with wallet provider state (not only wagmi store state).
+    const walletClient = await getWalletClient(config);
+    const providerChainId = walletClient
+      ? await walletClient.getChainId()
+      : await getChainId(config);
+
+    if (providerChainId !== targetChainId) {
+      throw new Error(
+        `Wallet network mismatch: expected chain ${targetChainId}, got ${providerChainId}. Please switch networks in your wallet and retry.`,
+      );
+    }
+  };
+
+  await ensureTargetChain();
 
   // Execute transactions sequentially (Wagmi doesn't support batch natively)
   const hashes: string[] = [];
   for (const tx of params.transactions) {
-    const hash = await sendTransaction(config, {
-      chainId: params.chainId,
-      to: tx.address as `0x${string}`,
-      data: tx.data as `0x${string}` | undefined,
-      value: tx.value ? BigInt(tx.value) : undefined,
-    });
+    let hash: `0x${string}`;
+    try {
+      hash = await sendTransaction(config, {
+        chainId: targetChainId,
+        to: tx.address as `0x${string}`,
+        data: tx.data as `0x${string}` | undefined,
+        value: tx.value ? BigInt(tx.value) : undefined,
+      });
+    } catch (error) {
+      if (targetChainId === undefined || !isChainMismatchError(error)) {
+        throw error;
+      }
+
+      await ensureTargetChain();
+      hash = await sendTransaction(config, {
+        chainId: targetChainId,
+        to: tx.address as `0x${string}`,
+        data: tx.data as `0x${string}` | undefined,
+        value: tx.value ? BigInt(tx.value) : undefined,
+      });
+    }
     hashes.push(hash);
   }
 
