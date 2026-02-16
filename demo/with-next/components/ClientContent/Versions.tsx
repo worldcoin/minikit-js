@@ -25,7 +25,7 @@ export const Versions = (): JSX.Element => {
   };
   return (
     <div className="grid gap-y-4">
-      <h2 className="font-bold text-2xl">Versions</h2>
+      <h2 className="font-bold text-2xl">Version Check</h2>
 
       <div>
         <p>window.WorldApp:</p>
