@@ -4,10 +4,11 @@ import {
   type MiniKitSendTransactionOptions,
   type SendTransactionResult,
 } from '@worldcoin/minikit-js';
-import { useWaitForTransactionReceipt } from '@worldcoin/minikit-react';
+import { useWaitForTransactionReceipt as useMiniKitWaitForTransactionReceipt } from '@worldcoin/minikit-react';
 import { useState } from 'react';
 import { createPublicClient, http } from 'viem';
 import { worldchain } from 'viem/chains';
+import { useWaitForTransactionReceipt as useWagmiWaitForTransactionReceipt } from 'wagmi';
 import * as yup from 'yup';
 import ANDYABI from '../../abi/Andy.json';
 import DEXABI from '../../abi/DEX.json';
@@ -16,13 +17,17 @@ import MinikitStaging from '../../abi/MinikitStaging.json';
 import { validateSchema } from './helpers/validate-schema';
 
 const sendTransactionResultSchema = yup.object({
-  hashes: yup.array().of(yup.string().required()).required().min(1),
-  transactionId: yup.string().optional(),
-  transaction_id: yup.string().optional(),
+  transactionHash: yup.string().nullable().optional(),
+  userOpHash: yup.string().nullable().optional(),
+  mini_app_id: yup.string().nullable().optional(),
+  status: yup.string<'success'>().oneOf(['success']).nullable().optional(),
+  version: yup.number().nullable().optional(),
+  transactionId: yup.string().nullable().optional(),
+  transaction_id: yup.string().nullable().optional(),
   transaction_status: yup.string().oneOf(['submitted']).optional(),
-  from: yup.string().optional(),
-  chain: yup.string().optional(),
-  timestamp: yup.string().optional(),
+  from: yup.string().nullable().optional(),
+  chain: yup.string().nullable().optional(),
+  timestamp: yup.string().nullable().optional(),
 });
 
 const testTokens = {
@@ -53,6 +58,12 @@ export const SendTransaction = () => {
   ] = useState<string | null>();
 
   const [transactionId, setTransactionId] = useState<string>('');
+  const [transactionHash, setTransactionHash] = useState<
+    `0x${string}` | undefined
+  >();
+  const [verificationMode, setVerificationMode] = useState<
+    'minikit' | 'wagmi' | null
+  >(null);
 
   const client = createPublicClient({
     chain: worldchain,
@@ -60,17 +71,30 @@ export const SendTransaction = () => {
   });
 
   const {
-    isLoading: isConfirming,
-    isSuccess: isConfirmed,
-    error,
-    isError,
-  } = useWaitForTransactionReceipt({
+    isLoading: isMiniKitConfirming,
+    isSuccess: isMiniKitConfirmed,
+    error: miniKitError,
+    isError: isMiniKitError,
+  } = useMiniKitWaitForTransactionReceipt({
     client: client,
     appConfig: {
       app_id: process.env.NEXT_PUBLIC_STAGING_VERIFY_APP_ID || '',
     },
     transactionId: transactionId,
     pollingInterval: 2000,
+  });
+
+  const {
+    isLoading: isWagmiConfirming,
+    isSuccess: isWagmiConfirmed,
+    error: wagmiError,
+    isError: isWagmiError,
+  } = useWagmiWaitForTransactionReceipt({
+    chainId: 480,
+    hash: transactionHash,
+    query: {
+      enabled: Boolean(transactionHash),
+    },
   });
 
   const handleResult = async (result: {
@@ -90,11 +114,24 @@ export const SendTransaction = () => {
       setSendTransactionPayloadValidationMessage(errorMessage);
     }
 
-    if (result.data.transactionId) {
+    if (result.executedWith === 'minikit' && result.data.transactionId) {
+      setVerificationMode('minikit');
       setTransactionId(result.data.transactionId);
+    } else if (result.executedWith === 'wagmi') {
+      setVerificationMode('wagmi');
+      const hash = result.data.transactionHash;
+
+      if (hash) {
+        setTransactionHash(hash as `0x${string}`);
+      }
+    } else {
+      setVerificationMode(null);
     }
 
-    setReceivedSendTransactionPayload(result.data);
+    setReceivedSendTransactionPayload({
+      executedWith: result.executedWith,
+      data: result.data,
+    });
   };
 
   const handleError = (err: unknown) => {
@@ -105,6 +142,7 @@ export const SendTransaction = () => {
       details: (err as any)?.details,
     };
     setSendTransactionPayloadValidationMessage(`Error: ${errorData.error}`);
+    setVerificationMode(null);
     setReceivedSendTransactionPayload(errorData);
   };
 
@@ -112,6 +150,9 @@ export const SendTransaction = () => {
     txOptions: MiniKitSendTransactionOptions,
   ) => {
     setTransactionData(txOptions);
+    setTransactionId('');
+    setTransactionHash(undefined);
+    setVerificationMode(null);
     try {
       const result = await MiniKit.sendTransaction(txOptions);
       await handleResult(result);
@@ -534,10 +575,23 @@ export const SendTransaction = () => {
         <div className="grid gap-y-1">
           <p>Verification:</p>
           <div className="grid gap-y-1 bg-gray-300 p-2">
-            {transactionId && <p>Transaction ID: {transactionId}</p>}
-            {isConfirming && <p>Waiting for confirmation...</p>}
-            {isConfirmed && <p>Transaction confirmed.</p>}
-            {isError && <p>{error?.message}</p>}
+            {verificationMode === 'minikit' && (
+              <>
+                {transactionId && <p>Transaction ID: {transactionId}</p>}
+                {isMiniKitConfirming && <p>Waiting for confirmation...</p>}
+                {isMiniKitConfirmed && <p>Transaction confirmed.</p>}
+                {isMiniKitError && <p>{miniKitError?.message}</p>}
+              </>
+            )}
+            {verificationMode === 'wagmi' && (
+              <>
+                {transactionHash && <p>Transaction hash: {transactionHash}</p>}
+                {isWagmiConfirming && <p>Waiting for confirmation...</p>}
+                {isWagmiConfirmed && <p>Transaction confirmed.</p>}
+                {isWagmiError && <p>{wagmiError?.message}</p>}
+              </>
+            )}
+            {!verificationMode && <p>No verification in this mode.</p>}
           </div>
         </div>
       </div>

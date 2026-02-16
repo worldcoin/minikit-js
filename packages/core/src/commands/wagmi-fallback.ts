@@ -249,16 +249,16 @@ export async function wagmiSignTypedData(
 }
 
 export interface SendTransactionParams {
-  transactions: Array<{
+  transaction: {
     address: string;
     data?: string;
     value?: string;
-  }>;
+  };
   chainId?: number;
 }
 
 export interface SendTransactionResult {
-  hashes: string[];
+  transactionHash: string;
 }
 
 function isChainMismatchError(error: unknown): boolean {
@@ -267,7 +267,7 @@ function isChainMismatchError(error: unknown): boolean {
 }
 
 /**
- * Execute transactions via Wagmi (sequential, no batching)
+ * Execute transaction via Wagmi
  */
 export async function wagmiSendTransaction(
   params: SendTransactionParams,
@@ -311,32 +311,31 @@ export async function wagmiSendTransaction(
 
   await ensureTargetChain();
 
-  // Execute transactions sequentially (Wagmi doesn't support batch natively)
-  const hashes: string[] = [];
-  for (const tx of params.transactions) {
-    let hash: `0x${string}`;
-    try {
-      hash = await sendTransaction(config, {
-        chainId: targetChainId,
-        to: tx.address as `0x${string}`,
-        data: tx.data as `0x${string}` | undefined,
-        value: tx.value ? BigInt(tx.value) : undefined,
-      });
-    } catch (error) {
-      if (targetChainId === undefined || !isChainMismatchError(error)) {
-        throw error;
-      }
-
-      await ensureTargetChain();
-      hash = await sendTransaction(config, {
-        chainId: targetChainId,
-        to: tx.address as `0x${string}`,
-        data: tx.data as `0x${string}` | undefined,
-        value: tx.value ? BigInt(tx.value) : undefined,
-      });
+  let transactionHash: `0x${string}`;
+  try {
+    transactionHash = await sendTransaction(config, {
+      chainId: targetChainId,
+      to: params.transaction.address as `0x${string}`,
+      data: params.transaction.data as `0x${string}` | undefined,
+      value: params.transaction.value
+        ? BigInt(params.transaction.value)
+        : undefined,
+    });
+  } catch (error) {
+    if (targetChainId === undefined || !isChainMismatchError(error)) {
+      throw error;
     }
-    hashes.push(hash);
+
+    await ensureTargetChain();
+    transactionHash = await sendTransaction(config, {
+      chainId: targetChainId,
+      to: params.transaction.address as `0x${string}`,
+      data: params.transaction.data as `0x${string}` | undefined,
+      value: params.transaction.value
+        ? BigInt(params.transaction.value)
+        : undefined,
+    });
   }
 
-  return { hashes };
+  return { transactionHash };
 }

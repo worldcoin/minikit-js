@@ -140,10 +140,11 @@ export const SendTransactionErrorMessage: Record<
 export type MiniAppSendTransactionSuccessPayload = MiniAppBaseSuccessPayload & {
   transaction_status: 'submitted';
   transaction_id: string;
-  reference: string;
+  reference?: string;
   from: string;
   chain: Network;
   timestamp: string;
+  userOpHash?: string;
   mini_app_id?: string;
 };
 
@@ -177,24 +178,34 @@ export interface MiniKitSendTransactionOptions<
   formatPayload?: boolean;
 }
 
+
+
 export interface SendTransactionResult {
-  /** Transaction hash(es) */
-  hashes: string[];
+  /** On-chain transaction hash (Wagmi fallback) */
+  transactionHash?: string | null;
+  /** User operation hash (World App only) */
+  userOpHash?: string | null;
+  /** Mini App ID (World App only) */
+  mini_app_id?: string | null;
+  /** Result status */
+  status?: 'success' | null;
+  /** Payload version */
+  version?: number | null;
   /** Transaction ID (World App only) */
-  transactionId?: string;
+  transactionId?: string | null;
   /** Reference (World App only) */
-  reference?: string;
+  reference?: string | null;
   /** From address */
-  from?: string;
+  from?: string | null;
   /** Chain identifier */
-  chain?: string;
+  chain?: string | null;
   /** Timestamp */
-  timestamp?: string;
+  timestamp?: string | null;
 
   // ---- Deprecated aliases (old event payload field names) ----
 
   /** @deprecated Use `transactionId` instead */
-  transaction_id?: string;
+  transaction_id?: string | null;
   /** @deprecated Success is implicit (errors throw). Always `'submitted'` when present. */
   transaction_status?: 'submitted';
 }

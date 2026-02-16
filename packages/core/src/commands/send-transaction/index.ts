@@ -7,22 +7,25 @@ import {
   COMMAND_VERSIONS,
   CommandContext,
   isCommandAvailable,
+  isInWorldApp,
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import { wagmiSendTransaction } from '../wagmi-fallback';
+import { hasWagmiConfig, wagmiSendTransaction } from '../wagmi-fallback';
 import type {
   MiniAppSendTransactionPayload,
   MiniKitSendTransactionOptions,
   SendTransactionResult,
   Transaction,
 } from './types';
-import { SendTransactionError } from './types';
+import { SendTransactionError, SendTransactionErrorCodes } from './types';
 import { validateSendTransactionPayload } from './validate';
 
 export * from './types';
 
 const WORLD_CHAIN_ID = 480;
+const WAGMI_MULTI_TX_ERROR_MESSAGE =
+  'Wagmi fallback does not support multi-transaction execution. Pass a single transaction, run inside World App for batching, or provide a custom fallback.';
 
 // ============================================================================
 // Unified API (auto-detects environment)
@@ -43,7 +46,7 @@ const WORLD_CHAIN_ID = 480;
  *   }],
  * });
  *
- * console.log(result.data.hashes); // ['0x...']
+ * console.log(result.data.transactionHash); // '0x...'
  * console.log(result.executedWith); // 'minikit' | 'wagmi' | 'fallback'
  * ```
  */
@@ -51,6 +54,17 @@ export async function sendTransaction<TFallback = SendTransactionResult>(
   options: MiniKitSendTransactionOptions<TFallback>,
   ctx?: CommandContext,
 ): Promise<CommandResultByVia<SendTransactionResult, TFallback>> {
+  const isWagmiFallbackPath = !isInWorldApp() && hasWagmiConfig();
+  if (
+    isWagmiFallbackPath &&
+    options.transaction.length > 1 &&
+    !options.fallback
+  ) {
+    throw new SendTransactionError(SendTransactionErrorCodes.InvalidOperation, {
+      reason: WAGMI_MULTI_TX_ERROR_MESSAGE,
+    });
+  }
+
   const result = await executeWithFallback({
     command: Command.SendTransaction,
     nativeExecutor: () => nativeSendTransaction(options, ctx),
@@ -139,7 +153,11 @@ async function nativeSendTransaction(
   }
 
   return {
-    hashes: [finalPayload.transaction_id],
+    transactionHash: null,
+    userOpHash: finalPayload.userOpHash ?? null,
+    mini_app_id: finalPayload.mini_app_id ?? null,
+    status: finalPayload.status,
+    version: finalPayload.version,
     transactionId: finalPayload.transaction_id,
     reference: finalPayload.reference,
     from: finalPayload.from,
@@ -159,6 +177,10 @@ async function nativeSendTransaction(
 async function wagmiSendTransactionAdapter(
   options: MiniKitSendTransactionOptions<any>,
 ): Promise<SendTransactionResult> {
+  if (options.transaction.length > 1) {
+    throw new Error(WAGMI_MULTI_TX_ERROR_MESSAGE);
+  }
+
   // Warn about unsupported features
   if (options.permit2 && options.permit2.length > 0) {
     console.warn(
@@ -173,14 +195,27 @@ async function wagmiSendTransactionAdapter(
     data: encodeTransactionData(tx),
     value: tx.value,
   }));
+  const firstTransaction = transactions[0];
+  if (!firstTransaction) {
+    throw new Error('At least one transaction is required');
+  }
 
   const result = await wagmiSendTransaction({
-    transactions,
+    transaction: firstTransaction,
     chainId: options.chainId,
   });
 
   return {
-    hashes: result.hashes,
+    transactionHash: result.transactionHash,
+    userOpHash: null,
+    mini_app_id: null,
+    status: 'success',
+    version: 1,
+    transactionId: null,
+    reference: null,
+    from: null,
+    chain: null,
+    timestamp: null,
   };
 }
 

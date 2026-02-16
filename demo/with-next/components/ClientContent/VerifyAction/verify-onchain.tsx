@@ -67,7 +67,7 @@ export const verifyOnchain = async (payload: {
 
     return {
       success: true,
-      transactionHash: result.data.transactionId,
+      transactionHash: result.data.transactionId ?? undefined,
     };
   } catch (error) {
     console.error('Error verifying on-chain:', error);
