@@ -1,14 +1,10 @@
 'use client';
 
-import {
-  MiniKit,
-  MiniKitInstallErrorCodes,
-  MiniKitInstallErrorMessage,
-} from '@worldcoin/minikit-js';
+import { MiniKit } from '@worldcoin/minikit-js';
 import clsx from 'clsx';
 import { useState } from 'react';
 
-const appId = 'your-app-id';
+const appId = process.env.NEXT_PUBLIC_STAGING_VERIFY_APP_ID;
 
 export const Versions = (): JSX.Element => {
   const [username, setUsername] = useState('andy');
@@ -19,27 +15,7 @@ export const Versions = (): JSX.Element => {
     ) {
       return { isValid: false, error: 'window.WorldApp is undefined' };
     }
-
-    try {
-      // @ts-ignore
-      if (MiniKit.commandsValid(window.WorldApp?.supported_commands)) {
-        return { isValid: true };
-      } else {
-        return {
-          isValid: false,
-          error:
-            MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.AppOutOfDate],
-        };
-      }
-    } catch (error) {
-      console.error('Error validating versions:', error);
-      return {
-        isValid: false,
-        error:
-          'Something went wrong on version validation' +
-          (error instanceof Error ? `: ${error.message}` : ''),
-      };
-    }
+    return { isValid: true };
   };
 
   const reinstall = () => {
