@@ -50,7 +50,7 @@ export const Pay = () => {
     if (payload.status === 'error') {
       const errorMessage = await validateSchema(
         paymentErrorPayloadSchema,
-        payload,
+        payload.data,
       );
 
       if (!errorMessage) {
@@ -61,7 +61,7 @@ export const Pay = () => {
     } else {
       const errorMessage = await validateSchema(
         paymentSuccessPayloadSchema,
-        payload,
+        payload.data,
       );
 
       if (!errorMessage) {
