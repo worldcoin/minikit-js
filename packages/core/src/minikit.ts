@@ -10,7 +10,6 @@ import type {
   MiniAppSendHapticFeedbackSuccessPayload,
   MiniAppSharePayload,
   MiniAppShareSuccessPayload,
-  MiniAppSignMessagePayload,
   MiniAppSignMessageSuccessPayload,
   MiniAppSignTypedDataPayload,
   MiniAppSignTypedDataSuccessPayload,
@@ -262,9 +261,7 @@ export class MiniKit {
   /**
    * Trigger haptic feedback
    */
-  static sendHapticFeedback<
-    TFallback = MiniAppSendHapticFeedbackPayload,
-  >(
+  static sendHapticFeedback<TFallback = MiniAppSendHapticFeedbackPayload>(
     options: MiniKitSendHapticFeedbackOptions<TFallback>,
   ): Promise<
     CommandResultByVia<
@@ -355,7 +352,7 @@ export class MiniKit {
   }
 
   public static install(appId?: string): MiniKitInstallReturnType {
-    if (typeof window === 'undefined' || Boolean(window.MiniKit)) {
+    if (typeof window === 'undefined') {
       return {
         success: false,
         errorCode: MiniKitInstallErrorCodes.AlreadyInstalled,
@@ -385,8 +382,13 @@ export class MiniKit {
     this.initFromWorldApp(window.WorldApp);
 
     try {
-      window.MiniKit = MiniKit;
-      this.sendInit();
+      // Keep install idempotent. If another MiniKit instance already exists on window
+      // (e.g. duplicated bundles/entries), still continue so this instance can validate
+      // command availability and use native bridge paths.
+      if (!window.MiniKit) {
+        window.MiniKit = MiniKit;
+        this.sendInit();
+      }
     } catch (error) {
       console.error(
         MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.Unknown],

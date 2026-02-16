@@ -1,6 +1,6 @@
 'use client';
 
-import { MiniKit } from '@worldcoin/minikit-js';
+import { MiniKit, validateCommands } from '@worldcoin/minikit-js';
 import clsx from 'clsx';
 import { useState } from 'react';
 
@@ -15,7 +15,8 @@ export const Versions = (): JSX.Element => {
     ) {
       return { isValid: false, error: 'window.WorldApp is undefined' };
     }
-    return { isValid: true };
+    console.log(validateCommands(window.WorldApp.supported_commands));
+    return { isValid: validateCommands(window.WorldApp.supported_commands) };
   };
 
   const reinstall = () => {
