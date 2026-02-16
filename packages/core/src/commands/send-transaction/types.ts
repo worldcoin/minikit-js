@@ -163,6 +163,13 @@ export interface SendTransactionOptions
   /** Transactions to execute */
   transaction: Transaction[];
 
+  /**
+   * Optional chain ID to execute on.
+   * - World App currently only supports World Chain (480).
+   * - On web (wagmi fallback), this is forwarded to wagmi.
+   */
+  chainId?: number;
+
   /** Permit2 data for token approvals (World App only) */
   permit2?: Permit2[];
 

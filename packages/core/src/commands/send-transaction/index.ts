@@ -22,6 +22,8 @@ import type {
 } from './types';
 import { SendTransactionError } from './types';
 
+const WORLD_CHAIN_ID = 480;
+
 // ============================================================================
 // Unified API (auto-detects environment)
 // ============================================================================
@@ -32,6 +34,7 @@ import { SendTransactionError } from './types';
  * @example
  * ```typescript
  * const result = await sendTransaction({
+ *   chainId: 480,
  *   transaction: [{
  *     address: '0x...',
  *     abi: ContractABI,
@@ -74,6 +77,15 @@ async function nativeSendTransaction(
   ) {
     throw new Error(
       "'sendTransaction' command is unavailable. Check MiniKit.install() or update the app version",
+    );
+  }
+
+  if (
+    options.chainId !== undefined &&
+    options.chainId !== WORLD_CHAIN_ID
+  ) {
+    throw new Error(
+      `World App only supports World Chain (chainId: ${WORLD_CHAIN_ID})`,
     );
   }
 
@@ -150,7 +162,10 @@ async function wagmiSendTransactionAdapter(
     value: tx.value,
   }));
 
-  const result = await wagmiSendTransaction({ transactions });
+  const result = await wagmiSendTransaction({
+    transactions,
+    chainId: options.chainId,
+  });
 
   return {
     hashes: result.hashes,

@@ -155,6 +155,7 @@ export interface SendTransactionParams {
     data?: string;
     value?: string;
   }>;
+  chainId?: number;
 }
 
 export interface SendTransactionResult {
@@ -174,14 +175,24 @@ export async function wagmiSendTransaction(
     );
   }
 
-  const { sendTransaction } = await import('wagmi/actions');
+  const { getChainId, sendTransaction, switchChain } = await import(
+    'wagmi/actions'
+  );
 
   await ensureConnected(config);
+
+  if (params.chainId !== undefined) {
+    const currentChainId = await getChainId(config);
+    if (currentChainId !== params.chainId) {
+      await switchChain(config, { chainId: params.chainId });
+    }
+  }
 
   // Execute transactions sequentially (Wagmi doesn't support batch natively)
   const hashes: string[] = [];
   for (const tx of params.transactions) {
     const hash = await sendTransaction(config, {
+      chainId: params.chainId,
       to: tx.address as `0x${string}`,
       data: tx.data as `0x${string}` | undefined,
       value: tx.value ? BigInt(tx.value) : undefined,

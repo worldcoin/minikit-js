@@ -96,6 +96,7 @@ export class MiniKit {
    * @example
    * ```typescript
    * const result = await MiniKit.sendTransaction({
+   *   chainId: 480,
    *   transaction: [{
    *     address: '0x...',
    *     abi: ContractABI,

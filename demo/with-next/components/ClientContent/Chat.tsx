@@ -1,5 +1,6 @@
 import {
   ChatErrorCodes,
+  ChatInput,
   MiniAppChatPayload,
   MiniKit,
   ResponseEvent,
@@ -77,7 +78,7 @@ export const Chat = () => {
   }, []);
 
   const onSendChat = useCallback(() => {
-    const chatPayload = {
+    const chatPayload: ChatInput = {
       message: message || '',
       ...(toAddress && { to: toAddress.split(',').map((addr) => addr.trim()) }),
     };
