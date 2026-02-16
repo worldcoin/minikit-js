@@ -1,9 +1,12 @@
-import { JsonRpcProvider } from 'ethers';
-import { parseSiweMessage, verifySiweMessage } from '../commands/wallet-auth/siwe';
-import { SiweMessage } from 'siwe';
 import { MiniAppWalletAuthSuccessPayload } from 'commands/wallet-auth';
+import { JsonRpcProvider } from 'ethers';
+import { SiweMessage } from 'siwe';
 import { createPublicClient, http } from 'viem';
 import { worldchain } from 'viem/chains';
+import {
+  parseSiweMessage,
+  verifySiweMessage,
+} from '../commands/wallet-auth/siwe';
 
 const siweMessage = `https://test.com wants you to sign in with your Ethereum account:\n\
 {{address}}\n\n\

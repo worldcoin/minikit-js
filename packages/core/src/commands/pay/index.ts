@@ -1,5 +1,6 @@
-import { validatePaymentPayload } from './validate';
-import { Network } from './types';
+import { EventManager } from '../../events';
+import { executeWithFallback } from '../fallback';
+import type { CommandResultByVia } from '../types';
 import {
   Command,
   COMMAND_VERSIONS,
@@ -8,19 +9,17 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import type { CommandResultByVia } from '../types';
-import { executeWithFallback } from '../fallback';
-import { EventManager } from '../../events';
-
-export * from './types';
 import type {
+  MiniAppPaymentPayload,
+  MiniKitPayOptions,
   PayCommandInput,
   PayCommandPayload,
-  MiniKitPayOptions,
   PayResult,
-  MiniAppPaymentPayload,
 } from './types';
-import { PayError } from './types';
+import { Network, PayError } from './types';
+import { validatePaymentPayload } from './validate';
+
+export * from './types';
 
 // ============================================================================
 // Unified API (auto-detects environment)
@@ -100,13 +99,12 @@ async function nativePay(
   const finalPayload = await new Promise<MiniAppPaymentPayload>(
     (resolve, reject) => {
       try {
-        ctx!.events.subscribe(
-          ResponseEvent.MiniAppPayment,
-          ((response: MiniAppPaymentPayload) => {
-            ctx!.events.unsubscribe(ResponseEvent.MiniAppPayment);
-            resolve(response);
-          }) as any,
-        );
+        ctx!.events.subscribe(ResponseEvent.MiniAppPayment, ((
+          response: MiniAppPaymentPayload,
+        ) => {
+          ctx!.events.unsubscribe(ResponseEvent.MiniAppPayment);
+          resolve(response);
+        }) as any);
 
         sendMiniKitEvent({
           command: Command.Pay,

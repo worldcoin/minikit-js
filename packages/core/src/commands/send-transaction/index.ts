@@ -1,4 +1,6 @@
-import { validateSendTransactionPayload } from './validate';
+import { EventManager } from '../../events';
+import { executeWithFallback } from '../fallback';
+import type { CommandResultByVia } from '../types';
 import {
   Command,
   COMMAND_VERSIONS,
@@ -7,20 +9,18 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import type { CommandResultByVia } from '../types';
-import { executeWithFallback } from '../fallback';
 import { wagmiSendTransaction } from '../wagmi-fallback';
-import { EventManager } from '../../events';
-
-export * from './types';
 import type {
-  SendTransactionInput,
-  MiniKitSendTransactionOptions,
-  SendTransactionResult,
   MiniAppSendTransactionPayload,
+  MiniKitSendTransactionOptions,
+  SendTransactionInput,
+  SendTransactionResult,
   Transaction,
 } from './types';
 import { SendTransactionError } from './types';
+import { validateSendTransactionPayload } from './validate';
+
+export * from './types';
 
 const WORLD_CHAIN_ID = 480;
 
@@ -63,10 +63,16 @@ export async function sendTransaction<TFallback = SendTransactionResult>(
   }
 
   if (result.executedWith === 'wagmi') {
-    return { executedWith: 'wagmi', data: result.data as SendTransactionResult };
+    return {
+      executedWith: 'wagmi',
+      data: result.data as SendTransactionResult,
+    };
   }
 
-  return { executedWith: 'minikit', data: result.data as SendTransactionResult };
+  return {
+    executedWith: 'minikit',
+    data: result.data as SendTransactionResult,
+  };
 }
 
 // ============================================================================
@@ -90,10 +96,7 @@ async function nativeSendTransaction(
     );
   }
 
-  if (
-    options.chainId !== undefined &&
-    options.chainId !== WORLD_CHAIN_ID
-  ) {
+  if (options.chainId !== undefined && options.chainId !== WORLD_CHAIN_ID) {
     throw new Error(
       `World App only supports World Chain (chainId: ${WORLD_CHAIN_ID})`,
     );
@@ -110,13 +113,12 @@ async function nativeSendTransaction(
   const finalPayload = await new Promise<MiniAppSendTransactionPayload>(
     (resolve, reject) => {
       try {
-        ctx!.events.subscribe(
-          ResponseEvent.MiniAppSendTransaction,
-          ((response: MiniAppSendTransactionPayload) => {
-            ctx!.events.unsubscribe(ResponseEvent.MiniAppSendTransaction);
-            resolve(response);
-          }) as any,
-        );
+        ctx!.events.subscribe(ResponseEvent.MiniAppSendTransaction, ((
+          response: MiniAppSendTransactionPayload,
+        ) => {
+          ctx!.events.unsubscribe(ResponseEvent.MiniAppSendTransaction);
+          resolve(response);
+        }) as any);
 
         sendMiniKitEvent({
           command: Command.SendTransaction,

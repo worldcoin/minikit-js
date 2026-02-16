@@ -18,11 +18,10 @@ export type PermissionSettings = {
   [K in Permission]?: any;
 };
 
-export type MiniAppGetPermissionsSuccessPayload =
-  MiniAppBaseSuccessPayload & {
-    permissions: PermissionSettings;
-    timestamp: string;
-  };
+export type MiniAppGetPermissionsSuccessPayload = MiniAppBaseSuccessPayload & {
+  permissions: PermissionSettings;
+  timestamp: string;
+};
 
 export type MiniAppGetPermissionsErrorPayload =
   MiniAppBaseErrorPayload<GetPermissionsErrorCodes> & {

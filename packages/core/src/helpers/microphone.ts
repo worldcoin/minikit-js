@@ -1,5 +1,5 @@
-import { MiniKit } from 'minikit';
 import { ResponseEvent, sendMiniKitEvent } from 'commands/types';
+import { MiniKit } from 'minikit';
 
 enum MicrophoneErrorCodes {
   MiniAppPermissionNotEnabled = 'mini_app_permission_not_enabled',

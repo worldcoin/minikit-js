@@ -52,7 +52,7 @@ export const verifyProof = async (params: {
           action,
           signal,
         }),
-      }
+      },
     );
 
     const result = await response.json();

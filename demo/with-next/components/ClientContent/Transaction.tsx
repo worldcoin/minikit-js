@@ -73,7 +73,10 @@ export const SendTransaction = () => {
     pollingInterval: 2000,
   });
 
-  const handleResult = async (result: { data: SendTransactionResult; executedWith: string }) => {
+  const handleResult = async (result: {
+    data: SendTransactionResult;
+    executedWith: string;
+  }) => {
     console.log('SendTransaction result', result);
 
     const errorMessage = await validateSchema(

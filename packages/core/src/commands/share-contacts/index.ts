@@ -1,3 +1,6 @@
+import { EventManager } from '../../events';
+import { executeWithFallback } from '../fallback';
+import type { CommandResultByVia } from '../types';
 import {
   Command,
   COMMAND_VERSIONS,
@@ -6,17 +9,14 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import type { CommandResultByVia } from '../types';
-import { executeWithFallback } from '../fallback';
-import { EventManager } from '../../events';
-
-export * from './types';
 import type {
+  MiniAppShareContactsPayload,
   MiniKitShareContactsOptions,
   ShareContactsResult,
-  MiniAppShareContactsPayload,
 } from './types';
 import { ShareContactsError } from './types';
+
+export * from './types';
 
 // ============================================================================
 // Unified API (auto-detects environment)
@@ -90,13 +90,12 @@ async function nativeShareContacts(
   const finalPayload = await new Promise<MiniAppShareContactsPayload>(
     (resolve, reject) => {
       try {
-        ctx!.events.subscribe(
-          ResponseEvent.MiniAppShareContacts,
-          ((response: MiniAppShareContactsPayload) => {
-            ctx!.events.unsubscribe(ResponseEvent.MiniAppShareContacts);
-            resolve(response);
-          }) as any,
-        );
+        ctx!.events.subscribe(ResponseEvent.MiniAppShareContacts, ((
+          response: MiniAppShareContactsPayload,
+        ) => {
+          ctx!.events.unsubscribe(ResponseEvent.MiniAppShareContacts);
+          resolve(response);
+        }) as any);
 
         sendMiniKitEvent({
           command: Command.ShareContacts,

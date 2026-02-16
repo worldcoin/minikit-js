@@ -1,3 +1,6 @@
+import { EventManager } from '../../events';
+import { executeWithFallback } from '../fallback';
+import type { CommandResultByVia } from '../types';
 import {
   Command,
   COMMAND_VERSIONS,
@@ -6,18 +9,15 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import type { CommandResultByVia } from '../types';
-import { executeWithFallback } from '../fallback';
 import { wagmiSignTypedData } from '../wagmi-fallback';
-import { EventManager } from '../../events';
-
-export * from './types';
 import type {
-  MiniKitSignTypedDataOptions,
   MiniAppSignTypedDataPayload,
   MiniAppSignTypedDataSuccessPayload,
+  MiniKitSignTypedDataOptions,
 } from './types';
 import { SignTypedDataError } from './types';
+
+export * from './types';
 
 // ============================================================================
 // Unified API (auto-detects environment)
@@ -92,13 +92,12 @@ async function nativeSignTypedData(
   const payload = await new Promise<MiniAppSignTypedDataPayload>(
     (resolve, reject) => {
       try {
-        ctx!.events.subscribe(
-          ResponseEvent.MiniAppSignTypedData,
-          ((response: MiniAppSignTypedDataPayload) => {
-            ctx!.events.unsubscribe(ResponseEvent.MiniAppSignTypedData);
-            resolve(response);
-          }) as any,
-        );
+        ctx!.events.subscribe(ResponseEvent.MiniAppSignTypedData, ((
+          response: MiniAppSignTypedDataPayload,
+        ) => {
+          ctx!.events.unsubscribe(ResponseEvent.MiniAppSignTypedData);
+          resolve(response);
+        }) as any);
 
         sendMiniKitEvent({
           command: Command.SignTypedData,

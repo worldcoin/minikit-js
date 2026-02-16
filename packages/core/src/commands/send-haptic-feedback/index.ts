@@ -1,3 +1,6 @@
+import { EventManager } from '../../events';
+import { executeWithFallback } from '../fallback';
+import type { CommandResultByVia } from '../types';
 import {
   Command,
   COMMAND_VERSIONS,
@@ -6,17 +9,14 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import type { CommandResultByVia } from '../types';
-import { executeWithFallback } from '../fallback';
-import { EventManager } from '../../events';
-
-export * from './types';
 import type {
   MiniAppSendHapticFeedbackPayload,
   MiniAppSendHapticFeedbackSuccessPayload,
   MiniKitSendHapticFeedbackOptions,
 } from './types';
 import { SendHapticFeedbackError } from './types';
+
+export * from './types';
 
 // ============================================================================
 // Unified API (auto-detects environment)
@@ -87,13 +87,12 @@ async function nativeSendHapticFeedback(
   const payload = await new Promise<MiniAppSendHapticFeedbackPayload>(
     (resolve, reject) => {
       try {
-        ctx!.events.subscribe(
-          ResponseEvent.MiniAppSendHapticFeedback,
-          ((response: MiniAppSendHapticFeedbackPayload) => {
-            ctx!.events.unsubscribe(ResponseEvent.MiniAppSendHapticFeedback);
-            resolve(response);
-          }) as any,
-        );
+        ctx!.events.subscribe(ResponseEvent.MiniAppSendHapticFeedback, ((
+          response: MiniAppSendHapticFeedbackPayload,
+        ) => {
+          ctx!.events.unsubscribe(ResponseEvent.MiniAppSendHapticFeedback);
+          resolve(response);
+        }) as any);
 
         sendMiniKitEvent({
           command: Command.SendHapticFeedback,

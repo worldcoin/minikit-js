@@ -1,7 +1,7 @@
 import type {
+  FallbackConfig,
   MiniAppBaseErrorPayload,
   MiniAppBaseSuccessPayload,
-  FallbackConfig,
 } from '../types';
 
 // ============================================================================

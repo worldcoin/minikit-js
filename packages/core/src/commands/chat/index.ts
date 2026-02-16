@@ -1,3 +1,6 @@
+import { EventManager } from '../../events';
+import { executeWithFallback } from '../fallback';
+import type { CommandResultByVia } from '../types';
 import {
   Command,
   COMMAND_VERSIONS,
@@ -6,17 +9,14 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import type { CommandResultByVia } from '../types';
-import { executeWithFallback } from '../fallback';
-import { EventManager } from '../../events';
-
-export * from './types';
 import type {
-  MiniKitChatOptions,
-  MiniAppChatSuccessPayload,
   MiniAppChatPayload,
+  MiniAppChatSuccessPayload,
+  MiniKitChatOptions,
 } from './types';
 import { ChatError } from './types';
+
+export * from './types';
 
 // ============================================================================
 // Unified API (auto-detects environment)
@@ -25,7 +25,9 @@ import { ChatError } from './types';
 export async function chat<TFallback = MiniAppChatSuccessPayload>(
   options: MiniKitChatOptions<TFallback>,
   ctx?: CommandContext,
-): Promise<CommandResultByVia<MiniAppChatSuccessPayload, TFallback, 'minikit'>> {
+): Promise<
+  CommandResultByVia<MiniAppChatSuccessPayload, TFallback, 'minikit'>
+> {
   const result = await executeWithFallback({
     command: Command.Chat,
     nativeExecutor: () => nativeChat(options, ctx),
@@ -36,7 +38,10 @@ export async function chat<TFallback = MiniAppChatSuccessPayload>(
     return { executedWith: 'fallback', data: result.data as TFallback };
   }
 
-  return { executedWith: 'minikit', data: result.data as MiniAppChatSuccessPayload };
+  return {
+    executedWith: 'minikit',
+    data: result.data as MiniAppChatSuccessPayload,
+  };
 }
 
 // ============================================================================
@@ -68,13 +73,12 @@ async function nativeChat(
 
   const payload = await new Promise<MiniAppChatPayload>((resolve, reject) => {
     try {
-      ctx!.events.subscribe(
-        ResponseEvent.MiniAppChat,
-        ((response: MiniAppChatPayload) => {
-          ctx!.events.unsubscribe(ResponseEvent.MiniAppChat);
-          resolve(response);
-        }) as any,
-      );
+      ctx!.events.subscribe(ResponseEvent.MiniAppChat, ((
+        response: MiniAppChatPayload,
+      ) => {
+        ctx!.events.unsubscribe(ResponseEvent.MiniAppChat);
+        resolve(response);
+      }) as any);
 
       sendMiniKitEvent({
         command: Command.Chat,

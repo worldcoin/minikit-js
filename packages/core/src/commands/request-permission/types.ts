@@ -38,8 +38,7 @@ export type MiniAppRequestPermissionPayload =
 
 export interface MiniKitRequestPermissionOptions<
   TCustomFallback = MiniAppRequestPermissionSuccessPayload,
->
-  extends RequestPermissionParams,
+> extends RequestPermissionParams,
     FallbackConfig<TCustomFallback> {}
 
 export class RequestPermissionError extends Error {

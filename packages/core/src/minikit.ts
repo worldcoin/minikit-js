@@ -1,3 +1,28 @@
+import type {
+  CommandResultByVia,
+  MiniAppChatSuccessPayload,
+  MiniAppGetPermissionsSuccessPayload,
+  MiniAppRequestPermissionSuccessPayload,
+  MiniAppSendHapticFeedbackSuccessPayload,
+  MiniAppShareSuccessPayload,
+  MiniAppSignMessageSuccessPayload,
+  MiniAppSignTypedDataSuccessPayload,
+  MiniKitChatOptions,
+  MiniKitGetPermissionsOptions,
+  MiniKitPayOptions,
+  MiniKitRequestPermissionOptions,
+  MiniKitSendHapticFeedbackOptions,
+  MiniKitSendTransactionOptions,
+  MiniKitShareContactsOptions,
+  MiniKitShareOptions,
+  MiniKitSignMessageOptions,
+  MiniKitSignTypedDataOptions,
+  MiniKitWalletAuthOptions,
+  PayResult,
+  SendTransactionResult,
+  ShareContactsResult,
+  WalletAuthResult,
+} from './commands';
 import {
   CommandContext,
   MiniAppWalletAuthPayload,
@@ -7,40 +32,15 @@ import {
   isInWorldApp,
   pay,
   requestPermission,
+  share as runShare,
   sendHapticFeedback,
   sendMiniKitEvent,
   sendTransaction,
-  share as runShare,
   shareContacts,
   signMessage,
   signTypedData,
   validateCommands,
   walletAuth,
-} from './commands';
-import type {
-  MiniKitChatOptions,
-  CommandResultByVia,
-  MiniKitGetPermissionsOptions,
-  MiniAppChatSuccessPayload,
-  MiniAppGetPermissionsSuccessPayload,
-  MiniAppRequestPermissionSuccessPayload,
-  MiniAppSendHapticFeedbackSuccessPayload,
-  MiniAppShareSuccessPayload,
-  MiniAppSignMessageSuccessPayload,
-  MiniAppSignTypedDataSuccessPayload,
-  MiniKitSignMessageOptions,
-  MiniKitSignTypedDataOptions,
-  MiniKitPayOptions,
-  PayResult,
-  MiniKitRequestPermissionOptions,
-  MiniKitSendHapticFeedbackOptions,
-  MiniKitSendTransactionOptions,
-  SendTransactionResult,
-  MiniKitShareContactsOptions,
-  ShareContactsResult,
-  MiniKitShareOptions,
-  MiniKitWalletAuthOptions,
-  WalletAuthResult,
 } from './commands';
 import { EventManager } from './events';
 import { setupMicrophone } from './helpers/microphone';
@@ -194,7 +194,9 @@ export class MiniKit {
    */
   static signTypedData<TFallback = MiniAppSignTypedDataSuccessPayload>(
     options: MiniKitSignTypedDataOptions<TFallback>,
-  ): Promise<CommandResultByVia<MiniAppSignTypedDataSuccessPayload, TFallback>> {
+  ): Promise<
+    CommandResultByVia<MiniAppSignTypedDataSuccessPayload, TFallback>
+  > {
     return signTypedData<TFallback>(options, this.getContext());
   }
 
@@ -203,7 +205,9 @@ export class MiniKit {
    */
   static chat<TFallback = MiniAppChatSuccessPayload>(
     options: MiniKitChatOptions<TFallback>,
-  ): Promise<CommandResultByVia<MiniAppChatSuccessPayload, TFallback, 'minikit'>> {
+  ): Promise<
+    CommandResultByVia<MiniAppChatSuccessPayload, TFallback, 'minikit'>
+  > {
     return chat<TFallback>(options, this.getContext());
   }
 
@@ -236,9 +240,7 @@ export class MiniKit {
   /**
    * Request a permission from the user
    */
-  static requestPermission<
-    TFallback = MiniAppRequestPermissionSuccessPayload,
-  >(
+  static requestPermission<TFallback = MiniAppRequestPermissionSuccessPayload>(
     options: MiniKitRequestPermissionOptions<TFallback>,
   ): Promise<
     CommandResultByVia<

@@ -21,6 +21,9 @@
   },
   "pnpm": {
     "overrides": {
+      "wagmi": "3.4.3",
+      "@wagmi/core": "3.3.3",
+      "@wagmi/connectors": "7.1.7",
       "ws": ">=7.5.10",
       "rollup": ">=4.22.4",
       "elliptic": ">=6.6.1"

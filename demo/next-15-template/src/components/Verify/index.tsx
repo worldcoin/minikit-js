@@ -1,6 +1,6 @@
 'use client';
-import { Button, LiveFeedback } from '@worldcoin/mini-apps-ui-kit-react';
 import { IDKit, orbLegacy, type RpContext } from '@worldcoin/idkit';
+import { Button, LiveFeedback } from '@worldcoin/mini-apps-ui-kit-react';
 import { useState } from 'react';
 
 /**

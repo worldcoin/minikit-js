@@ -5,12 +5,12 @@ import type {
   ExtractAbiFunction,
   ExtractAbiFunctionNames,
 } from 'abitype';
+import { Network } from '../pay/types';
 import type {
+  FallbackConfig,
   MiniAppBaseErrorPayload,
   MiniAppBaseSuccessPayload,
-  FallbackConfig,
 } from '../types';
-import { Network } from '../pay/types';
 
 // ============================================================================
 // Transaction Types (moved from types/transactions.ts)
@@ -137,16 +137,15 @@ export const SendTransactionErrorMessage: Record<
     'Permitted amount not found in permit2 payload.',
 };
 
-export type MiniAppSendTransactionSuccessPayload =
-  MiniAppBaseSuccessPayload & {
-    transaction_status: 'submitted';
-    transaction_id: string;
-    reference: string;
-    from: string;
-    chain: Network;
-    timestamp: string;
-    mini_app_id?: string;
-  };
+export type MiniAppSendTransactionSuccessPayload = MiniAppBaseSuccessPayload & {
+  transaction_status: 'submitted';
+  transaction_id: string;
+  reference: string;
+  from: string;
+  chain: Network;
+  timestamp: string;
+  mini_app_id?: string;
+};
 
 export type MiniAppSendTransactionErrorPayload =
   MiniAppBaseErrorPayload<SendTransactionErrorCodes> & {
@@ -160,8 +159,7 @@ export type MiniAppSendTransactionPayload =
 
 export interface MiniKitSendTransactionOptions<
   TCustomFallback = SendTransactionResult,
->
-  extends FallbackConfig<TCustomFallback> {
+> extends FallbackConfig<TCustomFallback> {
   /** Transactions to execute */
   transaction: Transaction[];
 

@@ -1,4 +1,6 @@
-import { formatShareInput } from './format';
+import { EventManager } from '../../events';
+import { executeWithFallback } from '../fallback';
+import type { CommandResultByVia } from '../types';
 import {
   Command,
   COMMAND_VERSIONS,
@@ -7,17 +9,15 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import type { CommandResultByVia } from '../types';
-import { executeWithFallback } from '../fallback';
-import { EventManager } from '../../events';
-
-export * from './types';
+import { formatShareInput } from './format';
 import type {
   MiniAppSharePayload,
   MiniAppShareSuccessPayload,
   MiniKitShareOptions,
 } from './types';
 import { ShareError } from './types';
+
+export * from './types';
 
 // ============================================================================
 // Unified API (auto-detects environment)
@@ -98,13 +98,12 @@ async function nativeShare(
 
   const payload = await new Promise<MiniAppSharePayload>((resolve, reject) => {
     try {
-      ctx!.events.subscribe(
-        ResponseEvent.MiniAppShare,
-        ((response: MiniAppSharePayload) => {
-          ctx!.events.unsubscribe(ResponseEvent.MiniAppShare);
-          resolve(response);
-        }) as any,
-      );
+      ctx!.events.subscribe(ResponseEvent.MiniAppShare, ((
+        response: MiniAppSharePayload,
+      ) => {
+        ctx!.events.unsubscribe(ResponseEvent.MiniAppShare);
+        resolve(response);
+      }) as any);
 
       sendMiniKitEvent({
         command: Command.Share,

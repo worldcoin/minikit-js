@@ -1,3 +1,6 @@
+import { EventManager } from '../../events';
+import { executeWithFallback } from '../fallback';
+import type { CommandResultByVia } from '../types';
 import {
   Command,
   COMMAND_VERSIONS,
@@ -6,26 +9,21 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import type { CommandResultByVia } from '../types';
-import { executeWithFallback } from '../fallback';
 import { wagmiSignMessage } from '../wagmi-fallback';
-import { EventManager } from '../../events';
-
-export * from './types';
 import type {
-  MiniKitSignMessageOptions,
   MiniAppSignMessagePayload,
   MiniAppSignMessageSuccessPayload,
+  MiniKitSignMessageOptions,
 } from './types';
 import { SignMessageError } from './types';
+
+export * from './types';
 
 // ============================================================================
 // Unified API (auto-detects environment)
 // ============================================================================
 
-export async function signMessage<
-  TFallback = MiniAppSignMessageSuccessPayload,
->(
+export async function signMessage<TFallback = MiniAppSignMessageSuccessPayload>(
   options: MiniKitSignMessageOptions<TFallback>,
   ctx?: CommandContext,
 ): Promise<CommandResultByVia<MiniAppSignMessageSuccessPayload, TFallback>> {
@@ -80,13 +78,12 @@ async function nativeSignMessage(
   const payload = await new Promise<MiniAppSignMessagePayload>(
     (resolve, reject) => {
       try {
-        ctx!.events.subscribe(
-          ResponseEvent.MiniAppSignMessage,
-          ((response: MiniAppSignMessagePayload) => {
-            ctx!.events.unsubscribe(ResponseEvent.MiniAppSignMessage);
-            resolve(response);
-          }) as any,
-        );
+        ctx!.events.subscribe(ResponseEvent.MiniAppSignMessage, ((
+          response: MiniAppSignMessagePayload,
+        ) => {
+          ctx!.events.unsubscribe(ResponseEvent.MiniAppSignMessage);
+          resolve(response);
+        }) as any);
 
         sendMiniKitEvent({
           command: Command.SignMessage,

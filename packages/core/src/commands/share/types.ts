@@ -16,8 +16,7 @@ export type ShareInput = ShareParams;
 
 export interface MiniKitShareOptions<
   TCustomFallback = MiniAppShareSuccessPayload,
->
-  extends ShareParams,
+> extends ShareParams,
     FallbackConfig<TCustomFallback> {}
 
 export type SharePayload = {

@@ -1,5 +1,6 @@
-import { generateSiweMessage } from './siwe';
-import { validateWalletAuthCommandInput } from './validate';
+import { EventManager } from '../../events';
+import { executeWithFallback } from '../fallback';
+import type { CommandResultByVia } from '../types';
 import {
   Command,
   COMMAND_VERSIONS,
@@ -8,19 +9,18 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import type { CommandResultByVia } from '../types';
-import { executeWithFallback } from '../fallback';
 import { wagmiWalletAuth } from '../wagmi-fallback';
-import { EventManager } from '../../events';
-
-export * from './types';
+import { generateSiweMessage } from './siwe';
 import type {
-  WalletAuthInput,
-  MiniKitWalletAuthOptions,
-  WalletAuthResult,
   MiniAppWalletAuthPayload,
+  MiniKitWalletAuthOptions,
+  WalletAuthInput,
+  WalletAuthResult,
 } from './types';
 import { WalletAuthError } from './types';
+import { validateWalletAuthCommandInput } from './validate';
+
+export * from './types';
 
 // ============================================================================
 // Unified API (auto-detects environment)
@@ -138,13 +138,12 @@ async function nativeWalletAuth(
   const finalPayload = await new Promise<MiniAppWalletAuthPayload>(
     (resolve, reject) => {
       try {
-        ctx!.events.subscribe(
-          ResponseEvent.MiniAppWalletAuth,
-          ((response: MiniAppWalletAuthPayload) => {
-            ctx!.events.unsubscribe(ResponseEvent.MiniAppWalletAuth);
-            resolve(response);
-          }) as any,
-        );
+        ctx!.events.subscribe(ResponseEvent.MiniAppWalletAuth, ((
+          response: MiniAppWalletAuthPayload,
+        ) => {
+          ctx!.events.unsubscribe(ResponseEvent.MiniAppWalletAuth);
+          resolve(response);
+        }) as any);
 
         sendMiniKitEvent({
           command: Command.WalletAuth,

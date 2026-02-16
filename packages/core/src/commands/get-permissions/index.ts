@@ -1,3 +1,6 @@
+import { EventManager } from '../../events';
+import { executeWithFallback } from '../fallback';
+import type { CommandResultByVia } from '../types';
 import {
   Command,
   COMMAND_VERSIONS,
@@ -6,17 +9,14 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import type { CommandResultByVia } from '../types';
-import { executeWithFallback } from '../fallback';
-import { EventManager } from '../../events';
-
-export * from './types';
 import type {
-  MiniKitGetPermissionsOptions,
   MiniAppGetPermissionsPayload,
   MiniAppGetPermissionsSuccessPayload,
+  MiniKitGetPermissionsOptions,
 } from './types';
 import { GetPermissionsError } from './types';
+
+export * from './types';
 
 // ============================================================================
 // Unified API (auto-detects environment)
@@ -71,13 +71,12 @@ async function nativeGetPermissions(
   const payload = await new Promise<MiniAppGetPermissionsPayload>(
     (resolve, reject) => {
       try {
-        ctx!.events.subscribe(
-          ResponseEvent.MiniAppGetPermissions,
-          ((response: MiniAppGetPermissionsPayload) => {
-            ctx!.events.unsubscribe(ResponseEvent.MiniAppGetPermissions);
-            resolve(response);
-          }) as any,
-        );
+        ctx!.events.subscribe(ResponseEvent.MiniAppGetPermissions, ((
+          response: MiniAppGetPermissionsPayload,
+        ) => {
+          ctx!.events.unsubscribe(ResponseEvent.MiniAppGetPermissions);
+          resolve(response);
+        }) as any);
 
         sendMiniKitEvent({
           command: Command.GetPermissions,

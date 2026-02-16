@@ -7,7 +7,7 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { useConfig } from 'wagmi';
+import * as wagmi from 'wagmi';
 import { setWagmiConfig } from './commands/wagmi-fallback';
 import { MiniKit } from './minikit';
 
@@ -25,6 +25,9 @@ const MiniKitContext = createContext<MiniKitContextValue | undefined>(
 );
 
 function useWagmiConfigSafe() {
+  const useConfig = (wagmi as any).useConfig as (() => unknown) | undefined;
+  if (!useConfig) return undefined;
+
   try {
     return useConfig();
   } catch {

@@ -56,7 +56,9 @@ async function ensureConnected(config: WagmiConfig): Promise<`0x${string}`> {
 
   const candidateConnectors = isWorldApp
     ? connectors
-    : connectors.filter((connector: { id?: string }) => connector.id !== 'worldApp');
+    : connectors.filter(
+        (connector: { id?: string }) => connector.id !== 'worldApp',
+      );
   if (!isWorldApp && candidateConnectors.length === 0) {
     throw new Error(
       'No web Wagmi connectors configured. Add a web connector (e.g. injected or walletConnect) after worldApp().',
@@ -147,7 +149,7 @@ export async function wagmiWalletAuth(
 
   if (!SIWE_NONCE_REGEX.test(params.nonce)) {
     throw new Error(
-      "Invalid nonce: must be alphanumeric and at least 8 characters (EIP-4361)",
+      'Invalid nonce: must be alphanumeric and at least 8 characters (EIP-4361)',
     );
   }
 

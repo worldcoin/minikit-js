@@ -9,10 +9,10 @@
 import { setWagmiConfig } from '../commands/wagmi-fallback';
 import { MiniKit } from '../minikit';
 import {
-  getWorldAppProvider,
+  _clearAddress,
   _getAddress,
   _setAddress,
-  _clearAddress,
+  getWorldAppProvider,
 } from '../provider';
 
 export type WorldAppConnectorOptions = {
@@ -111,9 +111,7 @@ function createConnectorFn(name: string) {
 
       async switchChain({ chainId }: { chainId: number }) {
         if (chainId !== 480) {
-          throw new Error(
-            'World App only supports World Chain (chainId: 480)',
-          );
+          throw new Error('World App only supports World Chain (chainId: 480)');
         }
         return (
           config.chains.find((c: { id: number }) => c.id === 480) ??

@@ -173,10 +173,7 @@ function createProvider(): WorldAppProvider {
             });
             return result.data.transactionId;
           } catch (e: any) {
-            throw rpcError(
-              4001,
-              `Send transaction failed: ${e.message}`,
-            );
+            throw rpcError(4001, `Send transaction failed: ${e.message}`);
           }
         }
 

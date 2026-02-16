@@ -1,5 +1,3 @@
-import type { MiniAppWalletAuthSuccessPayload } from './types';
-import { SiweMessage } from './types';
 import {
   Client,
   createPublicClient,
@@ -9,6 +7,8 @@ import {
   recoverAddress,
 } from 'viem';
 import { worldchain } from 'viem/chains';
+import type { MiniAppWalletAuthSuccessPayload } from './types';
+import { SiweMessage } from './types';
 
 const PREAMBLE = ' wants you to sign in with your Ethereum account:';
 const URI_TAG = 'URI: ';

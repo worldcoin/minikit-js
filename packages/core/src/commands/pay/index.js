@@ -1,0 +1,97 @@
+import { EventManager } from '../../events';
+import { executeWithFallback } from '../fallback';
+import {
+  Command,
+  COMMAND_VERSIONS,
+  isCommandAvailable,
+  ResponseEvent,
+  sendMiniKitEvent,
+} from '../types';
+import { Network, PayError } from './types';
+import { validatePaymentPayload } from './validate';
+export * from './types';
+// ============================================================================
+// Unified API (auto-detects environment)
+// ============================================================================
+/**
+ * Send a payment
+ *
+ * Note: This command works natively in World App. On web, provide a fallback if needed.
+ *
+ * @example
+ * ```typescript
+ * const result = await pay({
+ *   reference: crypto.randomUUID(),
+ *   to: '0x...',
+ *   tokens: [{ symbol: Tokens.WLD, token_amount: '1.0' }],
+ *   description: 'Payment for coffee',
+ *   fallback: () => showStripeCheckout(),
+ * });
+ *
+ * console.log(result.executedWith); // 'minikit' | 'fallback'
+ * ```
+ */
+export async function pay(options, ctx) {
+  const result = await executeWithFallback({
+    command: Command.Pay,
+    nativeExecutor: () => nativePay(options, ctx),
+    // No Wagmi fallback - pay is native only
+    customFallback: options.fallback,
+  });
+  if (result.executedWith === 'fallback') {
+    return { executedWith: 'fallback', data: result.data };
+  }
+  return { executedWith: 'minikit', data: result.data };
+}
+// ============================================================================
+// Native Implementation (World App)
+// ============================================================================
+async function nativePay(options, ctx) {
+  if (!ctx) {
+    ctx = { events: new EventManager(), state: { deviceProperties: {} } };
+  }
+  if (typeof window === 'undefined' || !isCommandAvailable(Command.Pay)) {
+    throw new Error(
+      "'pay' command is unavailable. Check MiniKit.install() or update the app version",
+    );
+  }
+  const input = {
+    reference: options.reference,
+    to: options.to,
+    tokens: options.tokens,
+    description: options.description,
+    network: options.network,
+  };
+  if (!validatePaymentPayload(input)) {
+    throw new Error('Invalid payment payload');
+  }
+  const eventPayload = {
+    ...input,
+    network: Network.WorldChain,
+  };
+  const finalPayload = await new Promise((resolve, reject) => {
+    try {
+      ctx.events.subscribe(ResponseEvent.MiniAppPayment, (response) => {
+        ctx.events.unsubscribe(ResponseEvent.MiniAppPayment);
+        resolve(response);
+      });
+      sendMiniKitEvent({
+        command: Command.Pay,
+        version: COMMAND_VERSIONS[Command.Pay],
+        payload: eventPayload,
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+  if (finalPayload.status === 'error') {
+    throw new PayError(finalPayload.error_code);
+  }
+  return {
+    transactionId: finalPayload.transaction_id,
+    reference: finalPayload.reference,
+    from: finalPayload.from,
+    chain: finalPayload.chain,
+    timestamp: finalPayload.timestamp,
+  };
+}

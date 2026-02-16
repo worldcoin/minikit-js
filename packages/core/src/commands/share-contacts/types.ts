@@ -1,7 +1,7 @@
 import type {
+  FallbackConfig,
   MiniAppBaseErrorPayload,
   MiniAppBaseSuccessPayload,
-  FallbackConfig,
 } from '../types';
 
 type ShareContactsParams = {
@@ -45,8 +45,7 @@ export type MiniAppShareContactsPayload =
 
 export interface MiniKitShareContactsOptions<
   TCustomFallback = ShareContactsResult,
->
-  extends FallbackConfig<TCustomFallback> {
+> extends FallbackConfig<TCustomFallback> {
   /** Enable multi-select in the contact picker */
   isMultiSelectEnabled?: boolean;
 

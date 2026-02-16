@@ -8,13 +8,13 @@
  * 4. Throw error
  */
 
+import type { CommandResult, CommandVia, FallbackReason } from './types';
 import {
-  isCommandAvailable,
-  isInWorldApp,
   CommandUnavailableError,
   FallbackRequiredError,
+  isCommandAvailable,
+  isInWorldApp,
 } from './types';
-import type { CommandResult, CommandVia, FallbackReason } from './types';
 import { hasWagmiConfig } from './wagmi-fallback';
 
 export interface ExecuteWithFallbackOptions<TNative, TFallback = TNative> {

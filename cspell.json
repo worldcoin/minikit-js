@@ -3,12 +3,7 @@
   "enabled": true,
   "language": "en-US",
   "allowCompoundWords": true,
-  "dictionaries": [
-    "typescript",
-    "node",
-    "npm",
-    "html"
-  ],
+  "dictionaries": ["typescript", "node", "npm", "html"],
   "enabledLanguageIds": [
     "typescript",
     "typescriptreact",
@@ -17,13 +12,5 @@
     "yaml",
     "json"
   ],
-  "words": [
-    "idkit",
-    "merkle",
-    "OIDC",
-    "SIWE",
-    "USDC",
-    "viem",
-    "wagmi"
-  ]
+  "words": ["idkit", "merkle", "OIDC", "SIWE", "USDC", "viem", "wagmi"]
 }

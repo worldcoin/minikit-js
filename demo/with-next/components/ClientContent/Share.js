@@ -1,0 +1,218 @@
+import { MiniKit, SendHapticFeedbackErrorCodes } from '@worldcoin/minikit-js';
+import { useCallback, useState } from 'react';
+import { jsx as _jsx, jsxs as _jsxs } from 'react/jsx-runtime';
+import * as yup from 'yup';
+import { validateSchema } from './helpers/validate-schema';
+const createFileFromUrl = async (url, name, type) => {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch file from ${url}: ${response.statusText}`);
+  }
+  const blob = await response.blob();
+  return new File([blob], name, { type });
+};
+const sendHapticFeedbackSuccessPayloadSchema = yup.object({
+  status: yup.string().oneOf(['success']),
+});
+const sendHapticFeedbackErrorPayloadSchema = yup.object({
+  error_code: yup
+    .string()
+    .oneOf(Object.values(SendHapticFeedbackErrorCodes))
+    .required(),
+  status: yup.string().equals(['error']).required(),
+  version: yup.number().required(),
+});
+export const Share = () => {
+  const [sentShareFilesPayload, setSentShareFilesPayload] = useState(null);
+  const validateResponse = async (payload) => {
+    console.log('MiniAppShare, SUBSCRIBE PAYLOAD', payload);
+    if (payload.status === 'error') {
+      const validationErrorMessage = await validateSchema(
+        sendHapticFeedbackErrorPayloadSchema,
+        payload,
+      );
+      if (!validationErrorMessage) {
+        console.log('Payload is valid');
+      } else {
+        console.error(validationErrorMessage);
+      }
+    } else {
+      const validationErrorMessage = await validateSchema(
+        sendHapticFeedbackSuccessPayloadSchema,
+        payload,
+      );
+      // This checks if the response format is correct
+      if (!validationErrorMessage) {
+        console.log('Payload is valid');
+      } else {
+        console.error(validationErrorMessage);
+      }
+    }
+  };
+  const onSendShareFiles = useCallback(async (input) => {
+    const sharePayload = {
+      ...input,
+      fallback() {
+        console.log('Share fallback called');
+      },
+    };
+    const finalPayload = await MiniKit.share(sharePayload);
+    setSentShareFilesPayload({
+      input,
+    });
+    if (finalPayload.executedWith === 'minikit') {
+      await validateResponse(finalPayload.data);
+    }
+  }, []);
+  return _jsx('div', {
+    children: _jsxs('div', {
+      className: 'grid gap-y-2',
+      children: [
+        _jsx('h2', { className: 'text-2xl font-bold', children: 'Share' }),
+        _jsx('div', {
+          children: _jsx('div', {
+            className: 'bg-gray-300 min-h-[100px] p-2',
+            children: _jsx('pre', {
+              className:
+                'break-all whitespace-break-spaces max-h-[250px] overflow-y-scroll ',
+              children: JSON.stringify(sentShareFilesPayload, null, 2),
+            }),
+          }),
+        }),
+        _jsxs('div', {
+          className: 'grid grid-cols-2 gap-2',
+          children: [
+            _jsx('button', {
+              className: 'bg-black text-white rounded-lg p-4 w-full',
+              onClick: async () => {
+                try {
+                  const imageFile = await createFileFromUrl(
+                    '/800.jpeg',
+                    '800.jpeg',
+                    'image/jpeg',
+                  );
+                  onSendShareFiles({
+                    files: [imageFile],
+                    title: 'Share one JPG',
+                    text: 'Share one JPG',
+                  });
+                } catch (error) {
+                  console.error('Error sharing one JPG:', error);
+                  // Optionally, update UI to show error
+                }
+              },
+              children: 'One JPG',
+            }),
+            _jsx('button', {
+              className: 'bg-black text-white rounded-lg p-4 w-full',
+              onClick: async () => {
+                try {
+                  const filesToShare = await Promise.all([
+                    createFileFromUrl('/marble.png', 'marble.png', 'image/png'),
+                    createFileFromUrl('/test.png', 'test.png', 'image/png'),
+                  ]);
+                  onSendShareFiles({
+                    files: filesToShare,
+                    title: 'Share two PNGs',
+                    text: 'Share two PNGs',
+                  });
+                } catch (error) {
+                  console.error('Error sharing three JPGs:', error);
+                }
+              },
+              children: 'Two PNGs',
+            }),
+          ],
+        }),
+        _jsxs('div', {
+          className: 'grid grid-cols-2 gap-2',
+          children: [
+            _jsx('button', {
+              className: 'bg-black text-white rounded-lg p-4 w-full',
+              onClick: async () => {
+                try {
+                  const filesToShare = await Promise.all([
+                    createFileFromUrl('/800.jpeg', '800.jpeg', 'image/jpeg'),
+                    createFileFromUrl('/test.png', 'test.png', 'image/png'),
+                  ]);
+                  onSendShareFiles({
+                    files: filesToShare,
+                    title: 'Share JPG + PNG',
+                    text: 'Share JPG + PNG ',
+                  });
+                } catch (error) {
+                  console.error('Error sharing JPG + PNG:', error);
+                }
+              },
+              children: 'JPG + PNG',
+            }),
+            _jsx('button', {
+              className: 'bg-black text-white rounded-lg p-4 w-full',
+              onClick: async () => {
+                try {
+                  const filesToShare = await Promise.all([
+                    createFileFromUrl('/800.jpeg', '800.jpeg', 'image/jpeg'),
+                    createFileFromUrl(
+                      '/dummy.pdf',
+                      'dummy.pdf',
+                      'application/pdf',
+                    ),
+                  ]);
+                  onSendShareFiles({
+                    files: filesToShare,
+                    title: 'Share JPG + PDF',
+                    text: 'Share JPG + PDF ',
+                  });
+                } catch (error) {
+                  console.error('Error sharing JPG + PDF (image/*):', error);
+                }
+              },
+              children: 'JPG + PDF',
+            }),
+          ],
+        }),
+        _jsxs('div', {
+          className: 'grid grid-cols-2 gap-2',
+          children: [
+            _jsx('button', {
+              className: 'bg-black text-white rounded-lg p-4 w-full',
+              onClick: async () => {
+                try {
+                  onSendShareFiles({
+                    title: 'URL',
+                    text: 'A URL to share',
+                    url: 'https://world-id-assets.com/app_a4f7f3e62c1de0b9490a5260cb390b56/9185e1fd-c902-4799-aacb-973ef290fe56.jpg',
+                  });
+                } catch (error) {
+                  console.error('Error sharing JPG no file extension:', error);
+                }
+              },
+              children: 'URL with title and text',
+            }),
+            _jsx('button', {
+              className: 'bg-black text-white rounded-lg p-4 w-full',
+              onClick: async () => {
+                try {
+                  // convert audio to file using /money.mp3
+                  const audioFile = await createFileFromUrl(
+                    '/money.mp3',
+                    'money.mp3',
+                    'audio/mp3',
+                  );
+                  onSendShareFiles({
+                    files: [audioFile],
+                    title: 'Share MP3',
+                    text: 'Share MP3',
+                  });
+                } catch (error) {
+                  console.error('Error sharing JPG with special name:', error);
+                }
+              },
+              children: 'MP3 from Local',
+            }),
+          ],
+        }),
+      ],
+    }),
+  });
+};

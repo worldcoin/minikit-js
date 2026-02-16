@@ -45,9 +45,7 @@ export type MiniAppWalletAuthPayload =
   | MiniAppWalletAuthSuccessPayload
   | MiniAppWalletAuthErrorPayload;
 
-export interface MiniKitWalletAuthOptions<
-  TCustomFallback = WalletAuthResult,
->
+export interface MiniKitWalletAuthOptions<TCustomFallback = WalletAuthResult>
   extends FallbackConfig<TCustomFallback> {
   /** Nonce for SIWE message (alphanumeric, at least 8 chars) */
   nonce: string;

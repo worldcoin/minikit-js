@@ -1,7 +1,7 @@
 export { MiniKit } from './minikit';
 
-export * from './types';
 export * from './commands';
+export * from './types';
 
 export { tokenToDecimals } from './commands/pay/validate';
 
