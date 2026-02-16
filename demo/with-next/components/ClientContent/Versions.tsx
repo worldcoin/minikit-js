@@ -32,6 +32,7 @@ export const Versions = (): JSX.Element => {
         };
       }
     } catch (error) {
+      console.error('Error validating versions:', error);
       return {
         isValid: false,
         error: 'Something went wrong on version validation',

@@ -1,15 +1,12 @@
-import { IDKit, signRequest } from '@worldcoin/idkit-core';
+import { signRequest } from '@worldcoin/idkit/signing';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
 
 const SIGNING_KEY = process.env.RP_SIGNING_KEY; // 32-byte hex private key
 const RP_ID = process.env.RP_ID ?? 'rp_765bb8d478f75a03';
-const initPromise = IDKit.initServer();
 
 export async function POST(req: Request) {
-  await initPromise;
-
   if (!SIGNING_KEY) {
     return NextResponse.json(
       { error: 'RP_SIGNING_KEY not configured' },
