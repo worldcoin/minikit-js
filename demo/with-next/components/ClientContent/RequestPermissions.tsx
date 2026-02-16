@@ -39,74 +39,68 @@ export const RequestPermission = () => {
 
   const onRequestPermission = useCallback(async (permission: Permission) => {
     const requestPermissionPayload: MiniKitRequestPermissionOptions = {
-        permission,
-        fallback() {
-          if (permission === Permission.Notifications) {
-            return Notification.requestPermission().then((result) => {
-              if (result === 'granted') {
-                return {
-                  status: 'success' as const,
-                  version: 1,
-                  permission,
-                  timestamp: new Date().toISOString(),
-                };
-              } else {
-                return {
-                  status: 'error' as const,
-                  version: 1,
-                  error_code: RequestPermissionErrorCodes.UserRejected,
-                  description: 'User denied the permission',
-                };
-              }
+      permission,
+      fallback() {
+        if (permission === Permission.Notifications) {
+          return Notification.requestPermission().then((result) => {
+            if (result === 'granted') {
+              return {
+                status: 'success' as const,
+                version: 1,
+                permission,
+                timestamp: new Date().toISOString(),
+              };
+            } else {
+              return {
+                status: 'error' as const,
+                version: 1,
+                error_code: RequestPermissionErrorCodes.UserRejected,
+                description: 'User denied the permission',
+              };
+            }
+          });
+        } else if (permission === Permission.Microphone) {
+          return navigator.mediaDevices
+            .getUserMedia({ audio: true })
+            .then(() => {
+              return {
+                status: 'success' as const,
+                version: 1,
+                permission,
+                timestamp: new Date().toISOString(),
+              };
+            })
+            .catch(() => {
+              return {
+                status: 'error' as const,
+                version: 1,
+                error_code: RequestPermissionErrorCodes.UserRejected,
+                description: 'User denied the permission or an error occurred',
+              };
             });
-          } else if (permission === Permission.Microphone) {
-            return navigator.mediaDevices
-              .getUserMedia({ audio: true })
-              .then(() => {
-                return {
-                  status: 'success' as const,
-                  version: 1,
-                  permission,
-                  timestamp: new Date().toISOString(),
-                };
-              })
-              .catch(() => {
-                return {
-                  status: 'error' as const,
-                  version: 1,
-                  error_code: RequestPermissionErrorCodes.UserRejected,
-                  description: 'User denied the permission or an error occurred',
-                };
-              });
-          } else {
-            return Promise.resolve({
-              status: 'error' as const,
-              version: 1,
-              error_code: RequestPermissionErrorCodes.UnsupportedPermission,
-              description:
-                'The requested permission is not supported in the fallback',
-            });
-          }
-        },
-      };
+        } else {
+          return Promise.resolve({
+            status: 'error' as const,
+            version: 1,
+            error_code: RequestPermissionErrorCodes.UnsupportedPermission,
+            description:
+              'The requested permission is not supported in the fallback',
+          });
+        }
+      },
+    };
 
     const payload = await MiniKit.requestPermission(requestPermissionPayload);
     setSentRequestPermissionPayload({
       payload,
     });
 
-    if (payload.executedWith === 'minikit') {
-      const response = payload.data;
-      setRequestPermissionAppPayload(JSON.stringify(response, null, 2));
-      if (response.status === 'success') {
-        setRequestPermissionPayloadValidationMessage('Permission granted');
-      } else {
-        setRequestPermissionPayloadValidationMessage('Permission denied');
-      }
+    const response = payload.data;
+    setRequestPermissionAppPayload(JSON.stringify(response, null, 2));
+    if (response.status === 'success') {
+      setRequestPermissionPayloadValidationMessage('Permission granted');
     } else {
-      setRequestPermissionPayloadValidationMessage(
-        'Executed with fallback, no validation available',
-      );
+      setRequestPermissionPayloadValidationMessage('Permission denied');
     }
   }, []);
 

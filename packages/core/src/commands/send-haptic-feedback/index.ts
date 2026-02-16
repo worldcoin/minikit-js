@@ -23,7 +23,7 @@ export * from './types';
 // ============================================================================
 
 export async function sendHapticFeedback<
-  TFallback = MiniAppSendHapticFeedbackSuccessPayload,
+  TFallback = MiniAppSendHapticFeedbackPayload,
 >(
   options: MiniKitSendHapticFeedbackOptions<TFallback>,
   ctx?: CommandContext,

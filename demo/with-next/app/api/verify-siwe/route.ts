@@ -1,16 +1,19 @@
 import {
   MiniAppWalletAuthSuccessPayload,
+  WalletAuthResult,
   verifySiweMessage,
 } from '@worldcoin/minikit-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { SiweMessage } from 'siwe';
 
 interface IRequestPayload {
-  payload: MiniAppWalletAuthSuccessPayload;
+  payload: MiniAppWalletAuthSuccessPayload | WalletAuthResult;
   nonce: string;
+  executedWith: 'minikit' | 'wagmi' | 'fallback';
 }
 
 export async function POST(req: NextRequest) {
-  const { payload, nonce } = (await req.json()) as IRequestPayload;
+  const { payload, nonce, executedWith } = (await req.json()) as IRequestPayload;
 
   // const cookieStore = await cookies();
   // if (nonce !== cookieStore.get('siwe')?.value) {
@@ -23,7 +26,35 @@ export async function POST(req: NextRequest) {
 
   try {
     console.log('payload', payload);
-    const validMessage = await verifySiweMessage(payload, nonce);
+
+    if (!payload?.address || !payload?.message || !payload?.signature) {
+      throw new Error('Invalid wallet auth payload');
+    }
+
+    if (executedWith === 'wagmi') {
+      const message = new SiweMessage(payload.message);
+      if (message.address.toLowerCase() !== payload.address.toLowerCase()) {
+        throw new Error('SIWE message address does not match payload address');
+      }
+
+      const verification = await message.verify({
+        signature: payload.signature,
+        nonce,
+      });
+
+      return NextResponse.json({
+        status: 'success',
+        isValid: verification.success,
+        ...(verification.success
+          ? {}
+          : { message: verification.error?.type ?? 'SIWE verification failed' }),
+      });
+    }
+
+    const validMessage = await verifySiweMessage(
+      payload as MiniAppWalletAuthSuccessPayload,
+      nonce,
+    );
     return NextResponse.json({
       status: 'success',
       isValid: validMessage.isValid,

@@ -24,7 +24,7 @@ export * from './types';
 // ============================================================================
 
 export async function signTypedData<
-  TFallback = MiniAppSignTypedDataSuccessPayload,
+  TFallback = MiniAppSignTypedDataPayload,
 >(
   options: MiniKitSignTypedDataOptions<TFallback>,
   ctx?: CommandContext,

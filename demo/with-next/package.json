@@ -25,6 +25,7 @@
     "permit2-sdk": "link:@uniswap/v3-sdk/permit2-sdk",
     "prettier-plugin-sort-imports-desc": "^1.0.0",
     "react-dom": "^19.0.3",
+    "siwe": "^3.0.0",
     "viem": "2.45.3",
     "wagmi": "^3.4.3",
     "yup": "^1.4.0"

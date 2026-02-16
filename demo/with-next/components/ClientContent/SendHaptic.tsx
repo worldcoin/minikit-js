@@ -1,13 +1,11 @@
 import {
-  MiniAppSendHapticFeedbackPayload,
   MiniKit,
-  ResponseEvent,
+  MiniKitSendHapticFeedbackOptions,
   SendHapticFeedbackErrorCodes,
   SendHapticFeedbackInput,
 } from '@worldcoin/minikit-js';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import * as yup from 'yup';
-import { validateSchema } from './helpers/validate-schema';
 
 const sendHapticFeedbackSuccessPayloadSchema = yup.object({
   status: yup.string<'success'>().oneOf(['success']),
@@ -36,55 +34,20 @@ export const SendHapticFeedback = () => {
   const [sentHapticFeedbackPayload, setSentHapticFeedbackPayload] =
     useState<Record<string, any> | null>(null);
 
-  useEffect(() => {
-    if (!MiniKit.isInstalled()) {
-      return;
-    }
-
-    MiniKit.subscribe(
-      ResponseEvent.MiniAppSendHapticFeedback,
-      async (payload: MiniAppSendHapticFeedbackPayload) => {
-        console.log('MiniAppSendHapticFeedback, SUBSCRIBE PAYLOAD', payload);
-
-        if (payload.status === 'error') {
-          const validationErrorMessage = await validateSchema(
-            sendHapticFeedbackErrorPayloadSchema,
-            payload,
-          );
-
-          if (!validationErrorMessage) {
-            console.log('Payload is valid');
-          } else {
-            console.error(validationErrorMessage);
-          }
-        } else {
-          const validationErrorMessage = await validateSchema(
-            sendHapticFeedbackSuccessPayloadSchema,
-            payload,
-          );
-
-          // This checks if the response format is correct
-          if (!validationErrorMessage) {
-            console.log('Payload is valid');
-          } else {
-            console.error(validationErrorMessage);
-          }
-        }
-      },
-    );
-
-    return () => {
-      MiniKit.unsubscribe(ResponseEvent.MiniAppSignTypedData);
-    };
-  }, []);
-
   const onSendHapticFeedback = useCallback(
-    async (input: SendHapticFeedbackInput) => {
-      const payload = MiniKit.sendHapticFeedback(input);
-
+    async (input: MiniKitSendHapticFeedbackOptions) => {
+      const payload = await MiniKit.sendHapticFeedback(input);
       setSentHapticFeedbackPayload({
         payload,
       });
+
+      if (payload.executedWith === 'minikit') {
+        const response = payload.data;
+        setSentHapticFeedbackPayload({
+          payload,
+          response,
+        });
+      }
     },
     [],
   );

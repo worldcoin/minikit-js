@@ -17,7 +17,7 @@ type SignTypedDataParams = {
 export type SignTypedDataInput = SignTypedDataParams;
 
 export interface MiniKitSignTypedDataOptions<
-  TCustomFallback = MiniAppSignTypedDataSuccessPayload,
+  TCustomFallback = MiniAppSignTypedDataPayload,
 > extends SignTypedDataParams,
     FallbackConfig<TCustomFallback> {}
 

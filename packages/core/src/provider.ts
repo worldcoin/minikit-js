@@ -131,6 +131,9 @@ function createProvider(): WorldAppProvider {
           const [data] = params as [string, string];
           try {
             const result = await MiniKit.signMessage({ message: data });
+            if (result.data.status === 'error') {
+              throw rpcError(4001, `Sign message failed: ${result.data.error_code}`);
+            }
             return result.data.signature;
           } catch (e: any) {
             throw rpcError(4001, `Sign message failed: ${e.message}`);
@@ -147,6 +150,12 @@ function createProvider(): WorldAppProvider {
               domain: typedData.domain,
               message: typedData.message,
             });
+            if (result.data.status === 'error') {
+              throw rpcError(
+                4001,
+                `Sign typed data failed: ${result.data.error_code}`,
+              );
+            }
             return result.data.signature;
           } catch (e: any) {
             throw rpcError(4001, `Sign typed data failed: ${e.message}`);

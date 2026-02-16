@@ -53,7 +53,11 @@ export const WalletAuth = () => {
       const response = await fetch('/api/verify-siwe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ payload, nonce: generatedNonce }),
+        body: JSON.stringify({
+          payload,
+          nonce: generatedNonce,
+          executedWith: result.executedWith,
+        }),
       });
 
       const responseJson = await response.json();

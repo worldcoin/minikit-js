@@ -23,7 +23,7 @@ export * from './types';
 // Unified API (auto-detects environment)
 // ============================================================================
 
-export async function signMessage<TFallback = MiniAppSignMessageSuccessPayload>(
+export async function signMessage<TFallback = MiniAppSignMessagePayload>(
   options: MiniKitSignMessageOptions<TFallback>,
   ctx?: CommandContext,
 ): Promise<CommandResultByVia<MiniAppSignMessageSuccessPayload, TFallback>> {

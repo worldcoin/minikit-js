@@ -1,12 +1,18 @@
 import type {
   CommandResultByVia,
+  MiniAppChatPayload,
   MiniAppChatSuccessPayload,
+  MiniAppGetPermissionsPayload,
   MiniAppGetPermissionsSuccessPayload,
   MiniAppRequestPermissionPayload,
   MiniAppRequestPermissionSuccessPayload,
+  MiniAppSendHapticFeedbackPayload,
   MiniAppSendHapticFeedbackSuccessPayload,
+  MiniAppSharePayload,
   MiniAppShareSuccessPayload,
+  MiniAppSignMessagePayload,
   MiniAppSignMessageSuccessPayload,
+  MiniAppSignTypedDataPayload,
   MiniAppSignTypedDataSuccessPayload,
   MiniKitChatOptions,
   MiniKitGetPermissionsOptions,
@@ -184,7 +190,7 @@ export class MiniKit {
   /**
    * Sign a message
    */
-  static signMessage<TFallback = MiniAppSignMessageSuccessPayload>(
+  static signMessage<TFallback = MiniAppSignMessagePayload>(
     options: MiniKitSignMessageOptions<TFallback>,
   ): Promise<CommandResultByVia<MiniAppSignMessageSuccessPayload, TFallback>> {
     return signMessage<TFallback>(options, this.getContext());
@@ -193,7 +199,7 @@ export class MiniKit {
   /**
    * Sign typed data (EIP-712)
    */
-  static signTypedData<TFallback = MiniAppSignTypedDataSuccessPayload>(
+  static signTypedData<TFallback = MiniAppSignTypedDataPayload>(
     options: MiniKitSignTypedDataOptions<TFallback>,
   ): Promise<
     CommandResultByVia<MiniAppSignTypedDataSuccessPayload, TFallback>
@@ -204,7 +210,7 @@ export class MiniKit {
   /**
    * Send a chat message
    */
-  static chat<TFallback = MiniAppChatSuccessPayload>(
+  static chat<TFallback = MiniAppChatPayload>(
     options: MiniKitChatOptions<TFallback>,
   ): Promise<
     CommandResultByVia<MiniAppChatSuccessPayload, TFallback, 'minikit'>
@@ -215,7 +221,7 @@ export class MiniKit {
   /**
    * Share files/text/URL
    */
-  static share<TFallback = MiniAppShareSuccessPayload>(
+  static share<TFallback = MiniAppSharePayload>(
     options: MiniKitShareOptions<TFallback>,
   ): Promise<
     CommandResultByVia<MiniAppShareSuccessPayload, TFallback, 'minikit'>
@@ -226,7 +232,7 @@ export class MiniKit {
   /**
    * Get current permission settings
    */
-  static getPermissions<TFallback = MiniAppGetPermissionsSuccessPayload>(
+  static getPermissions<TFallback = MiniAppGetPermissionsPayload>(
     options: MiniKitGetPermissionsOptions<TFallback> = {},
   ): Promise<
     CommandResultByVia<
@@ -257,7 +263,7 @@ export class MiniKit {
    * Trigger haptic feedback
    */
   static sendHapticFeedback<
-    TFallback = MiniAppSendHapticFeedbackSuccessPayload,
+    TFallback = MiniAppSendHapticFeedbackPayload,
   >(
     options: MiniKitSendHapticFeedbackOptions<TFallback>,
   ): Promise<

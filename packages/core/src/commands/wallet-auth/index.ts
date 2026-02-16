@@ -14,7 +14,6 @@ import { generateSiweMessage } from './siwe';
 import type {
   MiniAppWalletAuthPayload,
   MiniKitWalletAuthOptions,
-  WalletAuthInput,
   WalletAuthResult,
 } from './types';
 import { WalletAuthError } from './types';
@@ -64,10 +63,16 @@ export async function walletAuth<TFallback = WalletAuthResult>(
   }
 
   if (result.executedWith === 'wagmi') {
-    return { executedWith: 'wagmi', data: result.data as WalletAuthResult };
+    return {
+      executedWith: 'wagmi',
+      data: result.data as WalletAuthResult,
+    };
   }
 
-  return { executedWith: 'minikit', data: result.data as WalletAuthResult };
+  return {
+    executedWith: 'minikit',
+    data: result.data as WalletAuthResult,
+  };
 }
 
 // ============================================================================
@@ -91,7 +96,7 @@ async function nativeWalletAuth(
     );
   }
 
-  const input: WalletAuthInput = {
+  const input = {
     nonce: options.nonce,
     statement: options.statement,
     requestId: options.requestId,

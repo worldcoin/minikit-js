@@ -23,7 +23,7 @@ export * from './types';
 // Unified API (auto-detects environment)
 // ============================================================================
 
-export async function share<TFallback = MiniAppShareSuccessPayload>(
+export async function share<TFallback = MiniAppSharePayload>(
   options: MiniKitShareOptions<TFallback>,
   ctx?: CommandContext,
 ): Promise<

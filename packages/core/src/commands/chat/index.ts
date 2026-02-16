@@ -22,7 +22,7 @@ export * from './types';
 // Unified API (auto-detects environment)
 // ============================================================================
 
-export async function chat<TFallback = MiniAppChatSuccessPayload>(
+export async function chat<TFallback = MiniAppChatPayload>(
   options: MiniKitChatOptions<TFallback>,
   ctx?: CommandContext,
 ): Promise<
