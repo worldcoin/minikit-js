@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 
 const SIGNING_KEY = process.env.RP_SIGNING_KEY; // 32-byte hex private key
-const RP_ID = process.env.RP_ID ?? 'rp_765bb8d478f75a03';
+const RP_ID = process.env.RP_ID ?? 'rp_e87d44dbb7b76d91';
 
 export async function POST(req: Request) {
   if (!SIGNING_KEY) {

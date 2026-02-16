@@ -215,6 +215,7 @@ export const VerifyAction = () => {
             );
           }}
           onError={(errorCode) => {
+            console.log('Verification error:', errorCode);
             setVerifyResult({ error: `Verification failed: ${errorCode}` });
           }}
         />
