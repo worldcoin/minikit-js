@@ -17,6 +17,7 @@
     "@worldcoin/minikit-react": "workspace:*",
     "clsx": "^2.1.1",
     "eruda": "^3.4.1",
+    "jose": "^6.1.3",
     "next": "^15.2.8",
     "next-auth": "^5.0.0-beta.25",
     "permit2-sdk": "link:@uniswap/v3-sdk/permit2-sdk",
