@@ -7,26 +7,44 @@ export interface VerifyResponse {
   attribute?: string | null;
 }
 
-interface VerifyPayload {
+interface UniquenessProofResponseV3 {
+  identifier: string;
+  signal_hash?: string;
   proof: string;
   merkle_root: string;
-  nullifier_hash: string;
-  verification_level: string;
+  nullifier: string;
+}
+
+interface UniquenessProofResponseV4 {
+  identifier: string;
+  signal_hash?: string;
+  proof: string[];
+  nullifier: string;
+  issuer_schema_id: number;
+  expires_at_min: number;
 }
 
 /**
- * Verify a proof using the Developer Portal API
- *
- * For v3 proofs (current), use /api/v2/verify endpoint
- * For v4 proofs (upcoming), use /api/v4/verify endpoint
+ * Verify a proof using the Developer Portal v4 API
  */
 export const verifyProof = async (params: {
   app_id: `app_${string}`;
   action: string;
-  signal?: string;
-  payload: VerifyPayload;
+  action_description?: string;
+  nonce?: string;
+  protocol_version: '3.0' | '4.0';
+  responses: UniquenessProofResponseV3[] | UniquenessProofResponseV4[];
+  environment?: string;
 }): Promise<VerifyResponse | null> => {
-  const { app_id, action, payload, signal } = params;
+  const {
+    app_id,
+    action,
+    action_description,
+    nonce,
+    protocol_version,
+    responses,
+    environment,
+  } = params;
 
   if (!/^app_[a-zA-Z0-9_]+$/.test(app_id)) {
     throw new Error('Invalid app_id format');
@@ -38,19 +56,18 @@ export const verifyProof = async (params: {
     : 'https://developer.worldcoin.org';
 
   try {
-    // V3 proof verification (current format)
     const response = await fetch(
-      `${baseUrl}/api/v2/verify/${encodeURIComponent(app_id)}`,
+      `${baseUrl}/api/v4/verify/${encodeURIComponent(app_id)}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          proof: payload.proof,
-          merkle_root: payload.merkle_root,
-          nullifier_hash: payload.nullifier_hash,
-          verification_level: payload.verification_level,
           action,
-          signal,
+          action_description,
+          nonce,
+          protocol_version,
+          responses,
+          environment,
         }),
       },
     );

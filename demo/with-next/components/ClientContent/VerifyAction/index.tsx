@@ -30,6 +30,45 @@ export const VerifyAction = () => {
   );
   const [widgetOpen, setWidgetOpen] = useState(false);
   const [rpContext, setRpContext] = useState<RpContext | null>(null);
+  const verifyIDKitProof = useCallback(
+    async (
+      result: IDKitResult,
+      app_id: `app_${string}`,
+      fallbackAction: string,
+    ) => {
+      if (!result) {
+        setStatusMessage('No verification result to verify');
+        return;
+      }
+
+      if ('session_id' in result) {
+        setStatusMessage('Session proof verification is not supported here');
+        return;
+      }
+
+      const verifyResponse = await verifyProof({
+        app_id,
+        action: result.action ?? fallbackAction,
+        action_description: result.action_description,
+        nonce: result.nonce,
+        protocol_version: result.protocol_version,
+        responses: result.responses as any,
+        environment: result.environment,
+      });
+      setDevPortalVerifyResponse(verifyResponse);
+
+      if (verifyResponse) {
+        if (verifyResponse.success) {
+          setStatusMessage('Proof verified successfully with Developer Portal');
+        } else {
+          setStatusMessage(
+            `Proof verification failed with Developer Portal: ${verifyResponse}`,
+          );
+        }
+      }
+    },
+    [],
+  );
 
   const verifyAction = useCallback(
     async (params: {
@@ -89,25 +128,12 @@ export const VerifyAction = () => {
         setStatusMessage('Verification complete');
 
         // Verify with dev portal
-        const responses = completion.success
-          ? (completion.result as any)?.responses
-          : undefined;
-        if (responses && responses.length > 0) {
-          const firstResponse = responses[0] as Record<string, any>;
-          if (firstResponse.proof) {
-            const verifyResponse = await verifyProof({
-              payload: {
-                proof: firstResponse.proof,
-                merkle_root: firstResponse.merkle_root,
-                nullifier_hash: firstResponse.nullifier_hash,
-                verification_level: firstResponse.verification_level ?? 'orb',
-              },
-              app_id,
-              action,
-              signal: signal ?? 'test',
-            });
-            setDevPortalVerifyResponse(verifyResponse);
-          }
+        if (completion.success && completion.result) {
+          await verifyIDKitProof(
+            completion.result as IDKitResult,
+            app_id,
+            action,
+          );
         }
       } catch (err: unknown) {
         setStatusMessage(
@@ -115,7 +141,7 @@ export const VerifyAction = () => {
         );
       }
     },
-    [],
+    [verifyIDKitProof],
   );
 
   const onProdVerifyClick = useCallback(() => {
@@ -165,41 +191,13 @@ export const VerifyAction = () => {
     setWidgetOpen(true);
   }, []);
 
-  const verifyIDKitProof = useCallback(
-    async (verifyResult: IDKitResult) => {
-      if (!verifyResult) {
-        setStatusMessage('No verification result to verify');
-        return;
-      }
-
-      if (!lastUsedAppId) {
-        setStatusMessage('No app ID available for verification');
-        return;
-      }
-      if (verifyResult.protocol_version === '3.0') {
-        const verifyResponse = await verifyProof({
-          payload: {
-            proof: verifyResult.responses[0].proof,
-            merkle_root: verifyResult.responses[0].merkle_root,
-            nullifier_hash: verifyResult.responses[0].nullifier,
-            verification_level: verifyResult.responses[0].identifier ?? 'orb',
-          },
-          app_id: process.env
-            .NEXT_PUBLIC_STAGING_VERIFY_APP_ID as `app_${string}`,
-          action: process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION as string,
-        });
-        setDevPortalVerifyResponse(verifyResponse);
-      }
-    },
-    [verifyResult, lastUsedAppId],
-  );
-
   return (
     <div className="grid gap-y-4">
       <h2 className="font-bold text-2xl">Verify (IDKit)</h2>
       {rpContext && (
         <IDKitRequestWidget
           open={widgetOpen}
+          environment="staging"
           onOpenChange={setWidgetOpen}
           app_id={
             process.env.NEXT_PUBLIC_STAGING_VERIFY_APP_ID as `app_${string}`
@@ -209,8 +207,12 @@ export const VerifyAction = () => {
           allow_legacy_proofs={true}
           preset={orbLegacy({ signal: 'demo-signal' })}
           onSuccess={(result: IDKitResult) => {
-            setVerifyResult({ executedWith: 'idkit', data: result });
-            verifyIDKitProof(result);
+            setVerifyResult({ executedWith: 'minikit', data: result });
+            verifyIDKitProof(
+              result,
+              process.env.NEXT_PUBLIC_STAGING_VERIFY_APP_ID as `app_${string}`,
+              process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION as string,
+            );
           }}
           onError={(errorCode) => {
             setVerifyResult({ error: `Verification failed: ${errorCode}` });
@@ -290,7 +292,7 @@ export const VerifyAction = () => {
           </div>
 
           <div className="grid gap-y-2">
-            <p>`DEV_PORTAL/api/v2/verify` Response:</p>
+            <p>`DEV_PORTAL/api/v4/verify` Response:</p>
             <pre className="break-all whitespace-break-spaces bg-gray-300 p-2">
               {JSON.stringify(devPortalVerifyResponse, null, 2) ??
                 'No validation'}
