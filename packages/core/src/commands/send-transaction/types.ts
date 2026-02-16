@@ -158,7 +158,9 @@ export type MiniAppSendTransactionPayload =
   | MiniAppSendTransactionSuccessPayload
   | MiniAppSendTransactionErrorPayload;
 
-export interface MiniKitSendTransactionOptions<TCustomFallback = unknown>
+export interface MiniKitSendTransactionOptions<
+  TCustomFallback = SendTransactionResult,
+>
   extends FallbackConfig<TCustomFallback> {
   /** Transactions to execute */
   transaction: Transaction[];

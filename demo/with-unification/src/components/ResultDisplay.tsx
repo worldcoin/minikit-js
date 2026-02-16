@@ -2,14 +2,15 @@
 
 /**
  * Shared component to display command results with the transport path indicator.
- * The `via` field comes from CommandResult<T>.via: 'minikit' | 'wagmi' | 'fallback'
+ * The `executedWith` field comes from CommandResult<T>.executedWith:
+ * 'minikit' | 'wagmi' | 'fallback'
  */
 export function ResultDisplay({
-  via,
+  executedWith,
   data,
   error,
 }: {
-  via?: string;
+  executedWith?: string;
   data?: unknown;
   error?: string;
 }) {
@@ -22,9 +23,9 @@ export function ResultDisplay({
     );
   }
 
-  if (!data && !via) return null;
+  if (!data && !executedWith) return null;
 
-  const viaColors: Record<string, string> = {
+  const executedWithColors: Record<string, string> = {
     minikit: 'bg-success text-white',
     wagmi: 'bg-accent text-white',
     fallback: 'bg-warning text-black',
@@ -32,15 +33,15 @@ export function ResultDisplay({
 
   return (
     <div className="mt-3 rounded-md bg-card border border-border p-3 text-sm space-y-2">
-      {via && (
+      {executedWith && (
         <div className="flex items-center gap-2">
           <span className="text-muted text-xs uppercase tracking-wide">
-            via
+            executedWith
           </span>
           <span
-            className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${viaColors[via] ?? 'bg-border'}`}
+            className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${executedWithColors[executedWith] ?? 'bg-border'}`}
           >
-            {via}
+            {executedWith}
           </span>
         </div>
       )}

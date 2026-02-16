@@ -39,7 +39,7 @@ export type MiniAppSendHapticFeedbackPayload =
   | MiniAppSendHapticFeedbackErrorPayload;
 
 export type MiniKitSendHapticFeedbackOptions<
-  TCustomFallback = unknown,
+  TCustomFallback = MiniAppSendHapticFeedbackSuccessPayload,
 > = SendHapticFeedbackParams & FallbackConfig<TCustomFallback>;
 
 export class SendHapticFeedbackError extends Error {

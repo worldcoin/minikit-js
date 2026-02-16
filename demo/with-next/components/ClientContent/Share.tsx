@@ -81,7 +81,7 @@ export const Share = () => {
     setSentShareFilesPayload({
       input,
     });
-    if (finalPayload.via === 'minikit') {
+    if (finalPayload.executedWith === 'minikit') {
       await validateResponse(finalPayload.data);
     }
   }, []);

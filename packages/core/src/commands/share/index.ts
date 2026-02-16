@@ -23,11 +23,7 @@ import { ShareError } from './types';
 // Unified API (auto-detects environment)
 // ============================================================================
 
-export async function share(
-  options: MiniKitShareOptions,
-  ctx?: CommandContext,
-): Promise<CommandResultByVia<MiniAppShareSuccessPayload, MiniAppShareSuccessPayload, 'minikit'>>;
-export async function share<TFallback>(
+export async function share<TFallback = MiniAppShareSuccessPayload>(
   options: MiniKitShareOptions<TFallback>,
   ctx?: CommandContext,
 ): Promise<
@@ -39,15 +35,15 @@ export async function share<TFallback>(
     customFallback: options.fallback,
   });
 
-  if (result.via === 'fallback') {
+  if (result.executedWith === 'fallback') {
     return {
-      via: 'fallback',
+      executedWith: 'fallback',
       data: result.data as TFallback,
     };
   }
 
   return {
-    via: 'minikit',
+    executedWith: 'minikit',
     data: result.data as MiniAppShareSuccessPayload,
   };
 }

@@ -19,7 +19,6 @@ import {
 } from './commands';
 import type {
   MiniKitChatOptions,
-  CommandResult,
   CommandResultByVia,
   MiniKitGetPermissionsOptions,
   MiniAppChatSuccessPayload,
@@ -106,12 +105,12 @@ export class MiniKit {
    * ```typescript
    * const result = await MiniKit.walletAuth({ nonce: 'randomnonce123' });
    * console.log(result.data.address);
-   * console.log(result.via); // 'minikit' | 'wagmi' | 'fallback'
+   * console.log(result.executedWith); // 'minikit' | 'wagmi' | 'fallback'
    * ```
    */
   static walletAuth<TFallback = WalletAuthResult>(
     options: MiniKitWalletAuthOptions<TFallback>,
-  ): Promise<CommandResult<WalletAuthResult | TFallback>> {
+  ): Promise<CommandResultByVia<WalletAuthResult, TFallback>> {
     return walletAuth<TFallback>(options, this.getContext());
   }
 
@@ -136,7 +135,7 @@ export class MiniKit {
    */
   static sendTransaction<TFallback = SendTransactionResult>(
     options: MiniKitSendTransactionOptions<TFallback>,
-  ): Promise<CommandResult<SendTransactionResult | TFallback>> {
+  ): Promise<CommandResultByVia<SendTransactionResult, TFallback>> {
     return sendTransaction<TFallback>(options, this.getContext());
   }
 
@@ -158,7 +157,7 @@ export class MiniKit {
    */
   static pay<TFallback = PayResult>(
     options: MiniKitPayOptions<TFallback>,
-  ): Promise<CommandResult<PayResult | TFallback>> {
+  ): Promise<CommandResultByVia<PayResult, TFallback, 'minikit'>> {
     return pay<TFallback>(options, this.getContext());
   }
 
@@ -177,7 +176,7 @@ export class MiniKit {
    */
   static shareContacts<TFallback = ShareContactsResult>(
     options: MiniKitShareContactsOptions<TFallback> = {},
-  ): Promise<CommandResult<ShareContactsResult | TFallback>> {
+  ): Promise<CommandResultByVia<ShareContactsResult, TFallback, 'minikit'>> {
     return shareContacts<TFallback>(options, this.getContext());
   }
 
@@ -186,7 +185,7 @@ export class MiniKit {
    */
   static signMessage<TFallback = MiniAppSignMessageSuccessPayload>(
     options: MiniKitSignMessageOptions<TFallback>,
-  ): Promise<CommandResult<MiniAppSignMessageSuccessPayload | TFallback>> {
+  ): Promise<CommandResultByVia<MiniAppSignMessageSuccessPayload, TFallback>> {
     return signMessage<TFallback>(options, this.getContext());
   }
 
@@ -195,7 +194,7 @@ export class MiniKit {
    */
   static signTypedData<TFallback = MiniAppSignTypedDataSuccessPayload>(
     options: MiniKitSignTypedDataOptions<TFallback>,
-  ): Promise<CommandResult<MiniAppSignTypedDataSuccessPayload | TFallback>> {
+  ): Promise<CommandResultByVia<MiniAppSignTypedDataSuccessPayload, TFallback>> {
     return signTypedData<TFallback>(options, this.getContext());
   }
 
@@ -204,33 +203,19 @@ export class MiniKit {
    */
   static chat<TFallback = MiniAppChatSuccessPayload>(
     options: MiniKitChatOptions<TFallback>,
-  ): Promise<CommandResult<MiniAppChatSuccessPayload | TFallback>> {
+  ): Promise<CommandResultByVia<MiniAppChatSuccessPayload, TFallback, 'minikit'>> {
     return chat<TFallback>(options, this.getContext());
   }
 
   /**
    * Share files/text/URL
    */
-  static share(
-    options: MiniKitShareOptions,
-  ): Promise<
-    CommandResultByVia<
-      MiniAppShareSuccessPayload,
-      MiniAppShareSuccessPayload,
-      'minikit'
-    >
-  >;
-  static share<TFallback>(
+  static share<TFallback = MiniAppShareSuccessPayload>(
     options: MiniKitShareOptions<TFallback>,
   ): Promise<
     CommandResultByVia<MiniAppShareSuccessPayload, TFallback, 'minikit'>
-  >;
-  static share(
-    options: MiniKitShareOptions<any>,
-  ): Promise<
-    CommandResultByVia<MiniAppShareSuccessPayload, any, 'minikit'>
   > {
-    return runShare(options, this.getContext());
+    return runShare<TFallback>(options, this.getContext());
   }
 
   /**
@@ -239,7 +224,11 @@ export class MiniKit {
   static getPermissions<TFallback = MiniAppGetPermissionsSuccessPayload>(
     options: MiniKitGetPermissionsOptions<TFallback> = {},
   ): Promise<
-    CommandResult<MiniAppGetPermissionsSuccessPayload | TFallback>
+    CommandResultByVia<
+      MiniAppGetPermissionsSuccessPayload,
+      TFallback,
+      'minikit'
+    >
   > {
     return getPermissions<TFallback>(options, this.getContext());
   }
@@ -252,7 +241,11 @@ export class MiniKit {
   >(
     options: MiniKitRequestPermissionOptions<TFallback>,
   ): Promise<
-    CommandResult<MiniAppRequestPermissionSuccessPayload | TFallback>
+    CommandResultByVia<
+      MiniAppRequestPermissionSuccessPayload,
+      TFallback,
+      'minikit'
+    >
   > {
     return requestPermission<TFallback>(options, this.getContext());
   }
@@ -265,7 +258,11 @@ export class MiniKit {
   >(
     options: MiniKitSendHapticFeedbackOptions<TFallback>,
   ): Promise<
-    CommandResult<MiniAppSendHapticFeedbackSuccessPayload | TFallback>
+    CommandResultByVia<
+      MiniAppSendHapticFeedbackSuccessPayload,
+      TFallback,
+      'minikit'
+    >
   > {
     return sendHapticFeedback<TFallback>(options, this.getContext());
   }

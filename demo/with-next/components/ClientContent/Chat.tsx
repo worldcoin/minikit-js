@@ -82,7 +82,12 @@ export const Chat = () => {
       message: message || '',
       ...(toAddress && { to: toAddress.split(',').map((addr) => addr.trim()) }),
       fallback: () => {
-        console.log('here');
+        return {
+          status: 'success',
+          version: 1,
+          count: toAddress ? toAddress.split(',').length : 1,
+          timestamp: new Date().toISOString(),
+        };
       },
     };
 

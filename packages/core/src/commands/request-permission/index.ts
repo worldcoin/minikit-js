@@ -6,7 +6,7 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import type { CommandResult } from '../types';
+import type { CommandResultByVia } from '../types';
 import { executeWithFallback } from '../fallback';
 import { EventManager } from '../../events';
 
@@ -28,13 +28,26 @@ export async function requestPermission<
   options: MiniKitRequestPermissionOptions<TFallback>,
   ctx?: CommandContext,
 ): Promise<
-  CommandResult<MiniAppRequestPermissionSuccessPayload | TFallback>
+  CommandResultByVia<
+    MiniAppRequestPermissionSuccessPayload,
+    TFallback,
+    'minikit'
+  >
 > {
-  return executeWithFallback({
+  const result = await executeWithFallback({
     command: Command.RequestPermission,
     nativeExecutor: () => nativeRequestPermission(options, ctx),
     customFallback: options.fallback,
   });
+
+  if (result.executedWith === 'fallback') {
+    return { executedWith: 'fallback', data: result.data as TFallback };
+  }
+
+  return {
+    executedWith: 'minikit',
+    data: result.data as MiniAppRequestPermissionSuccessPayload,
+  };
 }
 
 // ============================================================================

@@ -8,7 +8,7 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import type { CommandResult } from '../types';
+import type { CommandResultByVia } from '../types';
 import { executeWithFallback } from '../fallback';
 import { EventManager } from '../../events';
 
@@ -41,19 +41,25 @@ import { PayError } from './types';
  *   fallback: () => showStripeCheckout(),
  * });
  *
- * console.log(result.via); // 'minikit' | 'fallback'
+ * console.log(result.executedWith); // 'minikit' | 'fallback'
  * ```
  */
 export async function pay<TFallback = PayResult>(
   options: MiniKitPayOptions<TFallback>,
   ctx?: CommandContext,
-): Promise<CommandResult<PayResult | TFallback>> {
-  return executeWithFallback({
+): Promise<CommandResultByVia<PayResult, TFallback, 'minikit'>> {
+  const result = await executeWithFallback({
     command: Command.Pay,
     nativeExecutor: () => nativePay(options, ctx),
     // No Wagmi fallback - pay is native only
     customFallback: options.fallback,
   });
+
+  if (result.executedWith === 'fallback') {
+    return { executedWith: 'fallback', data: result.data as TFallback };
+  }
+
+  return { executedWith: 'minikit', data: result.data as PayResult };
 }
 
 // ============================================================================

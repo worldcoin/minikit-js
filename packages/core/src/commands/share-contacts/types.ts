@@ -43,7 +43,9 @@ export type MiniAppShareContactsPayload =
   | MiniAppShareContactsSuccessPayload
   | MiniAppShareContactsErrorPayload;
 
-export interface MiniKitShareContactsOptions<TCustomFallback = unknown>
+export interface MiniKitShareContactsOptions<
+  TCustomFallback = ShareContactsResult,
+>
   extends FallbackConfig<TCustomFallback> {
   /** Enable multi-select in the contact picker */
   isMultiSelectEnabled?: boolean;

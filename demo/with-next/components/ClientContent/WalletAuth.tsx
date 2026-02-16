@@ -47,7 +47,7 @@ export const WalletAuth = () => {
       };
 
       setWalletAuthResult(payload);
-      setStatusMessage(`Authenticated via ${result.via}`);
+      setStatusMessage(`Authenticated via ${result.executedWith}`);
 
       // Call the API to verify the message
       const response = await fetch('/api/verify-siwe', {

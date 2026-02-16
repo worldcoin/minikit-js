@@ -6,7 +6,7 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import type { CommandResult } from '../types';
+import type { CommandResultByVia } from '../types';
 import { executeWithFallback } from '../fallback';
 import { EventManager } from '../../events';
 
@@ -35,19 +35,27 @@ import { ShareContactsError } from './types';
  * });
  *
  * console.log(result.data.contacts); // [{ username: '...', walletAddress: '...', ... }]
- * console.log(result.via); // 'minikit' | 'fallback'
+ * console.log(result.executedWith); // 'minikit' | 'fallback'
  * ```
  */
 export async function shareContacts<TFallback = ShareContactsResult>(
-  options: MiniKitShareContactsOptions<TFallback> = {},
+  options?: MiniKitShareContactsOptions<TFallback>,
   ctx?: CommandContext,
-): Promise<CommandResult<ShareContactsResult | TFallback>> {
-  return executeWithFallback({
+): Promise<CommandResultByVia<ShareContactsResult, TFallback, 'minikit'>> {
+  const resolvedOptions = options ?? {};
+
+  const result = await executeWithFallback({
     command: Command.ShareContacts,
-    nativeExecutor: () => nativeShareContacts(options, ctx),
+    nativeExecutor: () => nativeShareContacts(resolvedOptions, ctx),
     // No Wagmi fallback - contacts is native only
-    customFallback: options.fallback,
+    customFallback: resolvedOptions.fallback,
   });
+
+  if (result.executedWith === 'fallback') {
+    return { executedWith: 'fallback', data: result.data as TFallback };
+  }
+
+  return { executedWith: 'minikit', data: result.data as ShareContactsResult };
 }
 
 // Alias for backwards compatibility

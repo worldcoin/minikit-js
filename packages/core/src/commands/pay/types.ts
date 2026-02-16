@@ -90,7 +90,7 @@ export type MiniAppPaymentPayload =
   | MiniAppPaymentSuccessPayload
   | MiniAppPaymentErrorPayload;
 
-export interface MiniKitPayOptions<TCustomFallback = unknown>
+export interface MiniKitPayOptions<TCustomFallback = PayResult>
   extends FallbackConfig<TCustomFallback> {
   /** Unique reference for this payment (for tracking) */
   reference: string;

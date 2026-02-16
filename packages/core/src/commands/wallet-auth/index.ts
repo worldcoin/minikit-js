@@ -8,7 +8,7 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import type { CommandResult } from '../types';
+import type { CommandResultByVia } from '../types';
 import { executeWithFallback } from '../fallback';
 import { wagmiWalletAuth } from '../wagmi-fallback';
 import { EventManager } from '../../events';
@@ -34,7 +34,7 @@ import { WalletAuthError } from './types';
  * // Basic usage - works in World App and web
  * const result = await walletAuth({ nonce: 'randomnonce123' });
  * console.log(result.data.address); // '0x...'
- * console.log(result.via); // 'minikit' | 'wagmi' | 'fallback'
+ * console.log(result.executedWith); // 'minikit' | 'wagmi' | 'fallback'
  *
  * // With custom fallback
  * const result = await walletAuth({
@@ -46,8 +46,8 @@ import { WalletAuthError } from './types';
 export async function walletAuth<TFallback = WalletAuthResult>(
   options: MiniKitWalletAuthOptions<TFallback>,
   ctx?: CommandContext,
-): Promise<CommandResult<WalletAuthResult | TFallback>> {
-  return executeWithFallback({
+): Promise<CommandResultByVia<WalletAuthResult, TFallback>> {
+  const result = await executeWithFallback({
     command: Command.WalletAuth,
     nativeExecutor: () => nativeWalletAuth(options, ctx),
     wagmiFallback: () =>
@@ -58,6 +58,16 @@ export async function walletAuth<TFallback = WalletAuthResult>(
       }),
     customFallback: options.fallback,
   });
+
+  if (result.executedWith === 'fallback') {
+    return { executedWith: 'fallback', data: result.data as TFallback };
+  }
+
+  if (result.executedWith === 'wagmi') {
+    return { executedWith: 'wagmi', data: result.data as WalletAuthResult };
+  }
+
+  return { executedWith: 'minikit', data: result.data as WalletAuthResult };
 }
 
 // ============================================================================

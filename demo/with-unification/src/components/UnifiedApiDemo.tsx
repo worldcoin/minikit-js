@@ -40,21 +40,21 @@ export function UnifiedApiDemo() {
   const [widgetOpen, setWidgetOpen] = useState(false);
   const [rpContext, setRpContext] = useState<RpContext | null>(null);
   const [verifyResult, setVerifyResult] = useState<{
-    via?: string;
+    executedWith?: string;
     data?: unknown;
     error?: string;
   }>({});
 
   const [authStatus, setAuthStatus] = useState<'idle' | 'pending'>('idle');
   const [authResult, setAuthResult] = useState<{
-    via?: string;
+    executedWith?: string;
     data?: unknown;
     error?: string;
   }>({});
 
   const [txStatus, setTxStatus] = useState<'idle' | 'pending'>('idle');
   const [txResult, setTxResult] = useState<{
-    via?: string;
+    executedWith?: string;
     data?: unknown;
     error?: string;
   }>({});
@@ -101,7 +101,7 @@ export function UnifiedApiDemo() {
         statement: 'Sign in to Unified Demo',
       });
       setAuthResult({
-        via: result.via,
+        executedWith: result.executedWith,
         data: {
           address: result.data.address,
           message: result.data.message.slice(0, 100) + '...',
@@ -133,12 +133,12 @@ export function UnifiedApiDemo() {
         ],
       });
       setTxResult({
-        via: result.via,
+        executedWith: result.executedWith,
         data: {
           hashes: result.data.hashes,
           transactionId: result.data.transactionId,
           features:
-            result.via === 'minikit'
+            result.executedWith === 'minikit'
               ? 'batch + permit2 + gas sponsorship'
               : 'sequential, user pays gas',
         },
@@ -169,7 +169,7 @@ export function UnifiedApiDemo() {
             <code>IDKitRequestWidget</code> — native in World App, QR on web
           </p>
           <ResultDisplay
-            via={verifyResult.via}
+            executedWith={verifyResult.executedWith}
             data={verifyResult.data}
             error={verifyResult.error}
           />
@@ -190,7 +190,7 @@ export function UnifiedApiDemo() {
             <code>MiniKit.walletAuth(opts)</code>
           </p>
           <ResultDisplay
-            via={authResult.via}
+            executedWith={authResult.executedWith}
             data={authResult.data}
             error={authResult.error}
           />
@@ -209,7 +209,7 @@ export function UnifiedApiDemo() {
             <code>MiniKit.sendTransaction(opts)</code>
           </p>
           <ResultDisplay
-            via={txResult.via}
+            executedWith={txResult.executedWith}
             data={txResult.data}
             error={txResult.error}
           />
@@ -232,7 +232,7 @@ export function UnifiedApiDemo() {
           allow_legacy_proofs={true}
           preset={orbLegacy({ signal: 'demo-signal' })}
           onSuccess={(result: IDKitResult) => {
-            setVerifyResult({ via: 'idkit', data: result });
+            setVerifyResult({ executedWith: 'idkit', data: result });
           }}
           onError={(errorCode) => {
             setVerifyResult({ error: `Verification failed: ${errorCode}` });

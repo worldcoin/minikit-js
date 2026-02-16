@@ -6,7 +6,7 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import type { CommandResult } from '../types';
+import type { CommandResultByVia } from '../types';
 import { executeWithFallback } from '../fallback';
 import { wagmiSignMessage } from '../wagmi-fallback';
 import { EventManager } from '../../events';
@@ -28,8 +28,8 @@ export async function signMessage<
 >(
   options: MiniKitSignMessageOptions<TFallback>,
   ctx?: CommandContext,
-): Promise<CommandResult<MiniAppSignMessageSuccessPayload | TFallback>> {
-  return executeWithFallback({
+): Promise<CommandResultByVia<MiniAppSignMessageSuccessPayload, TFallback>> {
+  const result = await executeWithFallback({
     command: Command.SignMessage,
     nativeExecutor: () => nativeSignMessage(options, ctx),
     wagmiFallback: () =>
@@ -38,6 +38,22 @@ export async function signMessage<
       }),
     customFallback: options.fallback,
   });
+
+  if (result.executedWith === 'fallback') {
+    return { executedWith: 'fallback', data: result.data as TFallback };
+  }
+
+  if (result.executedWith === 'wagmi') {
+    return {
+      executedWith: 'wagmi',
+      data: result.data as MiniAppSignMessageSuccessPayload,
+    };
+  }
+
+  return {
+    executedWith: 'minikit',
+    data: result.data as MiniAppSignMessageSuccessPayload,
+  };
 }
 
 // ============================================================================

@@ -180,7 +180,7 @@ export const VerifyAction = () => {
           allow_legacy_proofs={true}
           preset={orbLegacy({ signal: 'demo-signal' })}
           onSuccess={(result: IDKitResult) => {
-            setVerifyResult({ via: 'idkit', data: result });
+            setVerifyResult({ executedWith: 'idkit', data: result });
           }}
           onError={(errorCode) => {
             setVerifyResult({ error: `Verification failed: ${errorCode}` });

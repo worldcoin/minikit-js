@@ -6,7 +6,7 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import type { CommandResult } from '../types';
+import type { CommandResultByVia } from '../types';
 import { executeWithFallback } from '../fallback';
 import { EventManager } from '../../events';
 
@@ -28,13 +28,26 @@ export async function sendHapticFeedback<
   options: MiniKitSendHapticFeedbackOptions<TFallback>,
   ctx?: CommandContext,
 ): Promise<
-  CommandResult<MiniAppSendHapticFeedbackSuccessPayload | TFallback>
+  CommandResultByVia<
+    MiniAppSendHapticFeedbackSuccessPayload,
+    TFallback,
+    'minikit'
+  >
 > {
-  return executeWithFallback({
+  const result = await executeWithFallback({
     command: Command.SendHapticFeedback,
     nativeExecutor: () => nativeSendHapticFeedback(options, ctx),
     customFallback: options.fallback,
   });
+
+  if (result.executedWith === 'fallback') {
+    return { executedWith: 'fallback', data: result.data as TFallback };
+  }
+
+  return {
+    executedWith: 'minikit',
+    data: result.data as MiniAppSendHapticFeedbackSuccessPayload,
+  };
 }
 
 // ============================================================================

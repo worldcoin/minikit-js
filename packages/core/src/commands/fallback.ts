@@ -46,7 +46,7 @@ export interface ExecuteWithFallbackOptions<TNative, TFallback = TNative> {
  *   customFallback: options.fallback,
  * });
  *
- * console.log(result.via); // 'minikit' | 'wagmi' | 'fallback'
+ * console.log(result.executedWith); // 'minikit' | 'wagmi' | 'fallback'
  * ```
  */
 export async function executeWithFallback<TNative, TFallback = TNative>(
@@ -64,7 +64,7 @@ export async function executeWithFallback<TNative, TFallback = TNative>(
   if (isInWorldApp() && isCommandAvailable(command)) {
     try {
       const data = await nativeExecutor();
-      return { data, via: 'minikit' as CommandVia };
+      return { data, executedWith: 'minikit' as CommandVia };
     } catch (error) {
       // Native failed, fall through to fallbacks
       console.warn(`Native ${command} failed, attempting fallback:`, error);
@@ -75,7 +75,7 @@ export async function executeWithFallback<TNative, TFallback = TNative>(
   if (wagmiFallback && hasWagmiConfig()) {
     try {
       const data = await wagmiFallback();
-      return { data, via: 'wagmi' as CommandVia };
+      return { data, executedWith: 'wagmi' as CommandVia };
     } catch (error) {
       console.warn(`Wagmi fallback for ${command} failed:`, error);
       // Fall through to custom fallback
@@ -85,7 +85,7 @@ export async function executeWithFallback<TNative, TFallback = TNative>(
   // 3. Try custom fallback
   if (customFallback) {
     const data = await customFallback();
-    return { data, via: 'fallback' as CommandVia };
+    return { data, executedWith: 'fallback' as CommandVia };
   }
 
   // 4. Error - no fallback available

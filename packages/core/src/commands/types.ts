@@ -164,7 +164,7 @@ export type CommandVia = 'minikit' | 'wagmi' | 'fallback';
 
 export interface CommandResult<T> {
   data: T;
-  via: CommandVia;
+  executedWith: CommandVia;
 }
 
 export type CommandResultByVia<
@@ -173,11 +173,11 @@ export type CommandResultByVia<
   TViaNative extends CommandVia = Exclude<CommandVia, 'fallback'>,
 > =
   | {
-      via: TViaNative;
+      executedWith: TViaNative;
       data: TNative;
     }
   | {
-      via: 'fallback';
+      executedWith: 'fallback';
       data: TFallback;
     };
 

@@ -1,12 +1,10 @@
 import { ResponseEvent } from './commands/types';
 
 // Event handler and payload types
-export type EventPayload<T extends ResponseEvent = ResponseEvent> = any; // Will be properly typed per-command
+export type EventPayload = any;
 
-export type EventHandler<E extends ResponseEvent = ResponseEvent> = <
-  T extends EventPayload<E>,
->(
-  data: T,
+export type EventHandler<E extends ResponseEvent = ResponseEvent> = (
+  data: EventPayload,
 ) => void;
 
 export class EventManager {

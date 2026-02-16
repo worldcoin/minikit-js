@@ -7,7 +7,7 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import type { CommandResult } from '../types';
+import type { CommandResultByVia } from '../types';
 import { executeWithFallback } from '../fallback';
 import { wagmiSendTransaction } from '../wagmi-fallback';
 import { EventManager } from '../../events';
@@ -44,19 +44,29 @@ const WORLD_CHAIN_ID = 480;
  * });
  *
  * console.log(result.data.hashes); // ['0x...']
- * console.log(result.via); // 'minikit' | 'wagmi' | 'fallback'
+ * console.log(result.executedWith); // 'minikit' | 'wagmi' | 'fallback'
  * ```
  */
 export async function sendTransaction<TFallback = SendTransactionResult>(
   options: MiniKitSendTransactionOptions<TFallback>,
   ctx?: CommandContext,
-): Promise<CommandResult<SendTransactionResult | TFallback>> {
-  return executeWithFallback({
+): Promise<CommandResultByVia<SendTransactionResult, TFallback>> {
+  const result = await executeWithFallback({
     command: Command.SendTransaction,
     nativeExecutor: () => nativeSendTransaction(options, ctx),
     wagmiFallback: () => wagmiSendTransactionAdapter(options),
     customFallback: options.fallback,
   });
+
+  if (result.executedWith === 'fallback') {
+    return { executedWith: 'fallback', data: result.data as TFallback };
+  }
+
+  if (result.executedWith === 'wagmi') {
+    return { executedWith: 'wagmi', data: result.data as SendTransactionResult };
+  }
+
+  return { executedWith: 'minikit', data: result.data as SendTransactionResult };
 }
 
 // ============================================================================

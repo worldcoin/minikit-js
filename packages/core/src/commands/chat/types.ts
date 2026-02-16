@@ -12,7 +12,9 @@ type ChatParams = {
 /** @deprecated Use {@link MiniKitChatOptions} instead */
 export type ChatInput = ChatParams;
 
-export interface MiniKitChatOptions<TCustomFallback = unknown>
+export interface MiniKitChatOptions<
+  TCustomFallback = MiniAppChatSuccessPayload,
+>
   extends ChatParams,
     FallbackConfig<TCustomFallback> {}
 

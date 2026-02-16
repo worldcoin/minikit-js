@@ -11,7 +11,9 @@ type SignMessageParams = {
 /** @deprecated Use {@link MiniKitSignMessageOptions} instead */
 export type SignMessageInput = SignMessageParams;
 
-export interface MiniKitSignMessageOptions<TCustomFallback = unknown>
+export interface MiniKitSignMessageOptions<
+  TCustomFallback = MiniAppSignMessageSuccessPayload,
+>
   extends SignMessageParams,
     FallbackConfig<TCustomFallback> {}
 

@@ -6,7 +6,7 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import type { CommandResult } from '../types';
+import type { CommandResultByVia } from '../types';
 import { executeWithFallback } from '../fallback';
 import { EventManager } from '../../events';
 
@@ -25,12 +25,18 @@ import { ChatError } from './types';
 export async function chat<TFallback = MiniAppChatSuccessPayload>(
   options: MiniKitChatOptions<TFallback>,
   ctx?: CommandContext,
-): Promise<CommandResult<MiniAppChatSuccessPayload | TFallback>> {
-  return executeWithFallback({
+): Promise<CommandResultByVia<MiniAppChatSuccessPayload, TFallback, 'minikit'>> {
+  const result = await executeWithFallback({
     command: Command.Chat,
     nativeExecutor: () => nativeChat(options, ctx),
     customFallback: options.fallback,
   });
+
+  if (result.executedWith === 'fallback') {
+    return { executedWith: 'fallback', data: result.data as TFallback };
+  }
+
+  return { executedWith: 'minikit', data: result.data as MiniAppChatSuccessPayload };
 }
 
 // ============================================================================
