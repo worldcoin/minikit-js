@@ -50,6 +50,20 @@ const mainContract =
     ? '0x9Cf4F011F55Add3ECC1B1B497A3e9bd32183D6e8' // same contract for now since I didn't add proofs
     : '0x9Cf4F011F55Add3ECC1B1B497A3e9bd32183D6e8';
 
+const standingPermitContract =
+  process.env.NEXT_PUBLIC_STANDING_PERMIT_CONTRACT ||
+  '0x7805d5a2230f279b6f4f85fae68f98e3597da6e2';
+
+const StandingPermitTestABI = [
+  {
+    inputs: [{ internalType: 'bytes', name: 'signature', type: 'bytes' }],
+    name: 'test',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+];
+
 /* Asynchronous Implementation
 For the purpose of variability some of these commands use async handlers
 and some of the commands user synchronous responses. 
@@ -442,6 +456,55 @@ export const SendTransaction = () => {
     await parseResponse(finalPayload);
   };
 
+  const sendStandingPermit = async (permitCount: number) => {
+    const deadline = Math.floor(
+      (Date.now() + 30 * 60 * 1000) / 1000,
+    ).toString();
+
+    const permit2: Array<{
+      permitted: { token: string; amount: string };
+      nonce: string;
+      spender: string;
+      deadline: string;
+    }> = [];
+    const transaction: Array<{
+      address: string;
+      abi: typeof StandingPermitTestABI;
+      functionName: string;
+      args: string[];
+    }> = [];
+
+    for (let i = 0; i < permitCount; i++) {
+      const nonce = (Date.now() + i).toString();
+
+      permit2.push({
+        permitted: {
+          token: testTokens.worldchain.USDC,
+          amount: '100000', // 0.1 USDC each
+        },
+        nonce,
+        spender: standingPermitContract,
+        deadline,
+      });
+
+      transaction.push({
+        address: standingPermitContract,
+        abi: StandingPermitTestABI,
+        functionName: 'test',
+        args: [`PERMIT2_SIGNATURE_PLACEHOLDER_${i}`],
+      });
+    }
+
+    const { commandPayload, finalPayload } =
+      await MiniKit.commandsAsync.sendTransaction({
+        transaction,
+        permit2,
+      });
+
+    setTransactionData(commandPayload);
+    await parseResponse(finalPayload);
+  };
+
   const testEthTransaction = async () => {
     const { commandPayload, finalPayload } =
       await MiniKit.commandsAsync.sendTransaction({
@@ -576,6 +639,21 @@ export const SendTransaction = () => {
           onClick={testNFTPurchase}
         >
           Purchase NFT Permit2 (0.1 USDC)
+        </button>
+      </div>
+
+      <div className="grid gap-x-2 grid-cols-2">
+        <button
+          className="bg-black text-white rounded-lg p-4 w-full"
+          onClick={() => sendStandingPermit(1)}
+        >
+          Standing Permit (1x 0.1 USDC)
+        </button>
+        <button
+          className="bg-black text-white rounded-lg p-4 w-full"
+          onClick={() => sendStandingPermit(3)}
+        >
+          Standing Permits (3x 0.1 USDC)
         </button>
       </div>
 
