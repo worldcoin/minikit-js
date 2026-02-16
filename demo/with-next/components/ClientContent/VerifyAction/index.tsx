@@ -165,6 +165,35 @@ export const VerifyAction = () => {
     setWidgetOpen(true);
   }, []);
 
+  const verifyIDKitProof = useCallback(
+    async (verifyResult: IDKitResult) => {
+      if (!verifyResult) {
+        setStatusMessage('No verification result to verify');
+        return;
+      }
+
+      if (!lastUsedAppId) {
+        setStatusMessage('No app ID available for verification');
+        return;
+      }
+      if (verifyResult.protocol_version === '3.0') {
+        const verifyResponse = await verifyProof({
+          payload: {
+            proof: verifyResult.responses[0].proof,
+            merkle_root: verifyResult.responses[0].merkle_root,
+            nullifier_hash: verifyResult.responses[0].nullifier,
+            verification_level: verifyResult.responses[0].identifier ?? 'orb',
+          },
+          app_id: process.env
+            .NEXT_PUBLIC_STAGING_VERIFY_APP_ID as `app_${string}`,
+          action: process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION as string,
+        });
+        setDevPortalVerifyResponse(verifyResponse);
+      }
+    },
+    [verifyResult, lastUsedAppId],
+  );
+
   return (
     <div className="grid gap-y-4">
       <h2 className="font-bold text-2xl">Verify (IDKit)</h2>
@@ -181,6 +210,7 @@ export const VerifyAction = () => {
           preset={orbLegacy({ signal: 'demo-signal' })}
           onSuccess={(result: IDKitResult) => {
             setVerifyResult({ executedWith: 'idkit', data: result });
+            verifyIDKitProof(result);
           }}
           onError={(errorCode) => {
             setVerifyResult({ error: `Verification failed: ${errorCode}` });
