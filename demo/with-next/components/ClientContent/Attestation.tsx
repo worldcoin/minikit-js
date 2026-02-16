@@ -1,5 +1,5 @@
 import {
-  AttestationPayload,
+  AttestationInput,
   MiniAppAttestationPayload,
   MiniKit,
   ResponseEvent,
@@ -89,7 +89,7 @@ export const Attestation = () => {
     const requestHash = await hexSha256(SAMPLE_REQUEST_BODY);
 
     // Step 2: Request attestation token from World App
-    const attestationPayload: AttestationPayload = { requestHash };
+    const attestationPayload: AttestationInput = { requestHash };
     const sent = MiniKit.commands.attestation(attestationPayload);
 
     if (!sent) {

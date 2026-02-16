@@ -14,12 +14,18 @@ import {
 // Types
 // ============================================================================
 
-export type AttestationPayload = {
+// Developer-facing input type (camelCase)
+export type AttestationInput = {
   /**
    * Hex-encoded hash of the request to be attested.
    * Hash must be generated per hashing spec documented in MiniKit docs.
    */
   requestHash: string;
+};
+
+// Wire payload sent to World App (snake_case)
+export type AttestationPayload = {
+  request_hash: string;
 };
 
 export enum AttestationErrorCodes {
@@ -59,7 +65,7 @@ export type MiniAppAttestationPayload =
 // ============================================================================
 
 export function createAttestationCommand(_ctx: CommandContext) {
-  return (payload: AttestationPayload): AttestationPayload | null => {
+  return (input: AttestationInput): AttestationPayload | null => {
     if (
       typeof window === 'undefined' ||
       !isCommandAvailable(Command.Attestation)
@@ -70,10 +76,14 @@ export function createAttestationCommand(_ctx: CommandContext) {
       return null;
     }
 
-    if (!payload.requestHash || payload.requestHash.length === 0) {
+    if (!input.requestHash || input.requestHash.length === 0) {
       console.error("'attestation' command requires a non-empty requestHash");
       return null;
     }
+
+    const payload: AttestationPayload = {
+      request_hash: input.requestHash,
+    };
 
     sendMiniKitEvent({
       command: Command.Attestation,
@@ -90,7 +100,7 @@ export function createAttestationAsyncCommand(
   syncCommand: ReturnType<typeof createAttestationCommand>,
 ) {
   return async (
-    payload: AttestationPayload,
+    input: AttestationInput,
   ): AsyncHandlerReturn<
     AttestationPayload | null,
     MiniAppAttestationPayload
@@ -107,7 +117,7 @@ export function createAttestationAsyncCommand(
           handleResponse as any,
         );
 
-        const commandPayload = syncCommand(payload);
+        const commandPayload = syncCommand(input);
 
         // If dispatch failed locally, clean up the subscription and reject
         // immediately — no response event will ever arrive.

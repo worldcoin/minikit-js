@@ -177,12 +177,16 @@ export type ChatPayload = {
 };
 
 // Anchor: Attestation Payload
-export type AttestationPayload = {
+export type AttestationInput = {
   /**
    * Hex-encoded hash of the request to be attested.
    * Hash must be generated per hashing spec documented in MiniKit docs.
    */
   requestHash: string;
+};
+
+export type AttestationPayload = {
+  request_hash: string;
 };
 
 type CommandReturnPayloadMap = {
