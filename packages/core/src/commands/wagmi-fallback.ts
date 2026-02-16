@@ -101,6 +101,32 @@ export interface WalletAuthResult {
   signature: string;
 }
 
+export interface SignMessageParams {
+  message: string;
+}
+
+export interface SignMessageResult {
+  status: 'success';
+  version: number;
+  signature: string;
+  address: string;
+}
+
+export interface SignTypedDataParams {
+  types: Record<string, unknown>;
+  primaryType: string;
+  message: Record<string, unknown>;
+  domain?: Record<string, unknown>;
+  chainId?: number;
+}
+
+export interface SignTypedDataResult {
+  status: 'success';
+  version: number;
+  signature: string;
+  address: string;
+}
+
 /**
  * Execute wallet auth via Wagmi (connect + SIWE)
  */
@@ -146,6 +172,77 @@ export async function wagmiWalletAuth(
     address,
     message,
     signature,
+  };
+}
+
+/**
+ * Execute sign message via Wagmi
+ */
+export async function wagmiSignMessage(
+  params: SignMessageParams,
+): Promise<SignMessageResult> {
+  const config = getWagmiConfig();
+  if (!config) {
+    throw new Error(
+      'Wagmi config not available. Pass wagmiConfig to MiniKitProvider.',
+    );
+  }
+
+  const { signMessage } = await import('wagmi/actions');
+
+  const address = await ensureConnected(config);
+  const signature = await signMessage(config, {
+    account: address,
+    message: params.message,
+  });
+
+  return {
+    status: 'success',
+    version: 1,
+    signature,
+    address,
+  };
+}
+
+/**
+ * Execute sign typed data via Wagmi
+ */
+export async function wagmiSignTypedData(
+  params: SignTypedDataParams,
+): Promise<SignTypedDataResult> {
+  const config = getWagmiConfig();
+  if (!config) {
+    throw new Error(
+      'Wagmi config not available. Pass wagmiConfig to MiniKitProvider.',
+    );
+  }
+
+  const { getChainId, signTypedData, switchChain } = await import(
+    'wagmi/actions'
+  );
+
+  const address = await ensureConnected(config);
+
+  if (params.chainId !== undefined) {
+    const currentChainId = await getChainId(config);
+    if (currentChainId !== params.chainId) {
+      await switchChain(config, { chainId: params.chainId });
+    }
+  }
+
+  const signature = await signTypedData(config, {
+    account: address,
+    types: params.types as any,
+    primaryType: params.primaryType as any,
+    domain: params.domain as any,
+    message: params.message as any,
+  });
+
+  return {
+    status: 'success',
+    version: 1,
+    signature,
+    address,
   };
 }
 

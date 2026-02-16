@@ -131,7 +131,7 @@ function createProvider(): WorldAppProvider {
           const [data] = params as [string, string];
           try {
             const result = await MiniKit.signMessage({ message: data });
-            return result.signature;
+            return result.data.signature;
           } catch (e: any) {
             throw rpcError(4001, `Sign message failed: ${e.message}`);
           }
@@ -147,7 +147,7 @@ function createProvider(): WorldAppProvider {
               domain: typedData.domain,
               message: typedData.message,
             });
-            return result.signature;
+            return result.data.signature;
           } catch (e: any) {
             throw rpcError(4001, `Sign typed data failed: ${e.message}`);
           }

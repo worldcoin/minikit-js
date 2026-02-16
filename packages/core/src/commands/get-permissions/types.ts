@@ -1,4 +1,5 @@
 import type {
+  FallbackConfig,
   MiniAppBaseErrorPayload,
   MiniAppBaseSuccessPayload,
 } from '../types';
@@ -31,6 +32,9 @@ export type MiniAppGetPermissionsErrorPayload =
 export type MiniAppGetPermissionsPayload =
   | MiniAppGetPermissionsSuccessPayload
   | MiniAppGetPermissionsErrorPayload;
+
+export interface GetPermissionsOptions
+  extends FallbackConfig<MiniAppGetPermissionsSuccessPayload> {}
 
 export class GetPermissionsError extends Error {
   constructor(public readonly error_code: GetPermissionsErrorCodes) {

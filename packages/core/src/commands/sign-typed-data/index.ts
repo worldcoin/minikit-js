@@ -6,22 +6,48 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
+import type { CommandResult } from '../types';
+import { executeWithFallback } from '../fallback';
+import { wagmiSignTypedData } from '../wagmi-fallback';
 import { EventManager } from '../../events';
 
 export * from './types';
 import type {
   MiniAppSignTypedDataPayload,
   MiniAppSignTypedDataSuccessPayload,
-  SignTypedDataInput,
+  SignTypedDataOptions,
 } from './types';
 import { SignTypedDataError } from './types';
 
 // ============================================================================
-// Implementation
+// Unified API (auto-detects environment)
 // ============================================================================
 
 export async function signTypedData(
-  input: SignTypedDataInput,
+  options: SignTypedDataOptions,
+  ctx?: CommandContext,
+): Promise<CommandResult<MiniAppSignTypedDataSuccessPayload>> {
+  return executeWithFallback({
+    command: Command.SignTypedData,
+    nativeExecutor: () => nativeSignTypedData(options, ctx),
+    wagmiFallback: () =>
+      wagmiSignTypedData({
+        types: options.types,
+        primaryType: options.primaryType,
+        message: options.message,
+        domain: options.domain,
+        chainId: options.chainId,
+      }),
+    customFallback: options.fallback,
+  });
+}
+
+// ============================================================================
+// Native Implementation (World App)
+// ============================================================================
+
+async function nativeSignTypedData(
+  options: SignTypedDataOptions,
   ctx?: CommandContext,
 ): Promise<MiniAppSignTypedDataSuccessPayload> {
   if (!ctx) {
@@ -37,10 +63,13 @@ export async function signTypedData(
     );
   }
 
-  // Default to Worldchain
-  if (!input.chainId) {
-    input.chainId = 480;
-  }
+  const payloadInput = {
+    types: options.types,
+    primaryType: options.primaryType,
+    message: options.message,
+    domain: options.domain,
+    chainId: options.chainId ?? 480,
+  };
 
   const payload = await new Promise<MiniAppSignTypedDataPayload>(
     (resolve, reject) => {
@@ -56,7 +85,7 @@ export async function signTypedData(
         sendMiniKitEvent({
           command: Command.SignTypedData,
           version: COMMAND_VERSIONS[Command.SignTypedData],
-          payload: input,
+          payload: payloadInput,
         });
       } catch (error) {
         reject(error);

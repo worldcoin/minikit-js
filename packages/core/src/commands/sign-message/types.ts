@@ -1,11 +1,19 @@
 import type {
+  FallbackConfig,
   MiniAppBaseErrorPayload,
   MiniAppBaseSuccessPayload,
 } from '../types';
 
-export type SignMessageInput = {
+type SignMessageParams = {
   message: string;
 };
+
+/** @deprecated Use {@link SignMessageOptions} instead */
+export type SignMessageInput = SignMessageParams;
+
+export interface SignMessageOptions
+  extends SignMessageParams,
+    FallbackConfig<MiniAppSignMessageSuccessPayload> {}
 
 export enum SignMessageErrorCodes {
   InvalidMessage = 'invalid_message',

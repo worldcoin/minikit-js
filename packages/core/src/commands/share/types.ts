@@ -1,14 +1,22 @@
 import type {
+  FallbackConfig,
   MiniAppBaseErrorPayload,
   MiniAppBaseSuccessPayload,
 } from '../types';
 
-export type ShareInput = {
+type ShareParams = {
   files?: File[];
   title?: string;
   text?: string;
   url?: string;
 };
+
+/** @deprecated Use {@link ShareOptions} instead */
+export type ShareInput = ShareParams;
+
+export interface ShareOptions
+  extends ShareParams,
+    FallbackConfig<MiniAppShareSuccessPayload> {}
 
 export type SharePayload = {
   files?: Array<{

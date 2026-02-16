@@ -1,12 +1,16 @@
 import type { Permission } from '../get-permissions';
 import type {
+  FallbackConfig,
   MiniAppBaseErrorPayload,
   MiniAppBaseSuccessPayload,
 } from '../types';
 
-export type RequestPermissionInput = {
+type RequestPermissionParams = {
   permission: Permission;
 };
+
+/** @deprecated Use {@link RequestPermissionOptions} instead */
+export type RequestPermissionInput = RequestPermissionParams;
 
 export enum RequestPermissionErrorCodes {
   UserRejected = 'user_rejected',
@@ -31,6 +35,10 @@ export type MiniAppRequestPermissionErrorPayload =
 export type MiniAppRequestPermissionPayload =
   | MiniAppRequestPermissionSuccessPayload
   | MiniAppRequestPermissionErrorPayload;
+
+export interface RequestPermissionOptions
+  extends RequestPermissionParams,
+    FallbackConfig<MiniAppRequestPermissionSuccessPayload> {}
 
 export class RequestPermissionError extends Error {
   constructor(public readonly error_code: RequestPermissionErrorCodes) {

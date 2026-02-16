@@ -76,7 +76,7 @@ export const Share = () => {
       input,
     });
 
-    await validateResponse(finalPayload);
+    await validateResponse(finalPayload.data);
   }, []);
 
   return (

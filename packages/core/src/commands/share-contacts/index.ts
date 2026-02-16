@@ -12,8 +12,6 @@ import { EventManager } from '../../events';
 
 export * from './types';
 import type {
-  ShareContactsInput,
-  ShareContactsPayload,
   ShareContactsOptions,
   ShareContactsResult,
   MiniAppShareContactsPayload,
@@ -27,7 +25,7 @@ import { ShareContactsError } from './types';
 /**
  * Open the contact picker to select World App contacts
  *
- * Note: This command only works in World App. On web, you must provide a fallback.
+ * Note: This command works natively in World App. On web, provide a fallback if needed.
  *
  * @example
  * ```typescript
@@ -49,7 +47,6 @@ export async function shareContacts(
     nativeExecutor: () => nativeShareContacts(options, ctx),
     // No Wagmi fallback - contacts is native only
     customFallback: options.fallback,
-    requiresFallback: true, // Must provide fallback on web
   });
 }
 
@@ -77,12 +74,10 @@ async function nativeShareContacts(
     );
   }
 
-  const input: ShareContactsInput = {
+  const payload = {
     isMultiSelectEnabled: options.isMultiSelectEnabled ?? false,
     inviteMessage: options.inviteMessage,
   };
-
-  const payload: ShareContactsPayload = input;
 
   const finalPayload = await new Promise<MiniAppShareContactsPayload>(
     (resolve, reject) => {

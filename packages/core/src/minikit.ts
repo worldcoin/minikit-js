@@ -178,8 +178,8 @@ export class MiniKit {
   /**
    * Get current permission settings
    */
-  static getPermissions() {
-    return getPermissions(this.getContext());
+  static getPermissions(...args: Parameters<typeof getPermissions>) {
+    return getPermissions(args[0], this.getContext());
   }
 
   /**

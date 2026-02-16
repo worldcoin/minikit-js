@@ -6,22 +6,39 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
+import type { CommandResult } from '../types';
+import { executeWithFallback } from '../fallback';
 import { EventManager } from '../../events';
 
 export * from './types';
 import type {
   MiniAppSendHapticFeedbackPayload,
   MiniAppSendHapticFeedbackSuccessPayload,
-  SendHapticFeedbackInput,
+  SendHapticFeedbackOptions,
 } from './types';
 import { SendHapticFeedbackError } from './types';
 
 // ============================================================================
-// Implementation
+// Unified API (auto-detects environment)
 // ============================================================================
 
 export async function sendHapticFeedback(
-  input: SendHapticFeedbackInput,
+  options: SendHapticFeedbackOptions,
+  ctx?: CommandContext,
+): Promise<CommandResult<MiniAppSendHapticFeedbackSuccessPayload>> {
+  return executeWithFallback({
+    command: Command.SendHapticFeedback,
+    nativeExecutor: () => nativeSendHapticFeedback(options, ctx),
+    customFallback: options.fallback,
+  });
+}
+
+// ============================================================================
+// Native Implementation (World App)
+// ============================================================================
+
+async function nativeSendHapticFeedback(
+  options: SendHapticFeedbackOptions,
   ctx?: CommandContext,
 ): Promise<MiniAppSendHapticFeedbackSuccessPayload> {
   if (!ctx) {
@@ -37,6 +54,19 @@ export async function sendHapticFeedback(
     );
   }
 
+  const payloadInput =
+    options.hapticsType === 'selection-changed'
+      ? { hapticsType: 'selection-changed' }
+      : options.hapticsType === 'impact'
+        ? {
+            hapticsType: 'impact',
+            style: options.style,
+          }
+        : {
+            hapticsType: 'notification',
+            style: options.style,
+          };
+
   const payload = await new Promise<MiniAppSendHapticFeedbackPayload>(
     (resolve, reject) => {
       try {
@@ -51,7 +81,7 @@ export async function sendHapticFeedback(
         sendMiniKitEvent({
           command: Command.SendHapticFeedback,
           version: COMMAND_VERSIONS[Command.SendHapticFeedback],
-          payload: input,
+          payload: payloadInput,
         });
       } catch (error) {
         reject(error);

@@ -7,22 +7,39 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
+import type { CommandResult } from '../types';
+import { executeWithFallback } from '../fallback';
 import { EventManager } from '../../events';
 
 export * from './types';
 import type {
   MiniAppSharePayload,
   MiniAppShareSuccessPayload,
-  ShareInput,
+  ShareOptions,
 } from './types';
 import { ShareError } from './types';
 
 // ============================================================================
-// Implementation
+// Unified API (auto-detects environment)
 // ============================================================================
 
 export async function share(
-  input: ShareInput,
+  options: ShareOptions,
+  ctx?: CommandContext,
+): Promise<CommandResult<MiniAppShareSuccessPayload>> {
+  return executeWithFallback({
+    command: Command.Share,
+    nativeExecutor: () => nativeShare(options, ctx),
+    customFallback: options.fallback,
+  });
+}
+
+// ============================================================================
+// Native Implementation (World App)
+// ============================================================================
+
+async function nativeShare(
+  options: ShareOptions,
   ctx?: CommandContext,
 ): Promise<MiniAppShareSuccessPayload> {
   if (!ctx) {
@@ -35,6 +52,13 @@ export async function share(
     );
   }
 
+  const payloadInput = {
+    files: options.files,
+    title: options.title,
+    text: options.text,
+    url: options.url,
+  };
+
   // iOS uses native navigator.share
   if (
     ctx.state.deviceProperties.deviceOS === 'ios' &&
@@ -43,20 +67,20 @@ export async function share(
     sendMiniKitEvent({
       command: Command.Share,
       version: COMMAND_VERSIONS[Command.Share],
-      payload: input,
+      payload: payloadInput,
     });
-    await navigator.share(input);
+    await navigator.share(payloadInput);
     // iOS doesn't send back a response event, return a synthetic success
     return {
       status: 'success',
       version: COMMAND_VERSIONS[Command.Share],
-      shared_files_count: input.files?.length ?? 0,
+      shared_files_count: payloadInput.files?.length ?? 0,
       timestamp: new Date().toISOString(),
     };
   }
 
   // Android: format files to base64 and send via postMessage
-  const formattedPayload = await formatShareInput(input);
+  const formattedPayload = await formatShareInput(payloadInput);
 
   const payload = await new Promise<MiniAppSharePayload>((resolve, reject) => {
     try {

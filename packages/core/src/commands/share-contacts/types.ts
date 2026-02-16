@@ -4,11 +4,15 @@ import type {
   FallbackConfig,
 } from '../types';
 
-export type ShareContactsInput = {
+type ShareContactsParams = {
   isMultiSelectEnabled: boolean;
   inviteMessage?: string;
 };
 
+/** @deprecated Use {@link ShareContactsOptions} instead */
+export type ShareContactsInput = ShareContactsParams;
+
+/** @deprecated Use {@link ShareContactsOptions} instead */
 export type ShareContactsPayload = ShareContactsInput;
 
 export enum ShareContactsErrorCodes {

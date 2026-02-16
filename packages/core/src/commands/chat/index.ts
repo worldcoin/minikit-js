@@ -6,22 +6,39 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
+import type { CommandResult } from '../types';
+import { executeWithFallback } from '../fallback';
 import { EventManager } from '../../events';
 
 export * from './types';
 import type {
-  ChatInput,
-  MiniAppChatPayload,
+  ChatOptions,
   MiniAppChatSuccessPayload,
+  MiniAppChatPayload,
 } from './types';
 import { ChatError } from './types';
 
 // ============================================================================
-// Implementation
+// Unified API (auto-detects environment)
 // ============================================================================
 
 export async function chat(
-  input: ChatInput,
+  options: ChatOptions,
+  ctx?: CommandContext,
+): Promise<CommandResult<MiniAppChatSuccessPayload>> {
+  return executeWithFallback({
+    command: Command.Chat,
+    nativeExecutor: () => nativeChat(options, ctx),
+    customFallback: options.fallback,
+  });
+}
+
+// ============================================================================
+// Native Implementation (World App)
+// ============================================================================
+
+async function nativeChat(
+  options: ChatOptions,
   ctx?: CommandContext,
 ): Promise<MiniAppChatSuccessPayload> {
   if (!ctx) {
@@ -34,7 +51,12 @@ export async function chat(
     );
   }
 
-  if (input.message.length === 0) {
+  const payloadInput = {
+    message: options.message,
+    to: options.to,
+  };
+
+  if (payloadInput.message.length === 0) {
     throw new Error("'chat' command requires a non-empty message");
   }
 
@@ -51,7 +73,7 @@ export async function chat(
       sendMiniKitEvent({
         command: Command.Chat,
         version: COMMAND_VERSIONS[Command.Chat],
-        payload: input,
+        payload: payloadInput,
       });
     } catch (error) {
       reject(error);

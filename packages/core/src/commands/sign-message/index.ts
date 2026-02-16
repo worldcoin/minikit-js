@@ -6,22 +6,44 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
+import type { CommandResult } from '../types';
+import { executeWithFallback } from '../fallback';
+import { wagmiSignMessage } from '../wagmi-fallback';
 import { EventManager } from '../../events';
 
 export * from './types';
 import type {
   MiniAppSignMessagePayload,
   MiniAppSignMessageSuccessPayload,
-  SignMessageInput,
+  SignMessageOptions,
 } from './types';
 import { SignMessageError } from './types';
 
 // ============================================================================
-// Implementation
+// Unified API (auto-detects environment)
 // ============================================================================
 
 export async function signMessage(
-  input: SignMessageInput,
+  options: SignMessageOptions,
+  ctx?: CommandContext,
+): Promise<CommandResult<MiniAppSignMessageSuccessPayload>> {
+  return executeWithFallback({
+    command: Command.SignMessage,
+    nativeExecutor: () => nativeSignMessage(options, ctx),
+    wagmiFallback: () =>
+      wagmiSignMessage({
+        message: options.message,
+      }),
+    customFallback: options.fallback,
+  });
+}
+
+// ============================================================================
+// Native Implementation (World App)
+// ============================================================================
+
+async function nativeSignMessage(
+  options: SignMessageOptions,
   ctx?: CommandContext,
 ): Promise<MiniAppSignMessageSuccessPayload> {
   if (!ctx) {
@@ -51,7 +73,7 @@ export async function signMessage(
         sendMiniKitEvent({
           command: Command.SignMessage,
           version: COMMAND_VERSIONS[Command.SignMessage],
-          payload: input,
+          payload: { message: options.message },
         });
       } catch (error) {
         reject(error);

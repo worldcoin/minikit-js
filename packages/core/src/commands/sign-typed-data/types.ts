@@ -1,16 +1,24 @@
 import type { TypedData, TypedDataDomain } from 'abitype';
 import type {
+  FallbackConfig,
   MiniAppBaseErrorPayload,
   MiniAppBaseSuccessPayload,
 } from '../types';
 
-export type SignTypedDataInput = {
+type SignTypedDataParams = {
   types: TypedData;
   primaryType: string;
   message: Record<string, unknown>;
   domain?: TypedDataDomain;
   chainId?: number;
 };
+
+/** @deprecated Use {@link SignTypedDataOptions} instead */
+export type SignTypedDataInput = SignTypedDataParams;
+
+export interface SignTypedDataOptions
+  extends SignTypedDataParams,
+    FallbackConfig<MiniAppSignTypedDataSuccessPayload> {}
 
 export enum SignTypedDataErrorCodes {
   InvalidOperation = 'invalid_operation',

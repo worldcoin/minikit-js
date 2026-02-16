@@ -1,4 +1,6 @@
-import type { ShareInput, SharePayload } from './';
+import type { ShareOptions, SharePayload } from './';
+
+type ShareFormatInput = Omit<ShareOptions, 'fallback'>;
 
 const MAX_FILES = 10;
 const MAX_TOTAL_SIZE_MB = 50;
@@ -33,7 +35,7 @@ const processFile = async (
 };
 
 export const formatShareInput = async (
-  input: ShareInput,
+  input: ShareFormatInput,
 ): Promise<SharePayload> => {
   if (!input.files) {
     return {

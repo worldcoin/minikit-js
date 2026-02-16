@@ -1,9 +1,10 @@
 import type {
+  FallbackConfig,
   MiniAppBaseErrorPayload,
   MiniAppBaseSuccessPayload,
 } from '../types';
 
-export type SendHapticFeedbackInput =
+type SendHapticFeedbackParams =
   | {
       hapticsType: 'notification';
       style: 'error' | 'success' | 'warning';
@@ -16,6 +17,9 @@ export type SendHapticFeedbackInput =
       hapticsType: 'impact';
       style: 'light' | 'medium' | 'heavy';
     };
+
+/** @deprecated Use {@link SendHapticFeedbackOptions} instead */
+export type SendHapticFeedbackInput = SendHapticFeedbackParams;
 
 export enum SendHapticFeedbackErrorCodes {
   GenericError = 'generic_error',
@@ -33,6 +37,9 @@ export type MiniAppSendHapticFeedbackErrorPayload =
 export type MiniAppSendHapticFeedbackPayload =
   | MiniAppSendHapticFeedbackSuccessPayload
   | MiniAppSendHapticFeedbackErrorPayload;
+
+export type SendHapticFeedbackOptions = SendHapticFeedbackParams &
+  FallbackConfig<MiniAppSendHapticFeedbackSuccessPayload>;
 
 export class SendHapticFeedbackError extends Error {
   constructor(public readonly error_code: SendHapticFeedbackErrorCodes) {

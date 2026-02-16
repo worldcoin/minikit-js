@@ -29,7 +29,7 @@ import { PayError } from './types';
 /**
  * Send a payment
  *
- * Note: This command only works in World App. On web, you must provide a fallback.
+ * Note: This command works natively in World App. On web, provide a fallback if needed.
  *
  * @example
  * ```typescript
@@ -53,7 +53,6 @@ export async function pay(
     nativeExecutor: () => nativePay(options, ctx),
     // No Wagmi fallback - pay is native only
     customFallback: options.fallback,
-    requiresFallback: true, // Must provide fallback on web
   });
 }
 

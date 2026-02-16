@@ -1,12 +1,20 @@
 import type {
+  FallbackConfig,
   MiniAppBaseErrorPayload,
   MiniAppBaseSuccessPayload,
 } from '../types';
 
-export type ChatInput = {
+type ChatParams = {
   to?: string[];
   message: string;
 };
+
+/** @deprecated Use {@link ChatOptions} instead */
+export type ChatInput = ChatParams;
+
+export interface ChatOptions
+  extends ChatParams,
+    FallbackConfig<MiniAppChatSuccessPayload> {}
 
 export enum ChatErrorCodes {
   UserRejected = 'user_rejected',
