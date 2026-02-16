@@ -190,7 +190,7 @@ export class MiniKit {
   /**
    * Sign a message
    */
-  static signMessage<TFallback = MiniAppSignMessagePayload>(
+  static signMessage<TFallback = MiniAppSignMessageSuccessPayload>(
     options: MiniKitSignMessageOptions<TFallback>,
   ): Promise<CommandResultByVia<MiniAppSignMessageSuccessPayload, TFallback>> {
     return signMessage<TFallback>(options, this.getContext());

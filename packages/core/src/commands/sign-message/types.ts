@@ -12,7 +12,7 @@ type SignMessageParams = {
 export type SignMessageInput = SignMessageParams;
 
 export interface MiniKitSignMessageOptions<
-  TCustomFallback = MiniAppSignMessagePayload,
+  TCustomFallback = MiniAppSignMessageSuccessPayload,
 > extends SignMessageParams,
     FallbackConfig<TCustomFallback> {}
 
