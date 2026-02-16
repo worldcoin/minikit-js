@@ -23,7 +23,7 @@ export * from './types';
 // ============================================================================
 
 export async function requestPermission<
-  TFallback = MiniAppRequestPermissionSuccessPayload,
+  TFallback = MiniAppRequestPermissionPayload,
 >(
   options: MiniKitRequestPermissionOptions<TFallback>,
   ctx?: CommandContext,

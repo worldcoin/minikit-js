@@ -1,9 +1,9 @@
 import {
   Contact,
   MiniKit,
+  MiniKitShareContactsOptions,
   ResponseEvent,
   ShareContactsErrorCodes,
-  ShareContactsPayload,
 } from '@worldcoin/minikit-js';
 import { useCallback, useEffect, useState } from 'react';
 import * as yup from 'yup';
@@ -38,6 +38,13 @@ export const ShareContacts = () => {
     useState<Record<string, any> | null>(null);
 
   const [tempInstallFix, setTempInstallFix] = useState(0);
+
+  type ShareContactsSuccessLike = {
+    status: 'success';
+    version: number;
+    contacts: Contact[];
+    timestamp: string;
+  };
 
   useEffect(() => {
     if (!MiniKit.isInstalled()) {
@@ -80,16 +87,62 @@ export const ShareContacts = () => {
 
   const onShareContacts = useCallback(
     async (isMultiSelectEnabled: boolean = false, inviteMessage?: string) => {
-      const shareContactsPayload: ShareContactsPayload = {
-        isMultiSelectEnabled,
-        inviteMessage,
-      };
+      const shareContactsPayload: MiniKitShareContactsOptions<ShareContactsSuccessLike> =
+        {
+          isMultiSelectEnabled,
+          inviteMessage,
+          async fallback() {
+            if (
+              typeof navigator === 'undefined' ||
+              !('contacts' in navigator)
+            ) {
+              throw new Error('Contact Picker API is not supported');
+            }
 
-      const payload = MiniKit.shareContacts(shareContactsPayload);
+            const contactsManager = (navigator as any).contacts;
+            const selectedContacts = await contactsManager.select(
+              ['name', 'email', 'tel'],
+              { multiple: isMultiSelectEnabled },
+            );
+
+            const contacts: Contact[] = (selectedContacts ?? []).map(
+              (selectedContact: any, index: number) => {
+                const name =
+                  selectedContact.name?.[0] ?? `contact-${index + 1}`;
+                const identifier =
+                  selectedContact.email?.[0] ??
+                  selectedContact.tel?.[0] ??
+                  `contact:${index + 1}`;
+
+                return {
+                  username: name,
+                  walletAddress: identifier,
+                  profilePictureUrl: null,
+                };
+              },
+            );
+
+            return {
+              status: 'success',
+              version: 1,
+              contacts,
+              timestamp: new Date().toISOString(),
+            };
+          },
+        };
+
       setSentShareContactsPayload({
-        payload,
+        shareContactsPayload,
       });
-      console.log('payload', payload);
+
+      const payload = await MiniKit.shareContacts(shareContactsPayload);
+      const normalizedPayload =
+        payload.executedWith === 'fallback'
+          ? payload.data
+          : ({ status: 'success', version: 1, ...payload.data } as const);
+
+      setShareContactsAppPayload(JSON.stringify(normalizedPayload, null, 2));
+
       setTempInstallFix((prev) => prev + 1);
     },
     [],

@@ -2,6 +2,7 @@ import type {
   CommandResultByVia,
   MiniAppChatSuccessPayload,
   MiniAppGetPermissionsSuccessPayload,
+  MiniAppRequestPermissionPayload,
   MiniAppRequestPermissionSuccessPayload,
   MiniAppSendHapticFeedbackSuccessPayload,
   MiniAppShareSuccessPayload,
@@ -240,7 +241,7 @@ export class MiniKit {
   /**
    * Request a permission from the user
    */
-  static requestPermission<TFallback = MiniAppRequestPermissionSuccessPayload>(
+  static requestPermission<TFallback = MiniAppRequestPermissionPayload>(
     options: MiniKitRequestPermissionOptions<TFallback>,
   ): Promise<
     CommandResultByVia<
