@@ -7,24 +7,9 @@ import {
   type RpContext,
 } from '@worldcoin/idkit';
 import { clsx } from 'clsx';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { verifyProof } from './verify-cloud-proof';
 import { VerifyOnchainProof } from './verify-onchain';
-
-const formatUnknownError = (error: unknown) => {
-  if (error instanceof Error) {
-    return {
-      name: error.name,
-      message: error.message,
-      stack: error.stack,
-    };
-  }
-
-  return {
-    message: String(error),
-  };
-};
-
 export const VerifyAction = () => {
   const isProduction = process.env.NEXT_PUBLIC_ENVIRONMENT === 'production';
 
@@ -45,44 +30,6 @@ export const VerifyAction = () => {
   );
   const [widgetOpen, setWidgetOpen] = useState(false);
   const [rpContext, setRpContext] = useState<RpContext | null>(null);
-  const [lastRuntimeError, setLastRuntimeError] = useState<
-    Record<string, unknown> | null
-  >(null);
-
-  useEffect(() => {
-    const onError = (event: ErrorEvent) => {
-      setLastRuntimeError({
-        type: 'window.error',
-        message: event.message,
-        filename: event.filename,
-        lineno: event.lineno,
-        colno: event.colno,
-      });
-    };
-
-    const onUnhandledRejection = (event: PromiseRejectionEvent) => {
-      setLastRuntimeError({
-        type: 'unhandledrejection',
-        reason:
-          event.reason instanceof Error
-            ? {
-                name: event.reason.name,
-                message: event.reason.message,
-                stack: event.reason.stack,
-              }
-            : String(event.reason),
-      });
-    };
-
-    window.addEventListener('error', onError);
-    window.addEventListener('unhandledrejection', onUnhandledRejection);
-
-    return () => {
-      window.removeEventListener('error', onError);
-      window.removeEventListener('unhandledrejection', onUnhandledRejection);
-    };
-  }, []);
-
   const verifyIDKitProof = useCallback(
     async (
       result: IDKitResult,
@@ -189,11 +136,6 @@ export const VerifyAction = () => {
           );
         }
       } catch (err: unknown) {
-        const details = formatUnknownError(err);
-        setVerifyResult({
-          error: 'IDKIT_VERIFY_FLOW_FAILED',
-          details,
-        });
         setStatusMessage(
           `Error: ${err instanceof Error ? err.message : String(err)}`,
         );
@@ -274,30 +216,7 @@ export const VerifyAction = () => {
           }}
           onError={(errorCode) => {
             console.log('Verification error:', errorCode);
-            const errorPayload: Record<string, unknown> = {
-              error: `Verification failed: ${errorCode}`,
-              errorCode,
-            };
-            if (errorCode === 'generic_error') {
-              const wasmResourceEntries = performance
-                .getEntriesByType('resource')
-                .filter((entry) => entry.name.includes('idkit_wasm_bg.wasm'))
-                .map((entry) => ({
-                  name: entry.name,
-                  initiatorType: (entry as PerformanceResourceTiming)
-                    .initiatorType,
-                  duration: entry.duration,
-                  transferSize: (entry as PerformanceResourceTiming)
-                    .transferSize,
-                }));
-
-              errorPayload.hint =
-                'Potential WASM init/load failure. Check Network tab for idkit_wasm_bg.wasm and CSP/CORS/404 errors.';
-              errorPayload.lastRuntimeError = lastRuntimeError;
-              errorPayload.wasmResourceEntries = wasmResourceEntries;
-            }
-            setVerifyResult(errorPayload);
-            setStatusMessage(`IDKit widget failed: ${errorCode}`);
+            setVerifyResult({ error: `Verification failed: ${errorCode}` });
           }}
         />
       )}
