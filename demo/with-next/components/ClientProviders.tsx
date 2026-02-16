@@ -28,7 +28,12 @@ export default function ClientProviders({
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <ErudaProvider>
-          <MiniKitProvider>
+          <MiniKitProvider
+            props={{
+              appId: process.env.NEXT_PUBLIC_APP_ID ?? '',
+              wagmiConfig: config,
+            }}
+          >
             <SessionProvider session={session}>{children}</SessionProvider>
           </MiniKitProvider>
         </ErudaProvider>

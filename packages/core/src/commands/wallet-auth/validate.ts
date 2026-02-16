@@ -1,5 +1,7 @@
 import type { WalletAuthInput } from './';
 
+const SIWE_NONCE_REGEX = /^[a-zA-Z0-9]+$/;
+
 type ValidationResult =
   | {
       valid: true;
@@ -18,6 +20,13 @@ export const validateWalletAuthCommandInput = (
 
   if (params.nonce.length < 8) {
     return { valid: false, message: "'nonce' must be at least 8 characters" };
+  }
+
+  if (!SIWE_NONCE_REGEX.test(params.nonce)) {
+    return {
+      valid: false,
+      message: "'nonce' must be alphanumeric (letters and numbers only)",
+    };
   }
 
   if (params.statement && params.statement.includes('\n')) {

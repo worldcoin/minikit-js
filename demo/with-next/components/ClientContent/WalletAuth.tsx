@@ -21,7 +21,7 @@ export const WalletAuth = () => {
   );
 
   const onWalletAuthClick = useCallback(async () => {
-    const generatedNonce = window.crypto.randomUUID();
+    const generatedNonce = window.crypto.randomUUID().replace(/-/g, '');
     setNonce(generatedNonce);
     setWalletAuthResult(null);
     setStatusMessage(null);

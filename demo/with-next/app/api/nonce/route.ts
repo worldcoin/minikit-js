@@ -1,9 +1,11 @@
 import { randomUUID } from 'crypto';
 import { NextRequest } from 'next/server';
 
+const generateSiweNonce = () => randomUUID().replace(/-/g, '');
+
 export async function GET() {
   console.log('GET request received');
-  return new Response(JSON.stringify({ nonce: randomUUID() }));
+  return new Response(JSON.stringify({ nonce: generateSiweNonce() }));
 }
 /* 
 Note: This is not a secure implementation of Wallet Auth.
@@ -16,6 +18,6 @@ export async function POST(request: NextRequest) {
   const localNonce = body.localNonce;
 
   return new Response(
-    JSON.stringify({ nonce: randomUUID(), localNonce: localNonce }),
+    JSON.stringify({ nonce: generateSiweNonce(), localNonce: localNonce }),
   );
 }

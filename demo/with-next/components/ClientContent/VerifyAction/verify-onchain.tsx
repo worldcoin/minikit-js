@@ -90,7 +90,7 @@ export const VerifyOnchainProof = () => {
     let signal = MiniKit.user.walletAddress;
     if (!signal) {
       const authResult = await MiniKit.walletAuth({
-        nonce: 'i-trust-you',
+        nonce: 'itrustyou123',
       });
       signal = authResult.data.address;
     }

@@ -97,7 +97,7 @@ export function UnifiedApiDemo() {
     setAuthResult({});
     try {
       const result = await MiniKit.walletAuth({
-        nonce: crypto.randomUUID(),
+        nonce: crypto.randomUUID().replace(/-/g, ''),
         statement: 'Sign in to Unified Demo',
       });
       setAuthResult({

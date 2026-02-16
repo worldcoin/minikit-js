@@ -7,10 +7,13 @@ import {
   useEffect,
   useState,
 } from 'react';
+import { useConfig } from 'wagmi';
+import { setWagmiConfig } from './commands/wagmi-fallback';
 import { MiniKit } from './minikit';
 
 type MiniKitProps = {
-  appId: string;
+  appId?: string;
+  wagmiConfig?: unknown;
 };
 
 type MiniKitContextValue = {
@@ -21,6 +24,14 @@ const MiniKitContext = createContext<MiniKitContextValue | undefined>(
   undefined,
 );
 
+function useWagmiConfigSafe() {
+  try {
+    return useConfig();
+  } catch {
+    return undefined;
+  }
+}
+
 export const MiniKitProvider = ({
   children,
   props,
@@ -28,9 +39,11 @@ export const MiniKitProvider = ({
   children: ReactNode;
   props?: MiniKitProps;
 }) => {
+  const detectedWagmiConfig = useWagmiConfigSafe();
   const [isInstalled, setIsInstalled] = useState<boolean | undefined>(
     undefined,
   );
+  const wagmiConfig = props?.wagmiConfig ?? detectedWagmiConfig;
 
   useEffect(() => {
     const { success } = MiniKit.install(props?.appId);
@@ -40,6 +53,12 @@ export const MiniKitProvider = ({
     );
     setIsInstalled(success);
   }, [props?.appId]);
+
+  useEffect(() => {
+    if (wagmiConfig) {
+      setWagmiConfig(wagmiConfig);
+    }
+  }, [wagmiConfig]);
 
   return (
     <MiniKitContext.Provider value={{ isInstalled }}>

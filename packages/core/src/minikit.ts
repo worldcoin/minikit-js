@@ -78,7 +78,7 @@ export class MiniKit {
    *
    * @example
    * ```typescript
-   * const result = await MiniKit.walletAuth({ nonce: 'random-nonce' });
+   * const result = await MiniKit.walletAuth({ nonce: 'randomnonce123' });
    * console.log(result.data.address);
    * console.log(result.via); // 'minikit' | 'wagmi' | 'fallback'
    * ```

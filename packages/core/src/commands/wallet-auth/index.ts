@@ -32,13 +32,13 @@ import { WalletAuthError } from './types';
  * @example
  * ```typescript
  * // Basic usage - works in World App and web
- * const result = await walletAuth({ nonce: 'random-nonce' });
+ * const result = await walletAuth({ nonce: 'randomnonce123' });
  * console.log(result.data.address); // '0x...'
  * console.log(result.via); // 'minikit' | 'wagmi' | 'fallback'
  *
  * // With custom fallback
  * const result = await walletAuth({
- *   nonce: 'random-nonce',
+ *   nonce: 'randomnonce123',
  *   fallback: () => signInWithOAuth(),
  * });
  * ```

@@ -89,7 +89,7 @@ function createProvider(): WorldAppProvider {
 
     try {
       const result = await MiniKit.walletAuth({
-        nonce: crypto.randomUUID(),
+        nonce: crypto.randomUUID().replace(/-/g, ''),
         statement: 'Sign in with World App',
       });
 

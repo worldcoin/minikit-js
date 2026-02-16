@@ -47,7 +47,7 @@ export type MiniAppWalletAuthPayload =
 
 export interface WalletAuthOptions
   extends FallbackConfig<WalletAuthResult> {
-  /** Nonce for SIWE message (should be generated server-side) */
+  /** Nonce for SIWE message (alphanumeric, at least 8 chars) */
   nonce: string;
 
   /** Optional statement to include in SIWE message */
