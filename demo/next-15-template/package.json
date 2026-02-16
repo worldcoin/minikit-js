@@ -10,7 +10,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "prettier --check . --ignore-path ../../.prettierignore"
   },
   "dependencies": {
     "@worldcoin/mini-apps-ui-kit-react": "^1.0.2",

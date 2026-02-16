@@ -46,7 +46,7 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "lint": "eslint ./ --ext .ts",
+    "lint": "prettier --check . --ignore-path ../../.prettierignore",
     "prepublishOnly": "npm run build",
     "type-check": "tsc --noEmit"
   },

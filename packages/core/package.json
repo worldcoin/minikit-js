@@ -103,7 +103,7 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "lint": "prettier --check .",
+    "lint": "prettier --check . --ignore-path ../../.prettierignore",
     "prepublishOnly": "npm run build",
     "test": "jest",
     "type-check": "tsc --noEmit"

@@ -1,4 +1,5 @@
 build/**
+**/build/**
 .turbo/**
 CHANGELOG.md
 pnpm-lock.yaml
