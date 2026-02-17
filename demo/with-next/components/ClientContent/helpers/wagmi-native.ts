@@ -1,8 +1,9 @@
-import type {
-  MiniKitSendTransactionOptions,
-  MiniKitSignTypedDataOptions,
-  SendTransactionResult,
-  WalletAuthResult,
+import {
+  MiniKit,
+  type MiniKitSendTransactionOptions,
+  type MiniKitSignTypedDataOptions,
+  type SendTransactionResult,
+  type WalletAuthResult,
 } from '@worldcoin/minikit-js';
 import { SiweMessage } from 'siwe';
 import { type Abi, type Hex } from 'viem';
@@ -44,6 +45,7 @@ export interface WagmiNativeSendTransactionResult {
 
 type Address = `0x${string}`;
 const WORLD_CHAIN_ID = 480;
+type AnyConnector = any;
 
 function toAddress(value: string): Address {
   if (!value.startsWith('0x')) {
@@ -53,33 +55,53 @@ function toAddress(value: string): Address {
 }
 
 function isWorldAppEnvironment(): boolean {
-  return typeof window !== 'undefined' && Boolean((window as any).WorldApp);
+  if (typeof window === 'undefined') return false;
+
+  try {
+    if (MiniKit.isInWorldApp()) return true;
+  } catch {
+    // Fall back to window flag below.
+  }
+
+  return Boolean((window as any).WorldApp);
 }
 
-async function ensureConnected(config: Config): Promise<Address> {
-  const isWorldApp = isWorldAppEnvironment();
-  if (isWorldApp) {
-    const worldAppConnector = config.connectors.find(
-      (connector) => connector.id === 'worldApp',
+function selectConnector(config: Config, isWorldApp: boolean): AnyConnector {
+  const connector = isWorldApp
+    ? config.connectors.find((item) => item.id === 'worldApp')
+    : config.connectors.find((item) => item.id !== 'worldApp');
+  if (!connector) {
+    throw new Error(
+      isWorldApp
+        ? 'No worldApp connector configured. Add worldApp() to route wagmi actions through MiniKit in World App.'
+        : 'No web Wagmi connectors configured. Add injected() or walletConnect() after worldApp().',
     );
-    if (!worldAppConnector) {
-      throw new Error(
-        'No worldApp connector configured. Add worldApp() to route wagmi actions through MiniKit in World App.',
-      );
-    }
+  }
+  return connector;
+}
 
+async function ensureConnected(
+  config: Config,
+): Promise<{ address: Address; connector: AnyConnector }> {
+  const isWorldApp = isWorldAppEnvironment();
+  const connector = selectConnector(config, isWorldApp);
+
+  if (isWorldApp) {
     try {
-      const result = await connect(config, { connector: worldAppConnector });
+      const result = await connect(config, { connector });
       const account = result.accounts[0];
-      if (account) return toAddress(account);
+      if (account) return { address: toAddress(account), connector };
     } catch {
       const existingWorldAppConnection = getConnections(config).find(
         (connection) =>
           connection.accounts.length > 0 &&
-          connection.connector.id === 'worldApp',
+          connection.connector.id === connector.id,
       );
       if (existingWorldAppConnection?.accounts[0]) {
-        return toAddress(existingWorldAppConnection.accounts[0]);
+        return {
+          address: toAddress(existingWorldAppConnection.accounts[0]),
+          connector,
+        };
       }
       throw new Error('Failed to connect with worldApp connector.');
     }
@@ -87,29 +109,21 @@ async function ensureConnected(config: Config): Promise<Address> {
     throw new Error('Failed to connect wallet with worldApp connector.');
   }
 
-  const existingWebConnection = getConnections(config).find(
+  const existingConnection = getConnections(config).find(
     (connection) =>
-      connection.accounts.length > 0 && connection.connector.id !== 'worldApp',
+      connection.accounts.length > 0 &&
+      connection.connector.id === connector.id,
   );
-  if (existingWebConnection?.accounts[0]) {
-    return toAddress(existingWebConnection.accounts[0]);
+  if (existingConnection?.accounts[0]) {
+    return { address: toAddress(existingConnection.accounts[0]), connector };
   }
 
-  const webConnectors = config.connectors.filter(
-    (connector) => connector.id !== 'worldApp',
-  );
-  if (webConnectors.length === 0) {
-    throw new Error(
-      'No web Wagmi connectors configured. Add injected() or walletConnect() after worldApp().',
-    );
-  }
-
-  const result = await connect(config, { connector: webConnectors[0] });
+  const result = await connect(config, { connector });
   const account = result.accounts[0];
   if (!account) {
     throw new Error('Failed to connect wallet with wagmi native actions.');
   }
-  return toAddress(account);
+  return { address: toAddress(account), connector };
 }
 
 function hasConfiguredChain(config: Config, chainId: number): boolean {
@@ -120,6 +134,7 @@ async function ensureChain(
   config: Config,
   chainId?: number,
   options?: { requireConfigured?: boolean },
+  connector?: AnyConnector,
 ): Promise<void> {
   const targetChainId = chainId ?? WORLD_CHAIN_ID;
   const requireConfigured = options?.requireConfigured ?? true;
@@ -143,7 +158,7 @@ async function ensureChain(
 
   const currentChainId = await getChainId(config);
   if (currentChainId !== targetChainId) {
-    await switchChain(config, { chainId: targetChainId });
+    await switchChain(config, { chainId: targetChainId, connector });
   }
 }
 
@@ -165,7 +180,7 @@ export async function wagmiNativeWalletAuth(
     notBefore?: Date;
   },
 ): Promise<WalletAuthResult> {
-  const address = await ensureConnected(config);
+  const { address, connector } = await ensureConnected(config);
 
   const siweMessage = new SiweMessage({
     domain: window.location.host,
@@ -181,7 +196,11 @@ export async function wagmiNativeWalletAuth(
   });
 
   const message = siweMessage.prepareMessage();
-  const signature = await signMessage(config, { account: address, message });
+  const signature = await signMessage(config, {
+    connector,
+    account: address,
+    message,
+  });
 
   return {
     address,
@@ -194,8 +213,9 @@ export async function wagmiNativeSignMessage(
   config: Config,
   message: string,
 ): Promise<WagmiNativeSignMessageResult> {
-  const address = await ensureConnected(config);
+  const { address, connector } = await ensureConnected(config);
   const signature = await signMessage(config, {
+    connector,
     account: address,
     message,
   });
@@ -212,12 +232,18 @@ export async function wagmiNativeSignTypedData(
   config: Config,
   payload: MiniKitSignTypedDataOptions,
 ): Promise<WagmiNativeSignTypedDataResult> {
-  const address = await ensureConnected(config);
+  const { address, connector } = await ensureConnected(config);
   if (payload.chainId !== undefined) {
-    await ensureChain(config, payload.chainId, { requireConfigured: false });
+    await ensureChain(
+      config,
+      payload.chainId,
+      { requireConfigured: false },
+      connector,
+    );
   }
 
   const signature = await signTypedData(config, {
+    connector,
     account: address,
     types: payload.types as any,
     primaryType: payload.primaryType as any,
@@ -251,13 +277,19 @@ export async function wagmiNativeSendTransaction(
     );
   }
 
-  const address = await ensureConnected(config);
-  await ensureChain(config, options.chainId, { requireConfigured: true });
+  const { address, connector } = await ensureConnected(config);
+  await ensureChain(
+    config,
+    options.chainId,
+    { requireConfigured: true },
+    connector,
+  );
 
   const tx = options.transaction[0];
   let response: Hex | string;
   if (tx.data && tx.data !== '0x') {
     response = await sendTransaction(config, {
+      connector,
       account: address,
       chainId: options.chainId ?? WORLD_CHAIN_ID,
       to: tx.address as Address,
@@ -266,6 +298,7 @@ export async function wagmiNativeSendTransaction(
     });
   } else {
     response = await writeContract(config, {
+      connector,
       account: address,
       chainId: options.chainId ?? WORLD_CHAIN_ID,
       address: tx.address as Address,
