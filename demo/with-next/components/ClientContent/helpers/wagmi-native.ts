@@ -4,7 +4,7 @@ import type {
   WalletAuthResult,
 } from '@worldcoin/minikit-js';
 import { SiweMessage } from 'siwe';
-import { type Abi, encodeFunctionData, type Hex } from 'viem';
+import { type Abi, type Hex } from 'viem';
 import type { Config } from 'wagmi';
 import {
   connect,
@@ -14,6 +14,7 @@ import {
   signMessage,
   signTypedData,
   switchChain,
+  writeContract,
 } from 'wagmi/actions';
 
 export type DemoExecutionMode = 'minikit' | 'wagmi';
@@ -53,24 +54,26 @@ function isWorldAppEnvironment(): boolean {
 }
 
 async function ensureConnected(config: Config): Promise<Address> {
+  // Direct wagmi mode should never use the worldApp connector because that
+  // loops back into MiniKit's provider path.
   const isWorldApp = isWorldAppEnvironment();
   const existingConnection = getConnections(config).find(
-    (connection) =>
-      connection.accounts.length > 0 &&
-      (isWorldApp || connection.connector.id !== 'worldApp'),
+    (connection) => connection.accounts.length > 0 && connection.connector.id !== 'worldApp',
   );
 
   if (existingConnection?.accounts[0]) {
     return toAddress(existingConnection.accounts[0]);
   }
 
-  const candidateConnectors = isWorldApp
-    ? config.connectors
-    : config.connectors.filter((connector) => connector.id !== 'worldApp');
+  const candidateConnectors = config.connectors.filter(
+    (connector) => connector.id !== 'worldApp',
+  );
 
   if (candidateConnectors.length === 0) {
     throw new Error(
-      'No compatible Wagmi connectors configured for this environment.',
+      isWorldApp
+        ? 'Direct wagmi mode requires a non-worldApp connector. Add injected() or walletConnect() after worldApp().'
+        : 'No compatible Wagmi connectors configured for this environment.',
     );
   }
 
@@ -163,7 +166,10 @@ export async function wagmiNativeSignTypedData(
     account: address,
     types: payload.types as any,
     primaryType: payload.primaryType as any,
-    domain: payload.domain as any,
+    domain: {
+      ...(payload.domain as Record<string, unknown> | undefined),
+      ...(payload.chainId !== undefined ? { chainId: payload.chainId } : {}),
+    } as any,
     message: payload.message as any,
   });
 
@@ -180,11 +186,13 @@ export async function wagmiNativeSendTransaction(
   options: MiniKitSendTransactionOptions,
 ): Promise<WagmiNativeSendTransactionResult> {
   if (options.permit2?.length) {
-    throw new Error('Wagmi native mode does not support permit2 payloads.');
+    throw new Error(
+      'Direct wagmi mode does not support permit2 payloads. Use MiniKit mode for permit2 tests.',
+    );
   }
   if (options.transaction.length !== 1) {
     throw new Error(
-      'Wagmi native mode supports a single transaction only in this demo.',
+      'Direct wagmi mode supports a single transaction only in this demo. Use MiniKit mode for batch transactions.',
     );
   }
 
@@ -192,22 +200,26 @@ export async function wagmiNativeSendTransaction(
   await ensureChain(config, options.chainId);
 
   const tx = options.transaction[0];
-  const data =
-    tx.data && tx.data !== '0x'
-      ? (tx.data as Hex)
-      : (encodeFunctionData({
-          abi: tx.abi as Abi,
-          functionName: tx.functionName as string,
-          args: tx.args as readonly unknown[],
-        }) as Hex);
-
-  const hash = await sendTransaction(config, {
-    account: address,
-    chainId: options.chainId ?? WORLD_CHAIN_ID,
-    to: tx.address as Address,
-    data,
-    ...(tx.value !== undefined ? { value: parseValue(tx.value) } : {}),
-  });
+  let hash: Hex;
+  if (tx.data && tx.data !== '0x') {
+    hash = await sendTransaction(config, {
+      account: address,
+      chainId: options.chainId ?? WORLD_CHAIN_ID,
+      to: tx.address as Address,
+      data: tx.data as Hex,
+      ...(tx.value !== undefined ? { value: parseValue(tx.value) } : {}),
+    });
+  } else {
+    hash = await writeContract(config, {
+      account: address,
+      chainId: options.chainId ?? WORLD_CHAIN_ID,
+      address: tx.address as Address,
+      abi: tx.abi as Abi,
+      functionName: tx.functionName as string,
+      args: tx.args as readonly unknown[],
+      ...(tx.value !== undefined ? { value: parseValue(tx.value) } : {}),
+    });
+  }
 
   return {
     status: 'success',
