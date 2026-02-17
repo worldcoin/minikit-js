@@ -68,6 +68,36 @@
         "types": "./build/connector/index.d.cts",
         "default": "./build/connector/index.cjs"
       }
+    },
+    "./commands": {
+      "import": {
+        "types": "./build/command-exports.d.ts",
+        "default": "./build/command-exports.js"
+      },
+      "require": {
+        "types": "./build/command-exports.d.cts",
+        "default": "./build/command-exports.cjs"
+      }
+    },
+    "./siwe": {
+      "import": {
+        "types": "./build/siwe-exports.d.ts",
+        "default": "./build/siwe-exports.js"
+      },
+      "require": {
+        "types": "./build/siwe-exports.d.cts",
+        "default": "./build/siwe-exports.cjs"
+      }
+    },
+    "./address-book": {
+      "import": {
+        "types": "./build/address-book.d.ts",
+        "default": "./build/address-book.js"
+      },
+      "require": {
+        "types": "./build/address-book.d.cts",
+        "default": "./build/address-book.cjs"
+      }
     }
   },
   "files": [

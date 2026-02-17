@@ -1,9 +1,9 @@
 import Safe, { hashSafeMessage } from '@safe-global/protocol-kit';
+import { MiniKit } from '@worldcoin/minikit-js';
 import {
-  MiniKit,
-  MiniKitSignTypedDataOptions,
   ResponseEvent,
-} from '@worldcoin/minikit-js';
+  type MiniKitSignTypedDataOptions,
+} from '@worldcoin/minikit-js/commands';
 import { useCallback, useState } from 'react';
 import { verifyTypedData } from 'viem';
 import { useConfig } from 'wagmi';

@@ -1,10 +1,10 @@
+import { MiniKit } from '@worldcoin/minikit-js';
 import {
-  Contact,
-  MiniKit,
-  MiniKitShareContactsOptions,
   ResponseEvent,
   ShareContactsErrorCodes,
-} from '@worldcoin/minikit-js';
+  type Contact,
+  type MiniKitShareContactsOptions,
+} from '@worldcoin/minikit-js/commands';
 import { useCallback, useEffect, useState } from 'react';
 import * as yup from 'yup';
 import { validateSchema } from './helpers/validate-schema';

@@ -1,10 +1,10 @@
+import { MiniKit } from '@worldcoin/minikit-js';
 import {
-  MiniKit,
-  MiniKitRequestPermissionOptions,
   Permission,
   RequestPermissionErrorCodes,
   ResponseEvent,
-} from '@worldcoin/minikit-js';
+  type MiniKitRequestPermissionOptions,
+} from '@worldcoin/minikit-js/commands';
 import { useCallback, useState } from 'react';
 import * as yup from 'yup';
 

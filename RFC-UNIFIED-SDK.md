@@ -76,6 +76,22 @@ Use MiniKit:
 import { MiniKit } from '@worldcoin/minikit-js';
 ```
 
+For tree-shakeable command type/function imports, use the commands subpath:
+
+```ts
+import {
+  MiniKitSendTransactionOptions,
+  SendTransactionErrorCodes,
+} from '@worldcoin/minikit-js/commands';
+```
+
+For helper-only imports, use subpaths:
+
+```ts
+import { getIsUserVerified } from '@worldcoin/minikit-js/address-book';
+import { parseSiweMessage, verifySiweMessage } from '@worldcoin/minikit-js/siwe';
+```
+
 ### If you need backend RP signatures
 
 Use IDKit core:
@@ -86,7 +102,7 @@ import { IDKit, signRequest } from '@worldcoin/idkit-core';
 
 ## Migration
 
-### Before
+### Verification Imports
 
 ```ts
 import { IDKitRequestWidget } from '@worldcoin/minikit-js/idkit';
@@ -100,18 +116,182 @@ import { IDKitRequestWidget, IDKit, orbLegacy } from '@worldcoin/idkit';
 import { MiniKit } from '@worldcoin/minikit-js';
 ```
 
-### Request Builder
+### Verification Request Builder
 
-### Before
+Before:
 
 ```ts
 const req = await MiniKit.request(config).preset(orbLegacy({ signal }));
 ```
 
-### After
+After:
 
 ```ts
 const req = await IDKit.request(config).preset(orbLegacy({ signal }));
+```
+
+### MiniKit Command API (v2 -> v3)
+
+#### 1) `MiniKit.commands` / `MiniKit.commandsAsync` are removed
+
+Before:
+
+```ts
+const payload = MiniKit.commands.signMessage({ message: 'hello' });
+const { commandPayload, finalPayload } = await MiniKit.commandsAsync.walletAuth({
+  nonce,
+});
+```
+
+After:
+
+```ts
+const signResult = await MiniKit.signMessage({ message: 'hello' });
+const authResult = await MiniKit.walletAuth({ nonce });
+```
+
+#### 2) Return shape changed to `{ executedWith, data }`
+
+Before:
+
+```ts
+const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
+  transaction: [tx],
+});
+console.log(finalPayload.transaction_id);
+```
+
+After:
+
+```ts
+const result = await MiniKit.sendTransaction({
+  transaction: [tx],
+});
+
+console.log(result.executedWith); // 'minikit' | 'wagmi' | 'fallback'
+console.log(result.data.transactionId);
+```
+
+#### 3) Verify command moved out of MiniKit
+
+Before:
+
+```ts
+await MiniKit.commandsAsync.verify({
+  action: 'my-action',
+  signal: 'user-123',
+});
+```
+
+After:
+
+```ts
+const request = await IDKit.request(config).preset(orbLegacy({ signal: 'user-123' }));
+const completion = await request.pollUntilCompletion();
+```
+
+#### 4) `walletAuth` nonce validation is stricter
+
+Before:
+
+```ts
+const nonce = crypto.randomUUID(); // contains hyphens
+await MiniKit.commandsAsync.walletAuth({ nonce });
+```
+
+After:
+
+```ts
+const nonce = crypto.randomUUID().replace(/-/g, '');
+await MiniKit.walletAuth({ nonce });
+```
+
+#### 5) `sendTransaction` now uses one flexible transaction type
+
+`Transaction` is now a single type with optional ABI fields and optional raw
+calldata. When `data` is present, it takes priority over `abi` /
+`functionName` / `args`.
+
+Before (contract-call only):
+
+```ts
+await MiniKit.commandsAsync.sendTransaction({
+  transaction: [
+    {
+      address: tokenAddress,
+      abi: erc20Abi,
+      functionName: 'transfer',
+      args: [to, amount],
+    },
+  ],
+});
+```
+
+After:
+
+```ts
+await MiniKit.sendTransaction({
+  transaction: [
+    {
+      address: tokenAddress,
+      value: '0x0',
+      data: '0xa9059cbb...', // takes priority when present
+      abi: erc20Abi,
+      functionName: 'transfer',
+      args: [to, amount],
+    },
+  ],
+});
+```
+
+Type shape:
+
+```ts
+type Transaction = {
+  address: string;
+  value?: string;
+  data?: string; // takes priority when present
+  abi?: Abi | readonly unknown[];
+  functionName?: ContractFunctionName<...>;
+  args?: ContractFunctionArgs<...>;
+};
+
+interface MiniKitSendTransactionOptions<TCustomFallback = SendTransactionResult> {
+  transaction: Transaction[];
+  chainId?: number; // defaults to 480 on World App
+  permit2?: Permit2[];
+  formatPayload?: boolean;
+}
+```
+
+#### 6) Wagmi fallback behavior for multi-transaction inputs
+
+Outside World App, wagmi fallback rejects `transaction.length > 1` by default.
+Use World App native batching, split into single calls, or provide a custom fallback.
+
+#### 7) Use subpath exports for better tree-shaking
+
+Before:
+
+```ts
+import {
+  MiniKitSendTransactionOptions,
+  SendTransactionErrorCodes,
+  getIsUserVerified,
+  parseSiweMessage,
+  verifySiweMessage,
+} from '@worldcoin/minikit-js';
+```
+
+After:
+
+```ts
+import {
+  MiniKitSendTransactionOptions,
+  SendTransactionErrorCodes,
+} from '@worldcoin/minikit-js/commands';
+import { getIsUserVerified } from '@worldcoin/minikit-js/address-book';
+import { parseSiweMessage, verifySiweMessage } from '@worldcoin/minikit-js/siwe';
 ```
 
 ## Tradeoffs

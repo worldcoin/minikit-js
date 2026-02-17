@@ -27,6 +27,74 @@ World ID verification belongs to IDKit:
 - Use `@worldcoin/idkit` for verification requests and widget UI
 - Use `@worldcoin/idkit-core` for backend signing helpers such as `signRequest`
 
+## v2 -> v3 Migration Highlights
+
+- `MiniKit.commands.*` / `MiniKit.commandsAsync.*` are removed. Use `await MiniKit.<command>(...)`.
+- Command responses now use `{ executedWith, data }`.
+- Verify flows moved to IDKit (`@worldcoin/idkit`), not MiniKit.
+- `walletAuth` nonce validation is stricter (alphanumeric SIWE nonce).
+- Tree-shakeable subpath exports are available for commands and helpers.
+
+### `sendTransaction` uses one flexible transaction type
+
+When `transaction[i].data` is provided, MiniKit prioritizes raw calldata over
+`abi` / `functionName` / `args`.
+
+Example:
+
+```ts
+await MiniKit.sendTransaction({
+  transaction: [
+    {
+      address: tokenAddress,
+      data: '0xa9059cbb...', // takes priority when present
+      abi: erc20Abi,
+      functionName: 'transfer',
+      args: [to, amount],
+    },
+  ],
+});
+```
+
+Type shape:
+
+```ts
+type Transaction = {
+  address: string;
+  value?: string;
+  data?: string;
+  abi?: Abi | readonly unknown[];
+  functionName?: ContractFunctionName<...>;
+  args?: ContractFunctionArgs<...>;
+};
+
+interface MiniKitSendTransactionOptions<TCustomFallback = SendTransactionResult> {
+  transaction: Transaction[];
+  chainId?: number; // defaults to 480 on World App
+  permit2?: Permit2[];
+  formatPayload?: boolean;
+}
+```
+
+### Tree-shakeable subpath exports
+
+Use subpaths to import only what you need:
+
+```ts
+import {
+  MiniKitSendTransactionOptions,
+  SendTransactionErrorCodes,
+} from '@worldcoin/minikit-js/commands';
+import { getIsUserVerified } from '@worldcoin/minikit-js/address-book';
+import { parseSiweMessage, verifySiweMessage } from '@worldcoin/minikit-js/siwe';
+```
+
+You can still import `MiniKit` itself from the package root:
+
+```ts
+import { MiniKit } from '@worldcoin/minikit-js';
+```
+
 ## 🛠 ️Developing Locally
 
 To run the example mini app locally:

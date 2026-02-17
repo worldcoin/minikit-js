@@ -7,7 +7,13 @@ export default defineConfig([
     outDir: 'build',
     format: ['esm', 'cjs'],
     external: ['wagmi', 'siwe', 'viem', 'react'],
-    entry: ['src/index.ts', 'src/connector/index.ts'],
+    entry: [
+      'src/index.ts',
+      'src/connector/index.ts',
+      'src/command-exports.ts',
+      'src/siwe-exports.ts',
+      'src/address-book.ts',
+    ],
     define: { 'process.env.NODE_ENV': '"production"' },
   },
   {

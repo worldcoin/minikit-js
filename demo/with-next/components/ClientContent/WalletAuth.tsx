@@ -1,6 +1,7 @@
 'use client';
 
-import { MiniKit, User } from '@worldcoin/minikit-js';
+import { MiniKit } from '@worldcoin/minikit-js';
+import type { User } from '@worldcoin/minikit-js/commands';
 import Image from 'next/image';
 import { useCallback, useState } from 'react';
 import { useConfig } from 'wagmi';

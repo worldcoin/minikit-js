@@ -1,9 +1,11 @@
 'use client';
 import {
   MiniKit,
-  type MiniKitSendTransactionOptions,
-  type SendTransactionResult,
 } from '@worldcoin/minikit-js';
+import type {
+  MiniKitSendTransactionOptions,
+  SendTransactionResult,
+} from '@worldcoin/minikit-js/commands';
 import { useWaitForTransactionReceipt as useMiniKitWaitForTransactionReceipt } from '@worldcoin/minikit-react';
 import { useState } from 'react';
 import { createPublicClient, encodeFunctionData, http } from 'viem';
@@ -408,9 +410,6 @@ export const SendTransaction = () => {
       transaction: [
         {
           address: mainContract,
-          abi: MinikitStaging,
-          functionName: 'mintToken',
-          args: [],
           data,
         },
       ],

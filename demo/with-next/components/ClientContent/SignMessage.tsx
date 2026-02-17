@@ -1,10 +1,10 @@
 import Safe, { hashSafeMessage } from '@safe-global/protocol-kit';
+import { MiniKit } from '@worldcoin/minikit-js';
 import {
-  MiniKit,
-  MiniKitSignMessageOptions,
   ResponseEvent,
   SignMessageErrorCodes,
-} from '@worldcoin/minikit-js';
+  type MiniKitSignMessageOptions,
+} from '@worldcoin/minikit-js/commands';
 import { useState } from 'react';
 import { verifyMessage } from 'viem';
 import { useConfig } from 'wagmi';

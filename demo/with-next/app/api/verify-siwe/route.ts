@@ -1,8 +1,8 @@
-import {
+import type {
   MiniAppWalletAuthSuccessPayload,
   WalletAuthResult,
-  verifySiweMessage,
-} from '@worldcoin/minikit-js';
+} from '@worldcoin/minikit-js/commands';
+import { verifySiweMessage } from '@worldcoin/minikit-js/siwe';
 import { NextRequest, NextResponse } from 'next/server';
 import { SiweMessage } from 'siwe';
 

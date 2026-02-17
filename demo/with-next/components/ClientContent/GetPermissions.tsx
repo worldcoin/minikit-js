@@ -1,8 +1,8 @@
+import { MiniKit } from '@worldcoin/minikit-js';
 import {
   GetPermissionsErrorCodes,
-  MiniKit,
   ResponseEvent,
-} from '@worldcoin/minikit-js';
+} from '@worldcoin/minikit-js/commands';
 import { useCallback, useEffect, useState } from 'react';
 import * as yup from 'yup';
 import { validateSchema } from './helpers/validate-schema';

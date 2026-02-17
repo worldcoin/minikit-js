@@ -371,9 +371,6 @@ function createProvider(): WorldAppProvider {
               transaction: [
                 {
                   address: tx.to,
-                  abi: [],
-                  functionName: '',
-                  args: [],
                   ...(tx.data && tx.data !== '0x' ? { data: tx.data } : {}),
                   value: tx.value,
                 },

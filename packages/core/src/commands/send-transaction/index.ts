@@ -223,11 +223,16 @@ async function wagmiSendTransactionAdapter(
  * Encode transaction data from ABI + function name + args
  */
 function encodeTransactionData(tx: Transaction): string | undefined {
-  if (tx.data) return tx.data;
+  if (tx.data) {
+    return tx.data;
+  }
+  if (!tx.abi || !tx.functionName) {
+    throw new Error('Transaction requires `data` or `abi` + `functionName`.');
+  }
 
   return encodeFunctionData({
     abi: tx.abi,
     functionName: tx.functionName,
-    args: tx.args,
+    args: tx.args ?? [],
   });
 }

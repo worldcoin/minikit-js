@@ -28,19 +28,19 @@ export type Permit2 = {
 
 export type Transaction = {
   address: string;
-  abi: Abi | readonly unknown[];
-  functionName: ContractFunctionName<
+  value?: string | undefined;
+  /** Raw calldata. If provided, it takes precedence over ABI/functionName/args. */
+  data?: string;
+  abi?: Abi | readonly unknown[];
+  functionName?: ContractFunctionName<
     Abi | readonly unknown[],
     'payable' | 'nonpayable'
   >;
-  value?: string | undefined;
-  args: ContractFunctionArgs<
+  args?: ContractFunctionArgs<
     Abi | readonly unknown[],
     'payable' | 'nonpayable',
     ContractFunctionName<Abi | readonly unknown[], 'payable' | 'nonpayable'>
   >;
-  /** Raw calldata — when present, sent directly to World App. */
-  data?: string;
 };
 
 export type ContractFunctionName<

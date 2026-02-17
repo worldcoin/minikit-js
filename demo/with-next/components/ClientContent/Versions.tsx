@@ -1,6 +1,7 @@
 'use client';
 
-import { MiniKit, validateCommands } from '@worldcoin/minikit-js';
+import { MiniKit } from '@worldcoin/minikit-js';
+import { validateCommands } from '@worldcoin/minikit-js/commands';
 import clsx from 'clsx';
 import { useState } from 'react';
 

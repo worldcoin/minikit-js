@@ -1,9 +1,9 @@
+import { MiniKit } from '@worldcoin/minikit-js';
 import {
-  MiniAppSharePayload,
-  MiniKit,
-  MiniKitShareOptions,
   SendHapticFeedbackErrorCodes,
-} from '@worldcoin/minikit-js';
+  type MiniAppSharePayload,
+  type MiniKitShareOptions,
+} from '@worldcoin/minikit-js/commands';
 import { useCallback, useState } from 'react';
 import * as yup from 'yup';
 import { validateSchema } from './helpers/validate-schema';

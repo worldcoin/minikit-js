@@ -1,10 +1,10 @@
+import { MiniKit } from '@worldcoin/minikit-js';
 import {
   ChatErrorCodes,
-  MiniAppChatPayload,
-  MiniKit,
-  MiniKitChatOptions,
   ResponseEvent,
-} from '@worldcoin/minikit-js';
+  type MiniAppChatPayload,
+  type MiniKitChatOptions,
+} from '@worldcoin/minikit-js/commands';
 import { useCallback, useEffect, useState } from 'react';
 import * as yup from 'yup';
 import { validateSchema } from './helpers/validate-schema';

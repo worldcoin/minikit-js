@@ -1,10 +1,12 @@
 import {
   MiniKit,
-  type MiniKitSendTransactionOptions,
-  type MiniKitSignTypedDataOptions,
-  type SendTransactionResult,
-  type WalletAuthResult,
 } from '@worldcoin/minikit-js';
+import type {
+  MiniKitSendTransactionOptions,
+  MiniKitSignTypedDataOptions,
+  SendTransactionResult,
+  WalletAuthResult,
+} from '@worldcoin/minikit-js/commands';
 import { SiweMessage } from 'siwe';
 import { type Abi, type Hex } from 'viem';
 import type { Config } from 'wagmi';
@@ -38,6 +40,7 @@ export interface WagmiNativeSignTypedDataResult {
 type Address = `0x${string}`;
 const WORLD_CHAIN_ID = 480;
 type AnyConnector = any;
+type DemoTransaction = MiniKitSendTransactionOptions['transaction'][number];
 
 function toAddress(value: string): Address {
   if (!value.startsWith('0x')) {
@@ -137,6 +140,23 @@ function parseValue(value: string): bigint {
 
 function isTransactionHash(value: string): boolean {
   return /^0x[0-9a-fA-F]{64}$/.test(value);
+}
+
+function isContractCallTransaction(
+  tx: DemoTransaction,
+): tx is DemoTransaction & {
+  abi: Abi;
+  functionName: string;
+  args: readonly unknown[];
+} {
+  return (
+    'abi' in tx &&
+    tx.abi !== undefined &&
+    'functionName' in tx &&
+    tx.functionName !== undefined &&
+    'args' in tx &&
+    tx.args !== undefined
+  );
 }
 
 export async function wagmiNativeWalletAuth(
@@ -257,13 +277,13 @@ export async function wagmiNativeSendTransaction(
 
   const tx = options.transaction[0];
   let response: Hex | string;
-  if (tx.data && tx.data !== '0x') {
+  if (!isContractCallTransaction(tx)) {
     response = await sendTransaction(config, {
       connector,
       account: address,
       chainId: options.chainId ?? WORLD_CHAIN_ID,
       to: tx.address as Address,
-      data: tx.data as Hex,
+      ...(tx.data ? { data: tx.data as Hex } : {}),
       ...(tx.value !== undefined ? { value: parseValue(tx.value) } : {}),
     });
   } else {
@@ -272,9 +292,9 @@ export async function wagmiNativeSendTransaction(
       account: address,
       chainId: options.chainId ?? WORLD_CHAIN_ID,
       address: tx.address as Address,
-      abi: tx.abi as Abi,
-      functionName: tx.functionName as string,
-      args: tx.args as readonly unknown[],
+      abi: tx.abi,
+      functionName: tx.functionName,
+      args: tx.args,
       ...(tx.value !== undefined ? { value: parseValue(tx.value) } : {}),
     });
   }

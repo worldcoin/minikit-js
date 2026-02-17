@@ -1,9 +1,9 @@
+import { MiniKit } from '@worldcoin/minikit-js';
 import {
-  MiniKit,
-  MiniKitSendHapticFeedbackOptions,
   SendHapticFeedbackErrorCodes,
-  SendHapticFeedbackInput,
-} from '@worldcoin/minikit-js';
+  type MiniKitSendHapticFeedbackOptions,
+  type SendHapticFeedbackInput,
+} from '@worldcoin/minikit-js/commands';
 import { useCallback, useState } from 'react';
 import * as yup from 'yup';
 

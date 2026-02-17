@@ -180,9 +180,6 @@ describe('World App EIP-1193 provider', () => {
       transaction: [
         {
           address: ADDRESS,
-          abi: [],
-          functionName: '',
-          args: [],
           data: '0x1234',
           value: '0x1',
         },
