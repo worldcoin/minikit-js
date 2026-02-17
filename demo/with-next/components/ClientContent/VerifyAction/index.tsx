@@ -6,10 +6,17 @@ import {
   type IDKitResult,
   type RpContext,
 } from '@worldcoin/idkit';
-import { clsx } from 'clsx';
+import { MiniKit } from '@worldcoin/minikit-js';
 import { useCallback, useState } from 'react';
 import { verifyProof } from './verify-cloud-proof';
 import { VerifyOnchainProof } from './verify-onchain';
+
+type VerifyTarget = {
+  appId: `app_${string}`;
+  action: string;
+  environment: 'staging' | 'production';
+};
+
 export const VerifyAction = () => {
   const isProduction = process.env.NEXT_PUBLIC_ENVIRONMENT === 'production';
 
@@ -29,7 +36,18 @@ export const VerifyAction = () => {
     null,
   );
   const [widgetOpen, setWidgetOpen] = useState(false);
+  const [widgetTarget, setWidgetTarget] = useState<VerifyTarget | null>(null);
   const [rpContext, setRpContext] = useState<RpContext | null>(null);
+
+  const target: VerifyTarget = {
+    appId: (isProduction
+      ? process.env.NEXT_PUBLIC_PROD_VERIFY_APP_ID
+      : process.env.NEXT_PUBLIC_STAGING_VERIFY_APP_ID) as `app_${string}`,
+    action: (isProduction
+      ? process.env.NEXT_PUBLIC_PROD_VERIFY_ACTION
+      : process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION) as string,
+    environment: isProduction ? 'production' : 'staging',
+  };
   const verifyIDKitProof = useCallback(
     async (
       result: IDKitResult,
@@ -144,23 +162,10 @@ export const VerifyAction = () => {
     [verifyIDKitProof],
   );
 
-  const onProdVerifyClick = useCallback(() => {
-    verifyAction({
-      app_id: process.env.NEXT_PUBLIC_PROD_VERIFY_APP_ID as `app_${string}`,
-      action: process.env.NEXT_PUBLIC_PROD_VERIFY_ACTION as string,
-      signal: 'test',
-    });
-  }, [verifyAction]);
+  const openWidgetFlow = useCallback(async (verifyTarget: VerifyTarget) => {
+    const { appId, action } = verifyTarget;
 
-  const onStagingVerifyClick = useCallback(() => {
-    verifyAction({
-      app_id: process.env.NEXT_PUBLIC_STAGING_VERIFY_APP_ID as `app_${string}`,
-      action: process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION as string,
-      signal: 'test',
-    });
-  }, [verifyAction]);
-
-  const onStagingIDKitVerifyClick = useCallback(async () => {
+    setLastUsedAppId(appId);
     setVerifyResult(undefined);
     setStatusMessage(null);
     setDevPortalVerifyResponse(null);
@@ -169,7 +174,7 @@ export const VerifyAction = () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        action: process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION as string,
+        action,
       }),
     });
 
@@ -187,32 +192,49 @@ export const VerifyAction = () => {
       expires_at: rpSig.expires_at,
       signature: rpSig.sig,
     };
+    setSentVerifyPayload({
+      app_id: appId,
+      action,
+      rp_context: rpContext,
+      allow_legacy_proofs: true,
+    });
+    setWidgetTarget(verifyTarget);
     setRpContext(rpContext);
+    setStatusMessage('Opening IDKit widget...');
     setWidgetOpen(true);
   }, []);
+
+  const onVerifyClick = useCallback(async () => {
+    if (MiniKit.isInstalled()) {
+      setStatusMessage('Detected World App. Using native IDKit flow.');
+      verifyAction({
+        app_id: target.appId,
+        action: target.action,
+        signal: 'test',
+      });
+      return;
+    }
+
+    setStatusMessage('Detected browser. Using IDKit widget flow.');
+    await openWidgetFlow(target);
+  }, [openWidgetFlow, target, verifyAction]);
 
   return (
     <div className="grid gap-y-4">
       <h2 className="font-bold text-2xl">Verify (IDKit)</h2>
-      {rpContext && (
+      {rpContext && widgetTarget && (
         <IDKitRequestWidget
           open={widgetOpen}
-          environment="staging"
+          environment={widgetTarget.environment}
           onOpenChange={setWidgetOpen}
-          app_id={
-            process.env.NEXT_PUBLIC_STAGING_VERIFY_APP_ID as `app_${string}`
-          }
-          action={process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION as string}
+          app_id={widgetTarget.appId}
+          action={widgetTarget.action}
           rp_context={rpContext}
           allow_legacy_proofs={true}
           preset={orbLegacy({ signal: 'demo-signal' })}
           onSuccess={(result: IDKitResult) => {
             setVerifyResult({ executedWith: 'minikit', data: result });
-            verifyIDKitProof(
-              result,
-              process.env.NEXT_PUBLIC_STAGING_VERIFY_APP_ID as `app_${string}`,
-              process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION as string,
-            );
+            verifyIDKitProof(result, widgetTarget.appId, widgetTarget.action);
           }}
           onError={(errorCode) => {
             console.log('Verification error:', errorCode);
@@ -239,38 +261,12 @@ export const VerifyAction = () => {
           <div className="grid gap-y-2">
             <div className="grid grid-cols-2 gap-x-2">
               <button
-                className={clsx(
-                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  isProduction ? 'hidden' : '',
-                )}
-                onClick={onStagingIDKitVerifyClick}
+                className="bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
+                onClick={onVerifyClick}
               >
-                Send IDKit Staging Verify
-              </button>
-            </div>
-          </div>
-          <div className="grid gap-y-2">
-            <div className="grid grid-cols-2 gap-x-2">
-              <button
-                className={clsx(
-                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  isProduction ? 'hidden' : '',
-                )}
-                onClick={onStagingVerifyClick}
-              >
-                Send staging verify (Orb)
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-x-2">
-              <button
-                className={clsx(
-                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  isProduction ? '' : 'hidden',
-                )}
-                onClick={onProdVerifyClick}
-              >
-                Send production verify (Orb)
+                {isProduction
+                  ? 'Send production verify'
+                  : 'Send staging verify'}
               </button>
             </div>
           </div>
