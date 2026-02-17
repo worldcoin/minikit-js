@@ -46,6 +46,8 @@ export const WalletAuth = () => {
         statement:
           'This is my statement and here is a link https://worldcoin.com/apps',
       };
+
+      console.log(executionMode, { input });
       const result =
         executionMode === 'wagmi'
           ? {
