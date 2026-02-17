@@ -6,7 +6,7 @@ import {
   type IDKitResult,
   type RpContext,
 } from '@worldcoin/idkit';
-import { MiniKit } from '@worldcoin/minikit-js';
+import { useMiniKit } from '@worldcoin/minikit-js/provider';
 import { useCallback, useState } from 'react';
 import { verifyProof } from './verify-cloud-proof';
 import { VerifyOnchainProof } from './verify-onchain';
@@ -35,6 +35,7 @@ export const VerifyAction = () => {
   const [lastUsedAppId, setLastUsedAppId] = useState<`app_${string}` | null>(
     null,
   );
+  const { isInstalled } = useMiniKit();
   const [widgetOpen, setWidgetOpen] = useState(false);
   const [widgetTarget, setWidgetTarget] = useState<VerifyTarget | null>(null);
   const [rpContext, setRpContext] = useState<RpContext | null>(null);
@@ -205,7 +206,7 @@ export const VerifyAction = () => {
   }, []);
 
   const onVerifyClick = useCallback(async () => {
-    if (MiniKit.isInstalled()) {
+    if (isInstalled) {
       setStatusMessage('Detected World App. Using native IDKit flow.');
       verifyAction({
         app_id: target.appId,

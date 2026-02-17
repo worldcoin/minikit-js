@@ -58,41 +58,57 @@ function isWorldAppEnvironment(): boolean {
 
 async function ensureConnected(config: Config): Promise<Address> {
   const isWorldApp = isWorldAppEnvironment();
-  const existingConnection = isWorldApp
-    ? getConnections(config).find(
+  if (isWorldApp) {
+    const worldAppConnector = config.connectors.find(
+      (connector) => connector.id === 'worldApp',
+    );
+    if (!worldAppConnector) {
+      throw new Error(
+        'No worldApp connector configured. Add worldApp() to route wagmi actions through MiniKit in World App.',
+      );
+    }
+
+    try {
+      const result = await connect(config, { connector: worldAppConnector });
+      const account = result.accounts[0];
+      if (account) return toAddress(account);
+    } catch {
+      const existingWorldAppConnection = getConnections(config).find(
         (connection) =>
           connection.accounts.length > 0 &&
           connection.connector.id === 'worldApp',
-      )
-    : getConnections(config).find(
-        (connection) =>
-          connection.accounts.length > 0 &&
-          connection.connector.id !== 'worldApp',
       );
+      if (existingWorldAppConnection?.accounts[0]) {
+        return toAddress(existingWorldAppConnection.accounts[0]);
+      }
+      throw new Error('Failed to connect with worldApp connector.');
+    }
 
-  if (existingConnection?.accounts[0]) {
-    return toAddress(existingConnection.accounts[0]);
+    throw new Error('Failed to connect wallet with worldApp connector.');
   }
 
-  const candidateConnectors = isWorldApp
-    ? config.connectors.filter((connector) => connector.id === 'worldApp')
-    : config.connectors.filter((connector) => connector.id !== 'worldApp');
+  const existingWebConnection = getConnections(config).find(
+    (connection) =>
+      connection.accounts.length > 0 && connection.connector.id !== 'worldApp',
+  );
+  if (existingWebConnection?.accounts[0]) {
+    return toAddress(existingWebConnection.accounts[0]);
+  }
 
-  if (candidateConnectors.length === 0) {
+  const webConnectors = config.connectors.filter(
+    (connector) => connector.id !== 'worldApp',
+  );
+  if (webConnectors.length === 0) {
     throw new Error(
-      isWorldApp
-        ? 'No worldApp connector configured. Add worldApp() to route wagmi actions through MiniKit in World App.'
-        : 'No web Wagmi connectors configured. Add injected() or walletConnect() after worldApp().',
+      'No web Wagmi connectors configured. Add injected() or walletConnect() after worldApp().',
     );
   }
 
-  const result = await connect(config, { connector: candidateConnectors[0] });
+  const result = await connect(config, { connector: webConnectors[0] });
   const account = result.accounts[0];
-
   if (!account) {
     throw new Error('Failed to connect wallet with wagmi native actions.');
   }
-
   return toAddress(account);
 }
 
