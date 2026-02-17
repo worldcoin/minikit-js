@@ -59,20 +59,23 @@ export async function executeWithFallback<TNative, TFallback = TNative>(
     customFallback,
     requiresFallback = false,
   } = options;
+  const inWorldApp = isInWorldApp();
+  const commandAvailable = isCommandAvailable(command);
+  let nativeError: unknown;
 
   // 1. Try native execution (World App)
-  if (isInWorldApp() && isCommandAvailable(command)) {
+  if (inWorldApp && commandAvailable) {
     try {
       const data = await nativeExecutor();
       return { data, executedWith: 'minikit' as CommandVia };
     } catch (error) {
-      // Native failed, fall through to fallbacks
+      nativeError = error;
       console.warn(`Native ${command} failed, attempting fallback:`, error);
     }
   }
 
-  // 2. Try Wagmi fallback (web with Wagmi)
-  if (wagmiFallback && hasWagmiConfig()) {
+  // 2. Try Wagmi fallback (web only)
+  if (!inWorldApp && wagmiFallback && hasWagmiConfig()) {
     try {
       const data = await wagmiFallback();
       return { data, executedWith: 'wagmi' as CommandVia };
@@ -88,8 +91,13 @@ export async function executeWithFallback<TNative, TFallback = TNative>(
     return { data, executedWith: 'fallback' as CommandVia };
   }
 
+  // In World App, preserve native command errors instead of masking them.
+  if (nativeError) {
+    throw nativeError;
+  }
+
   // 4. Error - no fallback available
-  if (requiresFallback && !isInWorldApp()) {
+  if (requiresFallback && !inWorldApp) {
     throw new FallbackRequiredError(command);
   }
 

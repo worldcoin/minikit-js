@@ -26,7 +26,7 @@ import { MiniKit } from './minikit';
 // ---------------------------------------------------------------------------
 
 export type WorldAppProvider = {
-  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+  request: (args: { method: string; params?: unknown }) => Promise<unknown>;
   on: (event: string, fn: (...args: unknown[]) => void) => void;
   removeListener: (event: string, fn: (...args: unknown[]) => void) => void;
 };
@@ -89,12 +89,31 @@ function decodeHexToUtf8(hex: string): string {
   return new TextDecoder().decode(bytes);
 }
 
-function extractPersonalSignMessage(params?: unknown[]): string {
-  if (!params || params.length === 0) {
+function asArrayParams(params?: unknown): unknown[] {
+  if (params === undefined) return [];
+  return Array.isArray(params) ? params : [params];
+}
+
+function decodeMaybeHexMessage(value: string): string {
+  if (!isHexString(value)) {
+    return value;
+  }
+
+  try {
+    return decodeHexToUtf8(value);
+  } catch {
+    // Keep raw hex if decoding fails. MiniKit may still choose to handle it.
+    return value;
+  }
+}
+
+function extractPersonalSignMessage(params?: unknown): string {
+  const items = asArrayParams(params);
+  if (items.length === 0) {
     throw new Error('Missing personal_sign params');
   }
 
-  const [first, second] = params;
+  const [first, second] = items;
   const maybeMessage =
     typeof first === 'string' &&
     isAddressString(first) &&
@@ -106,16 +125,138 @@ function extractPersonalSignMessage(params?: unknown[]): string {
     throw new Error('Invalid personal_sign message payload');
   }
 
-  if (!isHexString(maybeMessage)) {
-    return maybeMessage;
+  return decodeMaybeHexMessage(maybeMessage);
+}
+
+function extractEthSignMessage(params?: unknown): string {
+  const items = asArrayParams(params);
+  if (items.length === 0) {
+    throw new Error('Missing eth_sign params');
+  }
+  const [first, second] = items;
+  const maybeMessage =
+    typeof second === 'string'
+      ? second
+      : typeof first === 'string' && !isAddressString(first)
+        ? first
+        : undefined;
+
+  if (typeof maybeMessage !== 'string') {
+    throw new Error('Invalid eth_sign message payload');
   }
 
-  try {
-    return decodeHexToUtf8(maybeMessage);
-  } catch {
-    // Keep raw hex if decoding fails. MiniKit may still choose to handle it.
-    return maybeMessage;
+  return decodeMaybeHexMessage(maybeMessage);
+}
+
+function parseTypedDataInput(
+  params?: unknown,
+): {
+  types: Record<string, unknown>;
+  primaryType: string;
+  domain?: Record<string, unknown>;
+  message: Record<string, unknown>;
+  chainId?: number;
+} {
+  const items = asArrayParams(params);
+  const candidate = items.length > 1 ? items[1] : items[0];
+  if (!candidate) {
+    throw new Error('Missing typed data payload');
   }
+
+  const parsed =
+    typeof candidate === 'string'
+      ? JSON.parse(candidate)
+      : (candidate as Record<string, unknown>);
+
+  if (
+    !parsed ||
+    typeof parsed !== 'object' ||
+    typeof parsed.primaryType !== 'string' ||
+    typeof parsed.message !== 'object' ||
+    !parsed.message ||
+    typeof parsed.types !== 'object' ||
+    !parsed.types
+  ) {
+    throw new Error('Invalid typed data payload');
+  }
+
+  const domainValue = parsed.domain as Record<string, unknown> | undefined;
+  const chainIdValue = (domainValue?.chainId ?? parsed.chainId) as
+    | number
+    | string
+    | undefined;
+  const parsedChainId =
+    typeof chainIdValue === 'string'
+      ? Number(chainIdValue)
+      : typeof chainIdValue === 'number'
+        ? chainIdValue
+        : undefined;
+
+  return {
+    types: parsed.types as Record<string, unknown>,
+    primaryType: parsed.primaryType,
+    domain: domainValue,
+    message: parsed.message as Record<string, unknown>,
+    ...(Number.isFinite(parsedChainId) ? { chainId: parsedChainId } : {}),
+  };
+}
+
+function normalizeRpcValue(value: unknown): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (typeof value === 'string') return value;
+  if (typeof value === 'bigint') return `0x${value.toString(16)}`;
+  if (typeof value === 'number') return `0x${value.toString(16)}`;
+  return String(value);
+}
+
+function extractTransactionParams(params?: unknown): {
+  to: `0x${string}`;
+  data?: `0x${string}`;
+  value?: string;
+  chainId?: number;
+} {
+  const items = asArrayParams(params);
+  const tx = (items[0] ?? {}) as {
+    to?: string;
+    data?: string;
+    value?: unknown;
+    chainId?: unknown;
+  };
+  if (typeof tx.to !== 'string' || !isAddressString(tx.to)) {
+    throw new Error('Invalid transaction "to" address');
+  }
+
+  const chainId =
+    typeof tx.chainId === 'string'
+      ? Number(tx.chainId)
+      : typeof tx.chainId === 'number'
+        ? tx.chainId
+        : undefined;
+  const normalizedValue = normalizeRpcValue(tx.value);
+
+  return {
+    to: tx.to as `0x${string}`,
+    ...(typeof tx.data === 'string' ? { data: tx.data as `0x${string}` } : {}),
+    ...(normalizedValue !== undefined ? { value: normalizedValue } : {}),
+    ...(Number.isFinite(chainId) ? { chainId } : {}),
+  };
+}
+
+function extractSwitchChainId(params?: unknown): number {
+  const items = asArrayParams(params);
+  const payload = (items[0] ?? {}) as { chainId?: unknown };
+  const rawChainId = payload.chainId;
+  const chainId =
+    typeof rawChainId === 'string'
+      ? Number(rawChainId)
+      : typeof rawChainId === 'number'
+        ? rawChainId
+        : NaN;
+
+  if (!Number.isFinite(chainId)) {
+    throw new Error('Invalid chainId for wallet_switchEthereumChain');
+  }
+  return chainId;
 }
 
 // ---------------------------------------------------------------------------
@@ -153,7 +294,7 @@ function createProvider(): WorldAppProvider {
   }
 
   return {
-    async request({ method, params }: { method: string; params?: unknown[] }) {
+    async request({ method, params }: { method: string; params?: unknown }) {
       switch (method) {
         case 'eth_requestAccounts': {
           // Return cached address if already authed
@@ -187,15 +328,27 @@ function createProvider(): WorldAppProvider {
           }
         }
 
-        case 'eth_signTypedData_v4': {
-          const [, jsonString] = params as [string, string];
-          const typedData = JSON.parse(jsonString);
+        case 'eth_sign': {
+          const message = extractEthSignMessage(params);
           try {
+            const result = await MiniKit.signMessage({ message });
+            return result.data.signature;
+          } catch (e: any) {
+            throw rpcError(4001, `Sign message failed: ${e.message}`);
+          }
+        }
+
+        case 'eth_signTypedData':
+        case 'eth_signTypedData_v3':
+        case 'eth_signTypedData_v4': {
+          try {
+            const typedData = parseTypedDataInput(params);
             const result = await MiniKit.signTypedData({
-              types: typedData.types,
-              primaryType: typedData.primaryType,
-              domain: typedData.domain,
-              message: typedData.message,
+              types: typedData.types as any,
+              primaryType: typedData.primaryType as any,
+              domain: typedData.domain as any,
+              message: typedData.message as any,
+              chainId: typedData.chainId,
             });
             if (result.data.status === 'error') {
               throw rpcError(
@@ -210,15 +363,14 @@ function createProvider(): WorldAppProvider {
         }
 
         case 'eth_sendTransaction': {
-          const [tx] = params as [
-            { to: string; data?: string; value?: string },
-          ];
+          const tx = extractTransactionParams(params);
 
           try {
             const result = await MiniKit.sendTransaction({
+              ...(tx.chainId !== undefined ? { chainId: tx.chainId } : {}),
               transaction: [
                 {
-                  address: tx.to as `0x${string}`,
+                  address: tx.to,
                   abi: [],
                   functionName: '',
                   args: [],
@@ -234,8 +386,8 @@ function createProvider(): WorldAppProvider {
         }
 
         case 'wallet_switchEthereumChain': {
-          const [{ chainId }] = params as [{ chainId: string }];
-          if (Number(chainId) !== 480) {
+          const chainId = extractSwitchChainId(params);
+          if (chainId !== 480) {
             throw rpcError(4902, 'World App only supports World Chain (480)');
           }
           return null;
