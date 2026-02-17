@@ -68,6 +68,56 @@ function rpcError(code: number, message: string) {
   return Object.assign(new Error(message), { code });
 }
 
+function isHexString(value: string): boolean {
+  return /^0x[0-9a-fA-F]*$/.test(value);
+}
+
+function isAddressString(value: string): boolean {
+  return /^0x[0-9a-fA-F]{40}$/.test(value);
+}
+
+function decodeHexToUtf8(hex: string): string {
+  const raw = hex.slice(2);
+  if (raw.length % 2 !== 0) {
+    throw new Error('Invalid hex string length');
+  }
+
+  const bytes = new Uint8Array(raw.length / 2);
+  for (let i = 0; i < raw.length; i += 2) {
+    bytes[i / 2] = parseInt(raw.slice(i, i + 2), 16);
+  }
+  return new TextDecoder().decode(bytes);
+}
+
+function extractPersonalSignMessage(params?: unknown[]): string {
+  if (!params || params.length === 0) {
+    throw new Error('Missing personal_sign params');
+  }
+
+  const [first, second] = params;
+  const maybeMessage =
+    typeof first === 'string' &&
+    isAddressString(first) &&
+    typeof second === 'string'
+      ? second
+      : first;
+
+  if (typeof maybeMessage !== 'string') {
+    throw new Error('Invalid personal_sign message payload');
+  }
+
+  if (!isHexString(maybeMessage)) {
+    return maybeMessage;
+  }
+
+  try {
+    return decodeHexToUtf8(maybeMessage);
+  } catch {
+    // Keep raw hex if decoding fails. MiniKit may still choose to handle it.
+    return maybeMessage;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Provider implementation
 // ---------------------------------------------------------------------------
@@ -128,9 +178,9 @@ function createProvider(): WorldAppProvider {
           return '0x1e0'; // 480 = World Chain
 
         case 'personal_sign': {
-          const [data] = params as [string, string];
+          const message = extractPersonalSignMessage(params);
           try {
-            const result = await MiniKit.signMessage({ message: data });
+            const result = await MiniKit.signMessage({ message });
             return result.data.signature;
           } catch (e: any) {
             throw rpcError(4001, `Sign message failed: ${e.message}`);
