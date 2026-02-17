@@ -1,169 +1,146 @@
-# RFC: IDKit-Owned Verification + MiniKit Commands
-
-## Status
-
-Accepted for current WIP branch.
+---
+title: "Minikit v2.0"
+"og:image": "/images/docs/docs-meta.png"
+"twitter:image": "/images/docs/docs-meta.png"
+---
 
 ## Summary
 
-We are standardizing SDK ownership by concern:
+We are standardizing SDKs by concern:
 
 - `@worldcoin/idkit` owns World ID verification APIs and UI.
-- `@worldcoin/idkit-core` owns verification runtime primitives and backend signing.
-- `@worldcoin/minikit-js` owns mini-app commands only.
-
-This removes the ambiguous model where developers could import verification logic from multiple package paths.
+- `@worldcoin/minikit-js` owns mini-app commands only, verify is moved out to IDKit.
 
 ## Why
 
-During unification work, verification ended up reachable through multiple paths (`@worldcoin/idkit` and MiniKit compatibility exports). That created:
+Developers building on the World network should not have to choose between shipping a Mini App and a standalone application.
 
-- Confusing DX: same feature appears to exist in two SDKs.
-- Runtime risk: duplicate `@worldcoin/idkit-core` instances can lead to separate WASM/init state.
-- Heavier MiniKit surface area than intended.
+Historically, that choice created friction for three reasons:
+- World ID verification logic differed between Mini Apps and IDKit.
+- MiniKit command APIs were tightly coupled to World App runtime behavior.
+- MiniKit v1 wallet interactions did not follow EIP-1193 conventions (for example, wagmi/viem patterns), so existing dApps often required significant refactors to adopt MiniKit-specific walletAuth and sendTransaction flows.
 
-## Decision
-
-### 1) Verification is not proxied through MiniKit
-
-MiniKit no longer owns or proxies:
-
-- `MiniKit.request()`
-- `MiniKit.createSession()`
-- `MiniKit.proveSession()`
-- `@worldcoin/minikit-js/idkit` compatibility entrypoint
-
-Verification usage is always through IDKit.
-
-### 2) MiniKit remains command-focused
-
-MiniKit keeps:
-
-- `walletAuth`
-- `sendTransaction`
-- `pay`
-- `shareContacts`
-- `signMessage`
-- `signTypedData`
-- `chat`
-- `share`
-- permissions/haptics helpers
-
-### 3) Server-side signing comes from IDKit core
-
-Routes that sign RP context should use:
-
-- `IDKit.initServer()` (once)
-- `signRequest()`
-
-both imported from `@worldcoin/idkit-core`.
-
-## Developer Guidance
-
-### If you need verification UI or verify flow
-
-Use IDKit:
-
-```ts
-import { IDKit, IDKitRequestWidget, orbLegacy } from '@worldcoin/idkit';
-```
-
-### If you need mini-app commands
-
-Use MiniKit:
-
-```ts
-import { MiniKit } from '@worldcoin/minikit-js';
-```
-
-For tree-shakeable command type/function imports, use the commands subpath:
-
-```ts
-import {
-  MiniKitSendTransactionOptions,
-  SendTransactionErrorCodes,
-} from '@worldcoin/minikit-js/commands';
-```
-
-For helper-only imports, use subpaths:
-
-```ts
-import { getIsUserVerified } from '@worldcoin/minikit-js/address-book';
-import { parseSiweMessage, verifySiweMessage } from '@worldcoin/minikit-js/siwe';
-```
-
-### If you need backend RP signatures
-
-Use IDKit core:
-
-```ts
-import { IDKit, signRequest } from '@worldcoin/idkit-core';
-```
+MiniKit v2 addresses this by:
+- Removing verification APIs/UI from MiniKit and standardizing verification on IDKit.
+- Allowing existing wagmi-based dApps to add MiniKitProvider so wallet/transaction behavior adapts automatically to World App context.
+- Supporting custom fallback logic across commands, so apps behave consistently both inside and outside World App.
 
 ## Migration
 
-### Verification Imports
+### World ID moved completely to IDKit
 
+**Old:** Only works in a Mini App context
 ```ts
-import { IDKitRequestWidget } from '@worldcoin/minikit-js/idkit';
-import { MiniKit, orbLegacy } from '@worldcoin/minikit-js';
+// 1. Custom verification logic for MiniKit using World ID 3.0
+await MiniKit.commandsAsync.verify({
+  action: 'my-action',
+  signal: 'user-123',
+});
+
+// 2. Verify Proof
+await fetch('/api/verify-proof', {
+  method: 'POST',
+  headers: { 'content-type': 'application/json' },
+  body: JSON.stringify(completion.result),
+});
 ```
 
-### After
-
+**New:** Verification works as a mini app and standalone
 ```ts
-import { IDKitRequestWidget, IDKit, orbLegacy } from '@worldcoin/idkit';
-import { MiniKit } from '@worldcoin/minikit-js';
-```
+import { IDKit, orbLegacy } from '@worldcoin/idkit';
 
-### Verification Request Builder
+// 1. NEW: Requests now require signing in 4.0 to ensure legitimacy of RP context. 
+const rpContext = await fetch('/api/rp-signature', { method: 'POST' }).then((r) =>
+  r.json(),
+);
+// 2. Request verification
+const request = await IDKit.request({
+  app_id: process.env.NEXT_PUBLIC_APP_ID as `app_${string}`,
+  action: 'my-action',
+  rp_context: rpContext,
+  allow_legacy_proofs: false,
+  environment: 'production',
+}).preset(orbLegacy({ signal: 'user-123' }));
 
-Before:
-
-```ts
-const req = await MiniKit.request(config).preset(orbLegacy({ signal }));
-```
-
-After:
-
-```ts
-const req = await IDKit.request(config).preset(orbLegacy({ signal }));
+const completion = await request.pollUntilCompletion();
+// 3. Verify Proof
+if (completion.success) {
+  await fetch('/api/verify-proof', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(completion.result),
+  });
+}
 ```
 
 ### MiniKit Command API (v2 -> v3)
 
 #### 1) `MiniKit.commands` / `MiniKit.commandsAsync` are removed
 
-Before:
+**Old:**
 
-```ts
+```ts 
 const payload = MiniKit.commands.signMessage({ message: 'hello' });
 const { commandPayload, finalPayload } = await MiniKit.commandsAsync.walletAuth({
   nonce,
 });
 ```
 
-After:
+**New:**
 
 ```ts
 const signResult = await MiniKit.signMessage({ message: 'hello' });
 const authResult = await MiniKit.walletAuth({ nonce });
 ```
 
-#### 2) Return shape changed to `{ executedWith, data }`
+#### 2) Type and helper exports moved to `@worldcoin/minikit-js/commands`
+This reduces bundle size by importing types and helpers without pulling in the full MiniKit runtime.
 
-Before:
+**New:** Updated paths for types and helpers
+```tsx
+import type { MiniKitSendHapticFeedbackOptions } from '@worldcoin/minikit-js/commands'; // MOVED
+import { getIsUserVerified } from '@worldcoin/minikit-js/address-book'; // MOVED
+import { parseSiweMessage, verifySiweMessage } from '@worldcoin/minikit-js/siwe'; // MOVED
 
-```ts
+const options: MiniKitSendHapticFeedbackOptions = {
+  hapticsType: 'success',
+};
+
+```
+
+#### 3) Commands now support custom fallbacks
+
+Use `fallback` to keep the same command flow working outside World App.
+Fallback by default expect a response with the same shape as the original command, but you can also override and return custom data.
+
+```ts Fallback handlers for outside World App
+const result = await MiniKit.sendHapticFeedback({
+  hapticsType: 'impact',
+  style: 'light',
+  fallback: () => { // NEW
+    navigator.vibrate?.(20);
+    return {
+      status: 'success',
+      version: 1,
+      timestamp: new Date().toISOString(),
+    };
+  },
+});
+```
+
+#### 4) Return shape changed to `{ executedWith, data }`
+Command responses now include `executedWith` to indicate whether the command was executed by `minikit` | `fallback` | `wagmi` (if applicable). 
+The actual command response data is still nested under `data`.
+
+**Old:**
+```ts Fails outside World App
 const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
   transaction: [tx],
 });
 console.log(finalPayload.transaction_id);
 ```
-
-After:
-
-```ts
+**New:**
+```ts Custom handling based on execution context
 const result = await MiniKit.sendTransaction({
   transaction: [tx],
 });
@@ -172,47 +149,30 @@ console.log(result.executedWith); // 'minikit' | 'wagmi' | 'fallback'
 console.log(result.data.transactionId);
 ```
 
-#### 3) Verify command moved out of MiniKit
+#### 5) `walletAuth` nonce validation is stricter
+In order to be in line with EIP-4361, `walletAuth` now requires a nonce without hyphens. You can use `crypto.randomUUID().replace(/-/g, '')`.
 
-Before:
+**Old:**
 
-```ts
-await MiniKit.commandsAsync.verify({
-  action: 'my-action',
-  signal: 'user-123',
-});
-```
-
-After:
-
-```ts
-const request = await IDKit.request(config).preset(orbLegacy({ signal: 'user-123' }));
-const completion = await request.pollUntilCompletion();
-```
-
-#### 4) `walletAuth` nonce validation is stricter
-
-Before:
-
-```ts
+```ts Nonce with hyphens
 const nonce = crypto.randomUUID(); // contains hyphens
 await MiniKit.commandsAsync.walletAuth({ nonce });
 ```
 
-After:
+**New:**
 
-```ts
+```ts Nonce without hyphens
 const nonce = crypto.randomUUID().replace(/-/g, '');
 await MiniKit.walletAuth({ nonce });
 ```
 
-#### 5) `sendTransaction` now uses one flexible transaction type
+#### 6) `sendTransaction` now also supports raw calldata
 
-`Transaction` is now a single type with optional ABI fields and optional raw
+`Transaction` now supports optional raw
 calldata. When `data` is present, it takes priority over `abi` /
-`functionName` / `args`.
+`functionName` / `args`. This change helps with Wagmi interoperability.
 
-Before (contract-call only):
+**Old (contract-call only):**
 
 ```ts
 await MiniKit.commandsAsync.sendTransaction({
@@ -227,15 +187,15 @@ await MiniKit.commandsAsync.sendTransaction({
 });
 ```
 
-After:
+**New:**
 
-```ts
+```ts 
 await MiniKit.sendTransaction({
   transaction: [
     {
       address: tokenAddress,
       value: '0x0',
-      data: '0xa9059cbb...', // takes priority when present
+      data: '0xa9059cbb...', // NEW: takes priority when present
       abi: erc20Abi,
       functionName: 'transfer',
       args: [to, amount],
@@ -244,9 +204,9 @@ await MiniKit.sendTransaction({
 });
 ```
 
-Type shape:
+Type changes:
 
-```ts
+```ts Transaction Types
 type Transaction = {
   address: string;
   value?: string;
@@ -264,53 +224,157 @@ interface MiniKitSendTransactionOptions<TCustomFallback = SendTransactionResult>
 }
 ```
 
-#### 6) Wagmi fallback behavior for multi-transaction inputs
+### Running your Mini App as a Standalone App
 
-Outside World App, wagmi fallback rejects `transaction.length > 1` by default.
-Use World App native batching, split into single calls, or provide a custom fallback.
+#### World ID
+Migrating to World ID 4.0 with IDKit will allow your verification flow to work out of the box. You can
+optionally add branching logic to show the IDKit widget 
 
-#### 7) Use subpath exports for better tree-shaking
+**Example:**
+```tsx Example Verify Flow
+export function VerifyHybrid() {
+  const [open, setOpen] = useState(false);
+  const [rpContext, setRpContext] = useState<RpContext | null>(null);
+  const [status, setStatus] = useState<string>('idle');
 
-Before:
+  const onVerify = async () => {
+    setStatus('loading');
+    const rp = await fetchRpContext(ACTION);
+    // Add branching logic here to show Widget outside of World App
+    if (MiniKit.isInWorldApp()) {
+      // World App: headless/native path (no widget UI)
+      const req = await IDKit.request({
+        app_id: APP_ID,
+        action: ACTION,
+        rp_context: rp,
+        allow_legacy_proofs: true,
+        environment: ENV,
+      }).preset(orbLegacy({ signal: `user-${Date.now()}` }));
 
-```ts
-import {
-  MiniKitSendTransactionOptions,
-  SendTransactionErrorCodes,
-  getIsUserVerified,
-  parseSiweMessage,
-  verifySiweMessage,
-} from '@worldcoin/minikit-js';
+      const completion = await req.pollUntilCompletion();
+      if (!completion.success) {
+        setStatus(`error:${completion.error}`);
+        return;
+      }
+
+      await verifyProof(completion.result);
+      setStatus('verified:native');
+      return;
+    }
+
+    // Standalone web: open widget
+    setRpContext(rp);
+    setOpen(true);
+    setStatus('widget-open');
+  };
+
+  return (
+    <>
+      <button onClick={onVerify}>Verify</button>
+      <p>{status}</p>
+
+      {rpContext ? (
+        <IDKitRequestWidget
+          open={open}
+          onOpenChange={setOpen}
+          app_id={APP_ID}
+          action={ACTION}
+          rp_context={rpContext}
+          allow_legacy_proofs={true}
+          preset={orbLegacy({ signal: `user-${Date.now()}` })}
+          environment={ENV}
+          onSuccess={async (result) => {
+            await verifyProof(result);
+            setStatus('verified:widget');
+          }}
+          onError={(code) => setStatus(`error:${code}`)}
+        />
+      ) : null}
+    </>
+  );
+}
+```
+#### Transactions
+Adding Wagmi provider
+```tsx Install dependencies
+pnpm add @worldcoin/minikit-js wagmi viem @tanstack/react-query
 ```
 
-After:
+```tsx Add Wagmi Config
+// src/providers/wagmi-config.ts
+import { worldApp } from '@worldcoin/minikit-js/wagmi';
+import { worldchain } from 'viem/chains';
+import { http } from 'viem';
+import { createConfig } from 'wagmi';
+import { injected } from 'wagmi/connectors';
 
-```ts
-import {
-  MiniKitSendTransactionOptions,
-  SendTransactionErrorCodes,
-} from '@worldcoin/minikit-js/commands';
-import { getIsUserVerified } from '@worldcoin/minikit-js/address-book';
-import { parseSiweMessage, verifySiweMessage } from '@worldcoin/minikit-js/siwe';
+export const wagmiConfig = createConfig({
+  chains: [worldchain],
+  transports: {
+    [worldchain.id]: http('https://worldchain-mainnet.g.alchemy.com/public'),
+  },
+  connectors: [
+    worldApp(),   // native in World App
+    injected(),   // web fallback connector
+  ],
+});
 ```
 
-## Tradeoffs
 
-- Pros:
-  - Clear ownership model.
-  - Smaller MiniKit API surface.
-  - Fewer chances of duplicate runtime confusion.
-- Cons:
-  - Existing internal WIP code must update imports.
+```tsx Update providers
 
-## Out of Scope
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MiniKitProvider } from '@worldcoin/minikit-js/provider';
+import { WagmiProvider } from 'wagmi';
+import { wagmiConfig } from './wagmi-config';
 
-- Hard lockstep version policy between all SDKs.
-- Runtime hard-fail on duplicate versions (we can add warnings separately).
+const queryClient = new QueryClient();
 
-## Acceptance Criteria
+export function ClientProviders({ children }: { children: React.ReactNode }) {
+  return (
+    // NEW QueryClientProvider and WagmiProvider recommended for robust performance
+    <QueryClientProvider client={queryClient}> 
+      <WagmiProvider config={wagmiConfig}>
+        <MiniKitProvider
+          props={{
+            appId: process.env.NEXT_PUBLIC_APP_ID ?? '',
+            wagmiConfig, // NEW: pass explicitly for robust fallback behavior
+          }}
+        >
+          {children}
+        </MiniKitProvider>
+      </WagmiProvider>
+    </QueryClientProvider>
+  );
+}
+```
+Once these are set up your application will automatically support transaction logic externally without any refactoring to core command calls.
+#### Non Transaction Command fallbacks
+MiniKit v2 is designed to work both inside and outside of World App. By adding custom fallbacks to commands, you can ensure your app behaves gracefully when users access it outside of World App.
 
-- No verify APIs are exported by MiniKit.
-- No `/idkit` subpath exists in MiniKit.
-- Demos use IDKit for verification and MiniKit for commands.
-- RP signature routes use `@worldcoin/idkit-core` and call `IDKit.initServer()`.
+
+### Standalone App to Mini App
+
+
+#### World ID
+Requires no changes, simply enable the configuration to run your app as a mini app in the developer portal.
+
+#### Transactions
+If you are using **wagmi** for transactions, adding the `MiniKitProvider` and `worldApp` connector will allow your existing transaction logic to work seamlessly in World App without any changes. 
+
+If you're using another library like **viem** or **ethers**. Check if you're in World App and use the World App provider which will automatically
+bridge your commands.
+```tsx Viem/Ethers
+import { MiniKit, getWorldAppProvider } from '@worldcoin/minikit-js'
+import { BrowserProvider } from 'ethers' // or viem custom transport
+
+const inWorldApp = MiniKit.isInWorldApp()
+
+if (inWorldApp) {
+  const provider = new BrowserProvider(getWorldAppProvider())
+  const signer = await provider.getSigner()
+  // signer.sendTransaction / signMessage works via MiniKit bridge
+} else {
+  // your normal viem/ethers provider flow
+}
+```

@@ -95,6 +95,25 @@ You can still import `MiniKit` itself from the package root:
 import { MiniKit } from '@worldcoin/minikit-js';
 ```
 
+### Commands now support custom fallbacks
+
+Use `fallback` to run equivalent logic outside World App:
+
+```ts
+const result = await MiniKit.sendHapticFeedback({
+  hapticsType: 'impact',
+  style: 'light',
+  fallback: () => {
+    navigator.vibrate?.(20);
+    return {
+      status: 'success',
+      version: 1,
+      timestamp: new Date().toISOString(),
+    };
+  },
+});
+```
+
 ## 🛠 ️Developing Locally
 
 To run the example mini app locally:
