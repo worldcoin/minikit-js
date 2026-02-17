@@ -100,7 +100,11 @@ export class MiniKit {
 
   private static getActiveMiniKit(): typeof MiniKit {
     if (typeof window === 'undefined') return this;
-    return (window.MiniKit as typeof MiniKit | undefined) ?? this;
+    const candidate = window.MiniKit as Partial<typeof MiniKit> | undefined;
+    if (candidate && typeof candidate.trigger === 'function') {
+      return candidate as typeof MiniKit;
+    }
+    return this;
   }
 
   // ============================================================================
@@ -452,13 +456,11 @@ export class MiniKit {
     this.initFromWorldApp(window.WorldApp);
 
     try {
-      // Keep install idempotent. If another MiniKit instance already exists on window
-      // (e.g. duplicated bundles/entries), still continue so this instance can validate
-      // command availability and use native bridge paths.
-      if (!window.MiniKit) {
-        window.MiniKit = MiniKit;
-        this.sendInit();
-      }
+      // Always bind the active global instance during install. This avoids stale
+      // instances after HMR or duplicate entrypoints and keeps native responses
+      // routed to the same event manager that issued the command.
+      window.MiniKit = this;
+      this.sendInit();
     } catch (error) {
       console.error(
         MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.Unknown],

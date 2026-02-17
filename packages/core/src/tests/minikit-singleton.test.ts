@@ -23,7 +23,7 @@ describe('MiniKit singleton delegation', () => {
       },
     });
 
-    (global as any).window.MiniKit = { walletAuth };
+    (global as any).window.MiniKit = { walletAuth, trigger: jest.fn() };
 
     const input = { nonce: 'abc12345' };
     const result = await MiniKit.walletAuth(input as any);
@@ -60,7 +60,11 @@ describe('MiniKit singleton delegation', () => {
       },
     });
 
-    (global as any).window.MiniKit = { signMessage, signTypedData };
+    (global as any).window.MiniKit = {
+      signMessage,
+      signTypedData,
+      trigger: jest.fn(),
+    };
 
     await MiniKit.signMessage({ message: 'hello' } as any);
     await MiniKit.signTypedData({

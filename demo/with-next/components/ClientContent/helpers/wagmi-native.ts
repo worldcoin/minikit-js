@@ -37,16 +37,22 @@ export interface WagmiNativeSignTypedDataResult {
 
 type Address = `0x${string}`;
 const WORLD_CHAIN_ID = 480;
-const ACTION_TIMEOUT_MS = 45000;
+const ACTION_TIMEOUT_MS = 10000;
 type AnyConnector = any;
+
+function logWagmiNative(stage: string, details?: Record<string, unknown>) {
+  console.log('[wagmi-native]', stage, details ?? {});
+}
 
 async function withTimeout<T>(
   promise: Promise<T>,
   label: string,
   timeoutMs = ACTION_TIMEOUT_MS,
 ): Promise<T> {
+  logWagmiNative('await:start', { label, timeoutMs });
   return new Promise<T>((resolve, reject) => {
     const timeoutId = setTimeout(() => {
+      logWagmiNative('await:timeout', { label, timeoutMs });
       reject(
         new Error(
           `${label} timed out after ${Math.floor(timeoutMs / 1000)}s.`,
@@ -57,10 +63,15 @@ async function withTimeout<T>(
     promise.then(
       (value) => {
         clearTimeout(timeoutId);
+        logWagmiNative('await:success', { label });
         resolve(value);
       },
       (error) => {
         clearTimeout(timeoutId);
+        logWagmiNative('await:error', {
+          label,
+          error: error instanceof Error ? error.message : String(error),
+        });
         reject(error);
       },
     );
@@ -105,18 +116,39 @@ async function ensureConnected(
 ): Promise<{ address: Address; connector: AnyConnector }> {
   const isWorldApp = isWorldAppEnvironment();
   const connector = selectConnector(config, isWorldApp);
+  logWagmiNative('ensureConnected:start', {
+    isWorldApp,
+    connectorId: connector.id,
+    configuredConnectorIds: config.connectors.map((item) => item.id),
+  });
+
   const existingConnection = getConnections(config).find(
     (connection) =>
       connection.accounts.length > 0 &&
       connection.connector.id === connector.id,
   );
   if (existingConnection?.accounts[0]) {
+    logWagmiNative('ensureConnected:existing-connection', {
+      connectorId: connector.id,
+      address: existingConnection.accounts[0],
+    });
     return { address: toAddress(existingConnection.accounts[0]), connector };
   }
 
-  const result = await withTimeout(connect(config, { connector }), 'wagmi connect');
+  logWagmiNative('ensureConnected:connecting', { connectorId: connector.id });
+  const result = await withTimeout(
+    connect(config, { connector }),
+    'wagmi connect',
+  );
+  logWagmiNative('ensureConnected:connected', {
+    connectorId: connector.id,
+    accounts: result.accounts,
+  });
   const account = result.accounts[0];
   if (!account) {
+    logWagmiNative('ensureConnected:missing-account', {
+      connectorId: connector.id,
+    });
     throw new Error('Failed to connect wallet with wagmi native actions.');
   }
   return { address: toAddress(account), connector };
@@ -176,7 +208,19 @@ export async function wagmiNativeWalletAuth(
     notBefore?: Date;
   },
 ): Promise<WalletAuthResult> {
+  logWagmiNative('walletAuth:start', {
+    nonceLength: input.nonce.length,
+    hasStatement: Boolean(input.statement),
+    hasRequestId: Boolean(input.requestId),
+    hasExpirationTime: Boolean(input.expirationTime),
+    hasNotBefore: Boolean(input.notBefore),
+    isWorldApp: isWorldAppEnvironment(),
+  });
   const { address, connector } = await ensureConnected(config);
+  logWagmiNative('walletAuth:connected', {
+    address,
+    connectorId: connector.id,
+  });
   const siweMessage = new SiweMessage({
     domain: window.location.host,
     address,
@@ -191,6 +235,11 @@ export async function wagmiNativeWalletAuth(
   });
 
   const message = siweMessage.prepareMessage();
+  logWagmiNative('walletAuth:signing-message', {
+    address,
+    connectorId: connector.id,
+    messageLength: message.length,
+  });
   const signature = await withTimeout(
     signMessage(config, {
       connector,
@@ -199,6 +248,10 @@ export async function wagmiNativeWalletAuth(
     }),
     'wagmi signMessage(walletAuth)',
   );
+  logWagmiNative('walletAuth:signed', {
+    address,
+    signatureLength: signature.length,
+  });
 
   return {
     address,
