@@ -13,7 +13,7 @@ import { validateSchema } from './helpers/validate-schema';
 const paymentSuccessPayloadSchema = yup.object({
   status: yup.string<'success'>().oneOf(['success']),
   transaction_status: yup.string<'submitted'>().oneOf(['submitted']),
-  transaction_id: yup.string().required(),
+  transactionId: yup.string().required(),
   reference: yup.string().required(),
   from: yup.string().optional(),
   chain: yup.string().required(),

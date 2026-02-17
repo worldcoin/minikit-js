@@ -6,7 +6,7 @@ import {
 } from '@worldcoin/minikit-js';
 import { useWaitForTransactionReceipt as useMiniKitWaitForTransactionReceipt } from '@worldcoin/minikit-react';
 import { useState } from 'react';
-import { createPublicClient, http } from 'viem';
+import { createPublicClient, encodeFunctionData, http } from 'viem';
 import { worldchain } from 'viem/chains';
 import {
   useConfig,
@@ -17,11 +17,11 @@ import ANDYABI from '../../abi/Andy.json';
 import DEXABI from '../../abi/DEX.json';
 import ForwardABI from '../../abi/Forward.json';
 import MinikitStaging from '../../abi/MinikitStaging.json';
+import { validateSchema } from './helpers/validate-schema';
 import {
   DemoExecutionMode,
   wagmiNativeSendTransaction,
 } from './helpers/wagmi-native';
-import { validateSchema } from './helpers/validate-schema';
 
 const sendTransactionResultSchema = yup.object({
   transactionHash: yup.string().nullable().optional(),
@@ -30,7 +30,6 @@ const sendTransactionResultSchema = yup.object({
   status: yup.string<'success'>().oneOf(['success']).nullable().optional(),
   version: yup.number().nullable().optional(),
   transactionId: yup.string().nullable().optional(),
-  transaction_id: yup.string().nullable().optional(),
   transaction_status: yup.string().oneOf(['submitted']).optional(),
   from: yup.string().nullable().optional(),
   chain: yup.string().nullable().optional(),
@@ -397,6 +396,28 @@ export const SendTransaction = () => {
     await executeTransaction(txOptions);
   };
 
+  const mintTokenWithRawData = async () => {
+    const data = encodeFunctionData({
+      abi: MinikitStaging as any,
+      functionName: 'mintToken',
+      args: [],
+    });
+
+    const txOptions: MiniKitSendTransactionOptions = {
+      chainId: 480,
+      transaction: [
+        {
+          address: mainContract,
+          abi: MinikitStaging,
+          functionName: 'mintToken',
+          args: [],
+          data,
+        },
+      ],
+    };
+    await executeTransaction(txOptions);
+  };
+
   const bumpFunctionCalls = async () => {
     const txOptions = {
       transaction: [
@@ -536,6 +557,15 @@ export const SendTransaction = () => {
         >
           Mint Token
         </button>
+        <button
+          className="bg-blue-600 text-white rounded-lg p-4 w-full disabled:opacity-50"
+          onClick={mintTokenWithRawData}
+          disabled={executionMode !== 'wagmi'}
+        >
+          Wagmi To+Data
+        </button>
+      </div>
+      <div className="grid gap-x-2 grid-cols-2">
         <button
           className="bg-green-500 text-white rounded-lg p-4 w-full"
           onClick={bumpFunctionCalls}
