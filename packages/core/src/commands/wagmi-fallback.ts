@@ -10,6 +10,10 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type WagmiConfig = any;
 const SIWE_NONCE_REGEX = /^[a-zA-Z0-9]{8,}$/;
+const runtimeImport = new Function(
+  'specifier',
+  'return import(specifier)',
+) as (specifier: string) => Promise<any>;
 
 // Store wagmi config on globalThis so it's shared across entry points
 // (minikit-provider.js sets it, index.js reads it).
@@ -27,12 +31,36 @@ export function hasWagmiConfig(): boolean {
   return (globalThis as any)[WAGMI_KEY] !== undefined;
 }
 
+async function loadWagmiActions(): Promise<any> {
+  try {
+    return await runtimeImport('wagmi/actions');
+  } catch (error) {
+    const wrappedError = new Error(
+      'Wagmi fallback requires the "wagmi" package. Install wagmi or provide a custom fallback.',
+    );
+    (wrappedError as Error & { cause?: unknown }).cause = error;
+    throw wrappedError;
+  }
+}
+
+async function loadSiwe(): Promise<any> {
+  try {
+    return await runtimeImport('siwe');
+  } catch (error) {
+    const wrappedError = new Error(
+      'Wagmi walletAuth fallback requires the "siwe" package. Install siwe or provide a custom fallback.',
+    );
+    (wrappedError as Error & { cause?: unknown }).cause = error;
+    throw wrappedError;
+  }
+}
+
 /**
  * Ensure a wallet is connected via Wagmi.
  * Tries configured connectors in order and skips the World App connector on web.
  */
 async function ensureConnected(config: WagmiConfig): Promise<`0x${string}`> {
-  const { connect, getConnections } = await import('wagmi/actions');
+  const { connect, getConnections } = await loadWagmiActions();
   const isWorldApp =
     typeof window !== 'undefined' && Boolean((window as any).WorldApp);
 
@@ -76,7 +104,7 @@ async function ensureConnected(config: WagmiConfig): Promise<`0x${string}`> {
           ? account
           : (account as { address?: `0x${string}` }).address;
       if (address) {
-        return address;
+        return address as `0x${string}`;
       }
     }
   } catch (error) {
@@ -142,8 +170,8 @@ export async function wagmiWalletAuth(
     );
   }
 
-  const { signMessage } = await import('wagmi/actions');
-  const { SiweMessage } = await import('siwe');
+  const { signMessage } = await loadWagmiActions();
+  const { SiweMessage } = await loadSiwe();
 
   const address = await ensureConnected(config);
 
@@ -191,7 +219,7 @@ export async function wagmiSignMessage(
     );
   }
 
-  const { signMessage } = await import('wagmi/actions');
+  const { signMessage } = await loadWagmiActions();
 
   const address = await ensureConnected(config);
   const signature = await signMessage(config, {
@@ -220,9 +248,7 @@ export async function wagmiSignTypedData(
     );
   }
 
-  const { getChainId, signTypedData, switchChain } = await import(
-    'wagmi/actions'
-  );
+  const { getChainId, signTypedData, switchChain } = await loadWagmiActions();
 
   const address = await ensureConnected(config);
 
@@ -281,7 +307,7 @@ export async function wagmiSendTransaction(
   }
 
   const { getChainId, getWalletClient, sendTransaction, switchChain } =
-    await import('wagmi/actions');
+    await loadWagmiActions();
 
   await ensureConnected(config);
 
