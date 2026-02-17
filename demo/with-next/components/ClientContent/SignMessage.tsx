@@ -7,7 +7,12 @@ import {
 } from '@worldcoin/minikit-js';
 import { useState } from 'react';
 import { verifyMessage } from 'viem';
+import { useConfig } from 'wagmi';
 import * as yup from 'yup';
+import {
+  DemoExecutionMode,
+  wagmiNativeSignMessage,
+} from './helpers/wagmi-native';
 
 const signMessageSuccessPayloadSchema = yup.object({
   status: yup.string<'success'>().oneOf(['success']),
@@ -25,6 +30,9 @@ const signMessageErrorPayloadSchema = yup.object({
 });
 
 export const SignMessage = () => {
+  const wagmiConfig = useConfig();
+  const [executionMode, setExecutionMode] =
+    useState<DemoExecutionMode>('minikit');
   const [signMessageAppPayload, setSignMessageAppPayload] = useState<
     string | undefined
   >();
@@ -43,21 +51,26 @@ export const SignMessage = () => {
     string,
     any
   > | null>(null);
-  const [messageToSign, setMessageToSign] = useState('hello world');
 
   const onSignMessage = async (message: string) => {
     const signMessagePayload: MiniKitSignMessageOptions = {
       message,
     };
 
-    setMessageToSign(message);
     setSentSignMessagePayload({
       signMessagePayload,
     });
-    const payload = await MiniKit.signMessage(signMessagePayload);
+    const payload =
+      executionMode === 'wagmi'
+        ? {
+            executedWith: 'wagmi' as const,
+            data: await wagmiNativeSignMessage(wagmiConfig, message),
+          }
+        : await MiniKit.signMessage(signMessagePayload);
+    setSignMessagePayloadValidationMessage('Payload is valid');
     if (payload.executedWith === 'minikit') {
       const response = payload.data;
-      const messageHash = hashSafeMessage(messageToSign);
+      const messageHash = hashSafeMessage(message);
       setSignMessageAppPayload(JSON.stringify(response, null, 2));
 
       const isValid = await (
@@ -78,7 +91,7 @@ export const SignMessage = () => {
 
       const isValid = await verifyMessage({
         address: response.address as `0x${string}`,
-        message: messageToSign,
+        message,
         signature: response.signature as `0x${string}`,
       });
 
@@ -96,6 +109,28 @@ export const SignMessage = () => {
     <div>
       <div className="grid gap-y-2">
         <h2 className="text-2xl font-bold">Sign Message</h2>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            className={`rounded-lg p-3 w-full ${
+              executionMode === 'minikit'
+                ? 'bg-black text-white'
+                : 'bg-gray-200 text-black'
+            }`}
+            onClick={() => setExecutionMode('minikit')}
+          >
+            MiniKit Command
+          </button>
+          <button
+            className={`rounded-lg p-3 w-full ${
+              executionMode === 'wagmi'
+                ? 'bg-black text-white'
+                : 'bg-gray-200 text-black'
+            }`}
+            onClick={() => setExecutionMode('wagmi')}
+          >
+            Wagmi Native
+          </button>
+        </div>
 
         <div>
           <div className="bg-gray-300 min-h-[100px] p-2">

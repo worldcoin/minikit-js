@@ -6,6 +6,11 @@ import {
 } from '@worldcoin/minikit-js';
 import { useCallback, useState } from 'react';
 import { verifyTypedData } from 'viem';
+import { useConfig } from 'wagmi';
+import {
+  DemoExecutionMode,
+  wagmiNativeSignTypedData,
+} from './helpers/wagmi-native';
 
 const signTypedDataPayload = {
   types: {
@@ -149,6 +154,9 @@ const toSafeEip712TypedData = (
 });
 
 export const SignTypedData = () => {
+  const wagmiConfig = useConfig();
+  const [executionMode, setExecutionMode] =
+    useState<DemoExecutionMode>('minikit');
   const [signTypedDataAppPayload, setSignTypedDataAppPayload] = useState<
     string | undefined
   >();
@@ -174,7 +182,13 @@ export const SignTypedData = () => {
     setSentSignTypedDataPayload({
       signTypedDataInput,
     });
-    const payload = await MiniKit.signTypedData(signTypedDataInput);
+    const payload =
+      executionMode === 'wagmi'
+        ? {
+            executedWith: 'wagmi' as const,
+            data: await wagmiNativeSignTypedData(wagmiConfig, signTypedDataInput),
+          }
+        : await MiniKit.signTypedData(signTypedDataInput);
     setSignTypedDataAppPayload(JSON.stringify(payload.data, null, 2));
     setSignTypedDataPayloadValidationMessage('Payload is valid');
 
@@ -216,7 +230,7 @@ export const SignTypedData = () => {
     }
 
     setSignTypedDataPayloadVerificationMessage('Signature is invalid');
-  }, []);
+  }, [executionMode, wagmiConfig]);
 
   const signBenignPayload = async (chainId?: number) => {
     const signTypedDataPayload: MiniKitSignTypedDataOptions = {
@@ -225,10 +239,19 @@ export const SignTypedData = () => {
     };
 
     setSentSignTypedDataPayload(signTypedDataPayload);
-    const payload = await MiniKit.signTypedData({
-      ...benignPayload,
-      chainId,
-    });
+    const payload =
+      executionMode === 'wagmi'
+        ? {
+            executedWith: 'wagmi' as const,
+            data: await wagmiNativeSignTypedData(wagmiConfig, {
+              ...benignPayload,
+              chainId,
+            }),
+          }
+        : await MiniKit.signTypedData({
+            ...benignPayload,
+            chainId,
+          });
     setSignTypedDataAppPayload(JSON.stringify(payload.data, null, 2));
     setSignTypedDataPayloadValidationMessage('Payload is valid');
 
@@ -276,6 +299,28 @@ export const SignTypedData = () => {
     <div>
       <div className="grid gap-y-2">
         <h2 className="text-2xl font-bold">Sign Typed Data</h2>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            className={`rounded-lg p-3 w-full ${
+              executionMode === 'minikit'
+                ? 'bg-black text-white'
+                : 'bg-gray-200 text-black'
+            }`}
+            onClick={() => setExecutionMode('minikit')}
+          >
+            MiniKit Command
+          </button>
+          <button
+            className={`rounded-lg p-3 w-full ${
+              executionMode === 'wagmi'
+                ? 'bg-black text-white'
+                : 'bg-gray-200 text-black'
+            }`}
+            onClick={() => setExecutionMode('wagmi')}
+          >
+            Wagmi Native
+          </button>
+        </div>
 
         <div>
           <div className="bg-gray-300 min-h-[100px] p-2">

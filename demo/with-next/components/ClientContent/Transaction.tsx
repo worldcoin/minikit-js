@@ -8,12 +8,19 @@ import { useWaitForTransactionReceipt as useMiniKitWaitForTransactionReceipt } f
 import { useState } from 'react';
 import { createPublicClient, http } from 'viem';
 import { worldchain } from 'viem/chains';
-import { useWaitForTransactionReceipt as useWagmiWaitForTransactionReceipt } from 'wagmi';
+import {
+  useConfig,
+  useWaitForTransactionReceipt as useWagmiWaitForTransactionReceipt,
+} from 'wagmi';
 import * as yup from 'yup';
 import ANDYABI from '../../abi/Andy.json';
 import DEXABI from '../../abi/DEX.json';
 import ForwardABI from '../../abi/Forward.json';
 import MinikitStaging from '../../abi/MinikitStaging.json';
+import {
+  DemoExecutionMode,
+  wagmiNativeSendTransaction,
+} from './helpers/wagmi-native';
 import { validateSchema } from './helpers/validate-schema';
 
 const sendTransactionResultSchema = yup.object({
@@ -46,6 +53,9 @@ const mainContract =
     : '0x9Cf4F011F55Add3ECC1B1B497A3e9bd32183D6e8';
 
 export const SendTransaction = () => {
+  const wagmiConfig = useConfig();
+  const [executionMode, setExecutionMode] =
+    useState<DemoExecutionMode>('minikit');
   const [transactionData, setTransactionData] = useState<Record<
     string,
     any
@@ -154,7 +164,13 @@ export const SendTransaction = () => {
     setTransactionHash(undefined);
     setVerificationMode(null);
     try {
-      const result = await MiniKit.sendTransaction(txOptions);
+      const result =
+        executionMode === 'wagmi'
+          ? {
+              executedWith: 'wagmi' as const,
+              data: await wagmiNativeSendTransaction(wagmiConfig, txOptions),
+            }
+          : await MiniKit.sendTransaction(txOptions);
       await handleResult(result);
     } catch (err) {
       handleError(err);
@@ -455,6 +471,28 @@ export const SendTransaction = () => {
   return (
     <div className="grid gap-y-2">
       <h2 className="text-2xl font-bold">Send Transaction</h2>
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          className={`rounded-lg p-3 w-full ${
+            executionMode === 'minikit'
+              ? 'bg-black text-white'
+              : 'bg-gray-200 text-black'
+          }`}
+          onClick={() => setExecutionMode('minikit')}
+        >
+          MiniKit Command
+        </button>
+        <button
+          className={`rounded-lg p-3 w-full ${
+            executionMode === 'wagmi'
+              ? 'bg-black text-white'
+              : 'bg-gray-200 text-black'
+          }`}
+          onClick={() => setExecutionMode('wagmi')}
+        >
+          Wagmi Native
+        </button>
+      </div>
       <div className="bg-gray-50 border-l-4 border-gray-400 p-4 mb-4">
         <div className="flex">
           <div className="flex-shrink-0">
@@ -558,7 +596,7 @@ export const SendTransaction = () => {
       </div>
 
       <div className="grid gap-y-1">
-        <p>Result from `MiniKit.sendTransaction()`:</p>
+        <p>Result from send transaction execution:</p>
         <div className="bg-gray-300 min-h-[100px] p-2">
           <pre className="break-all whitespace-break-spaces">
             {JSON.stringify(receivedSendTransactionPayload, null, 2)}

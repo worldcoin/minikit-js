@@ -3,13 +3,21 @@
 import { MiniKit, User } from '@worldcoin/minikit-js';
 import Image from 'next/image';
 import { useCallback, useState } from 'react';
+import { useConfig } from 'wagmi';
+import {
+  DemoExecutionMode,
+  wagmiNativeWalletAuth,
+} from './helpers/wagmi-native';
 
 /*
 Note: This is not a secure implementation of Wallet Auth.
 It is only for demo purposes.
 */
 export const WalletAuth = () => {
+  const wagmiConfig = useConfig();
   const [nonce, setNonce] = useState<string | null>(null);
+  const [executionMode, setExecutionMode] =
+    useState<DemoExecutionMode>('minikit');
   const [walletAuthResult, setWalletAuthResult] = useState<Record<
     string,
     any
@@ -29,7 +37,7 @@ export const WalletAuth = () => {
     setProfile(null);
 
     try {
-      const result = await MiniKit.walletAuth({
+      const input = {
         nonce: generatedNonce,
         expirationTime: new Date(
           new Date().getTime() + 7 * 24 * 60 * 60 * 1000,
@@ -37,7 +45,14 @@ export const WalletAuth = () => {
         notBefore: new Date(new Date().getTime() - 24 * 60 * 60 * 1000),
         statement:
           'This is my statement and here is a link https://worldcoin.com/apps',
-      });
+      };
+      const result =
+        executionMode === 'wagmi'
+          ? {
+              executedWith: 'wagmi' as const,
+              data: await wagmiNativeWalletAuth(wagmiConfig, input),
+            }
+          : await MiniKit.walletAuth(input);
 
       const payload = {
         status: 'success' as const,
@@ -90,11 +105,33 @@ export const WalletAuth = () => {
         `Error: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
-  }, []);
+  }, [executionMode, wagmiConfig]);
 
   return (
     <div className="grid gap-y-2">
       <h2 className="text-2xl font-bold">Wallet Auth</h2>
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          className={`rounded-lg p-3 w-full ${
+            executionMode === 'minikit'
+              ? 'bg-black text-white'
+              : 'bg-gray-200 text-black'
+          }`}
+          onClick={() => setExecutionMode('minikit')}
+        >
+          MiniKit Command
+        </button>
+        <button
+          className={`rounded-lg p-3 w-full ${
+            executionMode === 'wagmi'
+              ? 'bg-black text-white'
+              : 'bg-gray-200 text-black'
+          }`}
+          onClick={() => setExecutionMode('wagmi')}
+        >
+          Wagmi Native
+        </button>
+      </div>
 
       <button
         className="bg-black text-white rounded-lg p-4 w-full"
