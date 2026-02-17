@@ -98,6 +98,11 @@ export class MiniKit {
   private static _location: MiniAppLaunchLocation | null = null;
   private static _isReady: boolean = false;
 
+  private static getActiveMiniKit(): typeof MiniKit {
+    if (typeof window === 'undefined') return this;
+    return (window.MiniKit as typeof MiniKit | undefined) ?? this;
+  }
+
   // ============================================================================
   // Unified API (auto-detects environment)
   // ============================================================================
@@ -117,6 +122,10 @@ export class MiniKit {
   static walletAuth<TFallback = WalletAuthResult>(
     options: MiniKitWalletAuthOptions<TFallback>,
   ): Promise<CommandResultByVia<WalletAuthResult, TFallback>> {
+    const active = this.getActiveMiniKit();
+    if (active !== this) {
+      return active.walletAuth<TFallback>(options);
+    }
     return walletAuth<TFallback>(options, this.getContext());
   }
 
@@ -142,6 +151,10 @@ export class MiniKit {
   static sendTransaction<TFallback = SendTransactionResult>(
     options: MiniKitSendTransactionOptions<TFallback>,
   ): Promise<CommandResultByVia<SendTransactionResult, TFallback>> {
+    const active = this.getActiveMiniKit();
+    if (active !== this) {
+      return active.sendTransaction<TFallback>(options);
+    }
     return sendTransaction<TFallback>(options, this.getContext());
   }
 
@@ -164,6 +177,10 @@ export class MiniKit {
   static pay<TFallback = PayResult>(
     options: MiniKitPayOptions<TFallback>,
   ): Promise<CommandResultByVia<PayResult, TFallback, 'minikit'>> {
+    const active = this.getActiveMiniKit();
+    if (active !== this) {
+      return active.pay<TFallback>(options);
+    }
     return pay<TFallback>(options, this.getContext());
   }
 
@@ -183,6 +200,10 @@ export class MiniKit {
   static shareContacts<TFallback = ShareContactsResult>(
     options: MiniKitShareContactsOptions<TFallback> = {},
   ): Promise<CommandResultByVia<ShareContactsResult, TFallback, 'minikit'>> {
+    const active = this.getActiveMiniKit();
+    if (active !== this) {
+      return active.shareContacts<TFallback>(options);
+    }
     return shareContacts<TFallback>(options, this.getContext());
   }
 
@@ -192,6 +213,10 @@ export class MiniKit {
   static signMessage<TFallback = MiniAppSignMessageSuccessPayload>(
     options: MiniKitSignMessageOptions<TFallback>,
   ): Promise<CommandResultByVia<MiniAppSignMessageSuccessPayload, TFallback>> {
+    const active = this.getActiveMiniKit();
+    if (active !== this) {
+      return active.signMessage<TFallback>(options);
+    }
     return signMessage<TFallback>(options, this.getContext());
   }
 
@@ -203,6 +228,10 @@ export class MiniKit {
   ): Promise<
     CommandResultByVia<MiniAppSignTypedDataSuccessPayload, TFallback>
   > {
+    const active = this.getActiveMiniKit();
+    if (active !== this) {
+      return active.signTypedData<TFallback>(options);
+    }
     return signTypedData<TFallback>(options, this.getContext());
   }
 
@@ -214,6 +243,10 @@ export class MiniKit {
   ): Promise<
     CommandResultByVia<MiniAppChatSuccessPayload, TFallback, 'minikit'>
   > {
+    const active = this.getActiveMiniKit();
+    if (active !== this) {
+      return active.chat<TFallback>(options);
+    }
     return chat<TFallback>(options, this.getContext());
   }
 
@@ -225,6 +258,10 @@ export class MiniKit {
   ): Promise<
     CommandResultByVia<MiniAppShareSuccessPayload, TFallback, 'minikit'>
   > {
+    const active = this.getActiveMiniKit();
+    if (active !== this) {
+      return active.share<TFallback>(options);
+    }
     return runShare<TFallback>(options, this.getContext());
   }
 
@@ -240,6 +277,10 @@ export class MiniKit {
       'minikit'
     >
   > {
+    const active = this.getActiveMiniKit();
+    if (active !== this) {
+      return active.getPermissions<TFallback>(options);
+    }
     return getPermissions<TFallback>(options, this.getContext());
   }
 
@@ -255,6 +296,10 @@ export class MiniKit {
       'minikit'
     >
   > {
+    const active = this.getActiveMiniKit();
+    if (active !== this) {
+      return active.requestPermission<TFallback>(options);
+    }
     return requestPermission<TFallback>(options, this.getContext());
   }
 
@@ -270,6 +315,10 @@ export class MiniKit {
       'minikit'
     >
   > {
+    const active = this.getActiveMiniKit();
+    if (active !== this) {
+      return active.sendHapticFeedback<TFallback>(options);
+    }
     return sendHapticFeedback<TFallback>(options, this.getContext());
   }
 
@@ -314,6 +363,12 @@ export class MiniKit {
     event: E,
     handler: (payload: any) => void,
   ) {
+    const active = this.getActiveMiniKit();
+    if (active !== this) {
+      active.subscribe(event, handler);
+      return;
+    }
+
     // Special handling for WalletAuth - update user state on success
     if (event === ResponseEvent.MiniAppWalletAuth) {
       const originalHandler = handler;
@@ -330,10 +385,20 @@ export class MiniKit {
   }
 
   public static unsubscribe(event: ResponseEvent) {
+    const active = this.getActiveMiniKit();
+    if (active !== this) {
+      active.unsubscribe(event);
+      return;
+    }
     this.eventManager.unsubscribe(event);
   }
 
   public static trigger(event: ResponseEvent, payload: any) {
+    const active = this.getActiveMiniKit();
+    if (active !== this) {
+      active.trigger(event, payload);
+      return;
+    }
     this.eventManager.trigger(event, payload);
   }
 
@@ -352,6 +417,11 @@ export class MiniKit {
   }
 
   public static install(appId?: string): MiniKitInstallReturnType {
+    const active = this.getActiveMiniKit();
+    if (active !== this) {
+      return active.install(appId);
+    }
+
     if (typeof window === 'undefined') {
       return {
         success: false,

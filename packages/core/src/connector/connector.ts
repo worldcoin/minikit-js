@@ -92,9 +92,27 @@ function createConnectorFn(name: string) {
 
       async getAccounts() {
         const addr = _getAddress();
-        return addr
-          ? ([addr] as readonly `0x${string}`[])
-          : ([] as readonly `0x${string}`[]);
+        if (addr) return [addr] as readonly `0x${string}`[];
+
+        // Lazy auth path for actions that need an account but did not call connect().
+        // This keeps World App UX aligned with "auth on first wallet action".
+        if (!MiniKit.isInWorldApp()) return [] as readonly `0x${string}`[];
+
+        try {
+          const accounts = (await provider.request({
+            method: 'eth_requestAccounts',
+          })) as unknown;
+          if (
+            Array.isArray(accounts) &&
+            accounts.length > 0 &&
+            typeof accounts[0] === 'string'
+          ) {
+            return [accounts[0] as `0x${string}`] as readonly `0x${string}`[];
+          }
+        } catch {
+          // Keep wagmi behavior consistent: unavailable account means "not connected".
+        }
+        return [] as readonly `0x${string}`[];
       },
 
       async getChainId() {

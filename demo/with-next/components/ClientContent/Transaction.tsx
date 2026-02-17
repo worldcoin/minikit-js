@@ -163,6 +163,7 @@ export const SendTransaction = () => {
     setTransactionId('');
     setTransactionHash(undefined);
     setVerificationMode(null);
+
     try {
       const result =
         executionMode === 'wagmi'
