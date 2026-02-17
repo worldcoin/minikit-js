@@ -89,7 +89,7 @@ export const Transaction = () => {
         'Transaction submitted, waiting for confirmation:',
         result.data.transactionId,
       );
-      setTransactionId(result.data.transactionId ?? result.data.hashes[0]);
+      setTransactionId(result.data.transactionId);
     } catch (err) {
       console.error('Error sending transaction:', err);
       setButtonState('failed');
@@ -155,7 +155,9 @@ export const Transaction = () => {
         'Transaction submitted, waiting for confirmation:',
         result.data.transactionId,
       );
-      setTransactionId(result.data.transactionId ?? result.data.hashes[0]);
+      setTransactionId(
+        result.data.transactionId ?? result.data.transactionHash ?? '',
+      );
     } catch (err) {
       console.error('Error sending transaction:', err);
       setButtonState('failed');

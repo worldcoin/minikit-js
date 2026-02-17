@@ -3,6 +3,12 @@ import * as commandTypes from '../commands/types';
 import * as wagmiFallback from '../commands/wagmi-fallback';
 
 describe('executeWithFallback', () => {
+  let warnSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+  });
+
   afterEach(() => {
     jest.restoreAllMocks();
   });
@@ -29,6 +35,7 @@ describe('executeWithFallback', () => {
     expect(nativeExecutor).toHaveBeenCalledTimes(1);
     expect(wagmiExecutor).not.toHaveBeenCalled();
     expect(hasWagmiConfigSpy).not.toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalled();
   });
 
   it('uses wagmi fallback on web when wagmi config exists', async () => {
