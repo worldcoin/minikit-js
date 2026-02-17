@@ -1,6 +1,7 @@
 import type {
   MiniKitSendTransactionOptions,
   MiniKitSignTypedDataOptions,
+  SendTransactionResult,
   WalletAuthResult,
 } from '@worldcoin/minikit-js';
 import { SiweMessage } from 'siwe';
@@ -34,9 +35,11 @@ export interface WagmiNativeSignTypedDataResult {
 }
 
 export interface WagmiNativeSendTransactionResult {
-  status: 'success';
-  version: number;
-  transactionHash: string;
+  status?: 'success' | null;
+  version?: number | null;
+  transactionHash?: string | null;
+  transactionId?: string | null;
+  transaction_id?: string | null;
 }
 
 type Address = `0x${string}`;
@@ -55,24 +58,30 @@ function isWorldAppEnvironment(): boolean {
 
 async function ensureConnected(config: Config): Promise<Address> {
   const isWorldApp = isWorldAppEnvironment();
-  const existingConnection = getConnections(config).find(
-    (connection) =>
-      connection.accounts.length > 0 &&
-      (isWorldApp || connection.connector.id !== 'worldApp'),
-  );
+  const existingConnection = isWorldApp
+    ? getConnections(config).find(
+        (connection) =>
+          connection.accounts.length > 0 &&
+          connection.connector.id === 'worldApp',
+      )
+    : getConnections(config).find(
+        (connection) =>
+          connection.accounts.length > 0 &&
+          connection.connector.id !== 'worldApp',
+      );
 
   if (existingConnection?.accounts[0]) {
     return toAddress(existingConnection.accounts[0]);
   }
 
   const candidateConnectors = isWorldApp
-    ? config.connectors
+    ? config.connectors.filter((connector) => connector.id === 'worldApp')
     : config.connectors.filter((connector) => connector.id !== 'worldApp');
 
   if (candidateConnectors.length === 0) {
     throw new Error(
       isWorldApp
-        ? 'No Wagmi connectors configured. Add worldApp() to route wagmi actions through MiniKit in World App.'
+        ? 'No worldApp connector configured. Add worldApp() to route wagmi actions through MiniKit in World App.'
         : 'No web Wagmi connectors configured. Add injected() or walletConnect() after worldApp().',
     );
   }
@@ -87,8 +96,35 @@ async function ensureConnected(config: Config): Promise<Address> {
   return toAddress(account);
 }
 
-async function ensureChain(config: Config, chainId?: number): Promise<void> {
+function hasConfiguredChain(config: Config, chainId: number): boolean {
+  return config.chains.some((chain) => chain.id === chainId);
+}
+
+async function ensureChain(
+  config: Config,
+  chainId?: number,
+  options?: { requireConfigured?: boolean },
+): Promise<void> {
   const targetChainId = chainId ?? WORLD_CHAIN_ID;
+  const requireConfigured = options?.requireConfigured ?? true;
+  const isWorldApp = isWorldAppEnvironment();
+
+  if (isWorldApp) {
+    if (targetChainId !== WORLD_CHAIN_ID && requireConfigured) {
+      throw new Error(
+        `World App only supports World Chain (${WORLD_CHAIN_ID}) for this action.`,
+      );
+    }
+    return;
+  }
+
+  if (!hasConfiguredChain(config, targetChainId)) {
+    if (!requireConfigured) return;
+    throw new Error(
+      `Chain ${targetChainId} is not configured in wagmi. Add it to createConfig({ chains: [...] }).`,
+    );
+  }
+
   const currentChainId = await getChainId(config);
   if (currentChainId !== targetChainId) {
     await switchChain(config, { chainId: targetChainId });
@@ -97,6 +133,10 @@ async function ensureChain(config: Config, chainId?: number): Promise<void> {
 
 function parseValue(value: string): bigint {
   return BigInt(value);
+}
+
+function isTransactionHash(value: string): boolean {
+  return /^0x[0-9a-fA-F]{64}$/.test(value);
 }
 
 export async function wagmiNativeWalletAuth(
@@ -110,7 +150,6 @@ export async function wagmiNativeWalletAuth(
   },
 ): Promise<WalletAuthResult> {
   const address = await ensureConnected(config);
-  await ensureChain(config, WORLD_CHAIN_ID);
 
   const siweMessage = new SiweMessage({
     domain: window.location.host,
@@ -159,7 +198,7 @@ export async function wagmiNativeSignTypedData(
 ): Promise<WagmiNativeSignTypedDataResult> {
   const address = await ensureConnected(config);
   if (payload.chainId !== undefined) {
-    await ensureChain(config, payload.chainId);
+    await ensureChain(config, payload.chainId, { requireConfigured: false });
   }
 
   const signature = await signTypedData(config, {
@@ -184,7 +223,7 @@ export async function wagmiNativeSignTypedData(
 export async function wagmiNativeSendTransaction(
   config: Config,
   options: MiniKitSendTransactionOptions,
-): Promise<WagmiNativeSendTransactionResult> {
+): Promise<SendTransactionResult> {
   if (options.permit2?.length) {
     throw new Error(
       'Direct wagmi mode does not support permit2 payloads. Use MiniKit mode for permit2 tests.',
@@ -197,12 +236,12 @@ export async function wagmiNativeSendTransaction(
   }
 
   const address = await ensureConnected(config);
-  await ensureChain(config, options.chainId);
+  await ensureChain(config, options.chainId, { requireConfigured: true });
 
   const tx = options.transaction[0];
-  let hash: Hex;
+  let response: Hex | string;
   if (tx.data && tx.data !== '0x') {
-    hash = await sendTransaction(config, {
+    response = await sendTransaction(config, {
       account: address,
       chainId: options.chainId ?? WORLD_CHAIN_ID,
       to: tx.address as Address,
@@ -210,7 +249,7 @@ export async function wagmiNativeSendTransaction(
       ...(tx.value !== undefined ? { value: parseValue(tx.value) } : {}),
     });
   } else {
-    hash = await writeContract(config, {
+    response = await writeContract(config, {
       account: address,
       chainId: options.chainId ?? WORLD_CHAIN_ID,
       address: tx.address as Address,
@@ -221,9 +260,22 @@ export async function wagmiNativeSendTransaction(
     });
   }
 
+  if (isTransactionHash(response)) {
+    return {
+      status: 'success',
+      version: 1,
+      transactionHash: response,
+      transactionId: null,
+      transaction_id: null,
+    };
+  }
+
+  // World App provider returns a MiniKit transaction id for eth_sendTransaction.
   return {
     status: 'success',
     version: 1,
-    transactionHash: hash,
+    transactionHash: null,
+    transactionId: response,
+    transaction_id: response,
   };
 }
