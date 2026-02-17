@@ -19,8 +19,6 @@ import { SignTypedDataError } from './types';
 
 export * from './types';
 
-const NATIVE_RESPONSE_TIMEOUT_MS = 10000;
-
 // ============================================================================
 // Unified API (auto-detects environment)
 // ============================================================================
@@ -91,22 +89,10 @@ async function nativeSignTypedData(
 
   const payload = await new Promise<MiniAppSignTypedDataPayload>(
     (resolve, reject) => {
-      const timeout = setTimeout(() => {
-        ctx!.events.unsubscribe(ResponseEvent.MiniAppSignTypedData);
-        reject(
-          new Error(
-            `signTypedData response timed out after ${Math.floor(
-              NATIVE_RESPONSE_TIMEOUT_MS / 1000,
-            )}s`,
-          ),
-        );
-      }, NATIVE_RESPONSE_TIMEOUT_MS);
-
       try {
         ctx!.events.subscribe(ResponseEvent.MiniAppSignTypedData, ((
           response: MiniAppSignTypedDataPayload,
         ) => {
-          clearTimeout(timeout);
           ctx!.events.unsubscribe(ResponseEvent.MiniAppSignTypedData);
           resolve(response);
         }) as any);
@@ -117,7 +103,6 @@ async function nativeSignTypedData(
           payload: payloadInput,
         });
       } catch (error) {
-        clearTimeout(timeout);
         reject(error);
       }
     },

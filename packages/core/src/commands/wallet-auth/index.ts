@@ -21,8 +21,6 @@ import { validateWalletAuthCommandInput } from './validate';
 
 export * from './types';
 
-const NATIVE_RESPONSE_TIMEOUT_MS = 10000;
-
 // ============================================================================
 // Unified API (auto-detects environment)
 // ============================================================================
@@ -144,22 +142,10 @@ async function nativeWalletAuth(
 
   const finalPayload = await new Promise<MiniAppWalletAuthPayload>(
     (resolve, reject) => {
-      const timeout = setTimeout(() => {
-        ctx!.events.unsubscribe(ResponseEvent.MiniAppWalletAuth);
-        reject(
-          new Error(
-            `walletAuth response timed out after ${Math.floor(
-              NATIVE_RESPONSE_TIMEOUT_MS / 1000,
-            )}s`,
-          ),
-        );
-      }, NATIVE_RESPONSE_TIMEOUT_MS);
-
       try {
         ctx!.events.subscribe(ResponseEvent.MiniAppWalletAuth, ((
           response: MiniAppWalletAuthPayload,
         ) => {
-          clearTimeout(timeout);
           ctx!.events.unsubscribe(ResponseEvent.MiniAppWalletAuth);
           resolve(response);
         }) as any);
@@ -170,7 +156,6 @@ async function nativeWalletAuth(
           payload: walletAuthPayload,
         });
       } catch (error) {
-        clearTimeout(timeout);
         reject(error);
       }
     },

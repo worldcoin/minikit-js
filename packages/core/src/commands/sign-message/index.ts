@@ -19,8 +19,6 @@ import { SignMessageError } from './types';
 
 export * from './types';
 
-const NATIVE_RESPONSE_TIMEOUT_MS = 10000;
-
 // ============================================================================
 // Unified API (auto-detects environment)
 // ============================================================================
@@ -81,22 +79,10 @@ async function nativeSignMessage(
 
   const payload = await new Promise<MiniAppSignMessagePayload>(
     (resolve, reject) => {
-      const timeout = setTimeout(() => {
-        ctx!.events.unsubscribe(ResponseEvent.MiniAppSignMessage);
-        reject(
-          new Error(
-            `signMessage response timed out after ${Math.floor(
-              NATIVE_RESPONSE_TIMEOUT_MS / 1000,
-            )}s`,
-          ),
-        );
-      }, NATIVE_RESPONSE_TIMEOUT_MS);
-
       try {
         ctx!.events.subscribe(ResponseEvent.MiniAppSignMessage, ((
           response: MiniAppSignMessagePayload,
         ) => {
-          clearTimeout(timeout);
           ctx!.events.unsubscribe(ResponseEvent.MiniAppSignMessage);
           resolve(response);
         }) as any);
@@ -107,7 +93,6 @@ async function nativeSignMessage(
           payload: { message: options.message },
         });
       } catch (error) {
-        clearTimeout(timeout);
         reject(error);
       }
     },

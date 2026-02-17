@@ -37,46 +37,7 @@ export interface WagmiNativeSignTypedDataResult {
 
 type Address = `0x${string}`;
 const WORLD_CHAIN_ID = 480;
-const ACTION_TIMEOUT_MS = 10000;
 type AnyConnector = any;
-
-function logWagmiNative(stage: string, details?: Record<string, unknown>) {
-  console.log('[wagmi-native]', stage, details ?? {});
-}
-
-async function withTimeout<T>(
-  promise: Promise<T>,
-  label: string,
-  timeoutMs = ACTION_TIMEOUT_MS,
-): Promise<T> {
-  logWagmiNative('await:start', { label, timeoutMs });
-  return new Promise<T>((resolve, reject) => {
-    const timeoutId = setTimeout(() => {
-      logWagmiNative('await:timeout', { label, timeoutMs });
-      reject(
-        new Error(
-          `${label} timed out after ${Math.floor(timeoutMs / 1000)}s.`,
-        ),
-      );
-    }, timeoutMs);
-
-    promise.then(
-      (value) => {
-        clearTimeout(timeoutId);
-        logWagmiNative('await:success', { label });
-        resolve(value);
-      },
-      (error) => {
-        clearTimeout(timeoutId);
-        logWagmiNative('await:error', {
-          label,
-          error: error instanceof Error ? error.message : String(error),
-        });
-        reject(error);
-      },
-    );
-  });
-}
 
 function toAddress(value: string): Address {
   if (!value.startsWith('0x')) {
@@ -116,11 +77,6 @@ async function ensureConnected(
 ): Promise<{ address: Address; connector: AnyConnector }> {
   const isWorldApp = isWorldAppEnvironment();
   const connector = selectConnector(config, isWorldApp);
-  logWagmiNative('ensureConnected:start', {
-    isWorldApp,
-    connectorId: connector.id,
-    configuredConnectorIds: config.connectors.map((item) => item.id),
-  });
 
   const existingConnection = getConnections(config).find(
     (connection) =>
@@ -128,27 +84,12 @@ async function ensureConnected(
       connection.connector.id === connector.id,
   );
   if (existingConnection?.accounts[0]) {
-    logWagmiNative('ensureConnected:existing-connection', {
-      connectorId: connector.id,
-      address: existingConnection.accounts[0],
-    });
     return { address: toAddress(existingConnection.accounts[0]), connector };
   }
 
-  logWagmiNative('ensureConnected:connecting', { connectorId: connector.id });
-  const result = await withTimeout(
-    connect(config, { connector }),
-    'wagmi connect',
-  );
-  logWagmiNative('ensureConnected:connected', {
-    connectorId: connector.id,
-    accounts: result.accounts,
-  });
+  const result = await connect(config, { connector });
   const account = result.accounts[0];
   if (!account) {
-    logWagmiNative('ensureConnected:missing-account', {
-      connectorId: connector.id,
-    });
     throw new Error('Failed to connect wallet with wagmi native actions.');
   }
   return { address: toAddress(account), connector };
@@ -208,19 +149,7 @@ export async function wagmiNativeWalletAuth(
     notBefore?: Date;
   },
 ): Promise<WalletAuthResult> {
-  logWagmiNative('walletAuth:start', {
-    nonceLength: input.nonce.length,
-    hasStatement: Boolean(input.statement),
-    hasRequestId: Boolean(input.requestId),
-    hasExpirationTime: Boolean(input.expirationTime),
-    hasNotBefore: Boolean(input.notBefore),
-    isWorldApp: isWorldAppEnvironment(),
-  });
   const { address, connector } = await ensureConnected(config);
-  logWagmiNative('walletAuth:connected', {
-    address,
-    connectorId: connector.id,
-  });
   const siweMessage = new SiweMessage({
     domain: window.location.host,
     address,
@@ -235,22 +164,10 @@ export async function wagmiNativeWalletAuth(
   });
 
   const message = siweMessage.prepareMessage();
-  logWagmiNative('walletAuth:signing-message', {
-    address,
-    connectorId: connector.id,
-    messageLength: message.length,
-  });
-  const signature = await withTimeout(
-    signMessage(config, {
-      connector,
-      account: address,
-      message,
-    }),
-    'wagmi signMessage(walletAuth)',
-  );
-  logWagmiNative('walletAuth:signed', {
-    address,
-    signatureLength: signature.length,
+  const signature = await signMessage(config, {
+    connector,
+    account: address,
+    message,
   });
 
   return {
@@ -265,14 +182,11 @@ export async function wagmiNativeSignMessage(
   message: string,
 ): Promise<WagmiNativeSignMessageResult> {
   const { address, connector } = await ensureConnected(config);
-  const signature = await withTimeout(
-    signMessage(config, {
-      connector,
-      account: address,
-      message,
-    }),
-    'wagmi signMessage',
-  );
+  const signature = await signMessage(config, {
+    connector,
+    account: address,
+    message,
+  });
 
   return {
     status: 'success',
@@ -301,17 +215,14 @@ export async function wagmiNativeSignTypedData(
     );
   }
 
-  const signature = await withTimeout(
-    signTypedData(config, {
-      connector,
-      account: address,
-      types: payload.types as any,
-      primaryType: payload.primaryType as any,
-      domain,
-      message: payload.message as any,
-    }),
-    'wagmi signTypedData',
-  );
+  const signature = await signTypedData(config, {
+    connector,
+    account: address,
+    types: payload.types as any,
+    primaryType: payload.primaryType as any,
+    domain,
+    message: payload.message as any,
+  });
 
   return {
     status: 'success',
@@ -347,31 +258,25 @@ export async function wagmiNativeSendTransaction(
   const tx = options.transaction[0];
   let response: Hex | string;
   if (tx.data && tx.data !== '0x') {
-    response = await withTimeout(
-      sendTransaction(config, {
-        connector,
-        account: address,
-        chainId: options.chainId ?? WORLD_CHAIN_ID,
-        to: tx.address as Address,
-        data: tx.data as Hex,
-        ...(tx.value !== undefined ? { value: parseValue(tx.value) } : {}),
-      }),
-      'wagmi sendTransaction',
-    );
+    response = await sendTransaction(config, {
+      connector,
+      account: address,
+      chainId: options.chainId ?? WORLD_CHAIN_ID,
+      to: tx.address as Address,
+      data: tx.data as Hex,
+      ...(tx.value !== undefined ? { value: parseValue(tx.value) } : {}),
+    });
   } else {
-    response = await withTimeout(
-      writeContract(config, {
-        connector,
-        account: address,
-        chainId: options.chainId ?? WORLD_CHAIN_ID,
-        address: tx.address as Address,
-        abi: tx.abi as Abi,
-        functionName: tx.functionName as string,
-        args: tx.args as readonly unknown[],
-        ...(tx.value !== undefined ? { value: parseValue(tx.value) } : {}),
-      }),
-      'wagmi writeContract',
-    );
+    response = await writeContract(config, {
+      connector,
+      account: address,
+      chainId: options.chainId ?? WORLD_CHAIN_ID,
+      address: tx.address as Address,
+      abi: tx.abi as Abi,
+      functionName: tx.functionName as string,
+      args: tx.args as readonly unknown[],
+      ...(tx.value !== undefined ? { value: parseValue(tx.value) } : {}),
+    });
   }
 
   if (isTransactionHash(response)) {
