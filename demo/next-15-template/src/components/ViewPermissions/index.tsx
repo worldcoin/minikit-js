@@ -21,6 +21,10 @@ export const ViewPermissions = () => {
           // You can also fetch this by grabbing from user
           // MiniKit.user.permissions
           const result = await MiniKit.getPermissions();
+          if (result.data.status !== 'success') {
+            console.log('No permissions found for user');
+            return;
+          }
           setPermissions(result.data.permissions || {});
           console.log('permissions', result);
         } catch (error) {
