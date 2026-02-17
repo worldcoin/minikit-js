@@ -61,7 +61,9 @@ export const WalletAuth = () => {
         signature: result.data.signature,
       };
 
-      setWalletAuthResult(payload);
+      console.log('here', { payload });
+
+      setWalletAuthResult(result);
       setStatusMessage(`Authenticated via ${result.executedWith}`);
 
       // Call the API to verify the message
