@@ -54,26 +54,26 @@ function isWorldAppEnvironment(): boolean {
 }
 
 async function ensureConnected(config: Config): Promise<Address> {
-  // Direct wagmi mode should never use the worldApp connector because that
-  // loops back into MiniKit's provider path.
   const isWorldApp = isWorldAppEnvironment();
   const existingConnection = getConnections(config).find(
-    (connection) => connection.accounts.length > 0 && connection.connector.id !== 'worldApp',
+    (connection) =>
+      connection.accounts.length > 0 &&
+      (isWorldApp || connection.connector.id !== 'worldApp'),
   );
 
   if (existingConnection?.accounts[0]) {
     return toAddress(existingConnection.accounts[0]);
   }
 
-  const candidateConnectors = config.connectors.filter(
-    (connector) => connector.id !== 'worldApp',
-  );
+  const candidateConnectors = isWorldApp
+    ? config.connectors
+    : config.connectors.filter((connector) => connector.id !== 'worldApp');
 
   if (candidateConnectors.length === 0) {
     throw new Error(
       isWorldApp
-        ? 'Direct wagmi mode requires a non-worldApp connector. Add injected() or walletConnect() after worldApp().'
-        : 'No compatible Wagmi connectors configured for this environment.',
+        ? 'No Wagmi connectors configured. Add worldApp() to route wagmi actions through MiniKit in World App.'
+        : 'No web Wagmi connectors configured. Add injected() or walletConnect() after worldApp().',
     );
   }
 
