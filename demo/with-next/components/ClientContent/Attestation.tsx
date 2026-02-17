@@ -39,6 +39,7 @@ export const Attestation = () => {
   // Keep the current request body in a ref so the subscription callback
   // always has access to the body that matches the in-flight attestation.
   const requestBodyRef = useRef<string>('');
+  const [tempInstallFix, setTempInstallFix] = useState(0);
 
   useEffect(() => {
     if (!MiniKit.isInstalled()) {
@@ -63,7 +64,7 @@ export const Attestation = () => {
     return () => {
       MiniKit.unsubscribe(ResponseEvent.MiniAppAttestation);
     };
-  }, []);
+  }, [tempInstallFix]);
 
   const verifyOnBackend = async (token: string, body: string) => {
     try {
@@ -102,10 +103,14 @@ export const Attestation = () => {
     const attestationPayload: AttestationInput = { requestHash };
     const sent = MiniKit.commands.attestation(attestationPayload);
 
+    console.log('MiniAppAttestation, SENT PAYLOAD', attestationPayload);
+
     if (!sent) {
       setResponse({ status: 'error', message: 'Command dispatch failed' });
       setIsLoading(false);
     }
+
+    setTempInstallFix((prev) => prev + 1);
   }, []);
 
   return (
