@@ -114,7 +114,7 @@ export const VerifyAction = () => {
 
         if (!res.ok) {
           const text = await res.text();
-          setStatusMessage(`RP signature request failed: ${text}`);
+          setStatusMessage(`RP signature requests failed: ${text}`);
           return;
         }
 
