@@ -142,12 +142,11 @@ export class MiniKit {
    * @example
    * ```typescript
    * const result = await MiniKit.sendTransaction({
-   *   chainId: 480,
-   *   transaction: [{
-   *     address: '0x...',
-   *     abi: ContractABI,
-   *     functionName: 'mint',
-   *     args: [],
+   *   network: Network.WorldChain,
+   *   transactions: [{
+   *     to: '0x...',
+   *     data: '0x...',
+   *     value: '0x0',
    *   }],
    * });
    * ```

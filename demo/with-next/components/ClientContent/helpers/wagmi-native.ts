@@ -8,7 +8,7 @@ import type {
   WalletAuthResult,
 } from '@worldcoin/minikit-js/commands';
 import { SiweMessage } from 'siwe';
-import { type Abi, type Hex } from 'viem';
+import { type Hex } from 'viem';
 import type { Config } from 'wagmi';
 import {
   connect,
@@ -18,7 +18,6 @@ import {
   signMessage,
   signTypedData,
   switchChain,
-  writeContract,
 } from 'wagmi/actions';
 
 export type DemoExecutionMode = 'minikit' | 'wagmi';
@@ -40,7 +39,11 @@ export interface WagmiNativeSignTypedDataResult {
 type Address = `0x${string}`;
 const WORLD_CHAIN_ID = 480;
 type AnyConnector = any;
-type DemoTransaction = MiniKitSendTransactionOptions['transaction'][number];
+type CalldataTransaction = {
+  to: string;
+  data?: string;
+  value?: string;
+};
 
 function toAddress(value: string): Address {
   if (!value.startsWith('0x')) {
@@ -142,21 +145,44 @@ function isTransactionHash(value: string): boolean {
   return /^0x[0-9a-fA-F]{64}$/.test(value);
 }
 
-function isContractCallTransaction(
-  tx: DemoTransaction,
-): tx is DemoTransaction & {
-  abi: Abi;
-  functionName: string;
-  args: readonly unknown[];
-} {
-  return (
-    'abi' in tx &&
-    tx.abi !== undefined &&
-    'functionName' in tx &&
-    tx.functionName !== undefined &&
-    'args' in tx &&
-    tx.args !== undefined
-  );
+function normalizeTransactions(
+  options: MiniKitSendTransactionOptions,
+): CalldataTransaction[] {
+  if (options.transactions && options.transactions.length > 0) {
+    return options.transactions;
+  }
+
+  if (!options.transaction || options.transaction.length === 0) {
+    throw new Error(
+      'At least one transaction is required in `transactions`.',
+    );
+  }
+
+  return options.transaction.map((tx) => {
+    if (!tx.data) {
+      throw new Error(
+        'ABI/functionName transactions are no longer supported in wagmi-native helper. Provide pre-encoded calldata in `transactions[].data`.',
+      );
+    }
+
+    return {
+      to: tx.address,
+      data: tx.data,
+      value: tx.value,
+    };
+  });
+}
+
+function resolveChainId(options: MiniKitSendTransactionOptions): number {
+  if (options.network && options.network !== 'worldchain') {
+    throw new Error('Only worldchain network is supported for now.');
+  }
+
+  if (options.chainId !== undefined && options.chainId !== WORLD_CHAIN_ID) {
+    throw new Error(`Only chainId ${WORLD_CHAIN_ID} is supported for now.`);
+  }
+
+  return WORLD_CHAIN_ID;
 }
 
 export async function wagmiNativeWalletAuth(
@@ -256,48 +282,32 @@ export async function wagmiNativeSendTransaction(
   config: Config,
   options: MiniKitSendTransactionOptions,
 ): Promise<SendTransactionResult> {
+  const transactions = normalizeTransactions(options);
+  const chainId = resolveChainId(options);
+
   if (options.permit2?.length) {
     throw new Error(
       'Direct wagmi mode does not support permit2 payloads. Use MiniKit mode for permit2 tests.',
     );
   }
-  if (options.transaction.length !== 1) {
+  if (transactions.length !== 1) {
     throw new Error(
       'Direct wagmi mode supports a single transaction only in this demo. Use MiniKit mode for batch transactions.',
     );
   }
 
   const { address, connector } = await ensureConnected(config);
-  await ensureChain(
-    config,
-    options.chainId,
-    { requireConfigured: true },
-    connector,
-  );
+  await ensureChain(config, chainId, { requireConfigured: true }, connector);
 
-  const tx = options.transaction[0];
-  let response: Hex | string;
-  if (!isContractCallTransaction(tx)) {
-    response = await sendTransaction(config, {
-      connector,
-      account: address,
-      chainId: options.chainId ?? WORLD_CHAIN_ID,
-      to: tx.address as Address,
-      ...(tx.data ? { data: tx.data as Hex } : {}),
-      ...(tx.value !== undefined ? { value: parseValue(tx.value) } : {}),
-    });
-  } else {
-    response = await writeContract(config, {
-      connector,
-      account: address,
-      chainId: options.chainId ?? WORLD_CHAIN_ID,
-      address: tx.address as Address,
-      abi: tx.abi,
-      functionName: tx.functionName,
-      args: tx.args,
-      ...(tx.value !== undefined ? { value: parseValue(tx.value) } : {}),
-    });
-  }
+  const tx = transactions[0];
+  const response: Hex | string = await sendTransaction(config, {
+    connector,
+    account: address,
+    chainId,
+    to: tx.to as Address,
+    ...(tx.data ? { data: tx.data as Hex } : {}),
+    ...(tx.value !== undefined ? { value: parseValue(tx.value) } : {}),
+  });
 
   if (isTransactionHash(response)) {
     return {

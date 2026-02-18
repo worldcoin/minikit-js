@@ -2,8 +2,13 @@
 
 import { IDKit, orbLegacy, type RpContext } from '@worldcoin/idkit';
 import { MiniKit } from '@worldcoin/minikit-js';
+import { Network } from '@worldcoin/minikit-js/commands';
 import { useState } from 'react';
-import { decodeAbiParameters, parseAbiParameters } from 'viem';
+import {
+  decodeAbiParameters,
+  encodeFunctionData,
+  parseAbiParameters,
+} from 'viem';
 
 // ABI fragment for the verify function
 const testVerifyAbi = [
@@ -54,13 +59,18 @@ export const verifyOnchain = async (payload: {
     console.log('NullifierHash:', nullifierHash);
     console.log('Proof:', proof);
 
+    const calldata = encodeFunctionData({
+      abi: testVerifyAbi,
+      functionName: 'verify',
+      args: [signal, root, nullifierHash, proof],
+    });
+
     const result = await MiniKit.sendTransaction({
-      transaction: [
+      network: Network.WorldChain,
+      transactions: [
         {
-          address: TEST_VERIFY_CONTRACT_ADDRESS,
-          abi: testVerifyAbi,
-          functionName: 'verify',
-          args: [signal, root, nullifierHash, proof],
+          to: TEST_VERIFY_CONTRACT_ADDRESS,
+          data: calldata,
         },
       ],
     });

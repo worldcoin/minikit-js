@@ -1,5 +1,5 @@
-import { encodeFunctionData } from 'viem';
 import { EventManager } from '../../events';
+import { Network } from '../pay/types';
 import { executeWithFallback } from '../fallback';
 import type { CommandResultByVia } from '../types';
 import {
@@ -13,10 +13,11 @@ import {
 } from '../types';
 import { hasWagmiConfig, wagmiSendTransaction } from '../wagmi-fallback';
 import type {
+  CalldataTransaction,
   MiniAppSendTransactionPayload,
   MiniKitSendTransactionOptions,
+  Permit2,
   SendTransactionResult,
-  Transaction,
 } from './types';
 import { SendTransactionError, SendTransactionErrorCodes } from './types';
 import { validateSendTransactionPayload } from './validate';
@@ -26,6 +27,77 @@ export * from './types';
 const WORLD_CHAIN_ID = 480;
 const WAGMI_MULTI_TX_ERROR_MESSAGE =
   'Wagmi fallback does not support multi-transaction execution. Pass a single transaction, run inside World App for batching, or provide a custom fallback.';
+
+type NormalizedSendTransactionOptions = {
+  transactions: CalldataTransaction[];
+  network: Network;
+  permit2?: Permit2[];
+  formatPayload?: boolean;
+};
+
+function resolveNetwork(options: MiniKitSendTransactionOptions<any>): Network {
+  if (options.network) {
+    return options.network;
+  }
+
+  if (options.chainId !== undefined) {
+    if (options.chainId !== WORLD_CHAIN_ID) {
+      throw new SendTransactionError(SendTransactionErrorCodes.InvalidOperation, {
+        reason: `World App only supports World Chain (chainId: ${WORLD_CHAIN_ID})`,
+      });
+    }
+    return Network.WorldChain;
+  }
+
+  return Network.WorldChain;
+}
+
+function resolveTransactions(
+  options: MiniKitSendTransactionOptions<any>,
+): CalldataTransaction[] {
+  if (options.transactions && options.transactions.length > 0) {
+    return options.transactions;
+  }
+
+  if (!options.transaction || options.transaction.length === 0) {
+    throw new SendTransactionError(SendTransactionErrorCodes.InputError, {
+      reason:
+        'At least one transaction is required. Use `transactions: [{ to, data, value }]`.',
+    });
+  }
+
+  return options.transaction.map((tx) => {
+    if (!tx.data) {
+      throw new SendTransactionError(SendTransactionErrorCodes.InvalidOperation, {
+        reason:
+          'ABI-based transaction packing is no longer supported in core. Provide pre-encoded calldata in `transactions[].data`.',
+      });
+    }
+    return {
+      to: tx.address,
+      data: tx.data,
+      value: tx.value,
+    };
+  });
+}
+
+function normalizeSendTransactionOptions(
+  options: MiniKitSendTransactionOptions<any>,
+): NormalizedSendTransactionOptions {
+  return {
+    transactions: resolveTransactions(options),
+    network: resolveNetwork(options),
+    permit2: options.permit2,
+    formatPayload: options.formatPayload !== false,
+  };
+}
+
+function getChainIdFromNetwork(network: Network): number {
+  if (network === Network.WorldChain) return WORLD_CHAIN_ID;
+  throw new SendTransactionError(SendTransactionErrorCodes.InvalidOperation, {
+    reason: `Unsupported network: ${network}`,
+  });
+}
 
 // ============================================================================
 // Unified API (auto-detects environment)
@@ -37,12 +109,11 @@ const WAGMI_MULTI_TX_ERROR_MESSAGE =
  * @example
  * ```typescript
  * const result = await sendTransaction({
- *   chainId: 480,
- *   transaction: [{
- *     address: '0x...',
- *     abi: ContractABI,
- *     functionName: 'mint',
- *     args: [],
+ *   network: Network.WorldChain,
+ *   transactions: [{
+ *     to: '0x...',
+ *     data: '0x...',
+ *     value: '0x0',
  *   }],
  * });
  *
@@ -54,10 +125,11 @@ export async function sendTransaction<TFallback = SendTransactionResult>(
   options: MiniKitSendTransactionOptions<TFallback>,
   ctx?: CommandContext,
 ): Promise<CommandResultByVia<SendTransactionResult, TFallback>> {
+  const normalizedOptions = normalizeSendTransactionOptions(options);
   const isWagmiFallbackPath = !isInWorldApp() && hasWagmiConfig();
   if (
     isWagmiFallbackPath &&
-    options.transaction.length > 1 &&
+    normalizedOptions.transactions.length > 1 &&
     !options.fallback
   ) {
     throw new SendTransactionError(SendTransactionErrorCodes.InvalidOperation, {
@@ -67,8 +139,8 @@ export async function sendTransaction<TFallback = SendTransactionResult>(
 
   const result = await executeWithFallback({
     command: Command.SendTransaction,
-    nativeExecutor: () => nativeSendTransaction(options, ctx),
-    wagmiFallback: () => wagmiSendTransactionAdapter(options),
+    nativeExecutor: () => nativeSendTransaction(normalizedOptions, ctx),
+    wagmiFallback: () => wagmiSendTransactionAdapter(normalizedOptions),
     customFallback: options.fallback,
   });
 
@@ -94,7 +166,7 @@ export async function sendTransaction<TFallback = SendTransactionResult>(
 // ============================================================================
 
 async function nativeSendTransaction(
-  options: MiniKitSendTransactionOptions<any>,
+  options: NormalizedSendTransactionOptions,
   ctx?: CommandContext,
 ): Promise<SendTransactionResult> {
   if (!ctx) {
@@ -110,16 +182,17 @@ async function nativeSendTransaction(
     );
   }
 
-  if (options.chainId !== undefined && options.chainId !== WORLD_CHAIN_ID) {
+  if (options.network !== Network.WorldChain) {
     throw new Error(
-      `World App only supports World Chain (chainId: ${WORLD_CHAIN_ID})`,
+      `World App only supports World Chain (network: ${Network.WorldChain})`,
     );
   }
 
-  const input: MiniKitSendTransactionOptions = {
-    transaction: options.transaction,
+  const input = {
+    transactions: options.transactions,
+    network: options.network,
     permit2: options.permit2,
-    formatPayload: options.formatPayload !== false,
+    formatPayload: options.formatPayload,
   };
 
   const validatedPayload = validateSendTransactionPayload(input);
@@ -175,9 +248,9 @@ async function nativeSendTransaction(
 // ============================================================================
 
 async function wagmiSendTransactionAdapter(
-  options: MiniKitSendTransactionOptions<any>,
+  options: NormalizedSendTransactionOptions,
 ): Promise<SendTransactionResult> {
-  if (options.transaction.length > 1) {
+  if (options.transactions.length > 1) {
     throw new Error(WAGMI_MULTI_TX_ERROR_MESSAGE);
   }
 
@@ -188,21 +261,18 @@ async function wagmiSendTransactionAdapter(
     );
   }
 
-  // Convert Transaction[] to the format wagmiSendTransaction expects
-  const transactions = options.transaction.map((tx) => ({
-    address: tx.address,
-    // Encode the function call data
-    data: encodeTransactionData(tx),
-    value: tx.value,
-  }));
-  const firstTransaction = transactions[0];
+  const firstTransaction = options.transactions[0];
   if (!firstTransaction) {
     throw new Error('At least one transaction is required');
   }
 
   const result = await wagmiSendTransaction({
-    transaction: firstTransaction,
-    chainId: options.chainId,
+    transaction: {
+      address: firstTransaction.to,
+      data: firstTransaction.data,
+      value: firstTransaction.value,
+    },
+    chainId: getChainIdFromNetwork(options.network),
   });
 
   return {
@@ -217,22 +287,4 @@ async function wagmiSendTransactionAdapter(
     chain: null,
     timestamp: null,
   };
-}
-
-/**
- * Encode transaction data from ABI + function name + args
- */
-function encodeTransactionData(tx: Transaction): string | undefined {
-  if (tx.data) {
-    return tx.data;
-  }
-  if (!tx.abi || !tx.functionName) {
-    throw new Error('Transaction requires `data` or `abi` + `functionName`.');
-  }
-
-  return encodeFunctionData({
-    abi: tx.abi,
-    functionName: tx.functionName,
-    args: tx.args ?? [],
-  });
 }

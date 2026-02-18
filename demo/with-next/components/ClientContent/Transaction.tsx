@@ -160,7 +160,51 @@ export const SendTransaction = () => {
   const executeTransaction = async (
     txOptions: MiniKitSendTransactionOptions,
   ) => {
-    setTransactionData(txOptions);
+    const normalizedOptions = (() => {
+      if (txOptions.transactions && txOptions.transactions.length > 0) {
+        return txOptions;
+      }
+
+      const legacyTransactions = txOptions.transaction;
+      if (!legacyTransactions || legacyTransactions.length === 0) {
+        throw new Error(
+          'At least one transaction is required in `transactions`.',
+        );
+      }
+
+      return {
+        transactions: legacyTransactions.map((tx: any) => {
+          if (tx.data) {
+            return {
+              to: tx.address,
+              data: tx.data,
+              value: tx.value,
+            };
+          }
+
+          if (!tx.abi || !tx.functionName) {
+            throw new Error(
+              'ABI/functionName transaction is missing calldata. Provide `data` or `abi` + `functionName` + `args`.',
+            );
+          }
+
+          return {
+            to: tx.address,
+            data: encodeFunctionData({
+              abi: tx.abi,
+              functionName: tx.functionName,
+              args: tx.args ?? [],
+            }),
+            value: tx.value,
+          };
+        }),
+        network: txOptions.network ?? 'worldchain',
+        permit2: txOptions.permit2,
+        formatPayload: txOptions.formatPayload,
+      } as MiniKitSendTransactionOptions;
+    })();
+
+    setTransactionData(normalizedOptions);
     setTransactionId('');
     setTransactionHash(undefined);
     setVerificationMode(null);
@@ -170,9 +214,12 @@ export const SendTransaction = () => {
         executionMode === 'wagmi'
           ? {
               executedWith: 'wagmi' as const,
-              data: await wagmiNativeSendTransaction(wagmiConfig, txOptions),
+              data: await wagmiNativeSendTransaction(
+                wagmiConfig,
+                normalizedOptions,
+              ),
             }
-          : await MiniKit.sendTransaction(txOptions);
+          : await MiniKit.sendTransaction(normalizedOptions);
       await handleResult(result);
     } catch (err) {
       handleError(err);

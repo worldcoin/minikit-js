@@ -26,7 +26,16 @@ export type Permit2 = {
   deadline: string | unknown;
 };
 
-export type Transaction = {
+export type CalldataTransaction = {
+  to: string;
+  /** Raw calldata hex string */
+  data?: string;
+  /** Hex encoded value */
+  value?: string | undefined;
+};
+
+/** @deprecated Use {@link CalldataTransaction} in `transactions` */
+export type LegacyTransaction = {
   address: string;
   value?: string | undefined;
   /** Raw calldata. If provided, it takes precedence over ABI/functionName/args. */
@@ -77,13 +86,17 @@ export type ContractFunctionArgs<
       : args
     : readonly unknown[];
 
+/** @deprecated Use {@link CalldataTransaction} */
+export type Transaction = LegacyTransaction;
+
 // ============================================================================
 // Send Transaction Types
 // ============================================================================
 
 /** @deprecated Use {@link MiniKitSendTransactionOptions} instead */
 export type SendTransactionInput = {
-  transaction: Transaction[];
+  transactions: CalldataTransaction[];
+  network: Network;
   permit2?: Permit2[];
   formatPayload?: boolean;
 };
@@ -161,21 +174,23 @@ export type MiniAppSendTransactionPayload =
 export interface MiniKitSendTransactionOptions<
   TCustomFallback = SendTransactionResult,
 > extends FallbackConfig<TCustomFallback> {
-  /** Transactions to execute */
-  transaction: Transaction[];
+  /** Transactions to execute (calldata first) */
+  transactions?: CalldataTransaction[];
 
-  /**
-   * Optional chain ID to execute on.
-   * - World App currently only supports World Chain (480).
-   * - On web (wagmi fallback), this is forwarded to wagmi.
-   */
-  chainId?: number;
+  /** Network to execute on (defaults to World Chain) */
+  network?: Network;
 
   /** Permit2 data for token approvals (World App only) */
   permit2?: Permit2[];
 
   /** Whether to format the payload (default: true) */
   formatPayload?: boolean;
+
+  /** @deprecated Use `transactions` with `{ to, data, value }` */
+  transaction?: LegacyTransaction[];
+
+  /** @deprecated Use `network` */
+  chainId?: number;
 }
 
 

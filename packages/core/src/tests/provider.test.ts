@@ -176,10 +176,10 @@ describe('World App EIP-1193 provider', () => {
 
     expect(transactionId).toBe('tx-123');
     expect(sendTransactionSpy).toHaveBeenCalledWith({
-      chainId: 480,
-      transaction: [
+      network: 'worldchain',
+      transactions: [
         {
-          address: ADDRESS,
+          to: ADDRESS,
           data: '0x1234',
           value: '0x1',
         },

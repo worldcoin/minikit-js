@@ -20,6 +20,7 @@
  */
 
 import { MiniKit } from './minikit';
+import { Network } from './commands/pay/types';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -364,13 +365,16 @@ function createProvider(): WorldAppProvider {
 
         case 'eth_sendTransaction': {
           const tx = extractTransactionParams(params);
+          if (tx.chainId !== undefined && tx.chainId !== 480) {
+            throw rpcError(4902, 'World App only supports World Chain (480)');
+          }
 
           try {
             const result = await MiniKit.sendTransaction({
-              ...(tx.chainId !== undefined ? { chainId: tx.chainId } : {}),
-              transaction: [
+              network: Network.WorldChain,
+              transactions: [
                 {
-                  address: tx.to,
+                  to: tx.to,
                   ...(tx.data && tx.data !== '0x' ? { data: tx.data } : {}),
                   value: tx.value,
                 },

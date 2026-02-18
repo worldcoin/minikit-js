@@ -3,9 +3,10 @@
 import TestContractABI from '@/abi/TestContract.json';
 import { Button, LiveFeedback } from '@worldcoin/mini-apps-ui-kit-react';
 import { MiniKit } from '@worldcoin/minikit-js';
+import { Network } from '@worldcoin/minikit-js/commands';
 import { useWaitForTransactionReceipt } from '@worldcoin/minikit-react';
 import { useEffect, useState } from 'react';
-import { createPublicClient, http } from 'viem';
+import { createPublicClient, encodeFunctionData, http } from 'viem';
 import { worldchain } from 'viem/chains';
 
 /**
@@ -75,12 +76,15 @@ export const Transaction = () => {
 
     try {
       const result = await MiniKit.sendTransaction({
-        transaction: [
+        network: Network.WorldChain,
+        transactions: [
           {
-            address: myContractToken,
-            abi: TestContractABI,
-            functionName: 'mintToken',
-            args: [],
+            to: myContractToken,
+            data: encodeFunctionData({
+              abi: TestContractABI,
+              functionName: 'mintToken',
+              args: [],
+            }),
           },
         ],
       });
@@ -126,23 +130,26 @@ export const Transaction = () => {
 
     try {
       const result = await MiniKit.sendTransaction({
-        transaction: [
+        network: Network.WorldChain,
+        transactions: [
           {
-            address: myContractToken,
-            abi: TestContractABI,
-            functionName: 'signatureTransfer',
-            args: [
-              [
+            to: myContractToken,
+            data: encodeFunctionData({
+              abi: TestContractABI,
+              functionName: 'signatureTransfer',
+              args: [
                 [
-                  permitTransfer.permitted.token,
-                  permitTransfer.permitted.amount,
+                  [
+                    permitTransfer.permitted.token,
+                    permitTransfer.permitted.amount,
+                  ],
+                  permitTransfer.nonce,
+                  permitTransfer.deadline,
                 ],
-                permitTransfer.nonce,
-                permitTransfer.deadline,
+                [transferDetails.to, transferDetails.requestedAmount],
+                'PERMIT2_SIGNATURE_PLACEHOLDER_0',
               ],
-              [transferDetails.to, transferDetails.requestedAmount],
-              'PERMIT2_SIGNATURE_PLACEHOLDER_0',
-            ],
+            }),
           },
         ],
         permit2: [
