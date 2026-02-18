@@ -9,7 +9,7 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import { wagmiWalletAuth } from '../wagmi-fallback';
+import { getFallbackAdapter } from '../fallback-adapter-registry';
 import { generateSiweMessage } from './siwe';
 import type {
   MiniAppWalletAuthPayload,
@@ -46,15 +46,18 @@ export async function walletAuth<TFallback = WalletAuthResult>(
   options: MiniKitWalletAuthOptions<TFallback>,
   ctx?: CommandContext,
 ): Promise<CommandResultByVia<WalletAuthResult, TFallback>> {
+  const fallbackAdapter = getFallbackAdapter();
   const result = await executeWithFallback({
     command: Command.WalletAuth,
     nativeExecutor: () => nativeWalletAuth(options, ctx),
-    wagmiFallback: () =>
-      wagmiWalletAuth({
-        nonce: options.nonce,
-        statement: options.statement,
-        expirationTime: options.expirationTime,
-      }),
+    wagmiFallback: fallbackAdapter?.walletAuth
+      ? () =>
+          fallbackAdapter.walletAuth!({
+            nonce: options.nonce,
+            statement: options.statement,
+            expirationTime: options.expirationTime,
+          })
+      : undefined,
     customFallback: options.fallback,
   });
 

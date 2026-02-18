@@ -9,7 +9,7 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import { wagmiSignTypedData } from '../wagmi-fallback';
+import { getFallbackAdapter } from '../fallback-adapter-registry';
 import type {
   MiniAppSignTypedDataPayload,
   MiniAppSignTypedDataSuccessPayload,
@@ -27,17 +27,20 @@ export async function signTypedData<TFallback = MiniAppSignTypedDataPayload>(
   options: MiniKitSignTypedDataOptions<TFallback>,
   ctx?: CommandContext,
 ): Promise<CommandResultByVia<MiniAppSignTypedDataSuccessPayload, TFallback>> {
+  const fallbackAdapter = getFallbackAdapter();
   const result = await executeWithFallback({
     command: Command.SignTypedData,
     nativeExecutor: () => nativeSignTypedData(options, ctx),
-    wagmiFallback: () =>
-      wagmiSignTypedData({
-        types: options.types,
-        primaryType: options.primaryType,
-        message: options.message,
-        domain: options.domain,
-        chainId: options.chainId,
-      }),
+    wagmiFallback: fallbackAdapter?.signTypedData
+      ? () =>
+          fallbackAdapter.signTypedData!({
+            types: options.types,
+            primaryType: options.primaryType,
+            message: options.message,
+            domain: options.domain,
+            chainId: options.chainId,
+          })
+      : undefined,
     customFallback: options.fallback,
   });
 

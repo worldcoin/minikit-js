@@ -4,6 +4,7 @@
  * These functions provide web fallback using Wagmi when not running in World App.
  * Wagmi is dynamically imported to avoid bundling it if not used.
  */
+import { setFallbackAdapter } from './fallback-adapter-registry';
 
 // We use `any` for the config type because wagmi is an optional peer dependency.
 // Type safety is enforced at runtime through dynamic imports.
@@ -21,6 +22,7 @@ const WAGMI_KEY = '__minikit_wagmi_config__' as const;
 
 export function setWagmiConfig(config: WagmiConfig): void {
   (globalThis as any)[WAGMI_KEY] = config;
+  registerWagmiFallbacks();
 }
 
 export function getWagmiConfig(): WagmiConfig | undefined {
@@ -29,6 +31,15 @@ export function getWagmiConfig(): WagmiConfig | undefined {
 
 export function hasWagmiConfig(): boolean {
   return (globalThis as any)[WAGMI_KEY] !== undefined;
+}
+
+export function registerWagmiFallbacks(): void {
+  setFallbackAdapter({
+    walletAuth: wagmiWalletAuth,
+    signMessage: wagmiSignMessage,
+    signTypedData: wagmiSignTypedData,
+    sendTransaction: wagmiSendTransaction,
+  });
 }
 
 async function loadWagmiActions(): Promise<any> {

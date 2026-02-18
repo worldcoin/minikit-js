@@ -15,7 +15,6 @@ import {
   isCommandAvailable,
   isInWorldApp,
 } from './types';
-import { hasWagmiConfig } from './wagmi-fallback';
 
 export interface ExecuteWithFallbackOptions<TNative, TFallback = TNative> {
   /** Command name for availability checking */
@@ -74,8 +73,8 @@ export async function executeWithFallback<TNative, TFallback = TNative>(
     }
   }
 
-  // 2. Try Wagmi fallback (web only)
-  if (!inWorldApp && wagmiFallback && hasWagmiConfig()) {
+  // 2. Try adapter fallback (web only)
+  if (!inWorldApp && wagmiFallback) {
     try {
       const data = await wagmiFallback();
       return { data, executedWith: 'wagmi' as CommandVia };

@@ -11,7 +11,7 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import { hasWagmiConfig, wagmiSendTransaction } from '../wagmi-fallback';
+import { getFallbackAdapter } from '../fallback-adapter-registry';
 import type {
   CalldataTransaction,
   MiniAppSendTransactionPayload,
@@ -126,7 +126,9 @@ export async function sendTransaction<TFallback = SendTransactionResult>(
   ctx?: CommandContext,
 ): Promise<CommandResultByVia<SendTransactionResult, TFallback>> {
   const normalizedOptions = normalizeSendTransactionOptions(options);
-  const isWagmiFallbackPath = !isInWorldApp() && hasWagmiConfig();
+  const fallbackAdapter = getFallbackAdapter();
+  const isWagmiFallbackPath =
+    !isInWorldApp() && Boolean(fallbackAdapter?.sendTransaction);
   if (
     isWagmiFallbackPath &&
     normalizedOptions.transactions.length > 1 &&
@@ -140,7 +142,9 @@ export async function sendTransaction<TFallback = SendTransactionResult>(
   const result = await executeWithFallback({
     command: Command.SendTransaction,
     nativeExecutor: () => nativeSendTransaction(normalizedOptions, ctx),
-    wagmiFallback: () => wagmiSendTransactionAdapter(normalizedOptions),
+    wagmiFallback: fallbackAdapter?.sendTransaction
+      ? () => adapterSendTransactionFallback(normalizedOptions)
+      : undefined,
     customFallback: options.fallback,
   });
 
@@ -247,7 +251,7 @@ async function nativeSendTransaction(
 // Wagmi Adapter
 // ============================================================================
 
-async function wagmiSendTransactionAdapter(
+async function adapterSendTransactionFallback(
   options: NormalizedSendTransactionOptions,
 ): Promise<SendTransactionResult> {
   if (options.transactions.length > 1) {
@@ -266,7 +270,12 @@ async function wagmiSendTransactionAdapter(
     throw new Error('At least one transaction is required');
   }
 
-  const result = await wagmiSendTransaction({
+  const fallbackAdapter = getFallbackAdapter();
+  if (!fallbackAdapter?.sendTransaction) {
+    throw new Error('Fallback adapter is not registered.');
+  }
+
+  const result = await fallbackAdapter.sendTransaction({
     transaction: {
       address: firstTransaction.to,
       data: firstTransaction.data,

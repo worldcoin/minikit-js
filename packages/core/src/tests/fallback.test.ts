@@ -1,6 +1,5 @@
 import { executeWithFallback } from '../commands/fallback';
 import * as commandTypes from '../commands/types';
-import * as wagmiFallback from '../commands/wagmi-fallback';
 
 describe('executeWithFallback', () => {
   let warnSpy: jest.SpyInstance;
@@ -20,9 +19,6 @@ describe('executeWithFallback', () => {
 
     jest.spyOn(commandTypes, 'isInWorldApp').mockReturnValue(true);
     jest.spyOn(commandTypes, 'isCommandAvailable').mockReturnValue(true);
-    const hasWagmiConfigSpy = jest
-      .spyOn(wagmiFallback, 'hasWagmiConfig')
-      .mockReturnValue(true);
 
     await expect(
       executeWithFallback({
@@ -34,17 +30,15 @@ describe('executeWithFallback', () => {
 
     expect(nativeExecutor).toHaveBeenCalledTimes(1);
     expect(wagmiExecutor).not.toHaveBeenCalled();
-    expect(hasWagmiConfigSpy).not.toHaveBeenCalled();
     expect(warnSpy).toHaveBeenCalled();
   });
 
-  it('uses wagmi fallback on web when wagmi config exists', async () => {
+  it('uses adapter fallback on web when provided', async () => {
     const nativeExecutor = jest.fn().mockResolvedValue('native-result');
     const wagmiExecutor = jest.fn().mockResolvedValue('wagmi-result');
 
     jest.spyOn(commandTypes, 'isInWorldApp').mockReturnValue(false);
     jest.spyOn(commandTypes, 'isCommandAvailable').mockReturnValue(false);
-    jest.spyOn(wagmiFallback, 'hasWagmiConfig').mockReturnValue(true);
 
     const result = await executeWithFallback({
       command: commandTypes.Command.SignMessage,

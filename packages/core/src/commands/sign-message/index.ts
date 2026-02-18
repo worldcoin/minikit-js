@@ -9,7 +9,7 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import { wagmiSignMessage } from '../wagmi-fallback';
+import { getFallbackAdapter } from '../fallback-adapter-registry';
 import type {
   MiniAppSignMessagePayload,
   MiniAppSignMessageSuccessPayload,
@@ -29,13 +29,16 @@ export async function signMessage<
   options: MiniKitSignMessageOptions<TFallback>,
   ctx?: CommandContext,
 ): Promise<CommandResultByVia<MiniAppSignMessageSuccessPayload, TFallback>> {
+  const fallbackAdapter = getFallbackAdapter();
   const result = await executeWithFallback({
     command: Command.SignMessage,
     nativeExecutor: () => nativeSignMessage(options, ctx),
-    wagmiFallback: () =>
-      wagmiSignMessage({
-        message: options.message,
-      }),
+    wagmiFallback: fallbackAdapter?.signMessage
+      ? () =>
+          fallbackAdapter.signMessage!({
+            message: options.message,
+          })
+      : undefined,
     customFallback: options.fallback,
   });
 
