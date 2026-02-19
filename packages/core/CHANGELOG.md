@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.10.0
+
+### Minor Changes
+
+- 8fe9a51: Add attestation command and closeMiniApp command
+
 ## 1.9.11
 
 ### Patch Changes
