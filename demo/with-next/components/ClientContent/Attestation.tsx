@@ -4,7 +4,7 @@ import {
   MiniKit,
   ResponseEvent,
 } from '@worldcoin/minikit-js';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
  * Compute hex-encoded SHA-256 hash of a string using the Web Crypto API.
@@ -17,13 +17,15 @@ async function hexSha256(data: string): Promise<string> {
     .join('');
 }
 
-// Sample request body the mini app would send to its backend
-const SAMPLE_REQUEST_BODY = JSON.stringify({
-  action: 'transfer',
-  to: '0x1234...abcd',
-  amount: '1.0',
-  token: 'WLD',
-});
+function buildRequestBody(): string {
+  return JSON.stringify({
+    action: 'transfer',
+    to: '0x1234...abcd',
+    amount: '1.0',
+    token: 'WLD',
+    nonce: crypto.randomUUID(),
+  });
+}
 
 export const Attestation = () => {
   const [response, setResponse] = useState<Record<string, any> | null>(null);
@@ -32,6 +34,12 @@ export const Attestation = () => {
     any
   > | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentBody, setCurrentBody] = useState<string>('');
+
+  // Keep the current request body in a ref so the subscription callback
+  // always has access to the body that matches the in-flight attestation.
+  const requestBodyRef = useRef<string>('');
+  const [tempInstallFix, setTempInstallFix] = useState(0);
 
   useEffect(() => {
     if (!MiniKit.isInstalled()) {
@@ -46,7 +54,7 @@ export const Attestation = () => {
 
         if (payload.status === 'success') {
           // Step 3: Send request + token to backend; backend hashes body independently
-          await verifyOnBackend(payload.token);
+          await verifyOnBackend(payload.token, requestBodyRef.current);
         } else {
           setIsLoading(false);
         }
@@ -56,9 +64,9 @@ export const Attestation = () => {
     return () => {
       MiniKit.unsubscribe(ResponseEvent.MiniAppAttestation);
     };
-  }, []);
+  }, [tempInstallFix]);
 
-  const verifyOnBackend = async (token: string) => {
+  const verifyOnBackend = async (token: string, body: string) => {
     try {
       const res = await fetch('/api/verify-attestation', {
         method: 'POST',
@@ -66,7 +74,7 @@ export const Attestation = () => {
           'Content-Type': 'application/json',
           'X-Attestation-Token': token,
         },
-        body: SAMPLE_REQUEST_BODY,
+        body,
       });
       const data = await res.json();
       setBackendResult(data);
@@ -85,17 +93,24 @@ export const Attestation = () => {
     setBackendResult(null);
     setIsLoading(true);
 
-    // Step 1: Hash the request body
-    const requestHash = await hexSha256(SAMPLE_REQUEST_BODY);
+    // Step 1: Build a unique request body and hash it
+    const body = buildRequestBody();
+    requestBodyRef.current = body;
+    setCurrentBody(body);
+    const requestHash = await hexSha256(body);
 
     // Step 2: Request attestation token from World App
     const attestationPayload: AttestationInput = { requestHash };
     const sent = MiniKit.commands.attestation(attestationPayload);
 
+    console.log('MiniAppAttestation, SENT PAYLOAD', attestationPayload);
+
     if (!sent) {
       setResponse({ status: 'error', message: 'Command dispatch failed' });
       setIsLoading(false);
     }
+
+    setTempInstallFix((prev) => prev + 1);
   }, []);
 
   return (
@@ -103,14 +118,16 @@ export const Attestation = () => {
       <div className="grid gap-y-2">
         <h2 className="text-2xl font-bold">Attestation</h2>
 
-        <div>
-          <p className="text-sm text-gray-600 mb-1">Sample request body:</p>
-          <div className="bg-gray-200 p-2 rounded text-xs">
-            <pre className="break-all whitespace-break-spaces">
-              {SAMPLE_REQUEST_BODY}
-            </pre>
+        {currentBody && (
+          <div>
+            <p className="text-sm text-gray-600 mb-1">Request body:</p>
+            <div className="bg-gray-200 p-2 rounded text-xs">
+              <pre className="break-all whitespace-break-spaces">
+                {currentBody}
+              </pre>
+            </div>
           </div>
-        </div>
+        )}
 
         {response && (
           <div>
