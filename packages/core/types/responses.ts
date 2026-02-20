@@ -17,7 +17,7 @@ import {
   WalletAuthErrorMessage,
 } from './errors';
 import { Network } from './payment';
-import { VerificationLevel } from './verification-level';
+import type { VerificationLevel } from './verification-level';
 
 export enum ResponseEvent {
   MiniAppVerifyAction = 'miniapp-verify-action',
