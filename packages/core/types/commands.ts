@@ -1,8 +1,9 @@
-import { IDKitConfig, VerificationLevel } from '@worldcoin/idkit-core';
+import { IDKitConfig } from '@worldcoin/idkit-core';
 import type { TypedData, TypedDataDomain } from 'abitype';
 import { MiniKitInstallErrorCodes, MiniKitInstallErrorMessage } from './errors';
 import { Network, Tokens } from './payment';
 import { Permit2, Transaction } from './transactions';
+import { VerificationLevel } from './verification-level';
 
 export enum Command {
   Verify = 'verify',

@@ -1,8 +1,8 @@
-import { VerificationLevel } from '@worldcoin/idkit-core';
 import { ResponseEvent } from '../commands/types';
 import type { MiniAppVerifyActionPayload } from '../commands/verify';
 import { EventManager } from '../core/events';
 import { compressAndPadProof } from '../helpers/proof';
+import { VerificationLevel } from '../types/verification-level';
 
 jest.mock('../helpers/proof', () => ({
   compressAndPadProof: jest.fn(),

@@ -279,6 +279,18 @@ export const VerifyAction = () => {
               </button>
             </div>
 
+            <div className="grid grid-cols-1 gap-x-2">
+              <button
+                className={clsx(
+                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
+                  isProduction ? 'hidden' : '',
+                )}
+                onClick={() => onStagingVerifyClick(VerificationLevel.Face)}
+              >
+                Check face (staging)
+              </button>
+            </div>
+
             <div className="grid grid-cols-2 gap-x-2">
               <button
                 className={clsx(
@@ -348,6 +360,18 @@ export const VerifyAction = () => {
                 onClick={() => onProdVerifyClick(VerificationLevel.Orb)}
               >
                 Send production app verify (Orb)
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-x-2">
+              <button
+                className={clsx(
+                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
+                  isProduction ? '' : 'hidden',
+                )}
+                onClick={() => onProdVerifyClick(VerificationLevel.Face)}
+              >
+                Check face (production)
               </button>
             </div>
 

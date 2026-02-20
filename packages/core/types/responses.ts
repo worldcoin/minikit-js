@@ -1,4 +1,3 @@
-import { VerificationLevel } from '@worldcoin/idkit-core';
 import { Permission } from './commands';
 import {
   AttestationErrorCodes,
@@ -18,6 +17,7 @@ import {
   WalletAuthErrorMessage,
 } from './errors';
 import { Network } from './payment';
+import { VerificationLevel } from './verification-level';
 
 export enum ResponseEvent {
   MiniAppVerifyAction = 'miniapp-verify-action',
