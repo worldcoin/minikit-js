@@ -18,9 +18,7 @@ import { AttestationError } from './types';
 
 export * from './types';
 
-export async function attestation<
-  TFallback = MiniAppAttestationSuccessPayload,
->(
+export async function attestation<TFallback = MiniAppAttestationSuccessPayload>(
   options: MiniKitAttestationOptions<TFallback>,
   ctx?: CommandContext,
 ): Promise<
@@ -50,7 +48,10 @@ async function nativeAttestation(
     ctx = { events: new EventManager(), state: { deviceProperties: {} } };
   }
 
-  if (typeof window === 'undefined' || !isCommandAvailable(Command.Attestation)) {
+  if (
+    typeof window === 'undefined' ||
+    !isCommandAvailable(Command.Attestation)
+  ) {
     throw new Error(
       "'attestation' command is unavailable. Check MiniKit.install() or update the app version",
     );

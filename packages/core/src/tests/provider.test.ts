@@ -17,14 +17,16 @@ describe('World App EIP-1193 provider', () => {
   });
 
   it('routes personal_sign to MiniKit.signMessage and decodes hex payload', async () => {
-    const signMessageSpy = jest.spyOn(MiniKit, 'signMessage').mockResolvedValue({
-      executedWith: 'minikit',
-      data: {
-        status: 'success',
-        version: 1,
-        signature: '0xsigned',
-      },
-    } as any);
+    const signMessageSpy = jest
+      .spyOn(MiniKit, 'signMessage')
+      .mockResolvedValue({
+        executedWith: 'minikit',
+        data: {
+          status: 'success',
+          version: 1,
+          signature: '0xsigned',
+        },
+      } as any);
     const provider = getWorldAppProvider();
 
     const signature = await provider.request({
@@ -37,14 +39,16 @@ describe('World App EIP-1193 provider', () => {
   });
 
   it('supports personal_sign address-first params', async () => {
-    const signMessageSpy = jest.spyOn(MiniKit, 'signMessage').mockResolvedValue({
-      executedWith: 'minikit',
-      data: {
-        status: 'success',
-        version: 1,
-        signature: '0xpersonal',
-      },
-    } as any);
+    const signMessageSpy = jest
+      .spyOn(MiniKit, 'signMessage')
+      .mockResolvedValue({
+        executedWith: 'minikit',
+        data: {
+          status: 'success',
+          version: 1,
+          signature: '0xpersonal',
+        },
+      } as any);
     const provider = getWorldAppProvider();
 
     const signature = await provider.request({
@@ -57,14 +61,16 @@ describe('World App EIP-1193 provider', () => {
   });
 
   it('routes eth_sign to MiniKit.signMessage', async () => {
-    const signMessageSpy = jest.spyOn(MiniKit, 'signMessage').mockResolvedValue({
-      executedWith: 'minikit',
-      data: {
-        status: 'success',
-        version: 1,
-        signature: '0xethsign',
-      },
-    } as any);
+    const signMessageSpy = jest
+      .spyOn(MiniKit, 'signMessage')
+      .mockResolvedValue({
+        executedWith: 'minikit',
+        data: {
+          status: 'success',
+          version: 1,
+          signature: '0xethsign',
+        },
+      } as any);
     const provider = getWorldAppProvider();
 
     const signature = await provider.request({

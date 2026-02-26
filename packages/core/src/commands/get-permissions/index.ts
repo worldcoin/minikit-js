@@ -22,9 +22,7 @@ export * from './types';
 // Unified API (auto-detects environment)
 // ============================================================================
 
-export async function getPermissions<
-  TFallback = MiniAppGetPermissionsPayload,
->(
+export async function getPermissions<TFallback = MiniAppGetPermissionsPayload>(
   options?: MiniKitGetPermissionsOptions<TFallback>,
   ctx?: CommandContext,
 ): Promise<

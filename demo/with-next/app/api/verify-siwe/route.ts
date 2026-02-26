@@ -13,7 +13,8 @@ interface IRequestPayload {
 }
 
 export async function POST(req: NextRequest) {
-  const { payload, nonce, executedWith } = (await req.json()) as IRequestPayload;
+  const { payload, nonce, executedWith } =
+    (await req.json()) as IRequestPayload;
 
   // const cookieStore = await cookies();
   // if (nonce !== cookieStore.get('siwe')?.value) {
@@ -47,7 +48,9 @@ export async function POST(req: NextRequest) {
         isValid: verification.success,
         ...(verification.success
           ? {}
-          : { message: verification.error?.type ?? 'SIWE verification failed' }),
+          : {
+              message: verification.error?.type ?? 'SIWE verification failed',
+            }),
       });
     }
 

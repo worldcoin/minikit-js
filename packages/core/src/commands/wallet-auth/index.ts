@@ -1,5 +1,6 @@
 import { EventManager } from '../../events';
 import { executeWithFallback } from '../fallback';
+import { getFallbackAdapter } from '../fallback-adapter-registry';
 import type { CommandResultByVia } from '../types';
 import {
   Command,
@@ -9,7 +10,6 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import { getFallbackAdapter } from '../fallback-adapter-registry';
 import { generateSiweMessage } from './siwe';
 import type {
   MiniAppWalletAuthPayload,

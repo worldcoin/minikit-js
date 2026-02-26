@@ -174,63 +174,69 @@ export const SignTypedData = () => {
   const [sentSignTypedDataPayload, setSentSignTypedDataPayload] =
     useState<Record<string, any> | null>(null);
 
-  const onSignTypedData = useCallback(async (stateChanges?: boolean) => {
-    const signTypedDataInput: MiniKitSignTypedDataOptions = stateChanges
-      ? stateChangesPayload
-      : signTypedDataPayload;
+  const onSignTypedData = useCallback(
+    async (stateChanges?: boolean) => {
+      const signTypedDataInput: MiniKitSignTypedDataOptions = stateChanges
+        ? stateChangesPayload
+        : signTypedDataPayload;
 
-    setSentSignTypedDataPayload({
-      signTypedDataInput,
-    });
-    const payload =
-      executionMode === 'wagmi'
-        ? {
-            executedWith: 'wagmi' as const,
-            data: await wagmiNativeSignTypedData(wagmiConfig, signTypedDataInput),
-          }
-        : await MiniKit.signTypedData(signTypedDataInput);
-    setSignTypedDataAppPayload(JSON.stringify(payload.data, null, 2));
-    setSignTypedDataPayloadValidationMessage('Payload is valid');
-
-    if (payload.executedWith === 'minikit') {
-      const response = payload.data;
-      const messageHash = hashSafeMessage(
-        toSafeEip712TypedData(signTypedDataInput) as any,
-      );
-
-      const isValid = await (
-        await Safe.init({
-          provider: 'https://worldchain-mainnet.g.alchemy.com/public',
-          safeAddress: response.address,
-        })
-      ).isValidSignature(messageHash, response.signature);
-
-      setSignTypedDataPayloadVerificationMessage(
-        isValid ? 'Signature is valid' : 'Signature is invalid',
-      );
-      return;
-    }
-
-    if (payload.executedWith === 'wagmi') {
-      const response = payload.data;
-
-      const isValid = await verifyTypedData({
-        address: response.address as `0x${string}`,
-        types: signTypedDataInput.types as Record<string, any>,
-        primaryType: signTypedDataInput.primaryType as any,
-        domain: signTypedDataInput.domain as Record<string, any> | undefined,
-        message: signTypedDataInput.message as Record<string, any>,
-        signature: response.signature as `0x${string}`,
+      setSentSignTypedDataPayload({
+        signTypedDataInput,
       });
+      const payload =
+        executionMode === 'wagmi'
+          ? {
+              executedWith: 'wagmi' as const,
+              data: await wagmiNativeSignTypedData(
+                wagmiConfig,
+                signTypedDataInput,
+              ),
+            }
+          : await MiniKit.signTypedData(signTypedDataInput);
+      setSignTypedDataAppPayload(JSON.stringify(payload.data, null, 2));
+      setSignTypedDataPayloadValidationMessage('Payload is valid');
 
-      setSignTypedDataPayloadVerificationMessage(
-        isValid ? 'Signature is valid' : 'Signature is invalid',
-      );
-      return;
-    }
+      if (payload.executedWith === 'minikit') {
+        const response = payload.data;
+        const messageHash = hashSafeMessage(
+          toSafeEip712TypedData(signTypedDataInput) as any,
+        );
 
-    setSignTypedDataPayloadVerificationMessage('Signature is invalid');
-  }, [executionMode, wagmiConfig]);
+        const isValid = await (
+          await Safe.init({
+            provider: 'https://worldchain-mainnet.g.alchemy.com/public',
+            safeAddress: response.address,
+          })
+        ).isValidSignature(messageHash, response.signature);
+
+        setSignTypedDataPayloadVerificationMessage(
+          isValid ? 'Signature is valid' : 'Signature is invalid',
+        );
+        return;
+      }
+
+      if (payload.executedWith === 'wagmi') {
+        const response = payload.data;
+
+        const isValid = await verifyTypedData({
+          address: response.address as `0x${string}`,
+          types: signTypedDataInput.types as Record<string, any>,
+          primaryType: signTypedDataInput.primaryType as any,
+          domain: signTypedDataInput.domain as Record<string, any> | undefined,
+          message: signTypedDataInput.message as Record<string, any>,
+          signature: response.signature as `0x${string}`,
+        });
+
+        setSignTypedDataPayloadVerificationMessage(
+          isValid ? 'Signature is valid' : 'Signature is invalid',
+        );
+        return;
+      }
+
+      setSignTypedDataPayloadVerificationMessage('Signature is invalid');
+    },
+    [executionMode, wagmiConfig],
+  );
 
   const signBenignPayload = async (chainId?: number) => {
     const signTypedDataPayload: MiniKitSignTypedDataOptions = {

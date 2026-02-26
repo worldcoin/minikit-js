@@ -1,6 +1,6 @@
 import type {
-  CommandResultByVia,
   CloseMiniAppResult,
+  CommandResultByVia,
   MiniAppAttestationSuccessPayload,
   MiniAppChatPayload,
   MiniAppChatSuccessPayload,
@@ -15,12 +15,12 @@ import type {
   MiniAppSignMessageSuccessPayload,
   MiniAppSignTypedDataPayload,
   MiniAppSignTypedDataSuccessPayload,
+  MiniKitAttestationOptions,
   MiniKitChatOptions,
   MiniKitCloseMiniAppOptions,
   MiniKitGetPermissionsOptions,
   MiniKitPayOptions,
   MiniKitRequestPermissionOptions,
-  MiniKitAttestationOptions,
   MiniKitSendHapticFeedbackOptions,
   MiniKitSendTransactionOptions,
   MiniKitShareContactsOptions,
@@ -337,11 +337,7 @@ export class MiniKit {
   static attestation<TFallback = MiniAppAttestationSuccessPayload>(
     options: MiniKitAttestationOptions<TFallback>,
   ): Promise<
-    CommandResultByVia<
-      MiniAppAttestationSuccessPayload,
-      TFallback,
-      'minikit'
-    >
+    CommandResultByVia<MiniAppAttestationSuccessPayload, TFallback, 'minikit'>
   > {
     const active = this.getActiveMiniKit();
     if (active !== this) {

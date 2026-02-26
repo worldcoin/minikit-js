@@ -224,7 +224,6 @@ export async function wagmiWalletAuth(
     address,
     message,
     signature,
-    
   };
 }
 

@@ -1,6 +1,4 @@
-import {
-  MiniKit,
-} from '@worldcoin/minikit-js';
+import { MiniKit } from '@worldcoin/minikit-js';
 import type {
   MiniKitSendTransactionOptions,
   MiniKitSignTypedDataOptions,
@@ -154,9 +152,7 @@ function normalizeTransactions(
   options: MiniKitSendTransactionOptions,
 ): CalldataTransaction[] {
   if (options.transactions.length === 0) {
-    throw new Error(
-      'At least one transaction is required in `transactions`.',
-    );
+    throw new Error('At least one transaction is required in `transactions`.');
   }
   return options.transactions;
 }

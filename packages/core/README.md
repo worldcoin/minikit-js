@@ -86,7 +86,10 @@ import {
   SendTransactionErrorCodes,
 } from '@worldcoin/minikit-js/commands';
 import { getIsUserVerified } from '@worldcoin/minikit-js/address-book';
-import { parseSiweMessage, verifySiweMessage } from '@worldcoin/minikit-js/siwe';
+import {
+  parseSiweMessage,
+  verifySiweMessage,
+} from '@worldcoin/minikit-js/siwe';
 ```
 
 You can still import `MiniKit` itself from the package root:

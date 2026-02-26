@@ -1,1 +1,4 @@
-export { parseSiweMessage, verifySiweMessage } from './commands/wallet-auth/siwe';
+export {
+  parseSiweMessage,
+  verifySiweMessage,
+} from './commands/wallet-auth/siwe';

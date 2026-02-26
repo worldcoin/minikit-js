@@ -8,6 +8,7 @@ import {
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useState } from 'react';
+import { Attestation } from './Attestation';
 import { CameraComponent } from './Camera';
 import { Chat } from './Chat';
 import CheckRequests from './CheckRequests';
@@ -23,7 +24,6 @@ import { Share } from './Share';
 import { ShareContacts } from './ShareContacts';
 import { SignMessage } from './SignMessage';
 import { SignTypedData } from './SignTypedMessage';
-import { Attestation } from './Attestation';
 import { SendTransaction } from './Transaction';
 import { User } from './User';
 import { VerifyAction } from './VerifyAction';

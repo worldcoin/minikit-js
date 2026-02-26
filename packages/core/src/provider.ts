@@ -148,9 +148,7 @@ function extractEthSignMessage(params?: unknown): string {
   return decodeMaybeHexMessage(maybeMessage);
 }
 
-function parseTypedDataInput(
-  params?: unknown,
-): {
+function parseTypedDataInput(params?: unknown): {
   types: Record<string, unknown>;
   primaryType: string;
   domain?: Record<string, unknown>;

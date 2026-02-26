@@ -1,5 +1,6 @@
 import { EventManager } from '../../events';
 import { executeWithFallback } from '../fallback';
+import { getFallbackAdapter } from '../fallback-adapter-registry';
 import type { CommandResultByVia } from '../types';
 import {
   Command,
@@ -9,7 +10,6 @@ import {
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
-import { getFallbackAdapter } from '../fallback-adapter-registry';
 import type {
   MiniAppSignMessagePayload,
   MiniAppSignMessageSuccessPayload,
@@ -23,9 +23,7 @@ export * from './types';
 // Unified API (auto-detects environment)
 // ============================================================================
 
-export async function signMessage<
-  TFallback = MiniAppSignMessageSuccessPayload,
->(
+export async function signMessage<TFallback = MiniAppSignMessageSuccessPayload>(
   options: MiniKitSignMessageOptions<TFallback>,
   ctx?: CommandContext,
 ): Promise<CommandResultByVia<MiniAppSignMessageSuccessPayload, TFallback>> {

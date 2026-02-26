@@ -3,7 +3,6 @@
 import TestContractABI from '@/abi/TestContract.json';
 import { Button, LiveFeedback } from '@worldcoin/mini-apps-ui-kit-react';
 import { MiniKit } from '@worldcoin/minikit-js';
-import { Network } from '@worldcoin/minikit-js/commands';
 import { useWaitForTransactionReceipt } from '@worldcoin/minikit-react';
 import { useEffect, useState } from 'react';
 import { createPublicClient, encodeFunctionData, http } from 'viem';
@@ -76,7 +75,7 @@ export const Transaction = () => {
 
     try {
       const result = await MiniKit.sendTransaction({
-        network: Network.WorldChain,
+        chainId: 480,
         transactions: [
           {
             to: myContractToken,
@@ -130,7 +129,7 @@ export const Transaction = () => {
 
     try {
       const result = await MiniKit.sendTransaction({
-        network: Network.WorldChain,
+        chainId: 480,
         transactions: [
           {
             to: myContractToken,

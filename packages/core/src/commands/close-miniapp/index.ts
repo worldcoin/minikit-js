@@ -7,10 +7,7 @@ import {
   isCommandAvailable,
   sendMiniKitEvent,
 } from '../types';
-import type {
-  CloseMiniAppResult,
-  MiniKitCloseMiniAppOptions,
-} from './types';
+import type { CloseMiniAppResult, MiniKitCloseMiniAppOptions } from './types';
 
 export * from './types';
 
@@ -35,7 +32,10 @@ export async function closeMiniApp<TFallback = CloseMiniAppResult>(
 }
 
 async function nativeCloseMiniApp(): Promise<CloseMiniAppResult> {
-  if (typeof window === 'undefined' || !isCommandAvailable(Command.CloseMiniApp)) {
+  if (
+    typeof window === 'undefined' ||
+    !isCommandAvailable(Command.CloseMiniApp)
+  ) {
     throw new Error(
       "'closeMiniApp' command is unavailable. Check MiniKit.install() or update the app version",
     );
