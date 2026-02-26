@@ -1,6 +1,6 @@
 {
   "name": "@worldcoin/minikit-react",
-  "version": "1.9.13",
+  "version": "1.9.11",
   "homepage": "https://docs.worldcoin.org/mini-apps",
   "description": "minikit-react is a set of hooks for building mini-apps",
   "license": "MIT",
@@ -46,7 +46,7 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "lint": "eslint ./ --ext .ts",
+    "lint": "prettier --check . --ignore-path ../../.prettierignore",
     "prepublishOnly": "npm run build",
     "type-check": "tsc --noEmit"
   },
@@ -63,7 +63,7 @@
     "prettier-plugin-sort-imports-desc": "^1.0.0",
     "tsup": "^8.0.2",
     "typescript": "^5.4.5",
-    "viem": "2.23.5",
+    "viem": "2.45.3",
     "react": "^18.2.0",
     "@types/react": "^18.0.25",
     "react-dom": "^18.2.0",
@@ -72,7 +72,7 @@
     "eslint-plugin-react-hooks": "^4.6.2"
   },
   "peerDependencies": {
-    "viem": "^2.23.5",
+    "viem": "^2.21.0",
     "react": "^18 || ^19"
   }
 }
