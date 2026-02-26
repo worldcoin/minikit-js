@@ -39,6 +39,7 @@ const PERMIT_BURN_CONTRACT_ADDRESS =
   '0x378543ea0A7b6B048d441cAC1885e3a6b76aD17D';
 const MKT_TOKEN_ADDRESS = '0x9Cf4F011F55Add3ECC1B1B497A3e9bd32183D6e8';
 const UINT160_MAX = (1n << 160n) - 1n;
+const UINT256_MAX = (1n << 256n) - 1n;
 
 const PERMIT2_ALLOWANCE_TRANSFER_ABI = [
   {
@@ -72,6 +73,19 @@ const ERC20_DECIMALS_ABI = [
     stateMutability: 'view',
     inputs: [],
     outputs: [{ name: '', type: 'uint8' }],
+  },
+] as const;
+
+const ERC20_APPROVE_ABI = [
+  {
+    type: 'function',
+    name: 'approve',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'spender', type: 'address' },
+      { name: 'amount', type: 'uint256' },
+    ],
+    outputs: [{ name: '', type: 'bool' }],
   },
 ] as const;
 
@@ -239,6 +253,20 @@ export const SendTransaction = () => {
     const owner = await resolveOwnerAddress();
     const amount = await resolveOneTokenAmount();
 
+    const tokenApproveTxOptions: MiniKitSendTransactionOptions = {
+      chainId: 480,
+      transactions: [
+        {
+          to: MKT_TOKEN_ADDRESS,
+          data: encodeFunctionData({
+            abi: ERC20_APPROVE_ABI,
+            functionName: 'approve',
+            args: [PERMIT2_ADDRESS as `0x${string}`, UINT256_MAX],
+          }),
+        },
+      ],
+    };
+
     const approveTxOptions: MiniKitSendTransactionOptions = {
       chainId: 480,
       transactions: [
@@ -273,6 +301,7 @@ export const SendTransaction = () => {
     };
 
     if (executionMode === 'wagmi') {
+      await executeTransaction(tokenApproveTxOptions);
       await executeTransaction(approveTxOptions);
       await executeTransaction(burnTxOptions);
       return;
@@ -281,6 +310,7 @@ export const SendTransaction = () => {
     await executeTransaction({
       chainId: 480,
       transactions: [
+        ...tokenApproveTxOptions.transactions,
         ...approveTxOptions.transactions,
         ...burnTxOptions.transactions,
       ],
