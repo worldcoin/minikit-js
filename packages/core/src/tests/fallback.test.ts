@@ -53,4 +53,28 @@ describe('executeWithFallback', () => {
       data: 'wagmi-result',
     });
   });
+
+  it('uses custom fallback after wagmi fallback fails on web', async () => {
+    const nativeExecutor = jest.fn().mockResolvedValue('native-result');
+    const wagmiExecutor = jest.fn().mockRejectedValue(new Error('missing wagmi'));
+    const customFallback = jest.fn().mockResolvedValue('custom-result');
+
+    jest.spyOn(commandTypes, 'isInWorldApp').mockReturnValue(false);
+    jest.spyOn(commandTypes, 'isCommandAvailable').mockReturnValue(false);
+
+    const result = await executeWithFallback({
+      command: commandTypes.Command.SignMessage,
+      nativeExecutor,
+      wagmiFallback: wagmiExecutor,
+      customFallback,
+    });
+
+    expect(nativeExecutor).not.toHaveBeenCalled();
+    expect(wagmiExecutor).toHaveBeenCalledTimes(1);
+    expect(customFallback).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({
+      executedWith: 'fallback',
+      data: 'custom-result',
+    });
+  });
 });

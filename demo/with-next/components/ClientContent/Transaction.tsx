@@ -35,7 +35,8 @@ const mainContract =
     : '0x9Cf4F011F55Add3ECC1B1B497A3e9bd32183D6e8';
 
 const PERMIT2_ADDRESS = '0x000000000022D473030F116dDEE9F6B43aC78BA3';
-const PERMIT_BURN_CONTRACT_ADDRESS = '0x378543ea0A7b6B048d441cAC1885e3a6b76aD17D';
+const PERMIT_BURN_CONTRACT_ADDRESS =
+  '0x378543ea0A7b6B048d441cAC1885e3a6b76aD17D';
 const MKT_TOKEN_ADDRESS = '0x9Cf4F011F55Add3ECC1B1B497A3e9bd32183D6e8';
 const UINT160_MAX = (1n << 160n) - 1n;
 
@@ -517,16 +518,15 @@ export const SendTransaction = () => {
           Test ETH
         </button>
       </div>
-      {executionMode === 'wagmi' && (
-        <div className="grid gap-x-2 grid-cols-1">
-          <button
-            className="bg-black text-white rounded-lg p-4 w-full"
-            onClick={testPermitApprove}
-          >
-            Test Permit Approve
-          </button>
-        </div>
-      )}
+
+      <div className="grid gap-x-2 grid-cols-1">
+        <button
+          className="bg-black text-white rounded-lg p-4 w-full"
+          onClick={testPermitApprove}
+        >
+          Test Permit Approve
+        </button>
+      </div>
 
       <div className="grid gap-y-1">
         <p>Result from send transaction execution:</p>

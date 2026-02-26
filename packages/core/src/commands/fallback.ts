@@ -85,7 +85,7 @@ export async function executeWithFallback<TNative, TFallback = TNative>(
   }
 
   // 3. Try custom fallback
-  if (customFallback) {
+  if (!inWorldApp && customFallback) {
     const data = await customFallback();
     return { data, executedWith: 'fallback' as CommandVia };
   }

@@ -43,9 +43,19 @@ export function registerWagmiFallbacks(): void {
 }
 
 async function loadWagmiActions(): Promise<any> {
+  // Temporary diagnostics for external fallback debugging.
+  console.log('[MiniKit WagmiFallback] loadWagmiActions:start', {
+    hasWindow: typeof window !== 'undefined',
+    hasWagmiConfig: hasWagmiConfig(),
+  });
   try {
-    return await runtimeImport('wagmi/actions');
+    const actions = await runtimeImport('wagmi/actions');
+    console.log('[MiniKit WagmiFallback] loadWagmiActions:success');
+    return actions;
   } catch (error) {
+    console.log('[MiniKit WagmiFallback] loadWagmiActions:error', {
+      message: error instanceof Error ? error.message : String(error),
+    });
     const wrappedError = new Error(
       'Wagmi fallback requires the "wagmi" package. Install wagmi or provide a custom fallback.',
     );
@@ -174,8 +184,13 @@ export interface SignTypedDataResult {
 export async function wagmiWalletAuth(
   params: WalletAuthParams,
 ): Promise<WalletAuthResult> {
+  console.log('[MiniKit WagmiFallback] walletAuth:start', {
+    hasWagmiConfig: hasWagmiConfig(),
+    nonceLength: params.nonce?.length ?? 0,
+  });
   const config = getWagmiConfig();
   if (!config) {
+    console.log('[MiniKit WagmiFallback] walletAuth:error:no-config');
     throw new Error(
       'Wagmi config not available. Pass wagmiConfig to MiniKitProvider.',
     );
@@ -223,8 +238,12 @@ export async function wagmiWalletAuth(
 export async function wagmiSignMessage(
   params: SignMessageParams,
 ): Promise<SignMessageResult> {
+  console.log('[MiniKit WagmiFallback] signMessage:start', {
+    hasWagmiConfig: hasWagmiConfig(),
+  });
   const config = getWagmiConfig();
   if (!config) {
+    console.log('[MiniKit WagmiFallback] signMessage:error:no-config');
     throw new Error(
       'Wagmi config not available. Pass wagmiConfig to MiniKitProvider.',
     );
@@ -252,8 +271,13 @@ export async function wagmiSignMessage(
 export async function wagmiSignTypedData(
   params: SignTypedDataParams,
 ): Promise<SignTypedDataResult> {
+  console.log('[MiniKit WagmiFallback] signTypedData:start', {
+    hasWagmiConfig: hasWagmiConfig(),
+    hasChainId: params.chainId !== undefined,
+  });
   const config = getWagmiConfig();
   if (!config) {
+    console.log('[MiniKit WagmiFallback] signTypedData:error:no-config');
     throw new Error(
       'Wagmi config not available. Pass wagmiConfig to MiniKitProvider.',
     );
@@ -310,8 +334,14 @@ function isChainMismatchError(error: unknown): boolean {
 export async function wagmiSendTransaction(
   params: SendTransactionParams,
 ): Promise<SendTransactionResult> {
+  console.log('[MiniKit WagmiFallback] sendTransaction:start', {
+    hasWagmiConfig: hasWagmiConfig(),
+    chainId: params.chainId,
+    hasData: Boolean(params.transaction.data),
+  });
   const config = getWagmiConfig();
   if (!config) {
+    console.log('[MiniKit WagmiFallback] sendTransaction:error:no-config');
     throw new Error(
       'Wagmi config not available. Pass wagmiConfig to MiniKitProvider.',
     );
