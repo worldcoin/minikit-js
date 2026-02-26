@@ -34,6 +34,46 @@ const mainContract =
     ? '0x9Cf4F011F55Add3ECC1B1B497A3e9bd32183D6e8' // same contract for now since I didn't add proofs
     : '0x9Cf4F011F55Add3ECC1B1B497A3e9bd32183D6e8';
 
+const PERMIT2_ADDRESS = '0x000000000022D473030F116dDEE9F6B43aC78BA3';
+const PERMIT_BURN_CONTRACT_ADDRESS = '0x378543ea0A7b6B048d441cAC1885e3a6b76aD17D';
+const MKT_TOKEN_ADDRESS = '0x9Cf4F011F55Add3ECC1B1B497A3e9bd32183D6e8';
+const UINT160_MAX = (1n << 160n) - 1n;
+
+const PERMIT2_ALLOWANCE_TRANSFER_ABI = [
+  {
+    type: 'function',
+    name: 'approve',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'token', type: 'address' },
+      { name: 'spender', type: 'address' },
+      { name: 'amount', type: 'uint160' },
+      { name: 'expiration', type: 'uint48' },
+    ],
+    outputs: [],
+  },
+] as const;
+
+const PERMIT_BURN_ABI = [
+  {
+    type: 'function',
+    name: 'burn',
+    stateMutability: 'nonpayable',
+    inputs: [{ name: 'owner', type: 'address' }],
+    outputs: [],
+  },
+] as const;
+
+const ERC20_DECIMALS_ABI = [
+  {
+    type: 'function',
+    name: 'decimals',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ name: '', type: 'uint8' }],
+  },
+] as const;
+
 export const SendTransaction = () => {
   const wagmiConfig = useConfig();
   const [executionMode, setExecutionMode] =
@@ -155,6 +195,95 @@ export const SendTransaction = () => {
     } catch (err) {
       handleError(err);
     }
+  };
+
+  const resolveOwnerAddress = async (): Promise<`0x${string}`> => {
+    const existing = MiniKit.user?.walletAddress;
+    if (existing && existing.startsWith('0x')) {
+      return existing as `0x${string}`;
+    }
+
+    const authResult = await MiniKit.walletAuth({
+      nonce: crypto.randomUUID().replace(/-/g, ''),
+      statement: 'Authenticate to continue with Permit2 test.',
+    });
+
+    const address = authResult.data.address;
+    if (!address || !address.startsWith('0x')) {
+      throw new Error('Failed to resolve wallet address from walletAuth.');
+    }
+    return address as `0x${string}`;
+  };
+
+  const resolveOneTokenAmount = async (): Promise<bigint> => {
+    const decimalsRaw = await client.readContract({
+      address: MKT_TOKEN_ADDRESS as `0x${string}`,
+      abi: ERC20_DECIMALS_ABI,
+      functionName: 'decimals',
+    });
+
+    const decimals = Number(decimalsRaw);
+    if (!Number.isInteger(decimals) || decimals < 0) {
+      throw new Error('Token decimals returned an invalid value.');
+    }
+
+    const amount = 10n ** BigInt(decimals);
+    if (amount > UINT160_MAX) {
+      throw new Error('Computed amount exceeds uint160 max.');
+    }
+    return amount;
+  };
+
+  const testPermitApprove = async () => {
+    const owner = await resolveOwnerAddress();
+    const amount = await resolveOneTokenAmount();
+
+    const approveTxOptions: MiniKitSendTransactionOptions = {
+      chainId: 480,
+      transactions: [
+        {
+          to: PERMIT2_ADDRESS,
+          data: encodeFunctionData({
+            abi: PERMIT2_ALLOWANCE_TRANSFER_ABI,
+            functionName: 'approve',
+            args: [
+              MKT_TOKEN_ADDRESS as `0x${string}`,
+              PERMIT_BURN_CONTRACT_ADDRESS as `0x${string}`,
+              amount,
+              0,
+            ],
+          }),
+        },
+      ],
+    };
+
+    const burnTxOptions: MiniKitSendTransactionOptions = {
+      chainId: 480,
+      transactions: [
+        {
+          to: PERMIT_BURN_CONTRACT_ADDRESS,
+          data: encodeFunctionData({
+            abi: PERMIT_BURN_ABI,
+            functionName: 'burn',
+            args: [owner],
+          }),
+        },
+      ],
+    };
+
+    if (executionMode === 'wagmi') {
+      await executeTransaction(approveTxOptions);
+      await executeTransaction(burnTxOptions);
+      return;
+    }
+
+    await executeTransaction({
+      chainId: 480,
+      transactions: [
+        ...approveTxOptions.transactions,
+        ...burnTxOptions.transactions,
+      ],
+    });
   };
 
   const mintToken = async () => {
@@ -388,6 +517,16 @@ export const SendTransaction = () => {
           Test ETH
         </button>
       </div>
+      {executionMode === 'wagmi' && (
+        <div className="grid gap-x-2 grid-cols-1">
+          <button
+            className="bg-black text-white rounded-lg p-4 w-full"
+            onClick={testPermitApprove}
+          >
+            Test Permit Approve
+          </button>
+        </div>
+      )}
 
       <div className="grid gap-y-1">
         <p>Result from send transaction execution:</p>
