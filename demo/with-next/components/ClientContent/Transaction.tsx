@@ -251,7 +251,7 @@ export const SendTransaction = () => {
               MKT_TOKEN_ADDRESS as `0x${string}`,
               PERMIT_BURN_CONTRACT_ADDRESS as `0x${string}`,
               amount,
-              10000,
+              Math.floor(Date.now() / 1000) + 3600,
             ],
           }),
         },
