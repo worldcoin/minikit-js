@@ -299,6 +299,14 @@ export const SendTransaction = () => {
             args: [],
           }),
         },
+        {
+          to: mainContract,
+          data: encodeFunctionData({
+            abi: MinikitStaging as any,
+            functionName: 'mintToken',
+            args: [],
+          }),
+        },
       ],
     };
     await executeTransaction(txOptions);
