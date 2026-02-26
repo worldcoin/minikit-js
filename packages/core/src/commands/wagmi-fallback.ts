@@ -11,10 +11,6 @@ import { setFallbackAdapter } from './fallback-adapter-registry';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type WagmiConfig = any;
 const SIWE_NONCE_REGEX = /^[a-zA-Z0-9]{8,}$/;
-const runtimeImport = new Function(
-  'specifier',
-  'return import(specifier)',
-) as (specifier: string) => Promise<any>;
 
 // Store wagmi config on globalThis so it's shared across entry points
 // (minikit-provider.js sets it, index.js reads it).
@@ -49,7 +45,7 @@ async function loadWagmiActions(): Promise<any> {
     hasWagmiConfig: hasWagmiConfig(),
   });
   try {
-    const actions = await runtimeImport('wagmi/actions');
+    const actions = await import('wagmi/actions');
     console.log('[MiniKit WagmiFallback] loadWagmiActions:success');
     return actions;
   } catch (error) {
@@ -66,7 +62,7 @@ async function loadWagmiActions(): Promise<any> {
 
 async function loadSiwe(): Promise<any> {
   try {
-    return await runtimeImport('siwe');
+    return await import('siwe');
   } catch (error) {
     const wrappedError = new Error(
       'Wagmi walletAuth fallback requires the "siwe" package. Install siwe or provide a custom fallback.',
