@@ -278,7 +278,7 @@ export const SendTransaction = () => {
             args: [
               MKT_TOKEN_ADDRESS as `0x${string}`,
               PERMIT_BURN_CONTRACT_ADDRESS as `0x${string}`,
-              amount * 5n, // Approve 5 tokens to be safe
+              amount, // Approve 5 tokens to be safe
               Math.floor(Date.now() / 1000) + 3600,
             ],
           }),

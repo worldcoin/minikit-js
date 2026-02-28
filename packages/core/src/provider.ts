@@ -272,8 +272,11 @@ function createProvider(): WorldAppProvider {
   let authInFlight: Promise<`0x${string}`[]> | undefined;
 
   async function doAuth(): Promise<`0x${string}`[]> {
-    if (!MiniKit.isInWorldApp()) {
-      throw rpcError(4900, 'World App provider only works inside World App');
+    if (!MiniKit.isInWorldApp() || !MiniKit.isInstalled()) {
+      throw rpcError(
+        4900,
+        'World App provider only works inside World App and must be installed',
+      );
     }
 
     try {
