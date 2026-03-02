@@ -15,6 +15,7 @@ import {
 // Types
 // ============================================================================
 
+/** @deprecated EIP-712 typed data signing is deprecated. Use signMessage or sendTransaction instead. */
 export type SignTypedDataInput = {
   types: TypedData;
   primaryType: string;
@@ -23,8 +24,10 @@ export type SignTypedDataInput = {
   chainId?: number;
 };
 
+/** @deprecated EIP-712 typed data signing is deprecated. Use signMessage or sendTransaction instead. */
 export type SignTypedDataPayload = SignTypedDataInput;
 
+/** @deprecated EIP-712 typed data signing is deprecated. Use signMessage or sendTransaction instead. */
 export enum SignTypedDataErrorCodes {
   InvalidOperation = 'invalid_operation',
   UserRejected = 'user_rejected',
@@ -36,6 +39,7 @@ export enum SignTypedDataErrorCodes {
   MaliciousOperation = 'malicious_operation',
 }
 
+/** @deprecated EIP-712 typed data signing is deprecated. Use signMessage or sendTransaction instead. */
 export const SignTypedDataErrorMessage = {
   [SignTypedDataErrorCodes.InvalidOperation]:
     'Transaction included an operation that was invalid',
@@ -53,16 +57,19 @@ export const SignTypedDataErrorMessage = {
     'The operation requested is considered malicious.',
 };
 
+/** @deprecated EIP-712 typed data signing is deprecated. Use signMessage or sendTransaction instead. */
 export type MiniAppSignTypedDataSuccessPayload = MiniAppBaseSuccessPayload & {
   signature: string;
   address: string;
 };
 
+/** @deprecated EIP-712 typed data signing is deprecated. Use signMessage or sendTransaction instead. */
 export type MiniAppSignTypedDataErrorPayload =
   MiniAppBaseErrorPayload<SignTypedDataErrorCodes> & {
     details?: Record<string, any>;
   };
 
+/** @deprecated EIP-712 typed data signing is deprecated. Use signMessage or sendTransaction instead. */
 export type MiniAppSignTypedDataPayload =
   | MiniAppSignTypedDataSuccessPayload
   | MiniAppSignTypedDataErrorPayload;
@@ -73,6 +80,10 @@ export type MiniAppSignTypedDataPayload =
 
 export function createSignTypedDataCommand(_ctx: CommandContext) {
   return (payload: SignTypedDataInput): SignTypedDataPayload | null => {
+    console.warn(
+      'signTypedData is deprecated. Use signMessage or sendTransaction instead.',
+    );
+
     if (
       typeof window === 'undefined' ||
       !isCommandAvailable(Command.SignTypedData)
