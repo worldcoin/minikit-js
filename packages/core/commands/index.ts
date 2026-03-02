@@ -65,6 +65,7 @@ export function createCommands(ctx: CommandContext) {
     walletAuth: createWalletAuthCommand(ctx),
     sendTransaction: createSendTransactionCommand(ctx),
     signMessage: createSignMessageCommand(ctx),
+    /** @deprecated EIP-712 typed data signing is deprecated. Use signMessage or sendTransaction instead. */
     signTypedData: createSignTypedDataCommand(ctx),
     shareContacts: createShareContactsCommand(ctx),
     requestPermission: createRequestPermissionCommand(ctx),
@@ -87,6 +88,7 @@ export function createAsyncCommands(ctx: CommandContext, commands: Commands) {
       commands.sendTransaction,
     ),
     signMessage: createSignMessageAsyncCommand(ctx, commands.signMessage),
+    /** @deprecated EIP-712 typed data signing is deprecated. Use signMessage or sendTransaction instead. */
     signTypedData: createSignTypedDataAsyncCommand(ctx, commands.signTypedData),
     shareContacts: createShareContactsAsyncCommand(ctx, commands.shareContacts),
     requestPermission: createRequestPermissionAsyncCommand(
