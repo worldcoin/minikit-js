@@ -6,7 +6,7 @@ import {
   type IDKitResult,
   type RpContext,
 } from '@worldcoin/idkit-core';
-import { useMiniKit } from '@worldcoin/minikit-js/provider';
+import { MiniKit } from '@worldcoin/minikit-js';
 import { useCallback, useState } from 'react';
 import { verifyProof } from './verify-cloud-proof';
 import { VerifyOnchainProof } from './verify-onchain';
@@ -35,7 +35,7 @@ export const VerifyAction = () => {
   const [lastUsedAppId, setLastUsedAppId] = useState<`app_${string}` | null>(
     null,
   );
-  const { isInstalled } = useMiniKit();
+  const isInWorldApp = MiniKit.isInWorldApp();
   const [widgetOpen, setWidgetOpen] = useState(false);
   const [widgetTarget, setWidgetTarget] = useState<VerifyTarget | null>(null);
   const [rpContext, setRpContext] = useState<RpContext | null>(null);
@@ -192,7 +192,7 @@ export const VerifyAction = () => {
   }, []);
 
   const onVerifyClick = useCallback(async () => {
-    if (isInstalled) {
+    if (isInWorldApp) {
       setStatusMessage('Detected World App. Using native IDKit flow.');
       await verifyAction({
         app_id: target.appId,
@@ -204,7 +204,7 @@ export const VerifyAction = () => {
 
     setStatusMessage('Detected browser. Using IDKit widget flow.');
     await openWidgetFlow(target);
-  }, [openWidgetFlow, target, verifyAction]);
+  }, [isInWorldApp, openWidgetFlow, target, verifyAction]);
 
   return (
     <div className="grid gap-y-4">
