@@ -1,6 +1,7 @@
 'use client';
 import { Button, LiveFeedback } from '@worldcoin/mini-apps-ui-kit-react';
-import { MiniKit, Tokens, tokenToDecimals } from '@worldcoin/minikit-js';
+import { MiniKit } from '@worldcoin/minikit-js';
+import { Tokens, tokenToDecimals } from '@worldcoin/minikit-js/commands';
 import { useState } from 'react';
 
 /**
@@ -23,29 +24,29 @@ export const Pay = () => {
     });
     const { id } = await res.json();
 
-    const result = await MiniKit.commandsAsync.pay({
-      reference: id,
-      to: address ?? '0x0000000000000000000000000000000000000000',
-      tokens: [
-        {
-          symbol: Tokens.WLD,
-          token_amount: tokenToDecimals(0.5, Tokens.WLD).toString(),
-        },
-        {
-          symbol: Tokens.USDC,
-          token_amount: tokenToDecimals(0.1, Tokens.USDC).toString(),
-        },
-      ],
-      description: 'Test example payment for minikit',
-    });
+    try {
+      const result = await MiniKit.pay({
+        reference: id,
+        to: address ?? '0x0000000000000000000000000000000000000000',
+        tokens: [
+          {
+            symbol: Tokens.WLD,
+            token_amount: tokenToDecimals(0.5, Tokens.WLD).toString(),
+          },
+          {
+            symbol: Tokens.USDC,
+            token_amount: tokenToDecimals(0.1, Tokens.USDC).toString(),
+          },
+        ],
+        description: 'Test example payment for minikit',
+      });
 
-    console.log(result.finalPayload);
-    if (result.finalPayload.status === 'success') {
+      console.log(result.data);
       setButtonState('success');
       // It's important to actually check the transaction result on-chain
       // You should confirm the reference id matches for security
       // Read more here: https://docs.world.org/mini-apps/commands/pay#verifying-the-payment
-    } else {
+    } catch {
       setButtonState('failed');
       setTimeout(() => {
         setButtonState(undefined);

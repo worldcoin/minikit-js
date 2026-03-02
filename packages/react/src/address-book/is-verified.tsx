@@ -1,4 +1,4 @@
-import { getIsUserVerified } from '@worldcoin/minikit-js';
+import { getIsUserVerified } from '@worldcoin/minikit-js/address-book';
 import { useEffect, useState } from 'react';
 
 /**

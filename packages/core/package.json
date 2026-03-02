@@ -4,27 +4,26 @@
     "url": "git+https://github.com/worldcoin/minikit-js.git"
   },
   "dependencies": {
-    "@worldcoin/idkit-core": "^2.0.2",
-    "abitype": "^1.0.6"
+    "abitype": "^1.2.3"
   },
   "description": "minikit-js is our SDK for building mini-apps.",
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "@types/node": "^20",
-    "@types/react": "^17.0.0",
+    "@types/react": "^19",
     "@typescript-eslint/eslint-plugin": "^7.7.0",
     "@typescript-eslint/parser": "^7.7.0",
+    "ethers": "^6.13.5",
     "jest": "^29.7.0",
     "prettier": "^3.2.5",
     "prettier-plugin-sort-imports-desc": "^1.0.0",
-    "react": "^17.0.0",
+    "react": "^19.0.0",
     "siwe": "^3.0.0",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "tsup": "^8.0.2",
-    "ethers": "^6.13.5",
     "typescript": "^5.4.5",
-    "viem": "2.23.5"
+    "viem": "2.45.3"
   },
   "engines": {
     "node": ">= 16"
@@ -40,6 +39,16 @@
         "default": "./build/index.cjs"
       }
     },
+    "./provider": {
+      "import": {
+        "types": "./build/minikit-provider.d.ts",
+        "default": "./build/minikit-provider.js"
+      },
+      "require": {
+        "types": "./build/minikit-provider.d.cts",
+        "default": "./build/minikit-provider.cjs"
+      }
+    },
     "./minikit-provider": {
       "import": {
         "types": "./build/minikit-provider.d.ts",
@@ -48,6 +57,46 @@
       "require": {
         "types": "./build/minikit-provider.d.cts",
         "default": "./build/minikit-provider.cjs"
+      }
+    },
+    "./wagmi": {
+      "import": {
+        "types": "./build/connector/index.d.ts",
+        "default": "./build/connector/index.js"
+      },
+      "require": {
+        "types": "./build/connector/index.d.cts",
+        "default": "./build/connector/index.cjs"
+      }
+    },
+    "./commands": {
+      "import": {
+        "types": "./build/command-exports.d.ts",
+        "default": "./build/command-exports.js"
+      },
+      "require": {
+        "types": "./build/command-exports.d.cts",
+        "default": "./build/command-exports.cjs"
+      }
+    },
+    "./siwe": {
+      "import": {
+        "types": "./build/siwe-exports.d.ts",
+        "default": "./build/siwe-exports.js"
+      },
+      "require": {
+        "types": "./build/siwe-exports.d.cts",
+        "default": "./build/siwe-exports.cjs"
+      }
+    },
+    "./address-book": {
+      "import": {
+        "types": "./build/address-book.d.ts",
+        "default": "./build/address-book.js"
+      },
+      "require": {
+        "types": "./build/address-book.d.cts",
+        "default": "./build/address-book.cjs"
       }
     }
   },
@@ -61,23 +110,36 @@
     "miniapps"
   ],
   "license": "MIT",
-  "main": "index.ts",
+  "main": "./build/index.js",
   "name": "@worldcoin/minikit-js",
   "peerDependencies": {
     "react": "^17 || ^18 || ^19",
-    "viem": "^2.23.5"
+    "siwe": "^3.0.0",
+    "viem": "^2.21.0",
+    "wagmi": "^3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@worldcoin/idkit-core": {
+      "optional": true
+    },
+    "wagmi": {
+      "optional": true
+    },
+    "siwe": {
+      "optional": true
+    }
   },
   "private": false,
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "lint": "prettier --check .",
+    "lint": "prettier --check . --ignore-path ../../.prettierignore",
     "prepublishOnly": "npm run build",
     "test": "jest",
     "type-check": "tsc --noEmit"
   },
   "type": "module",
-  "types": "index.ts",
+  "types": "./build/index.d.ts",
   "typesVersions": {
     "*": {
       "*": [
@@ -86,5 +148,5 @@
       ]
     }
   },
-  "version": "1.10.0"
+  "version": "2.0.0-dev.1"
 }

@@ -5,7 +5,7 @@ import { Button, LiveFeedback } from '@worldcoin/mini-apps-ui-kit-react';
 import { MiniKit } from '@worldcoin/minikit-js';
 import { useWaitForTransactionReceipt } from '@worldcoin/minikit-react';
 import { useEffect, useState } from 'react';
-import { createPublicClient, http } from 'viem';
+import { createPublicClient, encodeFunctionData, http } from 'viem';
 import { worldchain } from 'viem/chains';
 
 /**
@@ -74,30 +74,27 @@ export const Transaction = () => {
     setButtonState('pending');
 
     try {
-      const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
-        transaction: [
+      const result = await MiniKit.sendTransaction({
+        chainId: 480,
+        transactions: [
           {
-            address: myContractToken,
-            abi: TestContractABI,
-            functionName: 'mintToken',
-            args: [],
+            to: myContractToken,
+            data: encodeFunctionData({
+              abi: TestContractABI,
+              functionName: 'mintToken',
+              args: [],
+            }),
           },
         ],
       });
 
-      if (finalPayload.status === 'success') {
-        console.log(
-          'Transaction submitted, waiting for confirmation:',
-          finalPayload.transaction_id,
-        );
-        setTransactionId(finalPayload.transaction_id);
-      } else {
-        console.error('Transaction submission failed:', finalPayload);
-        setButtonState('failed');
-        setTimeout(() => {
-          setButtonState(undefined);
-        }, 3000);
-      }
+      console.log(
+        'Transaction submitted, waiting for confirmation:',
+        result.data.transactionId,
+      );
+      const transactionId =
+        result.data.transactionId ?? result.data.transactionHash ?? '';
+      setTransactionId(transactionId);
     } catch (err) {
       console.error('Error sending transaction:', err);
       setButtonState('failed');
@@ -131,24 +128,27 @@ export const Transaction = () => {
     };
 
     try {
-      const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
-        transaction: [
+      const result = await MiniKit.sendTransaction({
+        chainId: 480,
+        transactions: [
           {
-            address: myContractToken,
-            abi: TestContractABI,
-            functionName: 'signatureTransfer',
-            args: [
-              [
+            to: myContractToken,
+            data: encodeFunctionData({
+              abi: TestContractABI,
+              functionName: 'signatureTransfer',
+              args: [
                 [
-                  permitTransfer.permitted.token,
-                  permitTransfer.permitted.amount,
+                  [
+                    permitTransfer.permitted.token,
+                    permitTransfer.permitted.amount,
+                  ],
+                  permitTransfer.nonce,
+                  permitTransfer.deadline,
                 ],
-                permitTransfer.nonce,
-                permitTransfer.deadline,
+                [transferDetails.to, transferDetails.requestedAmount],
+                'PERMIT2_SIGNATURE_PLACEHOLDER_0',
               ],
-              [transferDetails.to, transferDetails.requestedAmount],
-              'PERMIT2_SIGNATURE_PLACEHOLDER_0',
-            ],
+            }),
           },
         ],
         permit2: [
@@ -159,19 +159,19 @@ export const Transaction = () => {
         ],
       });
 
-      if (finalPayload.status === 'success') {
-        console.log(
-          'Transaction submitted, waiting for confirmation:',
-          finalPayload.transaction_id,
-        );
-        setTransactionId(finalPayload.transaction_id);
-      } else {
-        console.error('Transaction submission failed:', finalPayload);
-        setButtonState('failed');
-      }
+      console.log(
+        'Transaction submitted, waiting for confirmation:',
+        result.data.transactionId,
+      );
+      const transactionId =
+        result.data.transactionId ?? result.data.transactionHash ?? '';
+      setTransactionId(transactionId);
     } catch (err) {
       console.error('Error sending transaction:', err);
       setButtonState('failed');
+      setTimeout(() => {
+        setButtonState(undefined);
+      }, 3000);
     }
   };
 
