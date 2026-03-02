@@ -141,6 +141,7 @@ export const VerifyAction = () => {
           await verifyIDKitProof(completion.result as IDKitResult, app_id);
         }
       } catch (err: unknown) {
+        console.error('Verification error:', err);
         setStatusMessage(
           `Error: ${err instanceof Error ? err.message : String(err)}`,
         );

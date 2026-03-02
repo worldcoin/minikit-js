@@ -96,81 +96,90 @@ export const VerifyOnchainProof = () => {
   }>({});
 
   const handleOnchainVerify = async () => {
-    let signal = MiniKit.user.walletAddress;
-    if (!signal) {
-      const authResult = await MiniKit.walletAuth({
-        nonce: 'itrustyou123',
-      });
-      signal = authResult.data.address;
-    }
-    if (!signal) {
-      setOnchainVerifyResult({ success: false, error: 'No wallet address' });
-      return;
-    }
-    // Fetch RP signature for IDKit
-    const rpRes = await fetch('/api/rp-signature', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'onchain-verify-test' }),
-    });
-    const rpSig = await rpRes.json();
-    const rpContext: RpContext = {
-      rp_id: rpSig.rp_id,
-      nonce: rpSig.nonce,
-      created_at: rpSig.created_at,
-      expires_at: rpSig.expires_at,
-      signature: rpSig.sig,
-    };
-
-    const request = await IDKit.request({
-      app_id: process.env.NEXT_PUBLIC_PROD_VERIFY_APP_ID as `app_${string}`,
-      action: 'onchain-verify-test',
-      rp_context: rpContext,
-      allow_legacy_proofs: true,
-      environment:
-        process.env.NEXT_PUBLIC_ENVIRONMENT === 'production'
-          ? 'production'
-          : 'staging',
-    }).preset(orbLegacy({ signal }));
-
-    const completion = await request.pollUntilCompletion();
-    if (!completion.success) {
-      setOnchainVerifyResult({
-        success: false,
-        error: `Verification failed: ${completion.error}`,
-        isLoading: false,
-      });
-      return;
-    }
-    const firstResponse = completion.result.responses?.[0] as
-      | Record<string, any>
-      | undefined;
-
-    if (firstResponse?.proof) {
-      const merkleRoot = firstResponse.merkle_root;
-      const nullifierHash = firstResponse.nullifier_hash;
-      const proof = firstResponse.proof;
-
-      try {
-        const result = await verifyOnchain({
-          signal,
-          root: merkleRoot,
-          nullifierHash: nullifierHash,
-          proof: proof,
+    try {
+      let signal = MiniKit.user.walletAddress;
+      if (!signal) {
+        const authResult = await MiniKit.walletAuth({
+          nonce: 'itrustyou123',
         });
+        signal = authResult.data.address;
+      }
+      if (!signal) {
+        setOnchainVerifyResult({ success: false, error: 'No wallet address' });
+        return;
+      }
+      // Fetch RP signature for IDKit
+      const rpRes = await fetch('/api/rp-signature', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'onchain-verify-test' }),
+      });
+      const rpSig = await rpRes.json();
+      const rpContext: RpContext = {
+        rp_id: rpSig.rp_id,
+        nonce: rpSig.nonce,
+        created_at: rpSig.created_at,
+        expires_at: rpSig.expires_at,
+        signature: rpSig.sig,
+      };
 
-        setOnchainVerifyResult({
-          ...result,
-          isLoading: false,
-        });
-      } catch (error) {
-        console.error('Error in onchain verification:', error);
+      const request = await IDKit.request({
+        app_id: process.env.NEXT_PUBLIC_PROD_VERIFY_APP_ID as `app_${string}`,
+        action: 'onchain-verify-test',
+        rp_context: rpContext,
+        allow_legacy_proofs: true,
+        environment:
+          process.env.NEXT_PUBLIC_ENVIRONMENT === 'production'
+            ? 'production'
+            : 'staging',
+      }).preset(orbLegacy({ signal }));
+
+      const completion = await request.pollUntilCompletion();
+      if (!completion.success) {
         setOnchainVerifyResult({
           success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: `Verification failed: ${completion.error}`,
           isLoading: false,
         });
+        return;
       }
+      const firstResponse = completion.result.responses?.[0] as
+        | Record<string, any>
+        | undefined;
+
+      if (firstResponse?.proof) {
+        const merkleRoot = firstResponse.merkle_root;
+        const nullifierHash = firstResponse.nullifier_hash;
+        const proof = firstResponse.proof;
+
+        try {
+          const result = await verifyOnchain({
+            signal,
+            root: merkleRoot,
+            nullifierHash: nullifierHash,
+            proof: proof,
+          });
+
+          setOnchainVerifyResult({
+            ...result,
+            isLoading: false,
+          });
+        } catch (error) {
+          console.error('Error in onchain verification:', error);
+          setOnchainVerifyResult({
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
+            isLoading: false,
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error during on-chain verification flow:', error);
+      setOnchainVerifyResult({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        isLoading: false,
+      });
     }
   };
   if (process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging') {
