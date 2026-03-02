@@ -1,5 +1,6 @@
-import { IDKitConfig, VerificationLevel } from '@worldcoin/idkit-core';
+import { IDKitConfig } from '@worldcoin/idkit-core';
 import { encodeAction, generateSignal } from '@worldcoin/idkit-core/hashing';
+import { VerificationLevel } from '../types/verification-level';
 import {
   AsyncHandlerReturn,
   Command,
