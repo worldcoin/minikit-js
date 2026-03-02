@@ -1,6 +1,7 @@
 'use client';
 import {
   IDKit,
+  IDKitRequestConfig,
   orbLegacy,
   type IDKitResult,
   type RpContext,
@@ -114,21 +115,19 @@ export const VerifyAction = () => {
           signature: rpSig.sig,
         };
 
-        const config = {
+        const config: IDKitRequestConfig = {
           app_id,
           action,
           rp_context: rpContext,
           allow_legacy_proofs: true,
-          environment: isProduction
-            ? 'production'
-            : ('staging' as 'production' | 'staging'),
+          environment: isProduction ? 'production' : 'staging',
         };
 
         setSentVerifyPayload({ ...config, signal });
 
         // Use IDKit request API
         const request = await IDKit.request(config).preset(
-          orbLegacy({ signal: signal ?? '' }),
+          orbLegacy({ signal }),
         );
 
         setStatusMessage('Waiting for verification...');
@@ -195,7 +194,7 @@ export const VerifyAction = () => {
   const onVerifyClick = useCallback(async () => {
     if (isInstalled) {
       setStatusMessage('Detected World App. Using native IDKit flow.');
-      verifyAction({
+      await verifyAction({
         app_id: target.appId,
         action: target.action,
         signal: 'test',
