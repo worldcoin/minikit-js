@@ -114,8 +114,8 @@ importers:
         specifier: 3.3.3
         version: 3.3.3(@tanstack/query-core@5.90.20)(@types/react@19.1.1)(ox@0.12.1(typescript@5.5.4)(zod@3.25.76))(react@19.1.0)(typescript@5.5.4)(use-sync-external-store@1.4.0(react@19.1.0))(viem@2.45.3(bufferutil@4.1.0)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.25.76))
       '@worldcoin/idkit-core':
-        specifier: 4.0.9-dev.0c1d917
-        version: 4.0.9-dev.0c1d917
+        specifier: 4.0.10
+        version: 4.0.10
       '@worldcoin/minikit-js':
         specifier: workspace:*
         version: link:../../packages/core
@@ -2445,8 +2445,8 @@ packages:
     resolution: {integrity: sha512-ykDuesfSsuERh4T0cShQlrnaBQiHS5qSJtEUiLiehoFln4nIbK93004l2EWjEDK989pbkC6hEy7yA6fPh6tMOQ==}
     deprecated: This version is deprecated. Please upgrade to >=4.0.6.
 
-  '@worldcoin/idkit-core@4.0.9-dev.0c1d917':
-    resolution: {integrity: sha512-Zu5KaZHhxkdZ8qnYnuF/mrbKPe7MTB9rHFWB0UP6boyToTszLwX7f6Ch2sN8nPpoaQJ9B99UpszvovIseiaErA==}
+  '@worldcoin/idkit-core@4.0.10':
+    resolution: {integrity: sha512-OeWJG1mcXXM8fnHTFaRQ2ZPjw+/56F03nFjYi1jaTFW3Jkxcbhe5jyd//kIgTpywPjvX+70Cod82k8EgNomVuw==}
 
   '@worldcoin/idkit-server@1.0.0':
     resolution: {integrity: sha512-ZCyXJFexxLjPtG7lxTntf6oiwF0pzoUIsVFIAAgFyXav5KmUnVlrvVoeGrgpiDFRznH2B4/Iv5xv+SkEHxOdXQ==}
@@ -10065,7 +10065,7 @@ snapshots:
 
   '@worldcoin/idkit-core@4.0.1': {}
 
-  '@worldcoin/idkit-core@4.0.9-dev.0c1d917':
+  '@worldcoin/idkit-core@4.0.10':
     dependencies:
       '@noble/hashes': 1.8.0
       '@worldcoin/idkit-server': 1.0.0
