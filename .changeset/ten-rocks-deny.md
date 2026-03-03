@@ -1,5 +1,5 @@
 ---
-'@worldcoin/minikit-js': patch
+'@worldcoin/minikit-js': minor
 ---
 
 deprecate signTypedData
