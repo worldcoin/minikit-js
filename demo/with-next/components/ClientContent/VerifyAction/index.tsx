@@ -2,7 +2,7 @@
 import {
   IDKit,
   IDKitRequestConfig,
-  orbLegacy,
+  deviceLegacy,
   type IDKitResult,
   type RpContext,
 } from '@worldcoin/idkit-core';
@@ -127,7 +127,7 @@ export const VerifyAction = () => {
 
         // Use IDKit request API
         const request = await IDKit.request(config).preset(
-          orbLegacy({ signal }),
+          deviceLegacy({ signal }),
         );
 
         setStatusMessage('Waiting for verification...');
