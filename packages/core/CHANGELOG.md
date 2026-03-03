@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.11.0
+
+### Minor Changes
+
+- b83799b: deprecate signTypedData
+
 ## 1.10.0
 
 ### Minor Changes
