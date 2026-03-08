@@ -93,6 +93,7 @@ export const SendTransaction = () => {
   const wagmiConfig = useConfig();
   const [executionMode, setExecutionMode] =
     useState<DemoExecutionMode>('minikit');
+  const isWagmiMode = executionMode === 'wagmi';
   const [transactionData, setTransactionData] = useState<Record<
     string,
     any
@@ -329,14 +330,6 @@ export const SendTransaction = () => {
             args: [],
           }),
         },
-        {
-          to: mainContract,
-          data: encodeFunctionData({
-            abi: MinikitStaging as any,
-            functionName: 'mintToken',
-            args: [],
-          }),
-        },
       ],
     };
     await executeTransaction(txOptions);
@@ -465,7 +458,7 @@ export const SendTransaction = () => {
           }`}
           onClick={() => setExecutionMode('wagmi')}
         >
-          Wagmi Native
+          Wagmi Native (Single Tx)
         </button>
       </div>
       <div className="bg-gray-50 border-l-4 border-gray-400 p-4 mb-4">
@@ -485,9 +478,10 @@ export const SendTransaction = () => {
           </div>
           <div className="ml-3">
             <p className="text-sm text-gray-700">
-              <span className="font-medium">Note:</span> Green buttons should
-              always work, red should fail, and black works if the conditions
-              are met.
+              <span className="font-medium">Note:</span> MiniKit mode can send
+              bundled transactions. Wagmi Native mode in this demo is limited
+              to single-transaction calls and is intended to exercise the wagmi
+              connector/provider path.
             </p>
           </div>
         </div>
@@ -513,9 +507,9 @@ export const SendTransaction = () => {
         <button
           className="bg-blue-600 text-white rounded-lg p-4 w-full disabled:opacity-50"
           onClick={mintTokenWithRawData}
-          disabled={executionMode !== 'wagmi'}
+          disabled={!isWagmiMode}
         >
-          Wagmi To+Data
+          Wagmi Single Tx (To+Data)
         </button>
       </div>
       <div className="grid gap-x-2 grid-cols-2">
