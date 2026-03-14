@@ -18,7 +18,8 @@ export * from './types/wallet-auth';
 
 export { tokenToDecimals } from 'helpers/payment/client';
 
-export { VerificationLevel, type ISuccessResult } from '@worldcoin/idkit-core';
+export { type ISuccessResult } from '@worldcoin/idkit-core';
+export { VerificationLevel } from './types/verification-level';
 export {
   verifyCloudProof,
   type IVerifyResponse,
