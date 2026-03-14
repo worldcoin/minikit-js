@@ -4,8 +4,7 @@
     "url": "git+https://github.com/worldcoin/minikit-js.git"
   },
   "dependencies": {
-    "abitype": "^1.2.3",
-    "viem": "^2.21.0"
+    "abitype": "^1.2.3"
   },
   "description": "minikit-js is our SDK for building mini-apps.",
   "devDependencies": {
@@ -116,13 +115,17 @@
   "peerDependencies": {
     "react": "^17 || ^18 || ^19",
     "siwe": "^3.0.0",
+    "viem": "^2.21.0",
     "wagmi": "^3.0.0"
   },
   "peerDependenciesMeta": {
-    "wagmi": {
+    "siwe": {
       "optional": true
     },
-    "siwe": {
+    "viem": {
+      "optional": true
+    },
+    "wagmi": {
       "optional": true
     }
   },
