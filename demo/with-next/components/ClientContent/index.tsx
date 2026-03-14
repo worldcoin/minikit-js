@@ -1,10 +1,7 @@
 'use client';
 
 import { MiniKit } from '@worldcoin/minikit-js';
-import {
-  GetSearchedUsernameResult,
-  UsernameSearch,
-} from '@worldcoin/minikit-react';
+import { UsernameSearch } from '@worldcoin/minikit-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useState } from 'react';
@@ -35,8 +32,18 @@ const VersionsNoSSR = dynamic(
 
 export const ClientContent = () => {
   const [searchValue, setSearchValue] = useState('');
-  const [searchResults, setSearchResults] =
-    useState<GetSearchedUsernameResult>();
+  const [searchResults, setSearchResults] = useState<
+    | {
+        status: number;
+        data?: Array<{
+          address: string;
+          profile_picture_url: string | null;
+          username: string;
+        }>;
+        error?: string;
+      }
+    | undefined
+  >();
   const isProduction = process.env.NEXT_PUBLIC_ENVIRONMENT === 'production';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

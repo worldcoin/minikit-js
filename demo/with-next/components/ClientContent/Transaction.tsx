@@ -1,75 +1,99 @@
-import {
-  MiniAppSendTransactionPayload,
-  MiniKit,
-  ResponseEvent,
-  SendTransactionErrorCodes,
-  Tokens,
-  tokenToDecimals,
-  VerificationLevel,
-} from '@worldcoin/minikit-js';
-import { useWaitForTransactionReceipt } from '@worldcoin/minikit-react';
+'use client';
+import { MiniKit } from '@worldcoin/minikit-js';
+import type {
+  MiniKitSendTransactionOptions,
+  SendTransactionResult,
+} from '@worldcoin/minikit-js/commands';
+import { useWaitForUserOperationReceipt } from '@worldcoin/minikit-react';
 import { useState } from 'react';
-import { createPublicClient, http } from 'viem';
+import { createPublicClient, encodeFunctionData, http } from 'viem';
 import { worldchain } from 'viem/chains';
+import {
+  useConfig,
+  useWaitForTransactionReceipt as useWagmiWaitForTransactionReceipt,
+} from 'wagmi';
 import * as yup from 'yup';
-import ANDYABI from '../../abi/Andy.json';
-import DEXABI from '../../abi/DEX.json';
 import ForwardABI from '../../abi/Forward.json';
 import MinikitStaging from '../../abi/MinikitStaging.json';
 import { validateSchema } from './helpers/validate-schema';
+import {
+  DemoExecutionMode,
+  wagmiNativeSendTransaction,
+} from './helpers/wagmi-native';
 
-const sendTransactionSuccessPayloadSchema = yup.object({
-  status: yup.string<'success'>().oneOf(['success']),
-  transaction_status: yup.string<'submitted'>().oneOf(['submitted']),
-  transaction_id: yup.string().required(),
-  from: yup.string().optional(),
-  chain: yup.string().required(),
+const sendTransactionResultSchema = yup.object({
+  userOpHash: yup.string().required(),
+  status: yup.string<'success'>().oneOf(['success']).required(),
+  version: yup.number().required(),
+  from: yup.string().required(),
   timestamp: yup.string().required(),
 });
-
-const sendTransactionErrorPayloadSchema = yup.object({
-  error_code: yup
-    .string<SendTransactionErrorCodes>()
-    .oneOf(Object.values(SendTransactionErrorCodes))
-    .required(),
-  status: yup.string<'error'>().equals(['error']).required(),
-});
-
-const testTokens = {
-  optimism: {
-    // USDC: '0x0b2c639c533813f4aa9d7837caf62653d097ff85',
-    USDC: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
-  },
-  worldchain: {
-    USDC: '0x79A02482A880bCE3F13e09Da970dC34db4CD24d1',
-  },
-};
 
 const mainContract =
   process.env.NEXT_PUBLIC_ENVIRONMENT === 'production'
     ? '0x9Cf4F011F55Add3ECC1B1B497A3e9bd32183D6e8' // same contract for now since I didn't add proofs
     : '0x9Cf4F011F55Add3ECC1B1B497A3e9bd32183D6e8';
 
-const standingPermitContract =
-  process.env.NEXT_PUBLIC_STANDING_PERMIT_CONTRACT ||
-  '0x7805d5a2230f279b6f4f85fae68f98e3597da6e2';
+const PERMIT2_ADDRESS = '0x000000000022D473030F116dDEE9F6B43aC78BA3';
+const PERMIT_BURN_CONTRACT_ADDRESS =
+  '0x378543ea0A7b6B048d441cAC1885e3a6b76aD17D';
+const MKT_TOKEN_ADDRESS = '0x9Cf4F011F55Add3ECC1B1B497A3e9bd32183D6e8';
+const UINT160_MAX = (1n << 160n) - 1n;
+const UINT256_MAX = (1n << 256n) - 1n;
 
-const StandingPermitTestABI = [
+const PERMIT2_ALLOWANCE_TRANSFER_ABI = [
   {
-    inputs: [{ internalType: 'bytes', name: 'signature', type: 'bytes' }],
-    name: 'test',
-    outputs: [],
-    stateMutability: 'nonpayable',
     type: 'function',
+    name: 'approve',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'token', type: 'address' },
+      { name: 'spender', type: 'address' },
+      { name: 'amount', type: 'uint160' },
+      { name: 'expiration', type: 'uint48' },
+    ],
+    outputs: [],
   },
-];
+] as const;
 
-/* Asynchronous Implementation
-For the purpose of variability some of these commands use async handlers
-and some of the commands user synchronous responses. 
-*/
+const PERMIT_BURN_ABI = [
+  {
+    type: 'function',
+    name: 'burn',
+    stateMutability: 'nonpayable',
+    inputs: [{ name: 'owner', type: 'address' }],
+    outputs: [],
+  },
+] as const;
+
+const ERC20_DECIMALS_ABI = [
+  {
+    type: 'function',
+    name: 'decimals',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ name: '', type: 'uint8' }],
+  },
+] as const;
+
+const ERC20_APPROVE_ABI = [
+  {
+    type: 'function',
+    name: 'approve',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'spender', type: 'address' },
+      { name: 'amount', type: 'uint256' },
+    ],
+    outputs: [{ name: '', type: 'bool' }],
+  },
+] as const;
 
 export const SendTransaction = () => {
+  const wagmiConfig = useConfig();
+  const [executionMode, setExecutionMode] =
+    useState<DemoExecutionMode>('minikit');
+  const isWagmiMode = executionMode === 'wagmi';
   const [transactionData, setTransactionData] = useState<Record<
     string,
     any
@@ -82,6 +106,12 @@ export const SendTransaction = () => {
   ] = useState<string | null>();
 
   const [transactionId, setTransactionId] = useState<string>('');
+  const [transactionHash, setTransactionHash] = useState<
+    `0x${string}` | undefined
+  >();
+  const [verificationMode, setVerificationMode] = useState<
+    'minikit' | 'wagmi' | null
+  >(null);
 
   const client = createPublicClient({
     chain: worldchain,
@@ -89,442 +119,351 @@ export const SendTransaction = () => {
   });
 
   const {
-    isLoading: isConfirming,
-    isSuccess: isConfirmed,
-    error,
-    isError,
-  } = useWaitForTransactionReceipt({
+    isLoading: isMiniKitConfirming,
+    isSuccess: isMiniKitConfirmed,
+    error: miniKitError,
+    isError: isMiniKitError,
+  } = useWaitForUserOperationReceipt({
     client: client,
-    appConfig: {
-      app_id: process.env.NEXT_PUBLIC_STAGING_VERIFY_APP_ID || '',
-    },
-    transactionId: transactionId,
-    pollingInterval: 2000,
+    userOpHash: transactionId,
   });
 
-  const parseResponse = async (payload: MiniAppSendTransactionPayload) => {
-    console.log('MiniAppSendTransaction, SUBSCRIBE PAYLOAD', payload);
+  const {
+    isLoading: isWagmiConfirming,
+    isSuccess: isWagmiConfirmed,
+    error: wagmiError,
+    isError: isWagmiError,
+  } = useWagmiWaitForTransactionReceipt({
+    chainId: 480,
+    hash: transactionHash,
+    query: {
+      enabled: Boolean(transactionHash),
+    },
+  });
 
-    if (payload.status === 'error') {
-      const errorMessage = await validateSchema(
-        sendTransactionErrorPayloadSchema,
-        payload,
-      );
+  const handleResult = async (result: {
+    data: SendTransactionResult;
+    executedWith: string;
+  }) => {
+    console.log('SendTransaction result', result);
 
-      if (!errorMessage) {
-        setSendTransactionPayloadValidationMessage('Payload is valid');
-      } else {
-        setSendTransactionPayloadValidationMessage(errorMessage);
-      }
+    const errorMessage = await validateSchema(
+      sendTransactionResultSchema,
+      result.data,
+    );
+
+    if (!errorMessage) {
+      setSendTransactionPayloadValidationMessage('Payload is valid');
     } else {
-      const errorMessage = await validateSchema(
-        sendTransactionSuccessPayloadSchema,
-        payload,
-      );
-
-      if (!errorMessage) {
-        setSendTransactionPayloadValidationMessage('Payload is valid');
-      } else {
-        setSendTransactionPayloadValidationMessage(errorMessage);
-      }
-
-      // const responseJson = await response.json();
-
-      // setSendTransactionVerificationMessage(
-      //   responseJson.isValid
-      //     ? "Valid! Successful Transaction"
-      //     : `Failed: ${responseJson.message}`
-      // );
-      setTransactionId(payload.transaction_id);
+      setSendTransactionPayloadValidationMessage(errorMessage);
     }
 
-    setReceivedSendTransactionPayload(payload);
+    if (result.executedWith === 'minikit' && result.data.userOpHash) {
+      setVerificationMode('minikit');
+      setTransactionId(result.data.userOpHash);
+    } else if (result.executedWith === 'wagmi') {
+      setVerificationMode('wagmi');
+      const hash = result.data.userOpHash;
+
+      if (hash) {
+        setTransactionHash(hash as `0x${string}`);
+      }
+    } else {
+      setVerificationMode(null);
+    }
+
+    setReceivedSendTransactionPayload({
+      executedWith: result.executedWith,
+      data: result.data,
+    });
   };
 
-  const onSendTransactionClick = async () => {
-    const deadline = Math.floor(
-      (Date.now() + 30 * 60 * 1000) / 1000,
-    ).toString();
-
-    // transfers can also be at most 1 hour in the future.
-    const permitTransfer = {
-      permitted: {
-        token: testTokens.worldchain.USDC,
-        amount: '100000',
-      },
-      nonce: Date.now().toString(),
-      deadline,
+  const handleError = (err: unknown) => {
+    console.error('SendTransaction error', err);
+    const errorData = {
+      error: err instanceof Error ? err.message : String(err),
+      code: (err as any)?.code,
+      details: (err as any)?.details,
     };
-
-    const permitTransferArgsForm = [
-      [permitTransfer.permitted.token, permitTransfer.permitted.amount],
-      permitTransfer.nonce,
-      permitTransfer.deadline,
-    ];
-
-    const transferDetails = {
-      to: '0x126f7998Eb44Dd2d097A8AB2eBcb28dEA1646AC8',
-      requestedAmount: '100000',
-    };
-
-    const transferDetailsArgsForm = [
-      transferDetails.to,
-      transferDetails.requestedAmount,
-    ];
-
-    const { commandPayload, finalPayload } =
-      await MiniKit.commandsAsync.sendTransaction({
-        transaction: [
-          {
-            address: '0x78c9b378b47c1700838c599e42edd4ffd1865ccd',
-            abi: DEXABI,
-            functionName: 'signatureTransfer',
-            args: [
-              permitTransferArgsForm,
-              transferDetailsArgsForm,
-              'PERMIT2_SIGNATURE_PLACEHOLDER_0',
-            ],
-          },
-        ],
-        permit2: [
-          {
-            ...permitTransfer,
-            spender: '0x78c9b378b47c1700838c599e42edd4ffd1865ccd',
-          },
-        ],
-      });
-    setTransactionData(commandPayload);
-    await parseResponse(finalPayload);
+    setSendTransactionPayloadValidationMessage(`Error: ${errorData.error}`);
+    setVerificationMode(null);
+    setReceivedSendTransactionPayload(errorData);
   };
 
-  const onSendNestedTransactionClick = async () => {
-    const deadline = Math.floor(
-      (Date.now() + 30 * 60 * 1000) / 1000,
-    ).toString();
+  const miniKitErrorMessage =
+    typeof miniKitError === 'string'
+      ? miniKitError
+      : miniKitError
+        ? String(miniKitError)
+        : undefined;
 
-    // transfers can also be at most 1 hour in the future.
-    const permitTransfer = {
-      permitted: {
-        token: testTokens.worldchain.USDC,
-        amount: '10000',
-      },
-      nonce: Date.now().toString(),
-      deadline,
-    };
-    const permitTransferArgsForm = [
-      [permitTransfer.permitted.token, permitTransfer.permitted.amount],
-      permitTransfer.nonce,
-      permitTransfer.deadline,
-    ];
+  const executeTransaction = async (
+    txOptions: MiniKitSendTransactionOptions,
+  ) => {
+    setTransactionData(txOptions);
+    setTransactionId('');
+    setTransactionHash(undefined);
+    setVerificationMode(null);
 
-    const permitTransfer2 = {
-      permitted: {
-        token: testTokens.worldchain.USDC,
-        amount: '20000',
-      },
-      nonce: deadline,
-      deadline,
-    };
-
-    const permitTransferArgsForm2 = [
-      [permitTransfer2.permitted.token, permitTransfer2.permitted.amount],
-      permitTransfer2.nonce,
-      permitTransfer2.deadline,
-    ];
-
-    const transferDetails = {
-      to: '0x126f7998Eb44Dd2d097A8AB2eBcb28dEA1646AC8',
-      requestedAmount: '10000',
-    };
-
-    const transferDetails2 = {
-      to: '0x126f7998Eb44Dd2d097A8AB2eBcb28dEA1646AC8',
-      requestedAmount: '20000',
-    };
-
-    const transferDetailsArgsForm = [
-      transferDetails.to,
-      transferDetails.requestedAmount,
-    ];
-
-    const transferDetailsArgsForm2 = [
-      transferDetails2.to,
-      transferDetails2.requestedAmount,
-    ];
-
-    const { commandPayload, finalPayload } =
-      await MiniKit.commandsAsync.sendTransaction({
-        transaction: [
-          {
-            address: '0x78c9b378b47c1700838c599e42edd4ffd1865ccd',
-            abi: DEXABI,
-            functionName: 'signatureTransfer',
-            args: [
-              permitTransferArgsForm,
-              transferDetailsArgsForm,
-              'PERMIT2_SIGNATURE_PLACEHOLDER_0',
-            ],
-          },
-          {
-            address: '0x78c9b378b47c1700838c599e42edd4ffd1865ccd',
-            abi: DEXABI,
-            functionName: 'signatureTransfer',
-            args: [
-              permitTransferArgsForm2,
-              transferDetailsArgsForm2,
-              'PERMIT2_SIGNATURE_PLACEHOLDER_1',
-            ],
-          },
-        ],
-        permit2: [
-          {
-            ...permitTransfer,
-            spender: '0x78c9b378b47c1700838c599e42edd4ffd1865ccd',
-          },
-          {
-            ...permitTransfer2,
-            spender: '0x78c9b378b47c1700838c599e42edd4ffd1865ccd',
-          },
-        ],
-      });
-    setTransactionData(commandPayload);
-    await parseResponse(finalPayload);
+    try {
+      const result =
+        executionMode === 'wagmi'
+          ? await wagmiNativeSendTransaction(wagmiConfig, txOptions)
+          : await MiniKit.sendTransaction(txOptions);
+      await handleResult(result);
+    } catch (err) {
+      handleError(err);
+    }
   };
 
-  const testNFTPurchase = async () => {
-    const deadline = Math.floor(
-      (Date.now() + 30 * 60 * 1000) / 1000,
-    ).toString();
+  const resolveOwnerAddress = async (): Promise<`0x${string}`> => {
+    const existing = MiniKit.user?.walletAddress;
+    if (existing && existing.startsWith('0x')) {
+      return existing as `0x${string}`;
+    }
 
-    // transfers can also be at most 1 hour in the future.
-    const permitTransfer = {
-      permitted: {
-        token: testTokens.worldchain.USDC,
-        amount: '1000000',
-      },
-      nonce: Date.now().toString(),
-      deadline,
-    };
-    const permitTransferArgsForm = [
-      [permitTransfer.permitted.token, permitTransfer.permitted.amount],
-      permitTransfer.nonce,
-      permitTransfer.deadline,
-    ];
-
-    const transferDetails = {
-      to: '0x640487Ce2c45bD05D03b65783c15aa1ac694cDb6',
-      requestedAmount: '1000000',
-    };
-
-    const transferDetailsArgsForm = [
-      transferDetails.to,
-      transferDetails.requestedAmount,
-    ];
-
-    const { commandPayload, finalPayload } =
-      await MiniKit.commandsAsync.sendTransaction({
-        transaction: [
-          {
-            address: '0x640487Ce2c45bD05D03b65783c15aa1ac694cDb6',
-            abi: ANDYABI,
-            functionName: 'buyNFTWithPermit2',
-            args: [
-              permitTransferArgsForm,
-              transferDetailsArgsForm,
-              'PERMIT2_SIGNATURE_PLACEHOLDER_0',
-            ],
-          },
-        ],
-        permit2: [
-          {
-            ...permitTransfer,
-            spender: '0x640487Ce2c45bD05D03b65783c15aa1ac694cDb6',
-          },
-        ],
-      });
-    setTransactionData(commandPayload);
-    await parseResponse(finalPayload);
-  };
-
-  const doubleAction = async () => {
-    await MiniKit.commandsAsync.verify({
-      action: process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION || '',
-      signal: '123',
-      verification_level: VerificationLevel.Device,
+    const authResult = await MiniKit.walletAuth({
+      nonce: crypto.randomUUID().replace(/-/g, ''),
+      statement: 'Authenticate to continue with Permit2 test.',
     });
 
-    await MiniKit.commandsAsync.pay({
-      to: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
-      tokens: [
+    const address = authResult.data.address;
+    if (!address || !address.startsWith('0x')) {
+      throw new Error('Failed to resolve wallet address from walletAuth.');
+    }
+    return address as `0x${string}`;
+  };
+
+  const resolveOneTokenAmount = async (): Promise<bigint> => {
+    const decimalsRaw = await client.readContract({
+      address: MKT_TOKEN_ADDRESS as `0x${string}`,
+      abi: ERC20_DECIMALS_ABI,
+      functionName: 'decimals',
+    });
+
+    const decimals = Number(decimalsRaw);
+    if (!Number.isInteger(decimals) || decimals < 0) {
+      throw new Error('Token decimals returned an invalid value.');
+    }
+
+    const amount = 10n ** BigInt(decimals);
+    if (amount > UINT160_MAX) {
+      throw new Error('Computed amount exceeds uint160 max.');
+    }
+    return amount;
+  };
+
+  const testPermitApprove = async () => {
+    const owner = await resolveOwnerAddress();
+    const amount = await resolveOneTokenAmount();
+
+    const tokenApproveTxOptions: MiniKitSendTransactionOptions = {
+      chainId: 480,
+      transactions: [
         {
-          symbol: Tokens.WLD,
-          token_amount: tokenToDecimals(0.1, Tokens.WLD).toString(),
+          to: MKT_TOKEN_ADDRESS,
+          data: encodeFunctionData({
+            abi: ERC20_APPROVE_ABI,
+            functionName: 'approve',
+            args: [PERMIT2_ADDRESS as `0x${string}`, UINT256_MAX],
+          }),
         },
       ],
-      description: 'Test Chaining',
-      reference: new Date().toISOString(),
-    });
-  };
+    };
 
-  const doubleActionTransact = async () => {
-    await MiniKit.commandsAsync.verify({
-      action: process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION || '',
-      signal: '123',
-      verification_level: VerificationLevel.Device,
-    });
+    const approveTxOptions: MiniKitSendTransactionOptions = {
+      chainId: 480,
+      transactions: [
+        {
+          to: PERMIT2_ADDRESS,
+          data: encodeFunctionData({
+            abi: PERMIT2_ALLOWANCE_TRANSFER_ABI,
+            functionName: 'approve',
+            args: [
+              MKT_TOKEN_ADDRESS as `0x${string}`,
+              PERMIT_BURN_CONTRACT_ADDRESS as `0x${string}`,
+              amount, // Approve 5 tokens to be safe
+              Math.floor(Date.now() / 1000) + 3600,
+            ],
+          }),
+        },
+      ],
+    };
 
-    await onSendTransactionClick();
+    const burnTxOptions: MiniKitSendTransactionOptions = {
+      chainId: 480,
+      transactions: [
+        {
+          to: PERMIT_BURN_CONTRACT_ADDRESS,
+          data: encodeFunctionData({
+            abi: PERMIT_BURN_ABI,
+            functionName: 'burn',
+            args: [owner],
+          }),
+        },
+      ],
+    };
+
+    if (executionMode === 'wagmi') {
+      await executeTransaction(tokenApproveTxOptions);
+      await executeTransaction(approveTxOptions);
+      await executeTransaction(burnTxOptions);
+      return;
+    }
+
+    await executeTransaction({
+      chainId: 480,
+      transactions: [
+        ...tokenApproveTxOptions.transactions,
+        ...approveTxOptions.transactions,
+        ...burnTxOptions.transactions,
+      ],
+    });
   };
 
   const mintToken = async () => {
-    const { commandPayload, finalPayload } =
-      await MiniKit.commandsAsync.sendTransaction({
-        transaction: [
-          {
-            address: mainContract,
-            abi: MinikitStaging,
+    const txOptions: MiniKitSendTransactionOptions = {
+      chainId: 480,
+      transactions: [
+        {
+          to: mainContract,
+          data: encodeFunctionData({
+            abi: MinikitStaging as any,
             functionName: 'mintToken',
             args: [],
-          },
-        ],
-      });
-    setTransactionData(commandPayload);
-    await parseResponse(finalPayload);
+          }),
+        },
+      ],
+    };
+    await executeTransaction(txOptions);
+  };
+
+  const mintTokenWithRawData = async () => {
+    const data = encodeFunctionData({
+      abi: MinikitStaging as any,
+      functionName: 'mintToken',
+      args: [],
+    });
+
+    const txOptions: MiniKitSendTransactionOptions = {
+      chainId: 480,
+      transactions: [
+        {
+          to: mainContract,
+          data,
+        },
+      ],
+    };
+    await executeTransaction(txOptions);
   };
 
   const bumpFunctionCalls = async () => {
-    const { commandPayload, finalPayload } =
-      await MiniKit.commandsAsync.sendTransaction({
-        transaction: [
-          {
-            address: mainContract,
-            abi: MinikitStaging,
+    const txOptions: MiniKitSendTransactionOptions = {
+      chainId: 480,
+      transactions: [
+        {
+          to: mainContract,
+          data: encodeFunctionData({
+            abi: MinikitStaging as any,
             functionName: 'trackCalls',
             args: [],
-          },
-        ],
-      });
-    setTransactionData(commandPayload);
-    await parseResponse(finalPayload);
+          }),
+        },
+      ],
+    };
+    await executeTransaction(txOptions);
   };
 
   const getTotalTokensMinted = async () => {
-    const { commandPayload, finalPayload } =
-      await MiniKit.commandsAsync.sendTransaction({
-        transaction: [
-          {
-            address: mainContract,
-            abi: MinikitStaging,
+    const txOptions: MiniKitSendTransactionOptions = {
+      chainId: 480,
+      transactions: [
+        {
+          to: mainContract,
+          data: encodeFunctionData({
+            abi: MinikitStaging as any,
             functionName: 'getTotalTokensMinted',
             args: [],
-          },
-        ],
-      });
-    setTransactionData(commandPayload);
-    await parseResponse(finalPayload);
+          }),
+        },
+      ],
+    };
+    await executeTransaction(txOptions);
   };
 
   const intentionallyRevert = async () => {
-    const { commandPayload, finalPayload } =
-      await MiniKit.commandsAsync.sendTransaction({
-        transaction: [
-          {
-            address: mainContract,
-            abi: MinikitStaging,
+    const txOptions: MiniKitSendTransactionOptions = {
+      chainId: 480,
+      transactions: [
+        {
+          to: mainContract,
+          data: encodeFunctionData({
+            abi: MinikitStaging as any,
             functionName: 'intentionalRevert',
             args: [],
-          },
-        ],
-      });
-    setTransactionData(commandPayload);
-    await parseResponse(finalPayload);
+          }),
+        },
+      ],
+    };
+    await executeTransaction(txOptions);
   };
 
   const nonExistantFunction = async () => {
-    const { commandPayload, finalPayload } =
-      await MiniKit.commandsAsync.sendTransaction({
-        transaction: [
-          {
-            address: mainContract,
-            abi: MinikitStaging,
-            functionName: 'functionDoesNotExist',
-            args: [],
-          },
-        ],
-      });
-    setTransactionData(commandPayload);
-    await parseResponse(finalPayload);
-  };
-
-  const sendStandingPermit = async (permitCount: number) => {
-    const deadline = Math.floor(
-      (Date.now() + 30 * 60 * 1000) / 1000,
-    ).toString();
-
-    const permit2: Array<{
-      permitted: { token: string; amount: string };
-      nonce: string;
-      spender: string;
-      deadline: string;
-    }> = [];
-    const transaction: Array<{
-      address: string;
-      abi: typeof StandingPermitTestABI;
-      functionName: string;
-      args: string[];
-    }> = [];
-
-    for (let i = 0; i < permitCount; i++) {
-      const nonce = (Date.now() + i).toString();
-
-      permit2.push({
-        permitted: {
-          token: testTokens.worldchain.USDC,
-          amount: '100000', // 0.1 USDC each
+    const txOptions: MiniKitSendTransactionOptions = {
+      chainId: 480,
+      transactions: [
+        {
+          to: mainContract,
+          data: '0xdeadbeef',
         },
-        nonce,
-        spender: standingPermitContract,
-        deadline,
-      });
-
-      transaction.push({
-        address: standingPermitContract,
-        abi: StandingPermitTestABI,
-        functionName: 'test',
-        args: [`PERMIT2_SIGNATURE_PLACEHOLDER_${i}`],
-      });
-    }
-
-    const { commandPayload, finalPayload } =
-      await MiniKit.commandsAsync.sendTransaction({
-        transaction,
-        permit2,
-      });
-
-    setTransactionData(commandPayload);
-    await parseResponse(finalPayload);
+      ],
+    };
+    await executeTransaction(txOptions);
   };
 
   const testEthTransaction = async () => {
-    const { commandPayload, finalPayload } =
-      await MiniKit.commandsAsync.sendTransaction({
-        transaction: [
-          {
-            address: '0x2E7BeBAB990076A10fBb5e8C2Ff16Fc1434387ad',
-            abi: ForwardABI,
+    const txOptions: MiniKitSendTransactionOptions = {
+      chainId: 480,
+      transactions: [
+        {
+          to: '0x2E7BeBAB990076A10fBb5e8C2Ff16Fc1434387ad',
+          data: encodeFunctionData({
+            abi: ForwardABI as any,
             functionName: 'pay',
-            args: ['0x377da9cab87c04a1d6f19d8b4be9aef8df26fcdd'], // Andy
-            value: '0x9184E72A000', // Send 0.00001 ETH
-          },
-        ],
-      });
-    setTransactionData(commandPayload);
-    await parseResponse(finalPayload);
+            args: ['0x377da9cab87c04a1d6f19d8b4be9aef8df26fcdd'],
+          }),
+          value: '0x9184E72A000', // Send 0.00001 ETH
+        },
+      ],
+    };
+    await executeTransaction(txOptions);
   };
 
   return (
     <div className="grid gap-y-2">
       <h2 className="text-2xl font-bold">Send Transaction</h2>
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          className={`rounded-lg p-3 w-full ${
+            executionMode === 'minikit'
+              ? 'bg-black text-white'
+              : 'bg-gray-200 text-black'
+          }`}
+          onClick={() => setExecutionMode('minikit')}
+        >
+          MiniKit Command
+        </button>
+        <button
+          className={`rounded-lg p-3 w-full ${
+            executionMode === 'wagmi'
+              ? 'bg-black text-white'
+              : 'bg-gray-200 text-black'
+          }`}
+          onClick={() => setExecutionMode('wagmi')}
+        >
+          Wagmi Native (Single Tx)
+        </button>
+      </div>
       <div className="bg-gray-50 border-l-4 border-gray-400 p-4 mb-4">
         <div className="flex">
           <div className="flex-shrink-0">
@@ -542,9 +481,10 @@ export const SendTransaction = () => {
           </div>
           <div className="ml-3">
             <p className="text-sm text-gray-700">
-              <span className="font-medium">Note:</span> Green buttons should
-              always work, red should fail, and black works if the conditions
-              are met.
+              <span className="font-medium">Note:</span> MiniKit mode can send
+              bundled transactions. Wagmi Native mode in this demo is limited to
+              single-transaction calls and is intended to exercise the wagmi
+              connector/provider path.
             </p>
           </div>
         </div>
@@ -567,6 +507,15 @@ export const SendTransaction = () => {
         >
           Mint Token
         </button>
+        <button
+          className="bg-blue-600 text-white rounded-lg p-4 w-full disabled:opacity-50"
+          onClick={mintTokenWithRawData}
+          disabled={!isWagmiMode}
+        >
+          Wagmi Single Tx (To+Data)
+        </button>
+      </div>
+      <div className="grid gap-x-2 grid-cols-2">
         <button
           className="bg-green-500 text-white rounded-lg p-4 w-full"
           onClick={bumpFunctionCalls}
@@ -596,71 +545,26 @@ export const SendTransaction = () => {
           Intentionally Revert
         </button>
       </div>
-      <div className="grid gap-x-2 grid-cols-2">
-        <button
-          className="bg-black text-white rounded-lg p-4 w-full"
-          onClick={onSendTransactionClick}
-        >
-          Permit 2 Testing (0.1 USDC)
-        </button>
-
-        <button
-          className="bg-black text-white rounded-lg p-4 w-full"
-          onClick={onSendNestedTransactionClick}
-        >
-          Nested Transaction (0.3 USDC)
-        </button>
-      </div>
-
-      <div className="grid gap-x-2 grid-cols-2">
-        <button
-          className="bg-black text-white rounded-lg p-4 w-full"
-          onClick={doubleAction}
-        >
-          Test Chaining Pay
-        </button>
-        <button
-          className="bg-black text-white rounded-lg p-4 w-full"
-          onClick={doubleActionTransact}
-        >
-          Test Chaining Transact
-        </button>
-      </div>
-
-      <div className="grid gap-x-2 grid-cols-2">
+      <div className="grid gap-x-2 grid-cols-1">
         <button
           className="bg-black text-white rounded-lg p-4 w-full"
           onClick={testEthTransaction}
         >
           Test ETH
         </button>
-        <button
-          className="bg-black text-white rounded-lg p-4 w-full"
-          onClick={testNFTPurchase}
-        >
-          Purchase NFT Permit2 (0.1 USDC)
-        </button>
       </div>
 
-      <div className="grid gap-x-2 grid-cols-2">
+      <div className="grid gap-x-2 grid-cols-1">
         <button
           className="bg-black text-white rounded-lg p-4 w-full"
-          onClick={() => sendStandingPermit(1)}
+          onClick={testPermitApprove}
         >
-          Standing Permit (1x 0.1 USDC)
-        </button>
-        <button
-          className="bg-black text-white rounded-lg p-4 w-full"
-          onClick={() => sendStandingPermit(3)}
-        >
-          Standing Permits (3x 0.1 USDC)
+          Test Permit Approve
         </button>
       </div>
 
       <div className="grid gap-y-1">
-        <p>
-          Received from &quot;{ResponseEvent.MiniAppSendTransaction}&quot;:{' '}
-        </p>
+        <p>Result from send transaction execution:</p>
         <div className="bg-gray-300 min-h-[100px] p-2">
           <pre className="break-all whitespace-break-spaces">
             {JSON.stringify(receivedSendTransactionPayload, null, 2)}
@@ -676,12 +580,26 @@ export const SendTransaction = () => {
 
         <div className="grid gap-y-1">
           <p>Verification:</p>
-          {/* {sendTransactionVerificationMessage ?? "No verification yet"} */}
           <div className="grid gap-y-1 bg-gray-300 p-2">
-            {transactionId && <p>Transaction ID: {transactionId}</p>}
-            {isConfirming && <p>Waiting for confirmation...</p>}
-            {isConfirmed && <p>Transaction confirmed.</p>}
-            {isError && <p>{error?.message}</p>}
+            {verificationMode === 'minikit' && (
+              <>
+                {transactionId && <p>UserOp hash: {transactionId}</p>}
+                {isMiniKitConfirming && <p>Waiting for confirmation...</p>}
+                {isMiniKitConfirmed && <p>Transaction confirmed.</p>}
+                {isMiniKitError && miniKitErrorMessage && (
+                  <p>{miniKitErrorMessage}</p>
+                )}
+              </>
+            )}
+            {verificationMode === 'wagmi' && (
+              <>
+                {transactionHash && <p>Transaction hash: {transactionHash}</p>}
+                {isWagmiConfirming && <p>Waiting for confirmation...</p>}
+                {isWagmiConfirmed && <p>Transaction confirmed.</p>}
+                {isWagmiError && <p>{wagmiError?.message}</p>}
+              </>
+            )}
+            {!verificationMode && <p>No verification in this mode.</p>}
           </div>
         </div>
       </div>

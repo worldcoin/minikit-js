@@ -1,222 +1,214 @@
+'use client';
 import {
-  ISuccessResult,
-  MiniKit,
-  ResponseEvent,
-  VerificationErrorCodes,
-  VerificationLevel,
-  VerifyCommandInput,
-} from '@worldcoin/minikit-js';
-import { clsx } from 'clsx';
-import { useCallback, useEffect, useState } from 'react';
-import * as yup from 'yup';
-import { validateSchema } from '../helpers/validate-schema';
+  IDKit,
+  IDKitRequestConfig,
+  deviceLegacy,
+  type IDKitResult,
+  type RpContext,
+} from '@worldcoin/idkit-core';
+import { MiniKit } from '@worldcoin/minikit-js';
+import { useCallback, useState } from 'react';
 import { verifyProof } from './verify-cloud-proof';
 import { VerifyOnchainProof } from './verify-onchain';
 
-// Schema for single verification response
-const verifyActionSuccessPayloadSchema = yup.object({
-  status: yup
-    .string<'success' | 'error'>()
-    .oneOf(['success', 'error'])
-    .required(),
-  proof: yup.string().required(),
-  merkle_root: yup.string().required(),
-  nullifier_hash: yup.string().required(),
-  verification_level: yup
-    .string<VerificationLevel>()
-    .oneOf(Object.values(VerificationLevel))
-    .required(),
-});
-
-// Schema for individual verification result in multi-verification response
-const verificationResultSchema = yup.object({
-  proof: yup.string().required(),
-  merkle_root: yup.string().required(),
-  nullifier_hash: yup.string().required(),
-  verification_level: yup
-    .string<VerificationLevel>()
-    .oneOf(Object.values(VerificationLevel))
-    .required(),
-});
-
-// Schema for multi-verification response
-const verifyActionMultiSuccessPayloadSchema = yup.object({
-  status: yup.string().equals(['success']).required(),
-  verifications: yup.array().of(verificationResultSchema).required().min(1),
-});
-
-const verifyActionErrorPayloadSchema = yup.object({
-  status: yup.string().equals(['error']).required(),
-  error_code: yup
-    .string<VerificationErrorCodes>()
-    .oneOf(Object.values(VerificationErrorCodes))
-    .required(),
-});
+type VerifyTarget = {
+  appId: `app_${string}`;
+  action: string;
+  environment: 'staging' | 'production';
+};
 
 export const VerifyAction = () => {
-  const [
-    verifyActionAppPayloadValidationMessage,
-    setVerifyActionAppPayloadValidationMessage,
-  ] = useState<string | null>(null);
   const isProduction = process.env.NEXT_PUBLIC_ENVIRONMENT === 'production';
-  const [verifyActionAppPayload, setVerifyActionAppPayload] = useState<
+
+  const [verifyResult, setVerifyResult] = useState<
     Record<string, any> | undefined
   >();
-
   const [sentVerifyPayload, setSentVerifyPayload] = useState<Record<
     string,
     any
   > | null>(null);
-
   const [devPortalVerifyResponse, setDevPortalVerifyResponse] = useState<Record<
     string,
     any
   > | null>(null);
-
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [lastUsedAppId, setLastUsedAppId] = useState<`app_${string}` | null>(
     null,
   );
+  const isInWorldApp = MiniKit.isInWorldApp();
+  const [widgetOpen, setWidgetOpen] = useState(false);
+  const [widgetTarget, setWidgetTarget] = useState<VerifyTarget | null>(null);
+  const [rpContext, setRpContext] = useState<RpContext | null>(null);
 
-  const [lastUsedAction, setLastUsedAction] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!MiniKit.isInstalled()) {
-      return;
-    }
-
-    MiniKit.subscribe(ResponseEvent.MiniAppVerifyAction, async (payload) => {
-      console.log('MiniAppVerifyAction, SUBSCRIBE PAYLOAD', payload);
-
-      // Handle error response
-      if (payload.status === 'error') {
-        const errorMessage = await validateSchema(
-          verifyActionErrorPayloadSchema,
-          payload,
-        );
-        if (errorMessage) {
-          return setVerifyActionAppPayloadValidationMessage(errorMessage);
-        }
-        setVerifyActionAppPayloadValidationMessage(`Payload is valid!`);
-        setVerifyActionAppPayload(payload);
+  const target: VerifyTarget = {
+    appId: (isProduction
+      ? process.env.NEXT_PUBLIC_PROD_VERIFY_APP_ID
+      : process.env.NEXT_PUBLIC_STAGING_VERIFY_APP_ID) as `app_${string}`,
+    action: (isProduction
+      ? process.env.NEXT_PUBLIC_PROD_VERIFY_ACTION
+      : process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION) as string,
+    environment: isProduction ? 'production' : 'staging',
+  };
+  const verifyIDKitProof = useCallback(
+    async (result: IDKitResult, app_id: `app_${string}`) => {
+      if (!result) {
+        setStatusMessage('No verification result to verify');
         return;
       }
 
-      // Handle multi-verification response
-      if ('verifications' in payload) {
-        const errorMessage = await validateSchema(
-          verifyActionMultiSuccessPayloadSchema,
-          payload,
-        );
-        if (errorMessage) {
-          return setVerifyActionAppPayloadValidationMessage(errorMessage);
-        }
-        setVerifyActionAppPayloadValidationMessage(
-          `Payload is valid (multi-verification: ${payload.verifications.length} proofs)`,
-        );
-        setVerifyActionAppPayload(payload);
-        // Skip cloud verification for multi-verification (not supported yet)
+      if ('session_id' in result) {
+        setStatusMessage('Session proof verification is not supported here');
         return;
       }
 
-      // Handle single verification response
-      const errorMessage = await validateSchema(
-        verifyActionSuccessPayloadSchema,
-        payload,
-      );
-
-      if (errorMessage) {
-        return setVerifyActionAppPayloadValidationMessage(errorMessage);
-      }
-
-      setVerifyActionAppPayloadValidationMessage('Payload is valid');
-      setVerifyActionAppPayload(payload);
-
-      if (!lastUsedAppId || !lastUsedAction) {
-        return console.log('lastUsedAppId or lastUsedAction is not set');
-      }
-
-      const verifyResponse = await verifyProof({
-        payload: payload as ISuccessResult,
-        app_id: lastUsedAppId,
-        action: lastUsedAction,
-        signal: 'test',
-      });
-
+      const verifyResponse = await verifyProof(result, app_id);
       setDevPortalVerifyResponse(verifyResponse);
-    });
 
-    return () => {
-      MiniKit.unsubscribe(ResponseEvent.MiniAppVerifyAction);
-    };
-  }, [lastUsedAction, lastUsedAppId]);
-
-  const verifyAction = useCallback(
-    (params: {
-      app_id: `app_${string}`;
-      action: string;
-      verification_level?: VerifyCommandInput['verification_level'];
-      signal?: string;
-      skip_proof_compression?: boolean;
-    }) => {
-      setLastUsedAppId(params.app_id);
-      setLastUsedAction(params.action);
-
-      // Anchor Reset Fields
-      setSentVerifyPayload(null);
-      setVerifyActionAppPayload(undefined);
-      setVerifyActionAppPayloadValidationMessage(null);
-      setDevPortalVerifyResponse(null);
-
-      const verifyPayload: VerifyCommandInput = {
-        action: params.action,
-        verification_level: params.verification_level,
-        signal: params.signal,
-        skip_proof_compression: params.skip_proof_compression,
-      };
-
-      const payload = MiniKit.commands.verify(verifyPayload);
-      setSentVerifyPayload(payload);
+      if (verifyResponse) {
+        if (verifyResponse.success) {
+          setStatusMessage('Proof verified successfully with Developer Portal');
+        } else {
+          setStatusMessage(
+            `Proof verification failed with Developer Portal: ${JSON.stringify(verifyResponse)}`,
+          );
+        }
+      }
     },
     [],
   );
 
-  const onProdVerifyClick = useCallback(
-    (
-      verification_level: VerifyCommandInput['verification_level'],
-      skip_proof_compression = false,
-    ) => {
-      verifyAction({
-        app_id: process.env.NEXT_PUBLIC_PROD_VERIFY_APP_ID as `app_${string}`,
-        action: process.env.NEXT_PUBLIC_PROD_VERIFY_ACTION as string,
-        verification_level,
-        signal: 'test',
-        skip_proof_compression,
-      });
+  const verifyAction = useCallback(
+    async (params: {
+      app_id: `app_${string}`;
+      action: string;
+      signal?: string;
+    }) => {
+      const { action, app_id, signal } = params;
+      setLastUsedAppId(app_id);
+
+      // Reset fields
+      setSentVerifyPayload(null);
+      setVerifyResult(undefined);
+      setStatusMessage(null);
+      setDevPortalVerifyResponse(null);
+
+      try {
+        // Fetch RP signature
+        const res = await fetch('/api/rp-signature', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action }),
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          setStatusMessage(`RP signature requests failed: ${text}`);
+          return;
+        }
+
+        const rpSig = await res.json();
+        const rpContext: RpContext = {
+          rp_id: rpSig.rp_id,
+          nonce: rpSig.nonce,
+          created_at: rpSig.created_at,
+          expires_at: rpSig.expires_at,
+          signature: rpSig.sig,
+        };
+
+        const config: IDKitRequestConfig = {
+          app_id,
+          action,
+          rp_context: rpContext,
+          allow_legacy_proofs: true,
+          environment: isProduction ? 'production' : 'staging',
+        };
+
+        setSentVerifyPayload({ ...config, signal });
+
+        // Use IDKit request API
+        const request = await IDKit.request(config).preset(
+          deviceLegacy({ signal }),
+        );
+
+        setStatusMessage('Waiting for verification...');
+        const completion = await request.pollUntilCompletion();
+        setVerifyResult(completion as unknown as Record<string, any>);
+        setStatusMessage('Verification complete');
+
+        // Verify with dev portal
+        if (completion.success && completion.result) {
+          await verifyIDKitProof(completion.result as IDKitResult, app_id);
+        }
+      } catch (err: unknown) {
+        console.error('Verification error:', err);
+        setStatusMessage(
+          `Error: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
     },
-    [verifyAction],
+    [verifyIDKitProof],
   );
 
-  const onStagingVerifyClick = useCallback(
-    (
-      verification_level: VerifyCommandInput['verification_level'],
-      skip_proof_compression = false,
-    ) => {
-      verifyAction({
-        app_id: process.env
-          .NEXT_PUBLIC_STAGING_VERIFY_APP_ID as `app_${string}`,
-        action: process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION as string,
-        verification_level,
+  const openWidgetFlow = useCallback(async (verifyTarget: VerifyTarget) => {
+    const { appId, action } = verifyTarget;
+
+    setLastUsedAppId(appId);
+    setVerifyResult(undefined);
+    setStatusMessage(null);
+    setDevPortalVerifyResponse(null);
+
+    const res = await fetch('/api/rp-signature', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action,
+      }),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      setStatusMessage(`RP signature request failed: ${text}`);
+      return;
+    }
+
+    const rpSig = await res.json();
+    const rpContext: RpContext = {
+      rp_id: rpSig.rp_id,
+      nonce: rpSig.nonce,
+      created_at: rpSig.created_at,
+      expires_at: rpSig.expires_at,
+      signature: rpSig.sig,
+    };
+    setSentVerifyPayload({
+      app_id: appId,
+      action,
+      rp_context: rpContext,
+      allow_legacy_proofs: true,
+    });
+    setWidgetTarget(verifyTarget);
+    setRpContext(rpContext);
+    setStatusMessage('Opening IDKit widget...');
+    setWidgetOpen(true);
+  }, []);
+
+  const onVerifyClick = useCallback(async () => {
+    if (isInWorldApp) {
+      setStatusMessage('Detected World App. Using native IDKit flow.');
+      await verifyAction({
+        app_id: target.appId,
+        action: target.action,
         signal: 'test',
-        skip_proof_compression,
       });
-    },
-    [verifyAction],
-  );
+      return;
+    }
+
+    setStatusMessage('Detected browser. Using IDKit widget flow.');
+    await openWidgetFlow(target);
+  }, [isInWorldApp, openWidgetFlow, target, verifyAction]);
 
   return (
     <div className="grid gap-y-4">
-      <h2 className="font-bold text-2xl">Verify</h2>
-
+      <h2 className="font-bold text-2xl">Verify (IDKit)</h2>
       <p className="border p-1 border-gray-400">
         <span className="font-bold block">App ID:</span>
         <span className="text-[12px] break-all">{lastUsedAppId ?? ''}</span>
@@ -233,187 +225,38 @@ export const VerifyAction = () => {
               </pre>
             </div>
           </div>
-
           <div className="grid gap-y-2">
             <div className="grid grid-cols-2 gap-x-2">
               <button
-                className={clsx(
-                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  isProduction ? 'hidden' : '',
-                )}
-                onClick={() => onStagingVerifyClick(VerificationLevel.Device)}
+                className="bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
+                onClick={onVerifyClick}
               >
-                Send staging app verify (Device)
-              </button>
-              <button
-                className={clsx(
-                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  isProduction ? 'hidden' : '',
-                )}
-                onClick={() => onStagingVerifyClick(VerificationLevel.Document)}
-              >
-                Send staging app verify (Document)
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-x-2">
-              <button
-                className={clsx(
-                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  isProduction ? 'hidden' : '',
-                )}
-                onClick={() =>
-                  onStagingVerifyClick(VerificationLevel.SecureDocument)
-                }
-              >
-                Send staging app verify (SecureDocument)
-              </button>
-              <button
-                className={clsx(
-                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  isProduction ? 'hidden' : '',
-                )}
-                onClick={() => onStagingVerifyClick(VerificationLevel.Orb)}
-              >
-                Send staging app verify (Orb)
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-x-2">
-              <button
-                className={clsx(
-                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  isProduction ? 'hidden' : '',
-                )}
-                onClick={() =>
-                  onStagingVerifyClick([
-                    VerificationLevel.Orb,
-                    VerificationLevel.Document,
-                  ])
-                }
-              >
-                Send staging app verify (Multi: Orb + Document)
-              </button>
-              <button
-                className={clsx(
-                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  isProduction ? 'hidden' : '',
-                )}
-                onClick={() =>
-                  onStagingVerifyClick(VerificationLevel.Orb, true)
-                }
-              >
-                Send staging app verify (Orb, no compression)
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-x-2">
-              <button
-                className={clsx(
-                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  isProduction ? '' : 'hidden',
-                )}
-                onClick={() => onProdVerifyClick(VerificationLevel.Device)}
-              >
-                Send production app verify (Device)
-              </button>
-              <button
-                className={clsx(
-                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  isProduction ? '' : 'hidden',
-                )}
-                onClick={() => onProdVerifyClick(VerificationLevel.Document)}
-              >
-                Send production app verify (Document)
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-x-2">
-              <button
-                className={clsx(
-                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  isProduction ? '' : 'hidden',
-                )}
-                onClick={() =>
-                  onProdVerifyClick(VerificationLevel.SecureDocument)
-                }
-              >
-                Send production app verify (SecureDocument)
-              </button>
-              <button
-                className={clsx(
-                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  isProduction ? '' : 'hidden',
-                )}
-                onClick={() => onProdVerifyClick(VerificationLevel.Orb)}
-              >
-                Send production app verify (Orb)
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-x-2">
-              <button
-                className={clsx(
-                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  isProduction ? '' : 'hidden',
-                )}
-                onClick={() =>
-                  onProdVerifyClick([
-                    VerificationLevel.Orb,
-                    VerificationLevel.Device,
-                  ])
-                }
-              >
-                Send production app verify (Multi: Orb + Device)
-              </button>
-              <button
-                className={clsx(
-                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  isProduction ? '' : 'hidden',
-                )}
-                onClick={() =>
-                  onProdVerifyClick([
-                    VerificationLevel.Orb,
-                    VerificationLevel.SecureDocument,
-                  ])
-                }
-              >
-                Send production app verify (Multi: Orb + SecureDocument)
-              </button>
-            </div>
-            <div className="grid grid-cols-1 gap-x-2">
-              <button
-                className={clsx(
-                  'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20',
-                  isProduction ? '' : 'hidden',
-                )}
-                onClick={() => onProdVerifyClick(VerificationLevel.Orb, true)}
-              >
-                Send production app verify (Orb, no compression)
+                {isProduction
+                  ? 'Send production verify'
+                  : 'Send staging verify'}
               </button>
             </div>
           </div>
         </div>
 
         <div className="w-full grid gap-y-2">
-          <p>Message from &quot;{ResponseEvent.MiniAppVerifyAction}&quot; </p>
+          <p>IDKit Verify Result</p>
 
           <div className="bg-gray-300 min-h-[100px] p-2">
             <pre className="break-all whitespace-break-spaces">
-              {JSON.stringify(verifyActionAppPayload, null, 2) ??
-                JSON.stringify(null)}
+              {JSON.stringify(verifyResult, null, 2) ?? JSON.stringify(null)}
             </pre>
           </div>
 
           <div className="grid gap-y-2">
-            <p>Validation message:</p>
+            <p>Status:</p>
             <p className="bg-gray-300 p-2">
-              {verifyActionAppPayloadValidationMessage ?? 'No validation'}
+              {statusMessage ?? 'No verification yet'}
             </p>
           </div>
 
           <div className="grid gap-y-2">
-            <p>`DEV_PORTAL/api/v2/verify` Response:</p>
+            <p>`DEV_PORTAL/api/v4/verify` Response:</p>
             <pre className="break-all whitespace-break-spaces bg-gray-300 p-2">
               {JSON.stringify(devPortalVerifyResponse, null, 2) ??
                 'No validation'}
