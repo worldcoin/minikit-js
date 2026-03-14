@@ -119,9 +119,6 @@
     "wagmi": "^3.0.0"
   },
   "peerDependenciesMeta": {
-    "@worldcoin/idkit-core": {
-      "optional": true
-    },
     "wagmi": {
       "optional": true
     },
