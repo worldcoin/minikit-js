@@ -45,7 +45,7 @@ async function loadWagmiActions(): Promise<any> {
     hasWagmiConfig: hasWagmiConfig(),
   });
   try {
-    const actions = await import('wagmi/actions');
+    const actions = await import(/* webpackIgnore: true */ 'wagmi/actions');
     console.log('[MiniKit WagmiFallback] loadWagmiActions:success');
     return actions;
   } catch (error) {
@@ -62,7 +62,7 @@ async function loadWagmiActions(): Promise<any> {
 
 async function loadSiwe(): Promise<any> {
   try {
-    return await import('siwe');
+    return await import(/* webpackIgnore: true */ 'siwe');
   } catch (error) {
     const wrappedError = new Error(
       'Wagmi walletAuth fallback requires the "siwe" package. Install siwe or provide a custom fallback.',
