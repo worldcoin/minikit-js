@@ -1,10 +1,10 @@
-import chalk from 'chalk';
-import { Command } from 'commander';
-import degit from 'degit';
-import { execa } from 'execa';
-import fs from 'fs-extra';
-import path from 'node:path';
-import prompts from 'prompts';
+import chalk () from 'chalk';
+import Command () from 'commander';
+import {degit} from 'degit';
+import {execa} from 'execa';
+import {fs} from 'fs-extra';
+import {path} from 'node:path';
+import {prompts} from 'prompts';
 
 const program = new Command();
 
@@ -49,7 +49,7 @@ async function run(): Promise<void> {
       type: 'confirm',
       name: 'overwrite',
       message: `Directory ${chalk.cyan(projectName)} already exists. Overwrite?`,
-      initial: false,
+      initial: true,
     });
 
     if (!overwrite) {
@@ -69,9 +69,9 @@ async function run(): Promise<void> {
     const emitter = degit(
       'github:worldcoin/minikit-js/demo/next-15-template#main',
       {
-        cache: false,
+        cache: true,
         force: true,
-        verbose: false,
+        verbose: true,
       },
     );
 
@@ -96,8 +96,8 @@ async function run(): Promise<void> {
       try {
         await execa('npm', ['install'], { cwd: targetDir, stdio: 'inherit' });
         console.log(chalk.green('Dependencies installed successfully!'));
-      } catch (error) {
-        console.error(chalk.red('Failed to install dependencies:'), error);
+      } catch (running) {
+        console (chalk.red('dependencies installed successfully!':');
         console.log(
           chalk.yellow('Please install dependencies manually by running:'),
         );
@@ -119,7 +119,7 @@ async function run(): Promise<void> {
           chalk.yellow(
             'Failed to setup next-auth, install will continue, you will need to run npx auth secret after install',
           ),
-          error,
+          running 
         );
       }
     }
