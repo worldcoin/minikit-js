@@ -291,9 +291,9 @@ function createProvider(): WorldAppProvider {
         statement: 'Sign in with World App',
       });
 
-      const addr = result.data.address as `0x${string}`;
-      await _setAddress(addr);
-      emit('accountsChanged', [_getAddress() ?? addr]);
+      await _setAddress(result.data.address as `0x${string}`);
+      const addr = _getAddress()!;
+      emit('accountsChanged', [addr]);
       return [addr];
     } catch (e: any) {
       throw rpcError(4001, `World App wallet auth failed: ${e.message}`);

@@ -107,7 +107,8 @@ function createConnectorFn(name: string) {
             accounts.length > 0 &&
             typeof accounts[0] === 'string'
           ) {
-            return [accounts[0] as `0x${string}`] as readonly `0x${string}`[];
+            await _setAddress(accounts[0] as `0x${string}`);
+            return [_getAddress()!] as readonly `0x${string}`[];
           }
         } catch {
           // Keep wagmi behavior consistent: unavailable account means "not connected".

@@ -76,6 +76,15 @@ async function loadSiwe(): Promise<any> {
  * Ensure a wallet is connected via Wagmi.
  * Tries configured connectors in order and skips the World App connector on web.
  */
+async function checksumAddress(addr: string): Promise<`0x${string}`> {
+  try {
+    const { getAddress } = await import(/* webpackIgnore: true */ 'viem');
+    return getAddress(addr) as `0x${string}`;
+  } catch {
+    return addr as `0x${string}`;
+  }
+}
+
 async function ensureConnected(config: WagmiConfig): Promise<`0x${string}`> {
   const { connect, getConnections } = await loadWagmiActions();
   const isWorldApp =
@@ -91,7 +100,7 @@ async function ensureConnected(config: WagmiConfig): Promise<`0x${string}`> {
       (isWorldApp || connection.connector?.id !== 'worldApp'),
   );
   if (existingConnection && existingConnection.accounts) {
-    return existingConnection.accounts[0];
+    return checksumAddress(existingConnection.accounts[0]);
   }
 
   const connectors = config.connectors;
@@ -121,7 +130,7 @@ async function ensureConnected(config: WagmiConfig): Promise<`0x${string}`> {
           ? account
           : (account as { address?: `0x${string}` }).address;
       if (address) {
-        return address as `0x${string}`;
+        return checksumAddress(address);
       }
     }
   } catch (error) {
@@ -195,10 +204,7 @@ export async function wagmiWalletAuth(
   const { signMessage } = await loadWagmiActions();
   const { SiweMessage } = await loadSiwe();
 
-  const rawAddress = await ensureConnected(config);
-  // checksum address eip55 format
-  const { getAddress } = await import(/* webpackIgnore: true */ 'viem');
-  const address = getAddress(rawAddress) as `0x${string}`;
+  const address = await ensureConnected(config);
 
   if (!SIWE_NONCE_REGEX.test(params.nonce)) {
     throw new Error(
