@@ -25,12 +25,16 @@ export const VerifyAction = () => {
   const [rpContext, setRpContext] = useState<RpContext | null>(null);
   const [widgetSignal, setWidgetSignal] = useState('test');
 
-  const appId = (isProduction
-    ? process.env.NEXT_PUBLIC_PROD_VERIFY_APP_ID
-    : process.env.NEXT_PUBLIC_STAGING_VERIFY_APP_ID) as `app_${string}`;
-  const action = (isProduction
-    ? process.env.NEXT_PUBLIC_PROD_VERIFY_ACTION
-    : process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION) as string;
+  const appId = (
+    isProduction
+      ? process.env.NEXT_PUBLIC_PROD_VERIFY_APP_ID
+      : process.env.NEXT_PUBLIC_STAGING_VERIFY_APP_ID
+  ) as `app_${string}`;
+  const action = (
+    isProduction
+      ? process.env.NEXT_PUBLIC_PROD_VERIFY_ACTION
+      : process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION
+  ) as string;
   const environment = isProduction ? 'production' : 'staging';
 
   const preset = useMemo(
