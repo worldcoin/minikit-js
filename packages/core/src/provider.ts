@@ -54,8 +54,11 @@ export async function _setAddress(addr: `0x${string}`): Promise<void> {
   try {
     // World App returns address in lowercase, but some libraries expect checksummed eip55 addresses.
     const { getAddress } = await import(/* webpackIgnore: true */ 'viem');
-    window.__worldapp_eip1193_address__ = getAddress(addr) as `0x${string}`;
-  } catch {
+    const checksummed = getAddress(addr) as `0x${string}`;
+    console.log('[MiniKit] _setAddress checksummed:', addr, '->', checksummed);
+    window.__worldapp_eip1193_address__ = checksummed;
+  } catch (e) {
+    console.warn('[MiniKit] _setAddress checksum failed, storing raw:', addr, e);
     window.__worldapp_eip1193_address__ = addr;
   }
 }
