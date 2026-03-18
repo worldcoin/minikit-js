@@ -1,4 +1,4 @@
-import { signRequest } from '@worldcoin/idkit-core/signing';
+import { signRequest } from '@worldcoin/idkit/signing';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';

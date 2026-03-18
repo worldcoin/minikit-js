@@ -1,28 +1,17 @@
 'use client';
 import {
-  IDKit,
-  IDKitRequestConfig,
+  IDKitRequestWidget,
   deviceLegacy,
   type IDKitResult,
   type RpContext,
-} from '@worldcoin/idkit-core';
-import { MiniKit } from '@worldcoin/minikit-js';
-import { useCallback, useState } from 'react';
+} from '@worldcoin/idkit';
+import { useMemo, useState } from 'react';
 import { verifyProof } from './verify-cloud-proof';
 import { VerifyOnchainProof } from './verify-onchain';
-
-type VerifyTarget = {
-  appId: `app_${string}`;
-  action: string;
-  environment: 'staging' | 'production';
-};
 
 export const VerifyAction = () => {
   const isProduction = process.env.NEXT_PUBLIC_ENVIRONMENT === 'production';
 
-  const [verifyResult, setVerifyResult] = useState<
-    Record<string, any> | undefined
-  >();
   const [sentVerifyPayload, setSentVerifyPayload] = useState<Record<
     string,
     any
@@ -32,186 +21,73 @@ export const VerifyAction = () => {
     any
   > | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [lastUsedAppId, setLastUsedAppId] = useState<`app_${string}` | null>(
-    null,
-  );
-  const isInWorldApp = MiniKit.isInWorldApp();
   const [widgetOpen, setWidgetOpen] = useState(false);
-  const [widgetTarget, setWidgetTarget] = useState<VerifyTarget | null>(null);
   const [rpContext, setRpContext] = useState<RpContext | null>(null);
+  const [widgetSignal, setWidgetSignal] = useState('test');
 
-  const target: VerifyTarget = {
-    appId: (isProduction
-      ? process.env.NEXT_PUBLIC_PROD_VERIFY_APP_ID
-      : process.env.NEXT_PUBLIC_STAGING_VERIFY_APP_ID) as `app_${string}`,
-    action: (isProduction
-      ? process.env.NEXT_PUBLIC_PROD_VERIFY_ACTION
-      : process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION) as string,
-    environment: isProduction ? 'production' : 'staging',
-  };
-  const verifyIDKitProof = useCallback(
-    async (result: IDKitResult, app_id: `app_${string}`) => {
-      if (!result) {
-        setStatusMessage('No verification result to verify');
-        return;
-      }
+  const appId = (isProduction
+    ? process.env.NEXT_PUBLIC_PROD_VERIFY_APP_ID
+    : process.env.NEXT_PUBLIC_STAGING_VERIFY_APP_ID) as `app_${string}`;
+  const action = (isProduction
+    ? process.env.NEXT_PUBLIC_PROD_VERIFY_ACTION
+    : process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION) as string;
+  const environment = isProduction ? 'production' : 'staging';
 
-      if ('session_id' in result) {
-        setStatusMessage('Session proof verification is not supported here');
-        return;
-      }
-
-      const verifyResponse = await verifyProof(result, app_id);
-      setDevPortalVerifyResponse(verifyResponse);
-
-      if (verifyResponse) {
-        if (verifyResponse.success) {
-          setStatusMessage('Proof verified successfully with Developer Portal');
-        } else {
-          setStatusMessage(
-            `Proof verification failed with Developer Portal: ${JSON.stringify(verifyResponse)}`,
-          );
-        }
-      }
-    },
-    [],
+  const preset = useMemo(
+    () => deviceLegacy({ signal: widgetSignal }),
+    [widgetSignal],
   );
 
-  const verifyAction = useCallback(
-    async (params: {
-      app_id: `app_${string}`;
-      action: string;
-      signal?: string;
-    }) => {
-      const { action, app_id, signal } = params;
-      setLastUsedAppId(app_id);
-
-      // Reset fields
-      setSentVerifyPayload(null);
-      setVerifyResult(undefined);
-      setStatusMessage(null);
-      setDevPortalVerifyResponse(null);
-
-      try {
-        // Fetch RP signature
-        const res = await fetch('/api/rp-signature', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action }),
-        });
-
-        if (!res.ok) {
-          const text = await res.text();
-          setStatusMessage(`RP signature requests failed: ${text}`);
-          return;
-        }
-
-        const rpSig = await res.json();
-        const rpContext: RpContext = {
-          rp_id: rpSig.rp_id,
-          nonce: rpSig.nonce,
-          created_at: rpSig.created_at,
-          expires_at: rpSig.expires_at,
-          signature: rpSig.sig,
-        };
-
-        const config: IDKitRequestConfig = {
-          app_id,
-          action,
-          rp_context: rpContext,
-          allow_legacy_proofs: true,
-          environment: isProduction ? 'production' : 'staging',
-        };
-
-        setSentVerifyPayload({ ...config, signal });
-
-        // Use IDKit request API
-        const request = await IDKit.request(config).preset(
-          deviceLegacy({ signal }),
-        );
-
-        setStatusMessage('Waiting for verification...');
-        const completion = await request.pollUntilCompletion();
-        setVerifyResult(completion as unknown as Record<string, any>);
-        setStatusMessage('Verification complete');
-
-        // Verify with dev portal
-        if (completion.success && completion.result) {
-          await verifyIDKitProof(completion.result as IDKitResult, app_id);
-        }
-      } catch (err: unknown) {
-        console.error('Verification error:', err);
-        setStatusMessage(
-          `Error: ${err instanceof Error ? err.message : String(err)}`,
-        );
-      }
-    },
-    [verifyIDKitProof],
-  );
-
-  const openWidgetFlow = useCallback(async (verifyTarget: VerifyTarget) => {
-    const { appId, action } = verifyTarget;
-
-    setLastUsedAppId(appId);
-    setVerifyResult(undefined);
+  const startVerify = async () => {
+    setSentVerifyPayload(null);
     setStatusMessage(null);
     setDevPortalVerifyResponse(null);
 
-    const res = await fetch('/api/rp-signature', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action,
-      }),
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      setStatusMessage(`RP signature request failed: ${text}`);
-      return;
-    }
-
-    const rpSig = await res.json();
-    const rpContext: RpContext = {
-      rp_id: rpSig.rp_id,
-      nonce: rpSig.nonce,
-      created_at: rpSig.created_at,
-      expires_at: rpSig.expires_at,
-      signature: rpSig.sig,
-    };
-    setSentVerifyPayload({
-      app_id: appId,
-      action,
-      rp_context: rpContext,
-      allow_legacy_proofs: true,
-    });
-    setWidgetTarget(verifyTarget);
-    setRpContext(rpContext);
-    setStatusMessage('Opening IDKit widget...');
-    setWidgetOpen(true);
-  }, []);
-
-  const onVerifyClick = useCallback(async () => {
-    if (isInWorldApp) {
-      setStatusMessage('Detected World App. Using native IDKit flow.');
-      await verifyAction({
-        app_id: target.appId,
-        action: target.action,
-        signal: 'test',
+    try {
+      const res = await fetch('/api/rp-signature', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
       });
-      return;
-    }
 
-    setStatusMessage('Detected browser. Using IDKit widget flow.');
-    await openWidgetFlow(target);
-  }, [isInWorldApp, openWidgetFlow, target, verifyAction]);
+      if (!res.ok) {
+        const text = await res.text();
+        setStatusMessage(`RP signature request failed: ${text}`);
+        return;
+      }
+
+      const rpSig = await res.json();
+      const rpCtx: RpContext = {
+        rp_id: rpSig.rp_id,
+        nonce: rpSig.nonce,
+        created_at: rpSig.created_at,
+        expires_at: rpSig.expires_at,
+        signature: rpSig.sig,
+      };
+
+      setSentVerifyPayload({
+        app_id: appId,
+        action,
+        rp_context: rpCtx,
+        allow_legacy_proofs: true,
+      });
+      setWidgetSignal(`test-${Date.now()}`);
+      setRpContext(rpCtx);
+      setStatusMessage('Opening IDKit widget...');
+      setWidgetOpen(true);
+    } catch (err: unknown) {
+      setStatusMessage(
+        `Error: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  };
 
   return (
     <div className="grid gap-y-4">
       <h2 className="font-bold text-2xl">Verify (IDKit)</h2>
       <p className="border p-1 border-gray-400">
         <span className="font-bold block">App ID:</span>
-        <span className="text-[12px] break-all">{lastUsedAppId ?? ''}</span>
+        <span className="text-[12px] break-all">{appId ?? ''}</span>
       </p>
 
       <div className="grid gap-y-12">
@@ -229,7 +105,7 @@ export const VerifyAction = () => {
             <div className="grid grid-cols-2 gap-x-2">
               <button
                 className="bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
-                onClick={onVerifyClick}
+                onClick={startVerify}
               >
                 {isProduction
                   ? 'Send production verify'
@@ -240,14 +116,6 @@ export const VerifyAction = () => {
         </div>
 
         <div className="w-full grid gap-y-2">
-          <p>IDKit Verify Result</p>
-
-          <div className="bg-gray-300 min-h-[100px] p-2">
-            <pre className="break-all whitespace-break-spaces">
-              {JSON.stringify(verifyResult, null, 2) ?? JSON.stringify(null)}
-            </pre>
-          </div>
-
           <div className="grid gap-y-2">
             <p>Status:</p>
             <p className="bg-gray-300 p-2">
@@ -264,6 +132,39 @@ export const VerifyAction = () => {
           </div>
         </div>
       </div>
+
+      {rpContext && (
+        <IDKitRequestWidget
+          open={widgetOpen}
+          onOpenChange={setWidgetOpen}
+          app_id={appId}
+          action={action}
+          rp_context={rpContext}
+          allow_legacy_proofs={true}
+          preset={preset}
+          onSuccess={() => {
+            setStatusMessage('Verification complete');
+          }}
+          handleVerify={async (result: IDKitResult) => {
+            const verifyResponse = await verifyProof(result, appId);
+            setDevPortalVerifyResponse(verifyResponse);
+            if (verifyResponse?.success) {
+              setStatusMessage(
+                'Proof verified successfully with Developer Portal',
+              );
+            } else {
+              setStatusMessage(
+                `Proof verification failed: ${JSON.stringify(verifyResponse)}`,
+              );
+            }
+          }}
+          onError={(errorCode) => {
+            setStatusMessage(`Verification failed: ${errorCode}`);
+          }}
+          environment={environment}
+        />
+      )}
+
       <VerifyOnchainProof />
     </div>
   );

@@ -14,8 +14,7 @@ For comprehensive setup instructions and usage examples, visit our [developer do
 
 World ID verification is owned by IDKit:
 
-- Use `@worldcoin/idkit` for verification APIs and UI (for example `IDKit.request()` and `IDKitRequestWidget`)
-- Use `@worldcoin/idkit-core` for server-side request signing (`signRequest`) and server initialization (`IDKit.initServer()`)
+- Use `@worldcoin/idkit` using `IDKitRequestWidget` see our [docs](https://docs.world.org/world-id/idkit/react)
 
 MiniKit is focused on mini-app commands (`walletAuth`, `sendTransaction`, `pay`, `shareContacts`, etc.) and does not proxy verify APIs.
 

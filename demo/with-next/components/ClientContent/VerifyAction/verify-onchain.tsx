@@ -1,8 +1,13 @@
 'use client';
 
-import { IDKit, orbLegacy, type RpContext } from '@worldcoin/idkit-core';
+import {
+  IDKitRequestWidget,
+  orbLegacy,
+  type IDKitResult,
+  type RpContext,
+} from '@worldcoin/idkit';
 import { MiniKit } from '@worldcoin/minikit-js';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   decodeAbiParameters,
   encodeFunctionData,
@@ -94,8 +99,22 @@ export const VerifyOnchainProof = () => {
     error?: string;
     isLoading?: boolean;
   }>({});
+  const [widgetOpen, setWidgetOpen] = useState(false);
+  const [rpContext, setRpContext] = useState<RpContext | null>(null);
+  const [widgetSignal, setWidgetSignal] = useState('');
 
-  const handleOnchainVerify = async () => {
+  const preset = useMemo(
+    () => orbLegacy({ signal: widgetSignal }),
+    [widgetSignal],
+  );
+
+  const appId = process.env.NEXT_PUBLIC_PROD_VERIFY_APP_ID as `app_${string}`;
+  const environment =
+    process.env.NEXT_PUBLIC_ENVIRONMENT === 'production'
+      ? 'production'
+      : 'staging';
+
+  const handleStartVerify = async () => {
     try {
       let signal = MiniKit.user.walletAddress;
       if (!signal) {
@@ -108,14 +127,14 @@ export const VerifyOnchainProof = () => {
         setOnchainVerifyResult({ success: false, error: 'No wallet address' });
         return;
       }
-      // Fetch RP signature for IDKit
+
       const rpRes = await fetch('/api/rp-signature', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'onchain-verify-test' }),
       });
       const rpSig = await rpRes.json();
-      const rpContext: RpContext = {
+      const rpCtx: RpContext = {
         rp_id: rpSig.rp_id,
         nonce: rpSig.nonce,
         created_at: rpSig.created_at,
@@ -123,58 +142,12 @@ export const VerifyOnchainProof = () => {
         signature: rpSig.sig,
       };
 
-      const request = await IDKit.request({
-        app_id: process.env.NEXT_PUBLIC_PROD_VERIFY_APP_ID as `app_${string}`,
-        action: 'onchain-verify-test',
-        rp_context: rpContext,
-        allow_legacy_proofs: true,
-        environment:
-          process.env.NEXT_PUBLIC_ENVIRONMENT === 'production'
-            ? 'production'
-            : 'staging',
-      }).preset(orbLegacy({ signal }));
-
-      const completion = await request.pollUntilCompletion();
-      if (!completion.success) {
-        setOnchainVerifyResult({
-          success: false,
-          error: `Verification failed: ${completion.error}`,
-          isLoading: false,
-        });
-        return;
-      }
-      const firstResponse = completion.result.responses?.[0] as
-        | Record<string, any>
-        | undefined;
-
-      if (firstResponse?.proof) {
-        const merkleRoot = firstResponse.merkle_root;
-        const nullifierHash = firstResponse.nullifier_hash;
-        const proof = firstResponse.proof;
-
-        try {
-          const result = await verifyOnchain({
-            signal,
-            root: merkleRoot,
-            nullifierHash: nullifierHash,
-            proof: proof,
-          });
-
-          setOnchainVerifyResult({
-            ...result,
-            isLoading: false,
-          });
-        } catch (error) {
-          console.error('Error in onchain verification:', error);
-          setOnchainVerifyResult({
-            success: false,
-            error: error instanceof Error ? error.message : 'Unknown error',
-            isLoading: false,
-          });
-        }
-      }
+      setWidgetSignal(signal);
+      setRpContext(rpCtx);
+      setOnchainVerifyResult({ isLoading: true });
+      setWidgetOpen(true);
     } catch (error) {
-      console.error('Error during on-chain verification flow:', error);
+      console.error('Error starting on-chain verification:', error);
       setOnchainVerifyResult({
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -182,6 +155,32 @@ export const VerifyOnchainProof = () => {
       });
     }
   };
+
+  const handleVerifyResult = async (result: IDKitResult) => {
+    const firstResponse = (result as any).responses?.[0] as
+      | Record<string, any>
+      | undefined;
+
+    if (firstResponse?.proof) {
+      try {
+        const onchainResult = await verifyOnchain({
+          signal: widgetSignal,
+          root: firstResponse.merkle_root,
+          nullifierHash: firstResponse.nullifier_hash,
+          proof: firstResponse.proof,
+        });
+        setOnchainVerifyResult({ ...onchainResult, isLoading: false });
+      } catch (error) {
+        console.error('Error in onchain verification:', error);
+        setOnchainVerifyResult({
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
+          isLoading: false,
+        });
+      }
+    }
+  };
+
   if (process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging') {
     return <></>;
   }
@@ -207,12 +206,39 @@ export const VerifyOnchainProof = () => {
         className={
           'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20'
         }
-        onClick={handleOnchainVerify}
+        onClick={handleStartVerify}
       >
         {onchainVerifyResult.isLoading
           ? 'Verifying on-chain...'
           : 'Verify on-chain with TestVerify contract'}
       </button>
+
+      {rpContext && (
+        <IDKitRequestWidget
+          open={widgetOpen}
+          onOpenChange={setWidgetOpen}
+          app_id={appId}
+          action="onchain-verify-test"
+          rp_context={rpContext}
+          allow_legacy_proofs={true}
+          preset={preset}
+          onSuccess={() => {
+            setOnchainVerifyResult((prev) => ({
+              ...prev,
+              isLoading: false,
+            }));
+          }}
+          handleVerify={handleVerifyResult}
+          onError={(errorCode) => {
+            setOnchainVerifyResult({
+              success: false,
+              error: `Verification failed: ${errorCode}`,
+              isLoading: false,
+            });
+          }}
+          environment={environment}
+        />
+      )}
 
       {onchainVerifyResult.success !== undefined && (
         <div

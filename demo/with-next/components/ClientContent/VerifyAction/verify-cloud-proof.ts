@@ -1,29 +1,12 @@
 'use server';
 
-import { IDKitResult } from '@worldcoin/idkit-core';
+import { IDKitResult } from '@worldcoin/idkit';
 
 export interface VerifyResponse {
   success: boolean;
   code?: string;
   detail?: string;
   attribute?: string | null;
-}
-
-interface UniquenessProofResponseV3 {
-  identifier: string;
-  signal_hash?: string;
-  proof: string;
-  merkle_root: string;
-  nullifier: string;
-}
-
-interface UniquenessProofResponseV4 {
-  identifier: string;
-  signal_hash?: string;
-  proof: string[];
-  nullifier: string;
-  issuer_schema_id: number;
-  expires_at_min: number;
 }
 
 /**
