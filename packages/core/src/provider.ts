@@ -48,10 +48,16 @@ export function _getAddress(): `0x${string}` | undefined {
   return window.__worldapp_eip1193_address__;
 }
 
-/** @internal */
-export function _setAddress(addr: `0x${string}`): void {
+/** @internal – stores the address in EIP-55 checksum format */
+export async function _setAddress(addr: `0x${string}`): Promise<void> {
   if (typeof window === 'undefined') return;
-  window.__worldapp_eip1193_address__ = addr;
+  try {
+    // World App returns address in lowercase, but some libraries expect checksummed eip55 addresses.
+    const { getAddress } = await import(/* webpackIgnore: true */ 'viem');
+    window.__worldapp_eip1193_address__ = getAddress(addr) as `0x${string}`;
+  } catch {
+    window.__worldapp_eip1193_address__ = addr;
+  }
 }
 
 /** @internal */
@@ -286,8 +292,8 @@ function createProvider(): WorldAppProvider {
       });
 
       const addr = result.data.address as `0x${string}`;
-      _setAddress(addr);
-      emit('accountsChanged', [addr]);
+      await _setAddress(addr);
+      emit('accountsChanged', [_getAddress() ?? addr]);
       return [addr];
     } catch (e: any) {
       throw rpcError(4001, `World App wallet auth failed: ${e.message}`);
