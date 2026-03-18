@@ -19,6 +19,7 @@
  * ```
  */
 
+import { getAddress } from 'viem';
 import { MiniKit } from './minikit';
 
 // ---------------------------------------------------------------------------
@@ -49,16 +50,11 @@ export function _getAddress(): `0x${string}` | undefined {
 }
 
 /** @internal – stores the address in EIP-55 checksum format */
-export async function _setAddress(addr: `0x${string}`): Promise<void> {
+export function _setAddress(addr: `0x${string}`): void {
   if (typeof window === 'undefined') return;
   try {
-    // World App returns address in lowercase, but some libraries expect checksummed eip55 addresses.
-    const { getAddress } = await import(/* webpackIgnore: true */ 'viem');
-    const checksummed = getAddress(addr) as `0x${string}`;
-    console.log('[MiniKit] _setAddress checksummed:', addr, '->', checksummed);
-    window.__worldapp_eip1193_address__ = checksummed;
-  } catch (e) {
-    console.warn('[MiniKit] _setAddress checksum failed, storing raw:', addr, e);
+    window.__worldapp_eip1193_address__ = getAddress(addr) as `0x${string}`;
+  } catch {
     window.__worldapp_eip1193_address__ = addr;
   }
 }
@@ -294,7 +290,7 @@ function createProvider(): WorldAppProvider {
         statement: 'Sign in with World App',
       });
 
-      await _setAddress(result.data.address as `0x${string}`);
+      _setAddress(result.data.address as `0x${string}`);
       const addr = _getAddress()!;
       emit('accountsChanged', [addr]);
       return [addr];
