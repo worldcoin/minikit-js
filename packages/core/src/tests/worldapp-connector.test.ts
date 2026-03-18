@@ -25,12 +25,16 @@ describe('worldApp connector lazy auth', () => {
     const request = jest
       .fn()
       .mockResolvedValue(['0x1234567890abcdef1234567890abcdef12345678']);
-    const getAddress = jest.fn().mockReturnValue(undefined);
+    let storedAddress: string | undefined = undefined;
+    const getAddress = jest.fn(() => storedAddress);
+    const setAddress = jest.fn((addr: string) => {
+      storedAddress = addr;
+    });
 
     jest.doMock('../provider', () => ({
       _clearAddress: jest.fn(),
       _getAddress: getAddress,
-      _setAddress: jest.fn(),
+      _setAddress: setAddress,
       getWorldAppProvider: jest.fn(() => ({ request })),
     }));
     jest.doMock('../commands/wagmi-fallback', () => ({
