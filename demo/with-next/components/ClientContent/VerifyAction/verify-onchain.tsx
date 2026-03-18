@@ -30,9 +30,9 @@ const testVerifyAbi = [
   },
 ];
 
-/** works on Prod QA App, app_id: app_dfbe55706a640c82dce839bb0ecae74d */
+/** works with app_id: app_f617d152e3f3ea2142dde27099ffd368, action: onchain-verify-test */
 export const TEST_VERIFY_CONTRACT_ADDRESS =
-  '0x02ce0121bfc7f4d142d2da0452344923e59e53da';
+  '0x6afbd3794faf7986493d1844d204b417147959c6';
 
 /**
  * Calls the TestVerify contract's verify function
@@ -108,7 +108,7 @@ export const VerifyOnchainProof = () => {
     [widgetSignal],
   );
 
-  const appId = process.env.NEXT_PUBLIC_PROD_VERIFY_APP_ID as `app_${string}`;
+  const appId = 'app_f617d152e3f3ea2142dde27099ffd368' as `app_${string}`;
   const environment =
     process.env.NEXT_PUBLIC_ENVIRONMENT === 'production'
       ? 'production'
@@ -191,14 +191,8 @@ export const VerifyOnchainProof = () => {
         Tests the verification proof on-chain using the TestVerify contract at
         address: {TEST_VERIFY_CONTRACT_ADDRESS}
         <br />
-        This will only work on the prod QA App -
-        <a
-          href="https://world.org/ecosystem/app_dfbe55706a640c82dce839bb0ecae74d"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          app_dfbe55706a640c82dce839bb0ecae74d
-        </a>
+        Uses app_id: app_f617d152e3f3ea2142dde27099ffd368, action:
+        onchain-verify-test
         <br />
       </p>
 
