@@ -63,6 +63,7 @@ export async function POST(req: NextRequest) {
       isValid: validMessage.isValid,
     });
   } catch (error: unknown) {
+    console.error('[verify-siwe] error:', error);
     const errorMessage =
       error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json({
