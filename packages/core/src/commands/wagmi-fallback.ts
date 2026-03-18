@@ -195,7 +195,10 @@ export async function wagmiWalletAuth(
   const { signMessage } = await loadWagmiActions();
   const { SiweMessage } = await loadSiwe();
 
-  const address = await ensureConnected(config);
+  const rawAddress = await ensureConnected(config);
+  // checksum address eip55 format
+  const { getAddress } = await import(/* webpackIgnore: true */ 'viem');
+  const address = getAddress(rawAddress) as `0x${string}`;
 
   if (!SIWE_NONCE_REGEX.test(params.nonce)) {
     throw new Error(

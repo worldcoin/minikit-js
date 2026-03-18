@@ -69,7 +69,7 @@ function createConnectorFn(name: string) {
         // Restore address from MiniKit state if already authenticated
         const existing = MiniKit.user?.walletAddress;
         if (existing) {
-          _setAddress(existing as `0x${string}`);
+          await _setAddress(existing as `0x${string}`);
         }
       },
 
