@@ -10,7 +10,7 @@ import { worldchain } from 'viem/chains';
 
 /**
  * This component is used to get a token from a contract
- * For this to work you need to add the contract address to both contract entrypoints and permit2 tokens
+ * For this to work you need to add the contract address to contract entrypoints
  * inside of  Dev Portal > Configuration > Advanced
  * The general design pattern here is
  * 1. Trigger the transaction
@@ -23,7 +23,7 @@ export const Transaction = () => {
   const [buttonState, setButtonState] = useState<
     'pending' | 'success' | 'failed' | undefined
   >(undefined);
-  const [whichButton, setWhichButton] = useState<'getToken' | 'usePermit2'>(
+  const [whichButton, setWhichButton] = useState<'getToken' | 'transferToken'>(
     'getToken',
   );
 
@@ -99,28 +99,14 @@ export const Transaction = () => {
     }
   };
 
-  // This is a basic transaction call to use Permit2 to spend the token you minted
+  // This is a basic ERC20 transfer using the token you minted
   // Make sure to call Mint Token first
-  const onClickUsePermit2 = async () => {
+  const onClickTransferToken = async () => {
     setUserOpHash('');
-    setWhichButton('usePermit2');
+    setWhichButton('transferToken');
     setButtonState('pending');
-    const address = (await MiniKit.getUserByUsername('alex')).walletAddress;
-
-    // Permit2 is valid for max 1 hour
-    const permitTransfer = {
-      permitted: {
-        token: myContractToken,
-        amount: (0.5 * 10 ** 18).toString(),
-      },
-      nonce: Date.now().toString(),
-      deadline: Math.floor((Date.now() + 30 * 60 * 1000) / 1000).toString(),
-    };
-
-    const transferDetails = {
-      to: address,
-      requestedAmount: (0.5 * 10 ** 18).toString(),
-    };
+    const recipient = (await MiniKit.getUserByUsername('alex')).walletAddress;
+    const transferAmount = '500000000000000000';
 
     try {
       const result = await MiniKit.sendTransaction({
@@ -130,19 +116,8 @@ export const Transaction = () => {
             to: myContractToken,
             data: encodeFunctionData({
               abi: TestContractABI,
-              functionName: 'signatureTransfer',
-              args: [
-                [
-                  [
-                    permitTransfer.permitted.token,
-                    permitTransfer.permitted.amount,
-                  ],
-                  permitTransfer.nonce,
-                  permitTransfer.deadline,
-                ],
-                [transferDetails.to, transferDetails.requestedAmount],
-                'PERMIT2_SIGNATURE_PLACEHOLDER_0',
-              ],
+              functionName: 'transfer',
+              args: [recipient, transferAmount],
             }),
           },
         ],
@@ -190,17 +165,17 @@ export const Transaction = () => {
           pending: 'Transaction pending',
           success: 'Transaction successful',
         }}
-        state={whichButton === 'usePermit2' ? buttonState : undefined}
+        state={whichButton === 'transferToken' ? buttonState : undefined}
         className="w-full"
       >
         <Button
-          onClick={onClickUsePermit2}
+          onClick={onClickTransferToken}
           disabled={buttonState === 'pending'}
           size="lg"
           variant="tertiary"
           className="w-full"
         >
-          Use Permit2
+          Transfer Token
         </Button>
       </LiveFeedback>
     </div>
