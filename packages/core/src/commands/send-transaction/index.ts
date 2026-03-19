@@ -5,6 +5,7 @@ import type { CommandResultByVia } from '../types';
 import {
   Command,
   COMMAND_VERSIONS,
+  CommandUnavailableError,
   CommandContext,
   isCommandAvailable,
   isInWorldApp,
@@ -153,6 +154,21 @@ async function nativeSendTransaction(
   if (options.chainId !== WORLD_CHAIN_ID) {
     throw new Error(
       `World App only supports World Chain (chainId: ${WORLD_CHAIN_ID})`,
+    );
+  }
+
+  const commandInput = window.WorldApp?.supported_commands.find(
+    (command) => command.name === Command.SendTransaction,
+  );
+  if (
+    commandInput &&
+    !commandInput.supported_versions.includes(
+      COMMAND_VERSIONS[Command.SendTransaction],
+    )
+  ) {
+    throw new CommandUnavailableError(
+      Command.SendTransaction,
+      'oldAppVersion',
     );
   }
 

@@ -1,4 +1,4 @@
-import type { SendTransactionInput } from './';
+import type { SendTransactionInput } from './types';
 
 const isValidHex = (str: string): boolean => {
   return /^0x[0-9A-Fa-f]+$/.test(str);
