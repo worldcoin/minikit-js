@@ -116,17 +116,7 @@ export const VerifyOnchainProof = () => {
 
   const handleStartVerify = async () => {
     try {
-      let signal = MiniKit.user.walletAddress;
-      if (!signal) {
-        const authResult = await MiniKit.walletAuth({
-          nonce: 'itrustyou123',
-        });
-        signal = authResult.data.address;
-      }
-      if (!signal) {
-        setOnchainVerifyResult({ success: false, error: 'No wallet address' });
-        return;
-      }
+      const signal = crypto.randomUUID().replace(/-/g, '');
 
       const rpRes = await fetch('/api/rp-signature', {
         method: 'POST',
