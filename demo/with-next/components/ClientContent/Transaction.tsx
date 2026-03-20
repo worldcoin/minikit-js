@@ -1,5 +1,5 @@
 'use client';
-import { MiniKit } from '@worldcoin/minikit-js';
+import { getWorldAppProvider, MiniKit } from '@worldcoin/minikit-js';
 import type {
   MiniKitSendTransactionOptions,
   SendTransactionResult,
@@ -109,6 +109,17 @@ export const SendTransaction = () => {
   const [transactionHash, setTransactionHash] = useState<
     `0x${string}` | undefined
   >();
+  const [providerHashProbePayload, setProviderHashProbePayload] = useState<
+    Record<string, any> | null
+  >(null);
+  const [providerHashProbeResult, setProviderHashProbeResult] = useState<
+    Record<string, any> | null
+  >(null);
+  const [providerHashProbeHash, setProviderHashProbeHash] = useState<string>('');
+  const [
+    providerHashProbeReceiptMessage,
+    setProviderHashProbeReceiptMessage,
+  ] = useState<string>('Run the probe to compare the returned hash.');
   const [verificationMode, setVerificationMode] = useState<
     'minikit' | 'wagmi' | null
   >(null);
@@ -139,6 +150,16 @@ export const SendTransaction = () => {
     query: {
       enabled: Boolean(transactionHash),
     },
+  });
+
+  const {
+    isLoading: isProviderProbeUserOpConfirming,
+    isSuccess: isProviderProbeUserOpConfirmed,
+    error: providerProbeUserOpError,
+    isError: isProviderProbeUserOpError,
+  } = useWaitForUserOperationReceipt({
+    client: client,
+    userOpHash: providerHashProbeHash,
   });
 
   const handleResult = async (result: {
@@ -439,6 +460,89 @@ export const SendTransaction = () => {
     await executeTransaction(txOptions);
   };
 
+  const testProviderHashMismatch = async () => {
+    const provider = getWorldAppProvider();
+    const rpcTransaction = {
+      to: mainContract,
+      data: encodeFunctionData({
+        abi: MinikitStaging as any,
+        functionName: 'trackCalls',
+        args: [],
+      }),
+      chainId: '0x1e0',
+    };
+
+    setProviderHashProbeHash('');
+    setProviderHashProbePayload({
+      method: 'eth_sendTransaction',
+      params: [rpcTransaction],
+    });
+    setProviderHashProbeResult(null);
+    setProviderHashProbeReceiptMessage('Requesting account access...');
+
+    try {
+      const accounts = (await provider.request({
+        method: 'eth_requestAccounts',
+      })) as string[];
+      const from = accounts[0];
+      if (!from) {
+        throw new Error('eth_requestAccounts returned no account.');
+      }
+
+      const params = [{ from, ...rpcTransaction }];
+      setProviderHashProbePayload({
+        method: 'eth_sendTransaction',
+        params,
+      });
+      setProviderHashProbeReceiptMessage(
+        'Waiting for a transaction receipt on the returned hash...',
+      );
+
+      const returnedHash = (await provider.request({
+        method: 'eth_sendTransaction',
+        params,
+      })) as `0x${string}`;
+
+      setProviderHashProbeHash(returnedHash);
+      setProviderHashProbeResult({
+        account: from,
+        returnedHash,
+      });
+
+      try {
+        const receipt = await client.waitForTransactionReceipt({
+          hash: returnedHash,
+          pollingInterval: 1_000,
+          timeout: 15_000,
+        });
+
+        setProviderHashProbeReceiptMessage(
+          `Transaction receipt lookup succeeded for ${receipt.transactionHash}.`,
+        );
+        setProviderHashProbeResult((current) => ({
+          ...(current ?? {}),
+          receipt,
+        }));
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : String(error);
+        setProviderHashProbeReceiptMessage(
+          `Transaction receipt lookup failed on the returned hash: ${message}`,
+        );
+        setProviderHashProbeResult((current) => ({
+          ...(current ?? {}),
+          txReceiptLookupError: message,
+        }));
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setProviderHashProbeReceiptMessage(`Provider probe failed: ${message}`);
+      setProviderHashProbeResult({
+        error: message,
+      });
+    }
+  };
+
   return (
     <div className="grid gap-y-2">
       <h2 className="text-2xl font-bold">Send Transaction</h2>
@@ -484,7 +588,9 @@ export const SendTransaction = () => {
               <span className="font-medium">Note:</span> MiniKit mode can send
               bundled transactions. Wagmi Native mode in this demo is limited to
               single-transaction calls and is intended to exercise the wagmi
-              connector/provider path.
+              connector/provider path. The provider probe below uses the raw
+              EIP-1193 provider and compares the returned hash against both a
+              user-op receipt poll and a transaction receipt poll.
             </p>
           </div>
         </div>
@@ -561,6 +667,67 @@ export const SendTransaction = () => {
         >
           Test Permit Approve
         </button>
+      </div>
+
+      <div className="grid gap-y-2 border border-gray-300 rounded-lg p-4">
+        <h3 className="text-lg font-semibold">Provider hash repro</h3>
+        <p className="text-sm text-gray-700">
+          This sends a raw `eth_sendTransaction` through
+          `getWorldAppProvider()`, then waits for a transaction receipt using
+          the returned hash. On the current bug, the same hash should confirm as
+          a user operation but fail as a transaction receipt lookup.
+        </p>
+        <button
+          className="bg-indigo-700 text-white rounded-lg p-4 w-full disabled:opacity-50"
+          onClick={testProviderHashMismatch}
+          disabled={!MiniKit.isInWorldApp()}
+        >
+          Test provider returned hash
+        </button>
+        <div className="grid gap-y-1">
+          <p>Provider RPC payload:</p>
+          <div className="bg-gray-300 min-h-[100px] p-2">
+            <pre className="break-all whitespace-break-spaces">
+              {JSON.stringify(providerHashProbePayload, null, 2)}
+            </pre>
+          </div>
+        </div>
+        <div className="grid gap-y-1">
+          <p>Provider probe result:</p>
+          <div className="bg-gray-300 min-h-[100px] p-2">
+            <pre className="break-all whitespace-break-spaces">
+              {JSON.stringify(providerHashProbeResult, null, 2)}
+            </pre>
+          </div>
+        </div>
+        <div className="grid gap-y-1">
+          <p>Provider probe verification:</p>
+          <div className="grid gap-y-1 bg-gray-300 p-2">
+            {providerHashProbeHash && (
+              <p>Returned hash: {providerHashProbeHash}</p>
+            )}
+            <p>{providerHashProbeReceiptMessage}</p>
+            {providerHashProbeHash && isProviderProbeUserOpConfirming && (
+              <p>Waiting for user operation confirmation on the same hash...</p>
+            )}
+            {providerHashProbeHash && isProviderProbeUserOpConfirmed && (
+              <p>User operation confirmation succeeded on the same hash.</p>
+            )}
+            {providerHashProbeHash && providerProbeUserOpError && (
+              <p>{String(providerProbeUserOpError)}</p>
+            )}
+            {providerHashProbeHash &&
+              providerHashProbeReceiptMessage.includes('failed') &&
+              !isProviderProbeUserOpError &&
+              !isProviderProbeUserOpConfirming &&
+              isProviderProbeUserOpConfirmed && (
+                <p>
+                  This mismatch means the provider returned a user operation
+                  hash, not a transaction hash.
+                </p>
+              )}
+          </div>
+        </div>
       </div>
 
       <div className="grid gap-y-1">
