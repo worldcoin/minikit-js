@@ -1,5 +1,5 @@
 ---
-title: 'Minikit v2.0'
+title: 'Unified MiniKit SDK'
 'og:image': '/images/docs/docs-meta.png'
 'twitter:image': '/images/docs/docs-meta.png'
 ---
@@ -21,7 +21,7 @@ Historically, that choice created friction for three reasons:
 - MiniKit command APIs were tightly coupled to World App runtime behavior.
 - MiniKit v1 wallet interactions did not follow EIP-1193 conventions (for example, wagmi/viem patterns), so existing dApps often required significant refactors to adopt MiniKit-specific walletAuth and sendTransaction flows.
 
-MiniKit v2 addresses this by:
+The current unified SDK implementation addresses this by:
 
 - Removing verification APIs/UI from MiniKit and standardizing verification on IDKit.
 - Allowing existing wagmi-based dApps to add MiniKitProvider so wallet/transaction behavior adapts automatically to World App context.
@@ -77,7 +77,7 @@ if (completion.success) {
 }
 ```
 
-### MiniKit Command API (v2 -> v3)
+### MiniKit Command API
 
 #### 1) `MiniKit.commands` / `MiniKit.commandsAsync` are removed
 
@@ -121,7 +121,7 @@ const options: MiniKitSendHapticFeedbackOptions = {
 #### 3) Commands now support custom fallbacks
 
 Use `fallback` to keep the same command flow working outside World App.
-Fallback by default expect a response with the same shape as the original command, but you can also override and return custom data.
+Fallbacks are expected to return the same shape as the original command, but you can also override and return custom data.
 
 ```ts Fallback handlers for outside World App
 const result = await MiniKit.sendHapticFeedback({
@@ -138,6 +138,15 @@ const result = await MiniKit.sendHapticFeedback({
   },
 });
 ```
+
+When `wagmiConfig` is registered through `MiniKitProvider`, MiniKit also has a built-in wagmi-backed web path for:
+
+- `walletAuth`
+- `signMessage`
+- `signTypedData`
+- `sendTransaction`
+
+Commands without a built-in web implementation still need an explicit `fallback`.
 
 #### 4) Return shape changed to `{ executedWith, data }`
 
@@ -157,16 +166,19 @@ console.log(finalPayload.transaction_id);
 
 ```ts Custom handling based on execution context
 const result = await MiniKit.sendTransaction({
-  transaction: [tx],
+  chainId: 480,
+  transactions: [tx],
 });
 
 console.log(result.executedWith); // 'minikit' | 'wagmi' | 'fallback'
-console.log(result.data.transactionId);
+console.log(result.data.userOpHash);
 ```
+
+Inside World App, `userOpHash` is the MiniKit user operation hash. In the wagmi fallback path, the current implementation normalizes the returned transaction hash into the same `userOpHash` field.
 
 #### 5) `walletAuth` nonce validation is stricter
 
-In order to be in line with EIP-4361, `walletAuth` now requires a nonce without hyphens. You can use `crypto.randomUUID().replace(/-/g, '')`.
+In order to be in line with EIP-4361, `walletAuth` now requires an alphanumeric nonce that is at least 8 characters long. `crypto.randomUUID().replace(/-/g, '')` is a safe default.
 
 **Old:**
 
@@ -182,11 +194,9 @@ const nonce = crypto.randomUUID().replace(/-/g, '');
 await MiniKit.walletAuth({ nonce });
 ```
 
-#### 6) `sendTransaction` now also supports raw calldata
+#### 6) `sendTransaction` now uses a calldata-first `transactions` array
 
-`Transaction` now supports optional raw
-calldata. When `data` is present, it takes priority over `abi` /
-`functionName` / `args`. This change helps with Wagmi interoperability.
+The current `sendTransaction` implementation no longer uses the legacy `transaction` contract-call shape. The supported API is a calldata-first `transactions` array with an explicit `chainId`.
 
 **Old (contract-call only):**
 
@@ -206,15 +216,19 @@ await MiniKit.commandsAsync.sendTransaction({
 **New:**
 
 ```ts
+import { encodeFunctionData } from 'viem';
+
 await MiniKit.sendTransaction({
-  transaction: [
+  chainId: 480,
+  transactions: [
     {
-      address: tokenAddress,
+      to: tokenAddress,
       value: '0x0',
-      data: '0xa9059cbb...', // NEW: takes priority when present
-      abi: erc20Abi,
-      functionName: 'transfer',
-      args: [to, amount],
+      data: encodeFunctionData({
+        abi: erc20Abi,
+        functionName: 'transfer',
+        args: [to, amount],
+      }),
     },
   ],
 });
@@ -223,22 +237,50 @@ await MiniKit.sendTransaction({
 Type changes:
 
 ```ts Transaction Types
-type Transaction = {
-  address: string;
+type CalldataTransaction = {
+  to: string;
   value?: string;
-  data?: string; // takes priority when present
-  abi?: Abi | readonly unknown[];
-  functionName?: ContractFunctionName<...>;
-  args?: ContractFunctionArgs<...>;
+  data?: string;
 };
 
-interface MiniKitSendTransactionOptions<TCustomFallback = SendTransactionResult> {
-  transaction: Transaction[];
-  chainId?: number; // defaults to 480 on World App
-  permit2?: Permit2[];
-  formatPayload?: boolean;
+interface MiniKitSendTransactionOptions<
+  TCustomFallback = SendTransactionResult,
+> {
+  transactions: CalldataTransaction[];
+  chainId: number; // currently must be 480
+}
+
+interface SendTransactionResult {
+  userOpHash: string; // tx hash in wagmi fallback path
+  status: 'success';
+  version: number;
+  from: string;
+  timestamp: string;
 }
 ```
+
+Current behavior to be aware of:
+
+- `chainId` is required and the implementation currently only accepts World Chain (`480`).
+- World App supports batched `transactions`.
+- The built-in wagmi fallback currently supports a single transaction only unless you provide a custom `fallback`.
+- Deprecated v1 send-transaction types still exist in `@worldcoin/minikit-js/commands` for compatibility, but they are not the supported runtime API.
+
+#### 7) React transaction polling is centered on `userOpHash`
+
+For MiniKit transaction flows, the current React helper is `useWaitForUserOperationReceipt`.
+
+```tsx
+import { useWaitForUserOperationReceipt } from '@worldcoin/minikit-react';
+
+const { isLoading, isSuccess, transactionHash } =
+  useWaitForUserOperationReceipt({
+    client,
+    userOpHash: result.data.userOpHash,
+  });
+```
+
+`useWaitForTransactionReceipt` is still exported for legacy transaction-id polling, but new `MiniKit.sendTransaction()` flows should use `userOpHash`.
 
 ### Running your Mini App as a Standalone App
 
@@ -315,7 +357,7 @@ export function VerifyHybrid() {
 
 #### Transactions
 
-Adding Wagmi provider
+Adding Wagmi provider:
 
 ```tsx Install dependencies
 pnpm add @worldcoin/minikit-js wagmi viem @tanstack/react-query
@@ -351,28 +393,27 @@ const queryClient = new QueryClient();
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
   return (
-    // NEW QueryClientProvider and WagmiProvider recommended for robust performance
-    <QueryClientProvider client={queryClient}>
-      <WagmiProvider config={wagmiConfig}>
+    <WagmiProvider config={wagmiConfig}>
+      <QueryClientProvider client={queryClient}>
         <MiniKitProvider
           props={{
             appId: process.env.NEXT_PUBLIC_APP_ID ?? '',
-            wagmiConfig, // NEW: pass explicitly for robust fallback behavior
+            wagmiConfig,
           }}
         >
           {children}
         </MiniKitProvider>
-      </WagmiProvider>
-    </QueryClientProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
   );
 }
 ```
 
-Once these are set up your application will automatically support transaction logic externally without any refactoring to core command calls.
+Once these are set up, `walletAuth`, `signMessage`, `signTypedData`, and `sendTransaction` can reuse the same MiniKit command calls both inside and outside World App. The current built-in wagmi path for `sendTransaction` supports single-transaction execution on web; batched transactions remain World App only unless you provide a custom fallback.
 
-#### Non Transaction Command fallbacks
+#### Commands without built-in wagmi fallbacks
 
-MiniKit v2 is designed to work both inside and outside of World App. By adding custom fallbacks to commands, you can ensure your app behaves gracefully when users access it outside of World App.
+MiniKit is designed to work both inside and outside of World App, but not every command has a built-in web implementation. Commands such as `pay` and `shareContacts` still need an explicit `fallback` when they should work on web.
 
 ### Standalone App to Mini App
 
@@ -382,10 +423,9 @@ Requires no changes, simply enable the configuration to run your app as a mini a
 
 #### Transactions
 
-If you are using **wagmi** for transactions, adding the `MiniKitProvider` and `worldApp` connector will allow your existing transaction logic to work seamlessly in World App without any changes.
+If you are already using **wagmi**, adding the `MiniKitProvider` and `worldApp` connector allows existing wallet and transaction flows to route through MiniKit in World App with minimal application changes.
 
-If you're using another library like **viem** or **ethers**. Check if you're in World App and use the World App provider which will automatically
-bridge your commands.
+If you're using another library like **viem** or **ethers**, check if you're in World App and swap in the World App EIP-1193 provider.
 
 ```tsx Viem/Ethers
 import { MiniKit, getWorldAppProvider } from '@worldcoin/minikit-js';
@@ -401,3 +441,5 @@ if (inWorldApp) {
   // your normal viem/ethers provider flow
 }
 ```
+
+Current implementation detail: inside World App, `eth_sendTransaction` currently resolves through `MiniKit.sendTransaction()` and returns the MiniKit `userOpHash`. If you need the final on-chain transaction hash, resolve the user operation status first.
