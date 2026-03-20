@@ -5,8 +5,8 @@ import type { CommandResultByVia } from '../types';
 import {
   Command,
   COMMAND_VERSIONS,
-  CommandUnavailableError,
   CommandContext,
+  CommandUnavailableError,
   isCommandAvailable,
   isInWorldApp,
   ResponseEvent,
@@ -166,10 +166,7 @@ async function nativeSendTransaction(
       COMMAND_VERSIONS[Command.SendTransaction],
     )
   ) {
-    throw new CommandUnavailableError(
-      Command.SendTransaction,
-      'oldAppVersion',
-    );
+    throw new CommandUnavailableError(Command.SendTransaction, 'oldAppVersion');
   }
 
   const input = {

@@ -109,17 +109,16 @@ export const SendTransaction = () => {
   const [transactionHash, setTransactionHash] = useState<
     `0x${string}` | undefined
   >();
-  const [providerHashProbePayload, setProviderHashProbePayload] = useState<
-    Record<string, any> | null
-  >(null);
-  const [providerHashProbeResult, setProviderHashProbeResult] = useState<
-    Record<string, any> | null
-  >(null);
-  const [providerHashProbeHash, setProviderHashProbeHash] = useState<string>('');
-  const [
-    providerHashProbeReceiptMessage,
-    setProviderHashProbeReceiptMessage,
-  ] = useState<string>('Run the probe to compare the returned hash.');
+  const [providerHashProbePayload, setProviderHashProbePayload] =
+    useState<Record<string, any> | null>(null);
+  const [providerHashProbeResult, setProviderHashProbeResult] = useState<Record<
+    string,
+    any
+  > | null>(null);
+  const [providerHashProbeHash, setProviderHashProbeHash] =
+    useState<string>('');
+  const [providerHashProbeReceiptMessage, setProviderHashProbeReceiptMessage] =
+    useState<string>('Run the probe to compare the returned hash.');
   const [verificationMode, setVerificationMode] = useState<
     'minikit' | 'wagmi' | null
   >(null);
@@ -524,8 +523,7 @@ export const SendTransaction = () => {
           receipt,
         }));
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : String(error);
+        const message = error instanceof Error ? error.message : String(error);
         setProviderHashProbeReceiptMessage(
           `Transaction receipt lookup failed on the returned hash: ${message}`,
         );
