@@ -11,11 +11,25 @@ import type {
 export enum Tokens {
   USDC = 'USDCE',
   WLD = 'WLD',
+  WARS = 'WARS',
+  WCOP = 'WCOP',
+  WMXN = 'WMXN',
+  WBRL = 'WBRL',
+  WPEN = 'WPEN',
+  WCLP = 'WCLP',
+  EURC = 'EURC',
 }
 
 export const TokenDecimals: { [key in Tokens]: number } = {
   [Tokens.USDC]: 6,
   [Tokens.WLD]: 18,
+  [Tokens.WARS]: 18,
+  [Tokens.WCOP]: 18,
+  [Tokens.WMXN]: 18,
+  [Tokens.WBRL]: 18,
+  [Tokens.WPEN]: 18,
+  [Tokens.WCLP]: 18,
+  [Tokens.EURC]: 6,
 };
 
 export enum Network {
