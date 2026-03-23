@@ -76,18 +76,19 @@ export const Pay = () => {
 
   const onPayClick = useCallback(
     async (amount: number, address: string, token?: Tokens) => {
-      const wldAmount = tokenToDecimals(amount, Tokens.WLD);
-      const usdcAmount = tokenToDecimals(amount, Tokens.USDC);
+      const wldAmount = tokenToDecimals(amount, Tokens.WLD).toString();
+      const usdcAmount = tokenToDecimals(amount, Tokens.USDC).toString();
 
-      const tokenPayload = [
-        {
-          symbol: Tokens.WLD,
-          token_amount: wldAmount.toString(),
-        },
-        {
-          symbol: Tokens.USDC,
-          token_amount: usdcAmount.toString(),
-        },
+      const tokenPayload: MiniKitPayOptions['tokens'] = [
+        { symbol: Tokens.WLD, token_amount: wldAmount },
+        { symbol: Tokens.USDC, token_amount: usdcAmount },
+        { symbol: Tokens.WARS, token_amount: wldAmount },
+        { symbol: Tokens.WCOP, token_amount: wldAmount },
+        { symbol: Tokens.WMXN, token_amount: wldAmount },
+        { symbol: Tokens.WBRL, token_amount: wldAmount },
+        { symbol: Tokens.WPEN, token_amount: wldAmount },
+        { symbol: Tokens.WCLP, token_amount: wldAmount },
+        { symbol: Tokens.EURC, token_amount: usdcAmount },
       ];
 
       const payPayload: MiniKitPayOptions = {
@@ -96,10 +97,7 @@ export const Pay = () => {
           ? [
               {
                 symbol: token,
-                token_amount:
-                  token === Tokens.WLD
-                    ? wldAmount.toString()
-                    : usdcAmount.toString(),
+                token_amount: tokenToDecimals(amount, token).toString(),
               },
             ]
           : tokenPayload,
@@ -148,7 +146,7 @@ export const Pay = () => {
               onPayClick(0.1, '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045')
             }
           >
-            Pay (USDC + WLD)
+            Pay any token
           </button>
           <button
             className="bg-black text-white rounded-lg p-4 w-full"
