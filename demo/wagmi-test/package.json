@@ -1,0 +1,32 @@
+{
+  "name": "minikit-demo-wagmi-test",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3002",
+    "build": "next build",
+    "start": "next start -p 3002",
+    "lint": "prettier --check . --ignore-path ../../.prettierignore",
+    "type-check": "tsc"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.62.8",
+    "@worldcoin/minikit-js": "workspace:*",
+    "@worldcoin/minikit-react": "workspace:*",
+    "next": "^15.2.8",
+    "react": "^19.0.3",
+    "react-dom": "^19.0.3",
+    "siwe": "^3.0.0",
+    "viem": "2.45.3",
+    "wagmi": "^3.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eruda": "^3.4.1",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}
