@@ -161,4 +161,30 @@ describe('Test SIWE Message Verification', () => {
       verifySiweMessage(payload, '814434bd-ed2c-412e-aa2c-c4b266a42027'),
     ).rejects.toThrow('Signature verification failed');
   });
+
+  /**
+   * Spec specifies only ALPHA and DIGIT character sets.
+   * https://eips.ethereum.org/EIPS/eip-4361
+   */
+  it('should reject invalid nonces', async () => {
+    // a hyphenated UUID is not valid per spec
+    const invalidNonce = crypto.randomUUID();
+    const message = signedMessagePayload.replace('12345678', invalidNonce);
+
+    const result = await verifySiweMessage(
+      {
+        status: 'success',
+        message: message,
+        signature: signature,
+        address: '0x619525ED4E862B62cFEDACCc4dA5a9864D6f4A97',
+        version: 2,
+      },
+      invalidNonce,
+      undefined,
+      undefined,
+    );
+
+    expect(result.isValid).toBe(false);
+    expect(result.siweMessageData).toBeUndefined();
+  });
 });

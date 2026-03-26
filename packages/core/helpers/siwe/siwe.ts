@@ -1,3 +1,4 @@
+import { nonceRegex } from 'helpers/siwe/validate-wallet-auth-command-input';
 import { MiniAppWalletAuthSuccessPayload } from 'types/responses';
 import { SiweMessage } from 'types/wallet-auth';
 import {
@@ -301,6 +302,11 @@ export const verifySiweMessageV2 = async (
 
   const { message, signature, address } = payload;
   const siweMessageData = parseSiweMessage(message);
+
+  if (!nonceRegex.test(nonce)) {
+    return { isValid: false, siweMessageData: undefined };
+  }
+
   if (!validateMessage(siweMessageData, nonce, statement, requestId)) {
     throw new Error('Validation failed');
   }

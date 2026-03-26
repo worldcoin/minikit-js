@@ -1,5 +1,7 @@
 import { WalletAuthInput } from 'types/commands';
 
+export const nonceRegex = /^[a-zA-Z\d]+$/;
+
 type ValidationResult =
   | {
       valid: true;
@@ -18,6 +20,14 @@ export const validateWalletAuthCommandInput = (
 
   if (params.nonce.length < 8) {
     return { valid: false, message: "'nonce' must be at least 8 characters" };
+  }
+
+  if (!nonceRegex.test(params.nonce)) {
+    return {
+      valid: false,
+      message:
+        "'nonce' must be only alphanumeric characters (see RFC 5234 for ALPHA and DIGIT)",
+    };
   }
 
   if (params.statement && params.statement.includes('\n')) {
