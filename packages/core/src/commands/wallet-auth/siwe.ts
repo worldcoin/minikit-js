@@ -4,7 +4,6 @@ import {
   getContract,
   hashMessage,
   http,
-  recoverAddress,
 } from 'viem';
 import { worldchain } from 'viem/chains';
 import type { MiniAppWalletAuthSuccessPayload } from './types';
@@ -180,14 +179,8 @@ export const verifySiweMessage = (
   requestId?: string,
   userProvider?: Client,
 ) => {
-  if (payload.version === 1) {
-    return verifySiweMessageV1(
-      payload,
-      nonce,
-      statement,
-      requestId,
-      userProvider,
-    );
+  if (payload.version !== 2) {
+    throw new Error('Unsupported version returned');
   } else {
     return verifySiweMessageV2(
       payload,
@@ -238,53 +231,6 @@ const validateMessage = (
     );
   }
   return true;
-};
-
-// To be deprecated in later versions
-export const verifySiweMessageV1 = async (
-  payload: MiniAppWalletAuthSuccessPayload,
-  nonce: string,
-  statement?: string,
-  requestId?: string,
-  userProvider?: Client,
-) => {
-  if (typeof window !== 'undefined') {
-    throw new Error('Wallet auth payload can only be verified in the backend');
-  }
-
-  const { message, signature, address } = payload;
-  const siweMessageData = parseSiweMessage(message);
-  validateMessage(siweMessageData, nonce, statement, requestId);
-
-  // Check ERC-191 Signature Matches not recovery
-  let provider =
-    userProvider ||
-    createPublicClient({ chain: worldchain, transport: http() });
-  const signedMessage = `${ERC_191_PREFIX}${message.length}${message}`;
-  const hashedMessage = hashMessage(signedMessage);
-  const contract = getContract({
-    address: address as `0x${string}`,
-    abi: SAFE_CONTRACT_ABI,
-    client: provider,
-  });
-
-  try {
-    const recoveredAddress = await recoverAddress({
-      hash: hashedMessage,
-      signature: `0x${signature}`,
-    });
-
-    const isOwner = await contract.read.isOwner([recoveredAddress]);
-    if (!isOwner) {
-      throw new Error('Signature verification failed, invalid owner');
-    }
-  } catch (error) {
-    throw new Error('Signature verification failed');
-  }
-  // TODO: Once live, in app
-  // console.warn('Using deprecated SIWE v1 verification. Please update your app');
-
-  return { isValid: true, siweMessageData: siweMessageData };
 };
 
 // Nonce is required to be passed in as a parameter to verify the message
