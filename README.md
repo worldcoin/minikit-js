@@ -10,6 +10,14 @@ or use the CDN:
 
 For comprehensive setup instructions and usage examples, visit our [developer documentation](https://docs.world.org/mini-apps).
 
+## Verification Ownership
+
+World ID verification is owned by IDKit:
+
+- Use `@worldcoin/idkit` using `IDKitRequestWidget` see our [docs](https://docs.world.org/world-id/idkit/react)
+
+MiniKit is focused on mini-app commands (`walletAuth`, `sendTransaction`, `pay`, `shareContacts`, etc.) and does not proxy verify APIs.
+
 ## 🛠 ️Developing Locally
 
 To run the example mini app locally:

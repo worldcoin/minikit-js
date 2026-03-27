@@ -1,13 +1,12 @@
+import { MiniKit } from '@worldcoin/minikit-js';
 import {
-  MiniKit,
   Permission,
   RequestPermissionErrorCodes,
-  RequestPermissionPayload,
   ResponseEvent,
-} from '@worldcoin/minikit-js';
-import { useCallback, useEffect, useState } from 'react';
+  type MiniKitRequestPermissionOptions,
+} from '@worldcoin/minikit-js/commands';
+import { useCallback, useState } from 'react';
 import * as yup from 'yup';
-import { validateSchema } from './helpers/validate-schema';
 
 const requestPermissionSuccessPayloadSchema = yup.object({
   status: yup.string<'success'>().equals(['success']).required(),
@@ -38,63 +37,71 @@ export const RequestPermission = () => {
   const [sentRequestPermissionPayload, setSentRequestPermissionPayload] =
     useState<Record<string, any> | null>(null);
 
-  const [tempInstallFix, setTempInstallFix] = useState(0);
-
-  useEffect(() => {
-    if (!MiniKit.isInstalled()) {
-      return;
-    }
-
-    MiniKit.subscribe(
-      ResponseEvent.MiniAppRequestPermission,
-      async (payload) => {
-        console.log('MiniAppRequestPermission, SUBSCRIBE PAYLOAD', payload);
-        setRequestPermissionAppPayload(JSON.stringify(payload, null, 2));
-        if (payload.status === 'error') {
-          const errorMessage = await validateSchema(
-            requestPermissionErrorPayloadSchema,
-            payload,
-          );
-
-          if (!errorMessage) {
-            setRequestPermissionPayloadValidationMessage('Payload is valid');
-          } else {
-            setRequestPermissionPayloadValidationMessage(errorMessage);
-          }
+  const onRequestPermission = useCallback(async (permission: Permission) => {
+    const requestPermissionPayload: MiniKitRequestPermissionOptions = {
+      permission,
+      fallback() {
+        if (permission === Permission.Notifications) {
+          return Notification.requestPermission().then((result) => {
+            if (result === 'granted') {
+              return {
+                status: 'success' as const,
+                version: 1,
+                permission,
+                timestamp: new Date().toISOString(),
+              };
+            } else {
+              return {
+                status: 'error' as const,
+                version: 1,
+                error_code: RequestPermissionErrorCodes.UserRejected,
+                description: 'User denied the permission',
+              };
+            }
+          });
+        } else if (permission === Permission.Microphone) {
+          return navigator.mediaDevices
+            .getUserMedia({ audio: true })
+            .then(() => {
+              return {
+                status: 'success' as const,
+                version: 1,
+                permission,
+                timestamp: new Date().toISOString(),
+              };
+            })
+            .catch(() => {
+              return {
+                status: 'error' as const,
+                version: 1,
+                error_code: RequestPermissionErrorCodes.UserRejected,
+                description: 'User denied the permission or an error occurred',
+              };
+            });
         } else {
-          const errorMessage = await validateSchema(
-            requestPermissionSuccessPayloadSchema,
-            payload,
-          );
-
-          // This checks if the response format is correct
-          if (!errorMessage) {
-            setRequestPermissionPayloadValidationMessage('Payload is valid');
-          } else {
-            setRequestPermissionPayloadValidationMessage(errorMessage);
-          }
+          return Promise.resolve({
+            status: 'error' as const,
+            version: 1,
+            error_code: RequestPermissionErrorCodes.UnsupportedPermission,
+            description:
+              'The requested permission is not supported in the fallback',
+          });
         }
       },
-    );
-
-    return () => {
-      MiniKit.unsubscribe(ResponseEvent.MiniAppRequestPermission);
-    };
-  }, [tempInstallFix]);
-
-  const onRequestPermission = useCallback(async (permission: Permission) => {
-    const requestPermissionPayload: RequestPermissionPayload = {
-      permission,
     };
 
-    const payload = MiniKit.commands.requestPermission(
-      requestPermissionPayload,
-    );
+    const payload = await MiniKit.requestPermission(requestPermissionPayload);
     setSentRequestPermissionPayload({
       payload,
     });
-    console.log('payload', payload);
-    setTempInstallFix((prev) => prev + 1);
+
+    const response = payload.data;
+    setRequestPermissionAppPayload(JSON.stringify(response, null, 2));
+    if (response.status === 'success') {
+      setRequestPermissionPayloadValidationMessage('Permission granted');
+    } else {
+      setRequestPermissionPayloadValidationMessage('Permission denied');
+    }
   }, []);
 
   return (

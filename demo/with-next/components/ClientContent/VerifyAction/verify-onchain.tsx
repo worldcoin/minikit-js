@@ -1,8 +1,18 @@
 'use client';
 
+import {
+  IDKitRequestWidget,
+  orbLegacy,
+  type IDKitResult,
+  type RpContext,
+} from '@worldcoin/idkit';
 import { MiniKit } from '@worldcoin/minikit-js';
-import { useState } from 'react';
-import { decodeAbiParameters, parseAbiParameters } from 'viem';
+import { useMemo, useState } from 'react';
+import {
+  decodeAbiParameters,
+  encodeFunctionData,
+  parseAbiParameters,
+} from 'viem';
 
 // ABI fragment for the verify function
 const testVerifyAbi = [
@@ -20,9 +30,9 @@ const testVerifyAbi = [
   },
 ];
 
-/** works on Prod QA App, app_id: app_dfbe55706a640c82dce839bb0ecae74d */
+/** works with app_id: app_f617d152e3f3ea2142dde27099ffd368, action: onchain-verify-test */
 export const TEST_VERIFY_CONTRACT_ADDRESS =
-  '0x02ce0121bfc7f4d142d2da0452344923e59e53da';
+  '0x6afbd3794faf7986493d1844d204b417147959c6';
 
 /**
  * Calls the TestVerify contract's verify function
@@ -53,28 +63,26 @@ export const verifyOnchain = async (payload: {
     console.log('NullifierHash:', nullifierHash);
     console.log('Proof:', proof);
 
-    const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
-      transaction: [
+    const calldata = encodeFunctionData({
+      abi: testVerifyAbi,
+      functionName: 'verify',
+      args: [signal, root, nullifierHash, proof],
+    });
+
+    const result = await MiniKit.sendTransaction({
+      chainId: 480,
+      transactions: [
         {
-          address: TEST_VERIFY_CONTRACT_ADDRESS,
-          abi: testVerifyAbi,
-          functionName: 'verify',
-          args: [signal, root, nullifierHash, proof],
+          to: TEST_VERIFY_CONTRACT_ADDRESS,
+          data: calldata,
         },
       ],
     });
 
-    if (finalPayload.status === 'success') {
-      return {
-        success: true,
-        transactionHash: finalPayload.transaction_id,
-      };
-    } else {
-      return {
-        success: false,
-        error: `Transaction failed: ${finalPayload.error_code || 'Unknown error'} \n ${JSON.stringify(finalPayload.details)}`,
-      };
-    }
+    return {
+      success: true,
+      transactionHash: result.data.userOpHash ?? undefined,
+    };
   } catch (error) {
     console.error('Error verifying on-chain:', error);
     return {
@@ -91,44 +99,67 @@ export const VerifyOnchainProof = () => {
     error?: string;
     isLoading?: boolean;
   }>({});
+  const [widgetOpen, setWidgetOpen] = useState(false);
+  const [rpContext, setRpContext] = useState<RpContext | null>(null);
+  const [widgetSignal, setWidgetSignal] = useState('');
 
-  const handleOnchainVerify = async () => {
-    let signal = MiniKit.user.walletAddress;
-    if (!signal) {
-      const { finalPayload } = await MiniKit.commandsAsync.walletAuth({
-        nonce: 'i-trust-you',
+  const preset = useMemo(
+    () => orbLegacy({ signal: widgetSignal }),
+    [widgetSignal],
+  );
+
+  const appId = 'app_f617d152e3f3ea2142dde27099ffd368' as `app_${string}`;
+  const environment =
+    process.env.NEXT_PUBLIC_ENVIRONMENT === 'production'
+      ? 'production'
+      : 'staging';
+
+  const handleStartVerify = async () => {
+    try {
+      const signal = crypto.randomUUID().replace(/-/g, '');
+
+      const rpRes = await fetch('/api/rp-signature', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'onchain-verify-test' }),
       });
-      if (finalPayload.status === 'success') {
-        signal = finalPayload.address;
-      } else {
-        return { success: false, error: 'No wallet address' };
-      }
+      const rpSig = await rpRes.json();
+      const rpCtx: RpContext = {
+        rp_id: rpSig.rp_id,
+        nonce: rpSig.nonce,
+        created_at: rpSig.created_at,
+        expires_at: rpSig.expires_at,
+        signature: rpSig.sig,
+      };
+
+      setWidgetSignal(signal);
+      setRpContext(rpCtx);
+      setOnchainVerifyResult({ isLoading: true });
+      setWidgetOpen(true);
+    } catch (error) {
+      console.error('Error starting on-chain verification:', error);
+      setOnchainVerifyResult({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        isLoading: false,
+      });
     }
-    const { finalPayload } = await MiniKit.commandsAsync.verify({
-      action: 'onchain-verify-test',
-      signal: signal,
-    });
-    if (
-      finalPayload.status === 'success' &&
-      !('verifications' in finalPayload)
-    ) {
-      const merkleRoot = finalPayload.merkle_root;
-      const nullifierHash = finalPayload.nullifier_hash;
-      const proof = finalPayload.proof;
+  };
 
+  const handleVerifyResult = async (result: IDKitResult) => {
+    const firstResponse = (result as any).responses?.[0] as
+      | Record<string, any>
+      | undefined;
+
+    if (firstResponse?.proof) {
       try {
-        // Using a fixed signal address for simplicity
-        const result = await verifyOnchain({
-          signal: signal,
-          root: merkleRoot,
-          nullifierHash: nullifierHash,
-          proof: proof,
+        const onchainResult = await verifyOnchain({
+          signal: widgetSignal,
+          root: firstResponse.merkle_root,
+          nullifierHash: firstResponse.nullifier_hash,
+          proof: firstResponse.proof,
         });
-
-        setOnchainVerifyResult({
-          ...result,
-          isLoading: false,
-        });
+        setOnchainVerifyResult({ ...onchainResult, isLoading: false });
       } catch (error) {
         console.error('Error in onchain verification:', error);
         setOnchainVerifyResult({
@@ -139,6 +170,7 @@ export const VerifyOnchainProof = () => {
       }
     }
   };
+
   if (process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging') {
     return <></>;
   }
@@ -149,14 +181,8 @@ export const VerifyOnchainProof = () => {
         Tests the verification proof on-chain using the TestVerify contract at
         address: {TEST_VERIFY_CONTRACT_ADDRESS}
         <br />
-        This will only work on the prod QA App -
-        <a
-          href="https://world.org/ecosystem/app_dfbe55706a640c82dce839bb0ecae74d"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          app_dfbe55706a640c82dce839bb0ecae74d
-        </a>
+        Uses app_id: app_f617d152e3f3ea2142dde27099ffd368, action:
+        onchain-verify-test
         <br />
       </p>
 
@@ -164,12 +190,39 @@ export const VerifyOnchainProof = () => {
         className={
           'bg-black text-white rounded-lg p-4 w-full disabled:opacity-20'
         }
-        onClick={handleOnchainVerify}
+        onClick={handleStartVerify}
       >
         {onchainVerifyResult.isLoading
           ? 'Verifying on-chain...'
           : 'Verify on-chain with TestVerify contract'}
       </button>
+
+      {rpContext && (
+        <IDKitRequestWidget
+          open={widgetOpen}
+          onOpenChange={setWidgetOpen}
+          app_id={appId}
+          action="onchain-verify-test"
+          rp_context={rpContext}
+          allow_legacy_proofs={true}
+          preset={preset}
+          onSuccess={() => {
+            setOnchainVerifyResult((prev) => ({
+              ...prev,
+              isLoading: false,
+            }));
+          }}
+          handleVerify={handleVerifyResult}
+          onError={(errorCode) => {
+            setOnchainVerifyResult({
+              success: false,
+              error: `Verification failed: ${errorCode}`,
+              isLoading: false,
+            });
+          }}
+          environment={environment}
+        />
+      )}
 
       {onchainVerifyResult.success !== undefined && (
         <div

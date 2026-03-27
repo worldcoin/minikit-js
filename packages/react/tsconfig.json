@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "types": ["node", "react"],
+    "types": ["node", "react", "jest"],
     "moduleResolution": "bundler",
     "rootDir": ".",
     "baseUrl": ".",

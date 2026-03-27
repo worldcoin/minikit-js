@@ -1,37 +1,45 @@
 'use server';
 
-import {
-  ISuccessResult,
-  IVerifyResponse,
-  verifyCloudProof,
-} from '@worldcoin/minikit-js';
+import { IDKitResult } from '@worldcoin/idkit';
 
-export const verifyProof = async (params: {
-  app_id: `app_${string}`;
-  action: string;
-  signal?: string;
-  payload: ISuccessResult;
-}) => {
-  const { app_id, action, payload, signal } = params;
-  let verifyResponse: IVerifyResponse | null = null;
-  const stagingEndpoint = `${process.env.NEXT_SERVER_DEV_PORTAL_URL}/api/v2/verify/${app_id}`;
+export interface VerifyResponse {
+  success: boolean;
+  code?: string;
+  detail?: string;
+  attribute?: string | null;
+}
 
-  try {
-    verifyResponse = await verifyCloudProof(
-      payload,
-      app_id,
-      action,
-      signal,
-
-      process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging'
-        ? stagingEndpoint
-        : undefined,
-    );
-
-    console.log('verifyResponse', verifyResponse);
-  } catch (error) {
-    console.log('Error in verifyCloudProof', error);
+/**
+ * Verify a proof using the Developer Portal v4 API
+ */
+export const verifyProof = async (
+  params: IDKitResult,
+  app_id: string,
+): Promise<VerifyResponse | null> => {
+  if (!/^app_[a-zA-Z0-9_]+$/.test(app_id)) {
+    throw new Error('Invalid app_id format');
   }
 
-  return verifyResponse;
+  const isStaging = process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging';
+  const baseUrl = isStaging
+    ? process.env.NEXT_SERVER_DEV_PORTAL_URL
+    : 'https://developer.worldcoin.org';
+
+  try {
+    const response = await fetch(
+      `${baseUrl}/api/v4/verify/${encodeURIComponent(app_id)}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params),
+      },
+    );
+
+    const result = await response.json();
+    console.log('verifyResponse', result);
+    return result;
+  } catch (error) {
+    console.error('Error in verifyProof', error);
+    return null;
+  }
 };

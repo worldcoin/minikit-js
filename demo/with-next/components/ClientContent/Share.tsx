@@ -1,9 +1,9 @@
+import { MiniKit } from '@worldcoin/minikit-js';
 import {
-  MiniAppSharePayload,
-  MiniKit,
   SendHapticFeedbackErrorCodes,
-  ShareInput,
-} from '@worldcoin/minikit-js';
+  type MiniAppSharePayload,
+  type MiniKitShareOptions,
+} from '@worldcoin/minikit-js/commands';
 import { useCallback, useState } from 'react';
 import * as yup from 'yup';
 import { validateSchema } from './helpers/validate-schema';
@@ -69,15 +69,21 @@ export const Share = () => {
     }
   };
 
-  const onSendShareFiles = useCallback(async (input: ShareInput) => {
-    const { commandPayload, finalPayload } =
-      await MiniKit.commandsAsync.share(input);
+  const onSendShareFiles = useCallback(async (input: MiniKitShareOptions) => {
+    const sharePayload = {
+      ...input,
+      fallback() {
+        console.log('Share fallback called');
+      },
+    };
+    const finalPayload = await MiniKit.share(sharePayload);
 
     setSentShareFilesPayload({
-      commandPayload,
+      input,
     });
-
-    await validateResponse(finalPayload);
+    if (finalPayload.executedWith === 'minikit') {
+      await validateResponse(finalPayload.data);
+    }
   }, []);
 
   return (

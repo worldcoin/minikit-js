@@ -1,0 +1,3 @@
+[submodule "demo/with-next/contracts/lib/forge-std"]
+	path = demo/with-next/contracts/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std

@@ -6,21 +6,25 @@
     "dev": "turbo run dev",
     "lint": "prettier --check .",
     "format": "prettier --write .",
-    "build": "turbo run build",
+    "build": "turbo run build --concurrency=1",
     "prepublishOnly": "npm run build",
     "type-check": "pnpm --recursive type-check",
     "release": "turbo build && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.7",
+    "prettier": "^3.2.5",
     "prettier-plugin-organize-imports": "^4.3.0",
-    "turbo": "^2.6.1"
+    "turbo": "^2.8.20"
   },
   "engines": {
     "node": ">=16"
   },
   "pnpm": {
     "overrides": {
+      "wagmi": "3.4.3",
+      "@wagmi/core": "3.3.3",
+      "@wagmi/connectors": "7.1.7",
       "ws": ">=7.5.10",
       "rollup": ">=4.22.4",
       "elliptic": ">=6.6.1"

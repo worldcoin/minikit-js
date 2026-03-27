@@ -1,14 +1,11 @@
 'use client';
 
-import {
-  MiniKit,
-  MiniKitInstallErrorCodes,
-  MiniKitInstallErrorMessage,
-} from '@worldcoin/minikit-js';
+import { MiniKit } from '@worldcoin/minikit-js';
+import { validateCommands } from '@worldcoin/minikit-js/commands';
 import clsx from 'clsx';
 import { useState } from 'react';
 
-const appId = 'your-app-id';
+const appId = process.env.NEXT_PUBLIC_STAGING_VERIFY_APP_ID;
 
 export const Versions = (): JSX.Element => {
   const [username, setUsername] = useState('andy');
@@ -19,24 +16,8 @@ export const Versions = (): JSX.Element => {
     ) {
       return { isValid: false, error: 'window.WorldApp is undefined' };
     }
-
-    try {
-      // @ts-ignore
-      if (MiniKit.commandsValid(window.WorldApp?.supported_commands)) {
-        return { isValid: true };
-      } else {
-        return {
-          isValid: false,
-          error:
-            MiniKitInstallErrorMessage[MiniKitInstallErrorCodes.AppOutOfDate],
-        };
-      }
-    } catch (error) {
-      return {
-        isValid: false,
-        error: 'Something went wrong on version validation',
-      };
-    }
+    console.log(validateCommands(window.WorldApp.supported_commands));
+    return { isValid: validateCommands(window.WorldApp.supported_commands) };
   };
 
   const reinstall = () => {
@@ -45,7 +26,7 @@ export const Versions = (): JSX.Element => {
   };
   return (
     <div className="grid gap-y-4">
-      <h2 className="font-bold text-2xl">Versions</h2>
+      <h2 className="font-bold text-2xl">Version Check</h2>
 
       <div>
         <p>window.WorldApp:</p>
