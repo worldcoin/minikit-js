@@ -193,6 +193,8 @@ describe('Test SIWE Message Verification', () => {
         },
         invalidNonce,
       ),
-    ).rejects.toThrow('Invalid nonce: must be alphanumeric only (per ERC-4361)');
+    ).rejects.toThrow(
+      'Invalid nonce: must be alphanumeric only (per ERC-4361)',
+    );
   });
 });
