@@ -245,6 +245,13 @@ export const verifySiweMessageV2 = async (
     throw new Error('Wallet auth payload can only be verified in the backend');
   }
 
+  const NONCE_REGEX = /^[a-zA-Z0-9]+$/;
+  if (!NONCE_REGEX.test(nonce)) {
+    throw new Error(
+      'Invalid nonce: must be alphanumeric only (per ERC-4361)',
+    );
+  }
+
   const { message, signature, address } = payload;
   const siweMessageData = parseSiweMessage(message);
   if (!validateMessage(siweMessageData, nonce, statement, requestId)) {

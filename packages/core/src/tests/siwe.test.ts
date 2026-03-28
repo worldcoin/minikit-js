@@ -50,7 +50,7 @@ const signatureSiweMessage = (
   expirationDays = 7,
   notBeforeDays = -1,
 ) =>
-  `http://localhost:3000 wants you to sign in with your Ethereum account:\n0xd809de3086ea4f53ed3979cead25e1ff72b564a3\n\n\nURI: http://localhost:3000/\nVersion: 1\nChain ID: 10\nNonce: 814434bd-ed2c-412e-aa2c-c4b266a42027\nIssued At: ${issuedAt.toISOString()}\nExpiration Time: ${new Date(issuedAt.getTime() + 1000 * 60 * 60 * 24 * expirationDays).toISOString()}\nNot Before: ${new Date(issuedAt.getTime() + 1000 * 60 * 60 * 24 * notBeforeDays).toISOString()}\nRequest ID: 0\n`;
+  `http://localhost:3000 wants you to sign in with your Ethereum account:\n0xd809de3086ea4f53ed3979cead25e1ff72b564a3\n\n\nURI: http://localhost:3000/\nVersion: 1\nChain ID: 10\nNonce: 814434bded2c412eaa2cc4b266a42027\nIssued At: ${issuedAt.toISOString()}\nExpiration Time: ${new Date(issuedAt.getTime() + 1000 * 60 * 60 * 24 * expirationDays).toISOString()}\nNot Before: ${new Date(issuedAt.getTime() + 1000 * 60 * 60 * 24 * notBeforeDays).toISOString()}\nRequest ID: 0\n`;
 
 const signature =
   '0x4daac02daec8852202bba0694da942b1f4e20d1795cbb1c6740a71ee4660f1d77c4fd7fabfd4416d7e987030d41841c575a363a95e496a3264d282863ce5dc4d1b';
@@ -138,7 +138,7 @@ describe('Test SIWE Message Verification', () => {
     expect(isValid.success).toBe(true);
   });
 
-  test('Verify SIWE Message with invalid signature', async () => {
+  test('Verify SIWE Message with v1 payload should reject', () => {
     const payload: MiniAppWalletAuthSuccessPayload = {
       status: 'success',
       message: signatureSiweMessage(new Date(), 7, -1),
@@ -146,8 +146,21 @@ describe('Test SIWE Message Verification', () => {
       address: '0xd809de3086ea4f53ed3979cead25e1ff72b564a3',
       version: 1,
     };
+    expect(() =>
+      verifySiweMessage(payload, '814434bded2c412eaa2cc4b266a42027'),
+    ).toThrow('Unsupported version returned');
+  });
+
+  test('Verify SIWE Message with invalid signature', async () => {
+    const payload: MiniAppWalletAuthSuccessPayload = {
+      status: 'success',
+      message: signatureSiweMessage(new Date(), 7, -1),
+      signature: 'random_signature',
+      address: '0xd809de3086ea4f53ed3979cead25e1ff72b564a3',
+      version: 2,
+    };
     await expect(
-      verifySiweMessage(payload, '814434bd-ed2c-412e-aa2c-c4b266a42027'),
+      verifySiweMessage(payload, '814434bded2c412eaa2cc4b266a42027'),
     ).rejects.toThrow('Signature verification failed');
   });
 
@@ -157,11 +170,29 @@ describe('Test SIWE Message Verification', () => {
       message: signatureSiweMessage(new Date(), 7, -1),
       signature: signature,
       address: '0x0000000000000000000000000000000000000000',
-      version: 1,
+      version: 2,
     };
 
     await expect(
-      verifySiweMessage(payload, '814434bd-ed2c-412e-aa2c-c4b266a42027'),
+      verifySiweMessage(payload, '814434bded2c412eaa2cc4b266a42027'),
     ).rejects.toThrow('Signature verification failed');
+  });
+
+  test('should reject invalid nonces per ERC-4361', async () => {
+    const invalidNonce = crypto.randomUUID(); // contains hyphens
+    const message = signedMessagePayload.replace('12345678', invalidNonce);
+
+    await expect(
+      verifySiweMessage(
+        {
+          status: 'success',
+          message: message,
+          signature: signature,
+          address: '0x619525ED4E862B62cFEDACCc4dA5a9864D6f4A97',
+          version: 2,
+        },
+        invalidNonce,
+      ),
+    ).rejects.toThrow('Invalid nonce: must be alphanumeric only (per ERC-4361)');
   });
 });
