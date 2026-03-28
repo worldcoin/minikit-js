@@ -136,12 +136,12 @@ async function nativeWalletAuth(
 
   const walletAuthPayload = { siweMessage };
 
-  // Wallet auth version 2 is only available for world app version 2087900 and above
   const worldAppVersion = ctx.state.deviceProperties.worldAppVersion;
-  const walletAuthVersion =
-    worldAppVersion && worldAppVersion > 2087900
-      ? COMMAND_VERSIONS[Command.WalletAuth]
-      : 1;
+  if (worldAppVersion && worldAppVersion <= 2087900) {
+    throw new Error(
+      'Wallet auth v1 is no longer supported. Please update World App to the latest version.',
+    );
+  }
 
   const finalPayload = await new Promise<MiniAppWalletAuthPayload>(
     (resolve, reject) => {
@@ -155,7 +155,7 @@ async function nativeWalletAuth(
 
         sendMiniKitEvent({
           command: Command.WalletAuth,
-          version: walletAuthVersion,
+          version: COMMAND_VERSIONS[Command.WalletAuth],
           payload: walletAuthPayload,
         });
       } catch (error) {
