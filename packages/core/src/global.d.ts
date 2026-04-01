@@ -28,6 +28,14 @@ interface Window {
       bottom: number;
       left: number;
     };
-    location: string | null | undefined;
+    verification_status?: {
+      is_orb_verified: boolean;
+      is_document_verified: boolean;
+      is_secure_document_verified: boolean;
+    };
+    wallet_address?: string;
+    preferred_currency?: string;
+    pending_notifications?: number;
+    location: { open_origin: string } | string | null | undefined;
   };
 }
