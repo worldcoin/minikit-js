@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.2
+
+### Patch Changes
+
+- b273bb4: fix-siwe-validation
+
 ## 2.0.1
 
 ### Patch Changes
