@@ -51,7 +51,10 @@ jobs:
           publish: pnpm release
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          NPM_TOKEN: '' # https://github.com/changesets/changesets/issues/1152#issuecomment-3190884868
+          # Do NOT set NPM_TOKEN — omitting it tells the changesets action to
+          # skip writing .npmrc so npm can authenticate via OIDC trusted
+          # publishing (requires id-token: write and npm >= 11.5.1).
+          # See: https://github.com/changesets/changesets/issues/1152
           # Changesets shells out to npm publish. Corepack blocks npm when
           # packageManager is set to pnpm — disable strict enforcement.
           COREPACK_ENABLE_STRICT: '0'
