@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.1
+
+### Patch Changes
+
+- ce59017: Introduce react hook and improve init payload body
+
 ## 2.0.0
 
 ### Major Changes

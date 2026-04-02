@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.1
+
+### Patch Changes
+
+- ce59017: Introduce react hook and improve init payload body
+- Updated dependencies [ce59017]
+  - @worldcoin/minikit-js@2.0.1
+
 ## 2.0.0
 
 ### Major Changes
