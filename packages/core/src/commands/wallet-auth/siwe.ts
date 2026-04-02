@@ -6,7 +6,10 @@ import {
   http,
 } from 'viem';
 import { worldchain } from 'viem/chains';
-import type { MiniAppWalletAuthSuccessPayload, WalletAuthResult } from './types';
+import type {
+  MiniAppWalletAuthSuccessPayload,
+  WalletAuthResult,
+} from './types';
 import { SiweMessage } from './types';
 
 type VerifySiwePayload = WalletAuthResult | MiniAppWalletAuthSuccessPayload;
