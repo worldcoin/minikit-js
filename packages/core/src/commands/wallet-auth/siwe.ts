@@ -6,8 +6,10 @@ import {
   http,
 } from 'viem';
 import { worldchain } from 'viem/chains';
-import type { WalletAuthResult } from './types';
+import type { MiniAppWalletAuthSuccessPayload, WalletAuthResult } from './types';
 import { SiweMessage } from './types';
+
+type VerifySiwePayload = WalletAuthResult | MiniAppWalletAuthSuccessPayload;
 
 const PREAMBLE = ' wants you to sign in with your Ethereum account:';
 const URI_TAG = 'URI: ';
@@ -173,7 +175,7 @@ export const generateSiweMessage = (siweMessageData: SiweMessage) => {
 };
 
 export const verifySiweMessage = (
-  payload: WalletAuthResult,
+  payload: VerifySiwePayload,
   nonce: string,
   statement?: string,
   requestId?: string,
@@ -231,7 +233,7 @@ const validateMessage = (
 
 // Nonce is required to be passed in as a parameter to verify the message
 export const verifySiweMessageV2 = async (
-  payload: WalletAuthResult,
+  payload: VerifySiwePayload,
   nonce: string,
   statement?: string,
   requestId?: string,
