@@ -447,4 +447,60 @@ describe('useUserOperationReceipt (imperative)', () => {
     expect(latestResult?.isLoading).toBe(false);
     expect(pollRejected).toBe(true);
   });
+
+  it('does not call waitForTransactionReceipt after abort during fetchStatus', async () => {
+    // Simulate: fetchStatus resolves with a tx hash, but signal was aborted
+    // while fetchStatus was in flight. waitForTransactionReceipt must NOT be called.
+    let resolveFetch!: (value: UserOperationStatus) => void;
+    mockedFetchUserOperationStatus.mockImplementation(
+      () =>
+        new Promise<UserOperationStatus>((resolve) => {
+          resolveFetch = resolve;
+        }),
+    );
+
+    await act(async () => {
+      renderer = create(
+        React.createElement(ImperativeHarness, {
+          client,
+          onChange: (r: ImperativeHookResult) => {
+            latestResult = r;
+          },
+        }),
+      );
+    });
+
+    let pollRejected = false;
+    let pollPromise: Promise<unknown> | undefined;
+
+    await act(async () => {
+      pollPromise = latestResult!
+        .poll(
+          '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        )
+        .catch(() => {
+          pollRejected = true;
+        });
+    });
+
+    // Abort while fetchStatus is still pending
+    await act(async () => {
+      latestResult!.reset();
+    });
+
+    // Now resolve fetchStatus with a mined status + hash
+    await act(async () => {
+      resolveFetch({
+        userOpHash:
+          '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        transactionHash:
+          '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+        transactionStatus: 'mined',
+      });
+      await pollPromise;
+    });
+
+    expect(pollRejected).toBe(true);
+    expect(client.waitForTransactionReceipt).not.toHaveBeenCalled();
+  });
 });

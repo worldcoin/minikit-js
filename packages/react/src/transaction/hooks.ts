@@ -385,11 +385,16 @@ async function pollForReceipt(params: {
     params;
   let attempt = 0;
 
+  const throwIfAborted = () => {
+    if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
+  };
+
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
+    throwIfAborted();
 
     const status = await fetchStatus();
+    throwIfAborted();
 
     if (status.transactionStatus === 'failed') {
       throw new Error('Transaction failed');
@@ -401,6 +406,7 @@ async function pollForReceipt(params: {
         confirmations,
         timeout,
       });
+      throwIfAborted();
       return { transactionHash: status.transactionHash, receipt };
     }
 
