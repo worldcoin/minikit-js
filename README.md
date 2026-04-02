@@ -1,4 +1,4 @@
-# minikit-js
+# MiniKit
 
 ## 🚀 Getting Started
 
@@ -9,6 +9,20 @@ or use the CDN:
 `https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@[version]/+esm`
 
 For comprehensive setup instructions and usage examples, visit our [developer documentation](https://docs.world.org/mini-apps).
+
+## Using Agents
+
+To migrate an existing web app to a mini app use
+
+```
+npx skills add worldcoin/minikit-js web-to-miniapp
+```
+
+To migrate a mini app to web use
+
+```
+npx skills add worldcoin/minikit-js miniapp-to-web
+```
 
 ## Verification Ownership
 
