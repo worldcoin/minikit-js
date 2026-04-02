@@ -114,4 +114,25 @@ describe('MiniKit.install – initFromWorldApp mapping', () => {
     expect(MiniKit.user.pendingNotifications).toBeUndefined();
     expect(MiniKit.location).toBeNull();
   });
+
+  it('re-install clears stale user state from previous install', () => {
+    // First install with full payload
+    (global as any).window.WorldApp = makeWorldApp();
+    MiniKit.install('app_test');
+
+    expect(MiniKit.user.walletAddress).toBe(
+      '0x377da9cab87c04a1d6f19d8b4be9aef8df26fcdd',
+    );
+    expect(MiniKit.user.verificationStatus).toBeDefined();
+
+    // Second install (e.g. HMR) with payload missing wallet/verification
+    (global as any).window.WorldApp = makeWorldApp({
+      wallet_address: undefined,
+      verification_status: undefined,
+    });
+    MiniKit.install('app_test');
+
+    expect(MiniKit.user.walletAddress).toBeUndefined();
+    expect(MiniKit.user.verificationStatus).toBeUndefined();
+  });
 });

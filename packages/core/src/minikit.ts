@@ -549,14 +549,15 @@ export class MiniKit {
   private static initFromWorldApp(worldApp: typeof window.WorldApp): void {
     if (!worldApp) return;
 
+    // Reset state to avoid leaking stale data across re-installs (e.g. HMR)
+    this._user = {};
+    this._deviceProperties = {};
+
     // Set user properties
     this._user.optedIntoOptionalAnalytics = worldApp.is_optional_analytics;
     this._user.preferredCurrency = worldApp.preferred_currency;
     this._user.pendingNotifications = worldApp.pending_notifications;
-
-    if (worldApp.wallet_address) {
-      this._user.walletAddress = worldApp.wallet_address;
-    }
+    this._user.walletAddress = worldApp.wallet_address;
 
     if (worldApp.verification_status) {
       this._user.verificationStatus = {
