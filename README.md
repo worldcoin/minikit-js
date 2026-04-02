@@ -1,4 +1,4 @@
-# minikit-js
+# MiniKit
 
 ## 🚀 Getting Started
 
