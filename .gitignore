@@ -13,3 +13,6 @@ node_modules
 # npmrc
 .npmrc
 .env
+
+# forge dependencies
+demo/with-next/contracts/lib/

@@ -410,10 +410,7 @@ async function pollForReceipt(params: {
 }
 
 function usePolling(options: {
-  execute: (
-    id: string,
-    signal: AbortSignal,
-  ) => Promise<ReceiptResult>;
+  execute: (id: string, signal: AbortSignal) => Promise<ReceiptResult>;
 }): UsePollingReturn {
   const { execute } = options;
   const [isLoading, setIsLoading] = useState(false);
@@ -434,26 +431,21 @@ function usePolling(options: {
     };
   }, []);
 
-  const poll = useCallback(
-    (id: string): Promise<ReceiptResult> => {
-      // Abort any in-flight poll
-      abortRef.current?.abort();
+  const poll = useCallback((id: string): Promise<ReceiptResult> => {
+    // Abort any in-flight poll
+    abortRef.current?.abort();
 
-      const controller = new AbortController();
-      abortRef.current = controller;
-      setIsLoading(true);
+    const controller = new AbortController();
+    abortRef.current = controller;
+    setIsLoading(true);
 
-      return executeRef
-        .current(id, controller.signal)
-        .finally(() => {
-          // Only update state if this controller is still the active one
-          if (abortRef.current === controller) {
-            setIsLoading(false);
-          }
-        });
-    },
-    [],
-  );
+    return executeRef.current(id, controller.signal).finally(() => {
+      // Only update state if this controller is still the active one
+      if (abortRef.current === controller) {
+        setIsLoading(false);
+      }
+    });
+  }, []);
 
   return { poll, isLoading, reset };
 }
@@ -500,8 +492,7 @@ export function useUserOperationReceipt<
   return usePolling({
     execute: (userOpHash, signal) =>
       pollForReceipt({
-        fetchStatus: () =>
-          fetchUserOperationStatus({ apiBaseUrl }, userOpHash),
+        fetchStatus: () => fetchUserOperationStatus({ apiBaseUrl }, userOpHash),
         strategy,
         client,
         confirmations,

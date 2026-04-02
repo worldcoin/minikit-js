@@ -3,9 +3,9 @@ import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import type { TransactionReceipt } from 'viem';
 
 import {
+  useUserOperationReceipt,
   useWaitForTransactionReceipt,
   useWaitForUserOperationReceipt,
-  useUserOperationReceipt,
   type ReceiptResult,
 } from './hooks';
 import {
