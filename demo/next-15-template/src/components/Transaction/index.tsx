@@ -3,8 +3,8 @@
 import TestContractABI from '@/abi/TestContract.json';
 import { Button, LiveFeedback } from '@worldcoin/mini-apps-ui-kit-react';
 import { MiniKit } from '@worldcoin/minikit-js';
-import { useWaitForUserOperationReceipt } from '@worldcoin/minikit-react';
-import { useEffect, useState } from 'react';
+import { useUserOperationReceipt } from '@worldcoin/minikit-react';
+import { useState } from 'react';
 import { createPublicClient, encodeFunctionData, http } from 'viem';
 import { worldchain } from 'viem/chains';
 
@@ -14,8 +14,8 @@ import { worldchain } from 'viem/chains';
  * inside of  Dev Portal > Configuration > Advanced
  * The general design pattern here is
  * 1. Trigger the transaction
- * 2. Update the userOpHash from the response to poll completion
- * 3. Wait in a useEffect for the transaction to complete
+ * 2. Poll for the receipt using the returned userOpHash
+ * 3. Handle success/failure
  */
 export const Transaction = () => {
   // See the code for this contract here: https://worldscan.org/address/0xF0882554ee924278806d708396F1a7975b732522#code
@@ -27,46 +27,16 @@ export const Transaction = () => {
     'getToken',
   );
 
-  // This triggers the useWaitForUserOperationReceipt hook when updated
-  const [userOpHash, setUserOpHash] = useState<string>('');
-
   // Feel free to use your own RPC provider for better performance
   const client = createPublicClient({
     chain: worldchain,
     transport: http('https://worldchain-mainnet.g.alchemy.com/public'),
   });
 
-  const {
-    isLoading: isConfirming,
-    isSuccess: isConfirmed,
-    isError,
-    error,
-  } = useWaitForUserOperationReceipt({
-    client: client,
-    userOpHash: userOpHash,
-  });
-
-  useEffect(() => {
-    if (userOpHash && !isConfirming) {
-      if (isConfirmed) {
-        console.log('Transaction confirmed!');
-        setButtonState('success');
-        setTimeout(() => {
-          setButtonState(undefined);
-        }, 3000);
-      } else if (isError) {
-        console.error('Transaction failed:', error);
-        setButtonState('failed');
-        setTimeout(() => {
-          setButtonState(undefined);
-        }, 3000);
-      }
-    }
-  }, [isConfirmed, isConfirming, isError, error, userOpHash]);
+  const { poll, isLoading } = useUserOperationReceipt({ client });
 
   // This is a basic transaction call to mint a token
   const onClickGetToken = async () => {
-    setUserOpHash('');
     setWhichButton('getToken');
     setButtonState('pending');
 
@@ -89,20 +59,21 @@ export const Transaction = () => {
         'Transaction submitted, waiting for confirmation:',
         result.data.userOpHash,
       );
-      setUserOpHash(result.data.userOpHash);
+
+      await poll(result.data.userOpHash);
+      console.log('Transaction confirmed!');
+      setButtonState('success');
+      setTimeout(() => setButtonState(undefined), 3000);
     } catch (err) {
-      console.error('Error sending transaction:', err);
+      console.error('Error:', err);
       setButtonState('failed');
-      setTimeout(() => {
-        setButtonState(undefined);
-      }, 3000);
+      setTimeout(() => setButtonState(undefined), 3000);
     }
   };
 
   // This is a basic ERC20 transfer using the token you minted
   // Make sure to call Mint Token first
   const onClickTransferToken = async () => {
-    setUserOpHash('');
     setWhichButton('transferToken');
     setButtonState('pending');
     const recipient = (await MiniKit.getUserByUsername('alex')).walletAddress;
@@ -127,13 +98,15 @@ export const Transaction = () => {
         'Transaction submitted, waiting for confirmation:',
         result.data.userOpHash,
       );
-      setUserOpHash(result.data.userOpHash);
+
+      await poll(result.data.userOpHash);
+      console.log('Transaction confirmed!');
+      setButtonState('success');
+      setTimeout(() => setButtonState(undefined), 3000);
     } catch (err) {
-      console.error('Error sending transaction:', err);
+      console.error('Error:', err);
       setButtonState('failed');
-      setTimeout(() => {
-        setButtonState(undefined);
-      }, 3000);
+      setTimeout(() => setButtonState(undefined), 3000);
     }
   };
 
@@ -151,7 +124,7 @@ export const Transaction = () => {
       >
         <Button
           onClick={onClickGetToken}
-          disabled={buttonState === 'pending'}
+          disabled={isLoading}
           size="lg"
           variant="primary"
           className="w-full"
@@ -170,7 +143,7 @@ export const Transaction = () => {
       >
         <Button
           onClick={onClickTransferToken}
-          disabled={buttonState === 'pending'}
+          disabled={isLoading}
           size="lg"
           variant="tertiary"
           className="w-full"

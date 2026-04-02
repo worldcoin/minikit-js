@@ -5,6 +5,8 @@ import type { TransactionReceipt } from 'viem';
 import {
   useWaitForTransactionReceipt,
   useWaitForUserOperationReceipt,
+  useUserOperationReceipt,
+  type ReceiptResult,
 } from './hooks';
 import {
   fetchTransactionHash,
@@ -251,5 +253,198 @@ describe('receipt hooks', () => {
       isLoading: false,
       isError: false,
     });
+  });
+});
+
+// ============================================================================
+// New imperative hooks
+// ============================================================================
+
+type ImperativeHookResult = ReturnType<typeof useUserOperationReceipt>;
+
+type ImperativeHarnessProps = {
+  onChange: (result: ImperativeHookResult) => void;
+  client: { waitForTransactionReceipt: jest.Mock };
+};
+
+function ImperativeHarness({ onChange, client }: ImperativeHarnessProps) {
+  const result = useUserOperationReceipt({
+    client: client as never,
+    apiBaseUrl: 'https://developer.world.org',
+  });
+
+  onChange(result);
+  return null;
+}
+
+describe('useUserOperationReceipt (imperative)', () => {
+  let renderer: ReactTestRenderer | undefined;
+  let latestResult: ImperativeHookResult | undefined;
+  let client: { waitForTransactionReceipt: jest.Mock };
+
+  beforeEach(() => {
+    client = { waitForTransactionReceipt: jest.fn() };
+    latestResult = undefined;
+  });
+
+  afterEach(async () => {
+    if (renderer) {
+      await act(async () => {
+        renderer?.unmount();
+      });
+      renderer = undefined;
+    }
+    jest.useRealTimers();
+    jest.clearAllMocks();
+  });
+
+  it('starts idle with isLoading false', async () => {
+    await act(async () => {
+      renderer = create(
+        React.createElement(ImperativeHarness, {
+          client,
+          onChange: (r: ImperativeHookResult) => {
+            latestResult = r;
+          },
+        }),
+      );
+    });
+
+    expect(latestResult?.isLoading).toBe(false);
+    expect(typeof latestResult?.poll).toBe('function');
+    expect(typeof latestResult?.reset).toBe('function');
+  });
+
+  it('poll resolves with receipt on success', async () => {
+    const receipt = {
+      status: 'success',
+      transactionHash:
+        '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    } as unknown as import('viem').TransactionReceipt;
+
+    mockedFetchUserOperationStatus.mockResolvedValue({
+      userOpHash:
+        '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      transactionHash: receipt.transactionHash as `0x${string}`,
+      transactionStatus: 'mined',
+    } satisfies UserOperationStatus);
+
+    client.waitForTransactionReceipt.mockResolvedValue(receipt);
+
+    let pollPromise: Promise<ReceiptResult> | undefined;
+
+    await act(async () => {
+      renderer = create(
+        React.createElement(ImperativeHarness, {
+          client,
+          onChange: (r: ImperativeHookResult) => {
+            latestResult = r;
+          },
+        }),
+      );
+    });
+
+    await act(async () => {
+      pollPromise = latestResult!.poll(
+        '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      );
+    });
+
+    let result: ReceiptResult | undefined;
+    await act(async () => {
+      result = await pollPromise;
+    });
+
+    expect(result).toEqual({
+      transactionHash: receipt.transactionHash,
+      receipt,
+    });
+    expect(latestResult?.isLoading).toBe(false);
+  });
+
+  it('poll rejects on transaction failure', async () => {
+    mockedFetchUserOperationStatus.mockResolvedValue({
+      userOpHash:
+        '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      transactionStatus: 'failed',
+    } satisfies UserOperationStatus);
+
+    await act(async () => {
+      renderer = create(
+        React.createElement(ImperativeHarness, {
+          client,
+          onChange: (r: ImperativeHookResult) => {
+            latestResult = r;
+          },
+        }),
+      );
+    });
+
+    let error: Error | undefined;
+
+    await act(async () => {
+      try {
+        await latestResult!.poll(
+          '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        );
+      } catch (e) {
+        error = e as Error;
+      }
+    });
+
+    expect(error?.message).toBe('Transaction failed');
+    expect(latestResult?.isLoading).toBe(false);
+  });
+
+  it('reset aborts in-flight polling', async () => {
+    jest.useFakeTimers();
+
+    // Return pending so polling continues to the delay step
+    mockedFetchUserOperationStatus.mockResolvedValue({
+      userOpHash:
+        '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      transactionStatus: 'pending',
+    } satisfies UserOperationStatus);
+
+    await act(async () => {
+      renderer = create(
+        React.createElement(ImperativeHarness, {
+          client,
+          onChange: (r: ImperativeHookResult) => {
+            latestResult = r;
+          },
+        }),
+      );
+    });
+
+    let pollRejected = false;
+    let pollPromise: Promise<unknown> | undefined;
+
+    await act(async () => {
+      // Attach a catch immediately so the rejection is handled
+      pollPromise = latestResult!
+        .poll(
+          '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        )
+        .catch(() => {
+          pollRejected = true;
+        });
+    });
+
+    // Let the first fetchStatus resolve so we enter the delay
+    await flushMicrotasks();
+    expect(latestResult?.isLoading).toBe(true);
+
+    await act(async () => {
+      latestResult!.reset();
+    });
+
+    // Let the abort propagate
+    await act(async () => {
+      await pollPromise;
+    });
+
+    expect(latestResult?.isLoading).toBe(false);
+    expect(pollRejected).toBe(true);
   });
 });
