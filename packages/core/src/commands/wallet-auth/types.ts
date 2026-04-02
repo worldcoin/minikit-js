@@ -70,6 +70,8 @@ export interface WalletAuthResult {
   message: string;
   /** Signature */
   signature: string;
+  /** Command protocol version (present when returned from World App) */
+  version?: number;
 }
 
 export type SiweMessage = {

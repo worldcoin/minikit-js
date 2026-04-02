@@ -138,17 +138,15 @@ describe('Test SIWE Message Verification', () => {
     expect(isValid.success).toBe(true);
   });
 
-  test('Verify SIWE Message with v1 payload should reject', () => {
-    const payload: MiniAppWalletAuthSuccessPayload = {
-      status: 'success',
+  test('Verify SIWE Message accepts WalletAuthResult without version/status', async () => {
+    const payload = {
       message: signatureSiweMessage(new Date(), 7, -1),
       signature: 'random_signature',
       address: '0xd809de3086ea4f53ed3979cead25e1ff72b564a3',
-      version: 1,
     };
-    expect(() =>
+    await expect(
       verifySiweMessage(payload, '814434bded2c412eaa2cc4b266a42027'),
-    ).toThrow('Unsupported version returned');
+    ).rejects.toThrow('Signature verification failed');
   });
 
   test('Verify SIWE Message with invalid signature', async () => {

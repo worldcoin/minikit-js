@@ -172,5 +172,6 @@ async function nativeWalletAuth(
     address: finalPayload.address,
     message: finalPayload.message,
     signature: finalPayload.signature,
+    version: finalPayload.version,
   };
 }

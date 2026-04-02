@@ -6,8 +6,13 @@ import {
   http,
 } from 'viem';
 import { worldchain } from 'viem/chains';
-import type { MiniAppWalletAuthSuccessPayload } from './types';
+import type {
+  MiniAppWalletAuthSuccessPayload,
+  WalletAuthResult,
+} from './types';
 import { SiweMessage } from './types';
+
+type VerifySiwePayload = WalletAuthResult | MiniAppWalletAuthSuccessPayload;
 
 const PREAMBLE = ' wants you to sign in with your Ethereum account:';
 const URI_TAG = 'URI: ';
@@ -173,23 +178,19 @@ export const generateSiweMessage = (siweMessageData: SiweMessage) => {
 };
 
 export const verifySiweMessage = (
-  payload: MiniAppWalletAuthSuccessPayload,
+  payload: VerifySiwePayload,
   nonce: string,
   statement?: string,
   requestId?: string,
   userProvider?: Client,
 ) => {
-  if (payload.version !== 2) {
-    throw new Error('Unsupported version returned');
-  } else {
-    return verifySiweMessageV2(
-      payload,
-      nonce,
-      statement,
-      requestId,
-      userProvider,
-    );
-  }
+  return verifySiweMessageV2(
+    payload,
+    nonce,
+    statement,
+    requestId,
+    userProvider,
+  );
 };
 
 const validateMessage = (
@@ -235,7 +236,7 @@ const validateMessage = (
 
 // Nonce is required to be passed in as a parameter to verify the message
 export const verifySiweMessageV2 = async (
-  payload: MiniAppWalletAuthSuccessPayload,
+  payload: VerifySiwePayload,
   nonce: string,
   statement?: string,
   requestId?: string,
