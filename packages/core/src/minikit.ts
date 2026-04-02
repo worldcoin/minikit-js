@@ -87,11 +87,18 @@ const WORLD_APP_LAUNCH_LOCATION_MAP: Record<string, MiniAppLaunchLocation> = {
 };
 
 function mapWorldAppLaunchLocation(
-  location: string | null | undefined,
+  location: { open_origin: string } | string | null | undefined,
 ): MiniAppLaunchLocation | null {
-  if (!location || typeof location !== 'string') return null;
-  console.log('MiniKit launch location mapped:', location);
-  return WORLD_APP_LAUNCH_LOCATION_MAP[location.toLowerCase()] ?? null;
+  if (!location) return null;
+  const raw =
+    typeof location === 'object' && 'open_origin' in location
+      ? location.open_origin
+      : typeof location === 'string'
+        ? location
+        : null;
+  if (!raw) return null;
+  console.log('MiniKit launch location mapped:', raw);
+  return WORLD_APP_LAUNCH_LOCATION_MAP[raw.toLowerCase()] ?? null;
 }
 
 export class MiniKit {
@@ -542,8 +549,24 @@ export class MiniKit {
   private static initFromWorldApp(worldApp: typeof window.WorldApp): void {
     if (!worldApp) return;
 
+    // Reset state to avoid leaking stale data across re-installs (e.g. HMR)
+    this._user = {};
+    this._deviceProperties = {};
+
     // Set user properties
     this._user.optedIntoOptionalAnalytics = worldApp.is_optional_analytics;
+    this._user.preferredCurrency = worldApp.preferred_currency;
+    this._user.pendingNotifications = worldApp.pending_notifications;
+    this._user.walletAddress = worldApp.wallet_address;
+
+    if (worldApp.verification_status) {
+      this._user.verificationStatus = {
+        isOrbVerified: worldApp.verification_status.is_orb_verified,
+        isDocumentVerified: worldApp.verification_status.is_document_verified,
+        isSecureDocumentVerified:
+          worldApp.verification_status.is_secure_document_verified,
+      };
+    }
 
     // Set device properties
     this._deviceProperties.safeAreaInsets = worldApp.safe_area_insets;

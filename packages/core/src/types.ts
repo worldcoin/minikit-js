@@ -2,6 +2,12 @@
 // Core Domain Types
 // ============================================================================
 
+export type VerificationStatus = {
+  isOrbVerified: boolean;
+  isDocumentVerified: boolean;
+  isSecureDocumentVerified: boolean;
+};
+
 export type User = {
   walletAddress?: string;
   username?: string;
@@ -10,17 +16,10 @@ export type User = {
     notifications: boolean;
     contacts: boolean;
   };
-  // verificationStatus: {
-  //   orb: {
-  //     isVerified: boolean;
-  //     verifiedUntil: number;
-  //   };
-  //   device: {
-  //     isVerified: boolean;
-  //     verifiedUntil: number;
-  //   };
-  // };
+  verificationStatus?: VerificationStatus;
   optedIntoOptionalAnalytics?: boolean;
+  preferredCurrency?: string;
+  pendingNotifications?: number;
 };
 
 export type DeviceProperties = {
