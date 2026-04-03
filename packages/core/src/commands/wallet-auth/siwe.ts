@@ -262,8 +262,7 @@ export const verifySiweMessageV2 = async (
   // Ensure payload address matches the address embedded in the SIWE message
   if (
     siweMessageData.address &&
-    siweMessageData.address.toLowerCase() !==
-      (address as string).toLowerCase()
+    siweMessageData.address.toLowerCase() !== (address as string).toLowerCase()
   ) {
     throw new Error(
       'Address mismatch: payload address does not match SIWE message address',
