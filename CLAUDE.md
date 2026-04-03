@@ -45,7 +45,7 @@ cd packages/core && pnpm test  # Run core package tests
 **Code Quality:**
 
 ```bash
-pnpm lint                # Check formatting (prettier)
+pnpm lint --write                # Check formatting (prettier)
 pnpm format              # Fix formatting (prettier)
 ```
 
@@ -114,3 +114,8 @@ The SDK communicates with the World App native container via WebView postMessage
 - **Build Orchestration:** Turbo with task dependencies
 - **Node Version:** >= 16
 - **TypeScript:** Strict mode with comprehensive type definitions
+
+## Instructions for editing
+
+- When making edits, always ensure you follow the lint patterns and formatting rules (prettier) used in the codebase.
+- Make sure it passes `pnpm lint --write` and `pnpm format` before finalizing your changes.
