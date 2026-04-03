@@ -1,11 +1,11 @@
 ---
 name: web-to-miniapp
-description: Use this skill when you are asked to adapt an existing web3 dapp to work as a World App mini app, or to share code between a web dapp and a mini app. This skill covers the technical steps of migration, common issues, and debugging tips. There will be some changes required to contracts and frontend code, but the overall architecture and user experience can remain largely unchanged.
+description: Use this skill when you are asked to adapt an existing web app to work as a World App mini app, or to share code between a web app and a mini app. This skill covers the technical steps of migration, common issues, and debugging tips. There will be some changes required to contracts and frontend code, but the overall architecture and user experience can remain largely unchanged.
 ---
 
-# Migrate Next.js Dapp to World App Mini App
+# Migrate Next.js Web App to World App Mini App
 
-You are converting an existing Next.js dapp that uses viem to work as a World App mini app. Follow these steps in order.
+You are converting an existing Next.js web app that uses viem to work as a World App mini app. Follow these steps in order.
 
 ## Step 1 — Install MiniKit
 
@@ -55,24 +55,17 @@ import Providers from './providers';
 
 ## Step 4 — Dual-provider wallet connection
 
-Detect World App and use `getWorldAppProvider()` as the EIP-1193 provider. Fall back to `window.ethereum` for browser wallets.
+Detect World App with `MiniKit.isInWorldApp()` and use `getWorldAppProvider()` as the EIP-1193 provider. Fall back to `window.ethereum` for browser wallets.
 
 ```tsx
+import { MiniKit } from '@worldcoin/minikit-js';
 import { getWorldAppProvider } from '@worldcoin/minikit-js';
-import { useMiniKit } from '@worldcoin/minikit-js/minikit-provider';
 import { createWalletClient, custom } from 'viem';
 import { worldchain } from 'viem/chains';
 
-// Inside your component:
-let isWorldApp = false;
-try {
-  isWorldApp = !!useMiniKit().isInstalled;
-} catch {
-  isWorldApp = typeof window !== 'undefined' && !!window.WorldApp;
-}
-
-// When connecting:
-const provider = isWorldApp ? getWorldAppProvider() : window.ethereum;
+const provider = MiniKit.isInWorldApp()
+  ? getWorldAppProvider()
+  : window.ethereum;
 
 const walletClient = createWalletClient({
   chain: worldchain,
@@ -88,91 +81,9 @@ const walletClient = createWalletClient({
 
 All existing `writeContract` / `readContract` calls work unchanged through this provider.
 
-## Step 5 — Replace ERC20 approve with Permit2
+## Step 5 — Bundle Approve with Contract Calls
 
-MiniKit blocks standard `token.approve()` calls. Use Permit2 AllowanceTransfer instead.
-
-Permit2 address (same on all EVM chains): `0x000000000022D473030F116dDEE9F6B43aC78BA3`
-
-**Frontend — change approve calls:**
-
-```tsx
-// Before (blocked in mini app):
-await walletClient.writeContract({
-  address: TOKEN,
-  abi: erc20Abi,
-  functionName: 'approve',
-  args: [SPENDER, amount],
-});
-
-// After:
-const expiration = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
-await walletClient.writeContract({
-  address: '0x000000000022D473030F116dDEE9F6B43aC78BA3', // Permit2
-  abi: [
-    {
-      name: 'approve',
-      type: 'function',
-      stateMutability: 'nonpayable',
-      inputs: [
-        { name: 'token', type: 'address' },
-        { name: 'spender', type: 'address' },
-        { name: 'amount', type: 'uint160' },
-        { name: 'expiration', type: 'uint48' },
-      ],
-      outputs: [],
-    },
-  ],
-  functionName: 'approve',
-  args: [TOKEN, SPENDER, amount, expiration],
-});
-```
-
-**Smart contract — change transferFrom:**
-
-```solidity
-// Before:
-token.transferFrom(msg.sender, address(this), amount);
-
-// After:
-import {IAllowanceTransfer} from "permit2/src/interfaces/IAllowanceTransfer.sol";
-
-IAllowanceTransfer public immutable permit2;
-// Set in constructor: permit2 = IAllowanceTransfer(0x000000000022D473030F116dDEE9F6B43aC78BA3);
-
-permit2.transferFrom(msg.sender, address(this), uint160(amount), address(token));
-```
-
-World App automatically approves tokens to the Permit2 contract. Your contract only calls `permit2.transferFrom`.
-
-## Step 6 — Handle userOpHash receipts
-
-`eth_sendTransaction` through MiniKit returns a `userOpHash`, not a mined tx hash. `waitForTransactionReceipt` may time out. Use a longer timeout and catch:
-
-```tsx
-try {
-  await publicClient.waitForTransactionReceipt({
-    hash,
-    timeout: 60_000,
-    pollingInterval: 2_000,
-  });
-} catch {
-  // userOp not yet settled — refresh state anyway
-}
-```
-
-## Step 7 — Whitelist contracts and tokens
-
-In the **Developer Portal > Mini App > Permissions**, add:
-
-- **Permit2 Tokens** — every ERC-20 your app transfers
-- **Contract Entrypoints** — every contract your app calls directly
-
-Transactions touching non-whitelisted contracts are blocked with `invalid_contract`.
-
-## Step 8 — (Optional) Bundle transactions
-
-For one-tap UX, call `MiniKit.sendTransaction()` directly with multiple transactions. The EIP-1193 provider only sends one tx at a time — for batching you must bypass it:
+World App resets token approvals to 0 after each transaction. A separate `approve()` followed by a `transferFrom()` in the next tx will fail, the approval is already gone. Thus you should bundle the approval and your contract call in a single `sendTransaction`:
 
 ```tsx
 import { MiniKit } from '@worldcoin/minikit-js';
@@ -182,11 +93,11 @@ await MiniKit.sendTransaction({
   chainId: 480,
   transactions: [
     {
-      to: PERMIT2,
+      to: TOKEN,
       data: encodeFunctionData({
-        abi: permit2Abi,
+        abi: erc20Abi,
         functionName: 'approve',
-        args: [TOKEN, SPENDER, amount, expiration],
+        args: [CONTRACT, amount],
       }),
     },
     {
@@ -201,20 +112,45 @@ await MiniKit.sendTransaction({
 });
 ```
 
-World App executes these atomically — both succeed or both revert.
+In World App, these execute atomically. On web, they are bundled into a single Multicall3 call automatically.
 
----
+## Step 6 — Handle userOpHash receipts
 
-## Common gotchas
+MiniKit returns a `userOpHash`, not a standard tx hash. Use `useUserOperationReceipt` from `@worldcoin/minikit-react` to poll for the receipt:
 
-| Issue                                      | Symptom                               | Fix                                          |
-| ------------------------------------------ | ------------------------------------- | -------------------------------------------- |
-| SSR hydration mismatch                     | Buttons render but clicks do nothing  | `dynamic(..., { ssr: false })`               |
-| `MiniKit.isInstalled()` before `install()` | Always `false` even in World App      | Use `useMiniKit()` hook or `window.WorldApp` |
-| ERC20 `approve()` blocked                  | Transaction silently rejected         | Use `permit2.approve()`                      |
-| Permit2 uses `uint160` amounts             | Silent overflow                       | Cast explicitly                              |
-| `eth_sendTransaction` returns `userOpHash` | `waitForTransactionReceipt` times out | Longer timeout + catch                       |
-| Missing contract whitelist                 | `invalid_contract` error              | Add to Developer Portal permissions          |
+```tsx
+import { useUserOperationReceipt } from '@worldcoin/minikit-react';
+import { createPublicClient, http } from 'viem';
+import { worldchain } from 'viem/chains';
+
+const client = createPublicClient({
+  chain: worldchain,
+  transport: http(),
+});
+
+const { poll, isLoading } = useUserOperationReceipt({ client });
+
+// After sendTransaction:
+const result = await MiniKit.sendTransaction({ ... });
+await poll(result.data.userOpHash);
+```
+
+## Step 7 — Whitelist contracts and tokens
+
+In the **Developer Portal > Mini App > Permissions**, add:
+
+- **Permit2 Tokens** — every ERC-20 your app transfers
+- **Contract Entrypoints** — every contract your app calls directly
+
+Transactions touching non-whitelisted contracts are blocked with `invalid_contract`.
+
+| Issue                                      | Symptom                               | Fix                                                           |
+| ------------------------------------------ | ------------------------------------- | ------------------------------------------------------------- |
+| SSR hydration mismatch                     | Buttons render but clicks do nothing  | `dynamic(..., { ssr: false })`                                |
+| `MiniKit.isInstalled()` before `install()` | Always `false` even in World App      | Use `useMiniKit()` hook or `window.WorldApp`                  |
+| Permit2 uses `uint160` amounts             | Silent overflow                       | Cast explicitly                                               |
+| `eth_sendTransaction` returns `userOpHash` | `waitForTransactionReceipt` times out | Use `useUserOperationReceipt` from `@worldcoin/minikit-react` |
+| Missing contract whitelist                 | `invalid_contract` error              | Add to Developer Portal permissions                           |
 
 ## Tip: Debugging in the webview
 
