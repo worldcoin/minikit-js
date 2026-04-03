@@ -38,6 +38,13 @@ export function registerWagmiFallbacks(): void {
   });
 }
 
+// Use variables for dynamic imports so bundlers cannot statically resolve them.
+// wagmi, siwe, and viem are optional peer dependencies — apps that don't install
+// them should not fail at build time.
+const WAGMI_ACTIONS = 'wagmi/actions';
+const SIWE_MODULE = 'siwe';
+const VIEM_MODULE = 'viem';
+
 async function loadWagmiActions(): Promise<any> {
   // Temporary diagnostics for external fallback debugging.
   console.log('[MiniKit WagmiFallback] loadWagmiActions:start', {
@@ -45,7 +52,7 @@ async function loadWagmiActions(): Promise<any> {
     hasWagmiConfig: hasWagmiConfig(),
   });
   try {
-    const actions = await import('wagmi/actions');
+    const actions = await import(WAGMI_ACTIONS);
     console.log('[MiniKit WagmiFallback] loadWagmiActions:success');
     return actions;
   } catch (error) {
@@ -62,7 +69,7 @@ async function loadWagmiActions(): Promise<any> {
 
 async function loadSiwe(): Promise<any> {
   try {
-    return await import('siwe');
+    return await import(SIWE_MODULE);
   } catch (error) {
     const wrappedError = new Error(
       'Wagmi walletAuth fallback requires the "siwe" package. Install siwe or provide a custom fallback.',
@@ -78,7 +85,7 @@ async function loadSiwe(): Promise<any> {
  */
 async function checksumAddress(addr: string): Promise<`0x${string}`> {
   try {
-    const { getAddress } = await import('viem');
+    const { getAddress } = await import(VIEM_MODULE);
     return getAddress(addr) as `0x${string}`;
   } catch {
     return addr as `0x${string}`;
@@ -428,7 +435,7 @@ export async function wagmiSendTransaction(
       value: tx.value ? BigInt(tx.value) : undefined,
     };
   } else {
-    const { encodeFunctionData } = await import('viem');
+    const { encodeFunctionData } = await import(VIEM_MODULE);
     const calls = params.transactions.map((tx) => ({
       target: tx.address as `0x${string}`,
       allowFailure: false,
