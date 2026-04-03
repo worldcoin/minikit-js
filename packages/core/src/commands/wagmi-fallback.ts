@@ -45,7 +45,7 @@ async function loadWagmiActions(): Promise<any> {
     hasWagmiConfig: hasWagmiConfig(),
   });
   try {
-    const actions = await import(/* webpackIgnore: true */ 'wagmi/actions');
+    const actions = await import('wagmi/actions');
     console.log('[MiniKit WagmiFallback] loadWagmiActions:success');
     return actions;
   } catch (error) {
@@ -62,7 +62,7 @@ async function loadWagmiActions(): Promise<any> {
 
 async function loadSiwe(): Promise<any> {
   try {
-    return await import(/* webpackIgnore: true */ 'siwe');
+    return await import('siwe');
   } catch (error) {
     const wrappedError = new Error(
       'Wagmi walletAuth fallback requires the "siwe" package. Install siwe or provide a custom fallback.',
@@ -78,7 +78,7 @@ async function loadSiwe(): Promise<any> {
  */
 async function checksumAddress(addr: string): Promise<`0x${string}`> {
   try {
-    const { getAddress } = await import(/* webpackIgnore: true */ 'viem');
+    const { getAddress } = await import('viem');
     return getAddress(addr) as `0x${string}`;
   } catch {
     return addr as `0x${string}`;
@@ -315,11 +315,11 @@ export async function wagmiSignTypedData(
 }
 
 export interface SendTransactionParams {
-  transaction: {
+  transactions: {
     address: string;
     data?: string;
     value?: string;
-  };
+  }[];
   chainId?: number;
 }
 
@@ -327,13 +327,48 @@ export interface SendTransactionResult {
   transactionHash: string;
 }
 
+// Standard Multicall3 address (same on all EVM chains)
+const MULTICALL3 = '0xcA11bde05977b3631167028862bE2a173976CA11' as const;
+
+const MULTICALL3_AGGREGATE3_VALUE_ABI = [
+  {
+    name: 'aggregate3Value',
+    type: 'function',
+    stateMutability: 'payable',
+    inputs: [
+      {
+        name: 'calls',
+        type: 'tuple[]',
+        components: [
+          { name: 'target', type: 'address' },
+          { name: 'allowFailure', type: 'bool' },
+          { name: 'value', type: 'uint256' },
+          { name: 'callData', type: 'bytes' },
+        ],
+      },
+    ],
+    outputs: [
+      {
+        name: 'returnData',
+        type: 'tuple[]',
+        components: [
+          { name: 'success', type: 'bool' },
+          { name: 'returnData', type: 'bytes' },
+        ],
+      },
+    ],
+  },
+] as const;
+
 function isChainMismatchError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
   return message.includes('does not match the target chain');
 }
 
 /**
- * Execute transaction via Wagmi
+ * Execute transaction(s) via Wagmi.
+ * Single transactions are sent directly.
+ * Multiple transactions are bundled into a single Multicall3.aggregate3Value call.
  */
 export async function wagmiSendTransaction(
   params: SendTransactionParams,
@@ -341,7 +376,7 @@ export async function wagmiSendTransaction(
   console.log('[MiniKit WagmiFallback] sendTransaction:start', {
     hasWagmiConfig: hasWagmiConfig(),
     chainId: params.chainId,
-    hasData: Boolean(params.transaction.data),
+    txCount: params.transactions.length,
   });
   const config = getWagmiConfig();
   if (!config) {
@@ -368,7 +403,6 @@ export async function wagmiSendTransaction(
       await switchChain(config, { chainId: targetChainId });
     }
 
-    // Confirm with wallet provider state (not only wagmi store state).
     const walletClient = await getWalletClient(config);
     const providerChainId = walletClient
       ? await walletClient.getChainId()
@@ -383,15 +417,41 @@ export async function wagmiSendTransaction(
 
   await ensureTargetChain();
 
+  // Build the transaction payload — single tx sent directly, multi-tx bundled via Multicall3
+  let txPayload: { to: `0x${string}`; data?: `0x${string}`; value?: bigint };
+
+  if (params.transactions.length === 1) {
+    const tx = params.transactions[0];
+    txPayload = {
+      to: tx.address as `0x${string}`,
+      data: tx.data as `0x${string}` | undefined,
+      value: tx.value ? BigInt(tx.value) : undefined,
+    };
+  } else {
+    const { encodeFunctionData } = await import('viem');
+    const calls = params.transactions.map((tx) => ({
+      target: tx.address as `0x${string}`,
+      allowFailure: false,
+      value: tx.value ? BigInt(tx.value) : 0n,
+      callData: (tx.data ?? '0x') as `0x${string}`,
+    }));
+    const totalValue = calls.reduce((sum, c) => sum + c.value, 0n);
+    txPayload = {
+      to: MULTICALL3,
+      data: encodeFunctionData({
+        abi: MULTICALL3_AGGREGATE3_VALUE_ABI,
+        functionName: 'aggregate3Value',
+        args: [calls],
+      }),
+      value: totalValue || undefined,
+    };
+  }
+
   let transactionHash: `0x${string}`;
   try {
     transactionHash = await sendTransaction(config, {
       chainId: targetChainId,
-      to: params.transaction.address as `0x${string}`,
-      data: params.transaction.data as `0x${string}` | undefined,
-      value: params.transaction.value
-        ? BigInt(params.transaction.value)
-        : undefined,
+      ...txPayload,
     });
   } catch (error) {
     if (targetChainId === undefined || !isChainMismatchError(error)) {
@@ -401,11 +461,7 @@ export async function wagmiSendTransaction(
     await ensureTargetChain();
     transactionHash = await sendTransaction(config, {
       chainId: targetChainId,
-      to: params.transaction.address as `0x${string}`,
-      data: params.transaction.data as `0x${string}` | undefined,
-      value: params.transaction.value
-        ? BigInt(params.transaction.value)
-        : undefined,
+      ...txPayload,
     });
   }
 

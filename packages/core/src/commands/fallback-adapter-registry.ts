@@ -37,11 +37,11 @@ export type SignTypedDataAdapterResult = {
 };
 
 export type SendTransactionAdapterParams = {
-  transaction: {
+  transactions: {
     address: string;
     data?: string;
     value?: string;
-  };
+  }[];
   chainId?: number;
 };
 

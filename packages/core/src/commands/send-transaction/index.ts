@@ -8,7 +8,6 @@ import {
   CommandContext,
   CommandUnavailableError,
   isCommandAvailable,
-  isInWorldApp,
   ResponseEvent,
   sendMiniKitEvent,
 } from '../types';
@@ -24,8 +23,6 @@ import { validateSendTransactionPayload } from './validate';
 export * from './types';
 
 const WORLD_CHAIN_ID = 480;
-const WAGMI_MULTI_TX_ERROR_MESSAGE =
-  'Wagmi fallback does not support multi-transaction execution. Pass a single transaction, run inside World App for batching, or provide a custom fallback.';
 
 type NormalizedSendTransactionOptions = {
   transactions: CalldataTransaction[];
@@ -92,17 +89,6 @@ export async function sendTransaction<TFallback = SendTransactionResult>(
 ): Promise<CommandResultByVia<SendTransactionResult, TFallback>> {
   const normalizedOptions = normalizeSendTransactionOptions(options);
   const fallbackAdapter = getFallbackAdapter();
-  const isWagmiFallbackPath =
-    !isInWorldApp() && Boolean(fallbackAdapter?.sendTransaction);
-  if (
-    isWagmiFallbackPath &&
-    normalizedOptions.transactions.length > 1 &&
-    !options.fallback
-  ) {
-    throw new SendTransactionError(SendTransactionErrorCodes.InvalidOperation, {
-      reason: WAGMI_MULTI_TX_ERROR_MESSAGE,
-    });
-  }
 
   const result = await executeWithFallback({
     command: Command.SendTransaction,
@@ -222,26 +208,17 @@ async function nativeSendTransaction(
 async function adapterSendTransactionFallback(
   options: NormalizedSendTransactionOptions,
 ): Promise<SendTransactionResult> {
-  if (options.transactions.length > 1) {
-    throw new Error(WAGMI_MULTI_TX_ERROR_MESSAGE);
-  }
-
-  const firstTransaction = options.transactions[0];
-  if (!firstTransaction) {
-    throw new Error('At least one transaction is required');
-  }
-
   const fallbackAdapter = getFallbackAdapter();
   if (!fallbackAdapter?.sendTransaction) {
     throw new Error('Fallback adapter is not registered.');
   }
 
   const result = await fallbackAdapter.sendTransaction({
-    transaction: {
-      address: firstTransaction.to,
-      data: firstTransaction.data,
-      value: firstTransaction.value,
-    },
+    transactions: options.transactions.map((tx) => ({
+      address: tx.to,
+      data: tx.data,
+      value: tx.value,
+    })),
     chainId: options.chainId,
   });
 
