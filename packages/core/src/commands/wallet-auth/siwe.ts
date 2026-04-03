@@ -259,6 +259,17 @@ export const verifySiweMessageV2 = async (
     throw new Error('Validation failed');
   }
 
+  // Ensure payload address matches the address embedded in the SIWE message
+  if (
+    siweMessageData.address &&
+    siweMessageData.address.toLowerCase() !==
+      (address as string).toLowerCase()
+  ) {
+    throw new Error(
+      'Address mismatch: payload address does not match SIWE message address',
+    );
+  }
+
   try {
     const client =
       userProvider ||
@@ -287,14 +298,16 @@ export const verifySiweMessageV2 = async (
         siweMessageData: siweMessageData,
       };
     } else {
-      // ECDSA verification for EOA wallets
+      // ECDSA verification for EOA wallets — compare against the SIWE message address
       const recoveredAddress = await recoverMessageAddress({
         message,
         signature: signature as `0x${string}`,
       });
+      const expectedAddress = siweMessageData.address ?? address;
       return {
         isValid:
-          recoveredAddress.toLowerCase() === (address as string).toLowerCase(),
+          recoveredAddress.toLowerCase() ===
+          (expectedAddress as string).toLowerCase(),
         siweMessageData: siweMessageData,
       };
     }
