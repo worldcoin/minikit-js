@@ -294,8 +294,7 @@ export const verifySiweMessageV2 = async (
       });
       return {
         isValid:
-          recoveredAddress.toLowerCase() ===
-          (address as string).toLowerCase(),
+          recoveredAddress.toLowerCase() === (address as string).toLowerCase(),
         siweMessageData: siweMessageData,
       };
     }

@@ -4,7 +4,8 @@ import * as commandTypes from '../commands/types';
 
 const ADDRESS_A = '0x1111111111111111111111111111111111111111';
 const ADDRESS_B = '0x2222222222222222222222222222222222222222';
-const TX_HASH = '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890';
+const TX_HASH =
+  '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890';
 
 describe('sendTransaction wagmi fallback', () => {
   let mockSendTransaction: jest.Mock;

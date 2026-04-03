@@ -88,6 +88,7 @@ const result = await MiniKit.walletAuth({
 ### Backend verification handles both account types
 
 `verifySiweMessage` from `@worldcoin/minikit-js/siwe` auto-detects:
+
 - **Smart Account (Safe)**: EIP-1271 `isValidSignature` on-chain
 - **EOA**: ECDSA `recoverMessageAddress`
 
@@ -182,23 +183,23 @@ Without a fallback, these throw `CommandUnavailableError` on web.
 
 ## What has built-in Wagmi support
 
-| Command | Wagmi fallback | Notes |
-|---|---|---|
-| `walletAuth` | Yes | SIWE via Wagmi connector |
-| `sendTransaction` | Yes | Single or batched via Multicall3 |
-| `signMessage` | Yes | `personal_sign` via Wagmi |
-| `signTypedData` | Yes | EIP-712 via Wagmi |
-| `pay` | No | Provide `fallback` |
-| `shareContacts` | No | Provide `fallback` |
-| `verify` (World ID) | N/A | Uses IDKit directly |
-| Everything else | No | Provide `fallback` |
+| Command             | Wagmi fallback | Notes                            |
+| ------------------- | -------------- | -------------------------------- |
+| `walletAuth`        | Yes            | SIWE via Wagmi connector         |
+| `sendTransaction`   | Yes            | Single or batched via Multicall3 |
+| `signMessage`       | Yes            | `personal_sign` via Wagmi        |
+| `signTypedData`     | Yes            | EIP-712 via Wagmi                |
+| `pay`               | No             | Provide `fallback`               |
+| `shareContacts`     | No             | Provide `fallback`               |
+| `verify` (World ID) | N/A            | Uses IDKit directly              |
+| Everything else     | No             | Provide `fallback`               |
 
 ## Key differences between environments
 
-| Aspect | World App | Web |
-|---|---|---|
-| Account type | Smart Account (Safe) | EOA |
-| Transaction hash | `userOpHash` (UserOperation) | Standard tx hash |
-| Multi-tx | Native atomic batching | Multicall3 atomic batching |
-| Gas | Sponsored | User pays |
-| Chain | World Chain (480) | World Chain (480) |
+| Aspect           | World App                    | Web                        |
+| ---------------- | ---------------------------- | -------------------------- |
+| Account type     | Smart Account (Safe)         | EOA                        |
+| Transaction hash | `userOpHash` (UserOperation) | Standard tx hash           |
+| Multi-tx         | Native atomic batching       | Multicall3 atomic batching |
+| Gas              | Sponsored                    | User pays                  |
+| Chain            | World Chain (480)            | World Chain (480)          |
