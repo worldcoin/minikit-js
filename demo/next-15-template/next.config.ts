@@ -6,6 +6,8 @@ const nextConfig: NextConfig = {
   },
   allowedDevOrigins: ['*'], // Add your dev origin here
   reactStrictMode: false,
+  // idkit-core loads WASM via import.meta.url + fs; bundling breaks that path
+  serverExternalPackages: ['@worldcoin/idkit-core', '@worldcoin/idkit'],
 };
 
 export default nextConfig;
