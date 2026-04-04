@@ -334,48 +334,18 @@ export interface SendTransactionResult {
   transactionHash: string;
 }
 
-// Standard Multicall3 address (same on all EVM chains)
-const MULTICALL3 = '0xcA11bde05977b3631167028862bE2a173976CA11' as const;
-
-const MULTICALL3_AGGREGATE3_VALUE_ABI = [
-  {
-    name: 'aggregate3Value',
-    type: 'function',
-    stateMutability: 'payable',
-    inputs: [
-      {
-        name: 'calls',
-        type: 'tuple[]',
-        components: [
-          { name: 'target', type: 'address' },
-          { name: 'allowFailure', type: 'bool' },
-          { name: 'value', type: 'uint256' },
-          { name: 'callData', type: 'bytes' },
-        ],
-      },
-    ],
-    outputs: [
-      {
-        name: 'returnData',
-        type: 'tuple[]',
-        components: [
-          { name: 'success', type: 'bool' },
-          { name: 'returnData', type: 'bytes' },
-        ],
-      },
-    ],
-  },
-] as const;
-
 function isChainMismatchError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
   return message.includes('does not match the target chain');
 }
 
 /**
- * Execute transaction(s) via Wagmi.
- * Single transactions are sent directly.
- * Multiple transactions are bundled into a single Multicall3.aggregate3Value call.
+ * Execute transaction(s) via Wagmi sequentially.
+ * Each transaction is sent individually and requires wallet confirmation.
+ * Returns the hash of the last transaction.
+ *
+ * Note: Unlike World App, web execution is NOT atomic — if a later transaction
+ * fails, earlier ones are already confirmed and cannot be rolled back.
  */
 export async function wagmiSendTransaction(
   params: SendTransactionParams,
@@ -424,53 +394,30 @@ export async function wagmiSendTransaction(
 
   await ensureTargetChain();
 
-  // Build the transaction payload — single tx sent directly, multi-tx bundled via Multicall3
-  let txPayload: { to: `0x${string}`; data?: `0x${string}`; value?: bigint };
+  let lastHash: `0x${string}` = '0x';
 
-  if (params.transactions.length === 1) {
-    const tx = params.transactions[0];
-    txPayload = {
-      to: tx.address as `0x${string}`,
-      data: tx.data as `0x${string}` | undefined,
-      value: tx.value ? BigInt(tx.value) : undefined,
-    };
-  } else {
-    const { encodeFunctionData } = await import(VIEM_MODULE);
-    const calls = params.transactions.map((tx) => ({
-      target: tx.address as `0x${string}`,
-      allowFailure: false,
-      value: tx.value ? BigInt(tx.value) : 0n,
-      callData: (tx.data ?? '0x') as `0x${string}`,
-    }));
-    const totalValue = calls.reduce((sum, c) => sum + c.value, 0n);
-    txPayload = {
-      to: MULTICALL3,
-      data: encodeFunctionData({
-        abi: MULTICALL3_AGGREGATE3_VALUE_ABI,
-        functionName: 'aggregate3Value',
-        args: [calls],
-      }),
-      value: totalValue || undefined,
-    };
-  }
-
-  let transactionHash: `0x${string}`;
-  try {
-    transactionHash = await sendTransaction(config, {
-      chainId: targetChainId,
-      ...txPayload,
-    });
-  } catch (error) {
-    if (targetChainId === undefined || !isChainMismatchError(error)) {
-      throw error;
+  for (const tx of params.transactions) {
+    try {
+      lastHash = await sendTransaction(config, {
+        chainId: targetChainId,
+        to: tx.address as `0x${string}`,
+        data: tx.data as `0x${string}` | undefined,
+        value: tx.value ? BigInt(tx.value) : undefined,
+      });
+    } catch (error) {
+      if (targetChainId !== undefined && isChainMismatchError(error)) {
+        await ensureTargetChain();
+        lastHash = await sendTransaction(config, {
+          chainId: targetChainId,
+          to: tx.address as `0x${string}`,
+          data: tx.data as `0x${string}` | undefined,
+          value: tx.value ? BigInt(tx.value) : undefined,
+        });
+      } else {
+        throw error;
+      }
     }
-
-    await ensureTargetChain();
-    transactionHash = await sendTransaction(config, {
-      chainId: targetChainId,
-      ...txPayload,
-    });
   }
 
-  return { transactionHash };
+  return { transactionHash: lastHash };
 }

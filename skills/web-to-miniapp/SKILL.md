@@ -112,7 +112,7 @@ await MiniKit.sendTransaction({
 });
 ```
 
-In World App, these execute atomically. On web, they are bundled into a single Multicall3 call automatically.
+In World App, these execute atomically. On web, they execute sequentially — each requires a separate wallet confirmation and is not atomic.
 
 ## Step 6 — Handle userOpHash receipts
 

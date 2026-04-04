@@ -109,7 +109,7 @@ No branching needed — it checks if the address has contract code and picks the
 
 - **World App**: native bridge, supports batching, returns `userOpHash`
 - **Web (single tx)**: sent directly via Wagmi wallet
-- **Web (multiple txs)**: automatically bundled into a single Multicall3 `aggregate3Value` call for atomic execution
+- **Web (multiple txs)**: executed sequentially — each requires wallet confirmation (not atomic)
 
 ```tsx
 import { MiniKit } from '@worldcoin/minikit-js';
@@ -186,7 +186,7 @@ Without a fallback, these throw `CommandUnavailableError` on web.
 | Command             | Wagmi fallback | Notes                            |
 | ------------------- | -------------- | -------------------------------- |
 | `walletAuth`        | Yes            | SIWE via Wagmi connector         |
-| `sendTransaction`   | Yes            | Single or batched via Multicall3 |
+| `sendTransaction`   | Yes            | Single or sequential on web |
 | `signMessage`       | Yes            | `personal_sign` via Wagmi        |
 | `signTypedData`     | Yes            | EIP-712 via Wagmi                |
 | `pay`               | No             | Provide `fallback`               |
@@ -200,6 +200,6 @@ Without a fallback, these throw `CommandUnavailableError` on web.
 | ---------------- | ---------------------------- | -------------------------- |
 | Account type     | Smart Account (Safe)         | EOA                        |
 | Transaction hash | `userOpHash` (UserOperation) | Standard tx hash           |
-| Multi-tx         | Native atomic batching       | Multicall3 atomic batching |
+| Multi-tx         | Native atomic batching       | Sequential (not atomic)    |
 | Gas              | Sponsored                    | User pays                  |
 | Chain            | World Chain (480)            | World Chain (480)          |

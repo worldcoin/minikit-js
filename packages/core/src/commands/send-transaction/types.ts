@@ -290,7 +290,7 @@ export const WORLD_APP_FEATURES: FeatureSupport = {
 };
 
 export const WEB_FEATURES: FeatureSupport = {
-  batch: true,
+  batch: false,
   permit2: false,
   gasSponsorship: false,
 };
