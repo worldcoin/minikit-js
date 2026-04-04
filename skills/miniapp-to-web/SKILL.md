@@ -183,23 +183,23 @@ Without a fallback, these throw `CommandUnavailableError` on web.
 
 ## What has built-in Wagmi support
 
-| Command             | Wagmi fallback | Notes                            |
-| ------------------- | -------------- | -------------------------------- |
-| `walletAuth`        | Yes            | SIWE via Wagmi connector         |
+| Command             | Wagmi fallback | Notes                       |
+| ------------------- | -------------- | --------------------------- |
+| `walletAuth`        | Yes            | SIWE via Wagmi connector    |
 | `sendTransaction`   | Yes            | Single or sequential on web |
-| `signMessage`       | Yes            | `personal_sign` via Wagmi        |
-| `signTypedData`     | Yes            | EIP-712 via Wagmi                |
-| `pay`               | No             | Provide `fallback`               |
-| `shareContacts`     | No             | Provide `fallback`               |
-| `verify` (World ID) | N/A            | Uses IDKit directly              |
-| Everything else     | No             | Provide `fallback`               |
+| `signMessage`       | Yes            | `personal_sign` via Wagmi   |
+| `signTypedData`     | Yes            | EIP-712 via Wagmi           |
+| `pay`               | No             | Provide `fallback`          |
+| `shareContacts`     | No             | Provide `fallback`          |
+| `verify` (World ID) | N/A            | Uses IDKit directly         |
+| Everything else     | No             | Provide `fallback`          |
 
 ## Key differences between environments
 
-| Aspect           | World App                    | Web                        |
-| ---------------- | ---------------------------- | -------------------------- |
-| Account type     | Smart Account (Safe)         | EOA                        |
-| Transaction hash | `userOpHash` (UserOperation) | Standard tx hash           |
-| Multi-tx         | Native atomic batching       | Sequential (not atomic)    |
-| Gas              | Sponsored                    | User pays                  |
-| Chain            | World Chain (480)            | World Chain (480)          |
+| Aspect           | World App                    | Web                     |
+| ---------------- | ---------------------------- | ----------------------- |
+| Account type     | Smart Account (Safe)         | EOA                     |
+| Transaction hash | `userOpHash` (UserOperation) | Standard tx hash        |
+| Multi-tx         | Native atomic batching       | Sequential (not atomic) |
+| Gas              | Sponsored                    | User pays               |
+| Chain            | World Chain (480)            | World Chain (480)       |
