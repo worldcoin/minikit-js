@@ -269,47 +269,48 @@ export const verifySiweMessageV2 = async (
     );
   }
 
+  const expectedAddress = (
+    siweMessageData.address ?? address
+  ).toLowerCase();
+
+  // Try ECDSA recovery first — pure crypto, no RPC needed.
+  // If the recovered address matches, we know it's a valid EOA signature.
+  try {
+    const recoveredAddress = await recoverMessageAddress({
+      message,
+      signature: signature as `0x${string}`,
+    });
+    if (recoveredAddress.toLowerCase() === expectedAddress) {
+      return {
+        isValid: true,
+        siweMessageData: siweMessageData,
+      };
+    }
+  } catch {
+    // ECDSA recovery failed (e.g. invalid signature format for EOA).
+    // Fall through to EIP-1271 contract verification.
+  }
+
+  // ECDSA didn't match — try EIP-1271 for smart contract wallets (Safe).
   try {
     const client =
       userProvider ||
       createPublicClient({ chain: worldchain, transport: http() });
 
-    // Check if the address is a smart contract (e.g. Safe) or an EOA
-    const code = await getCode(client, {
+    const walletContract = getContract({
       address: address as `0x${string}`,
+      abi: SAFE_CONTRACT_ABI,
+      client,
     });
-    const isContract = code !== undefined && code !== '0x';
-
-    if (isContract) {
-      // EIP-1271 verification for smart contract wallets (Safe)
-      const walletContract = getContract({
-        address: address as `0x${string}`,
-        abi: SAFE_CONTRACT_ABI,
-        client,
-      });
-      const hashedMessage = hashMessage(message);
-      const res = await walletContract.read.isValidSignature([
-        hashedMessage,
-        signature,
-      ]);
-      return {
-        isValid: res === EIP1271_MAGICVALUE,
-        siweMessageData: siweMessageData,
-      };
-    } else {
-      // ECDSA verification for EOA wallets — compare against the SIWE message address
-      const recoveredAddress = await recoverMessageAddress({
-        message,
-        signature: signature as `0x${string}`,
-      });
-      const expectedAddress = siweMessageData.address ?? address;
-      return {
-        isValid:
-          recoveredAddress.toLowerCase() ===
-          (expectedAddress as string).toLowerCase(),
-        siweMessageData: siweMessageData,
-      };
-    }
+    const hashedMessage = hashMessage(message);
+    const res = await walletContract.read.isValidSignature([
+      hashedMessage,
+      signature,
+    ]);
+    return {
+      isValid: res === EIP1271_MAGICVALUE,
+      siweMessageData: siweMessageData,
+    };
   } catch (error) {
     console.log(error);
     throw new Error('Signature verification failed');
