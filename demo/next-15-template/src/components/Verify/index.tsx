@@ -9,7 +9,11 @@ import { useState } from 'react';
  * It's critical you verify the proof on the server side.
  * Read More: https://docs.world.org/mini-apps/commands/verify#verifying-the-proof
  */
-export const Verify = () => {
+export const Verify = ({
+  action,
+}: {
+  action: string;
+}) => {
   const [buttonState, setButtonState] = useState<
     'pending' | 'success' | 'failed' | undefined
   >(undefined);
@@ -21,7 +25,7 @@ export const Verify = () => {
       const rpRes = await fetch('/api/rp-signature', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'test-action' }),
+        body: JSON.stringify({ action }),
       });
 
       if (!rpRes.ok) {
@@ -40,7 +44,7 @@ export const Verify = () => {
       // Use IDKit request API
       const request = await IDKit.request({
         app_id: process.env.NEXT_PUBLIC_APP_ID as `app_${string}`,
-        action: 'test-action',
+        action,
         rp_context: rpContext,
         allow_legacy_proofs: true,
       }).preset(orbLegacy({ signal: '' }));
@@ -56,14 +60,15 @@ export const Verify = () => {
       // Verify the proof on the server
       const response = await fetch('/api/verify-proof', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          payload: completion.result,
-          action: 'test-action',
+          rp_id: rpSig.rp_id,
+          idkitResponse: completion.result,
         }),
       });
 
       const data = await response.json();
-      if (data.verifyRes.success) {
+      if (data.success) {
         setButtonState('success');
       } else {
         setButtonState('failed');

@@ -27,7 +27,7 @@ export default async function Home() {
       </Page.Header>
       <Page.Main className="flex flex-col items-center justify-start gap-4 mb-16">
         <UserInfo />
-        <Verify />
+        <Verify action="test-action" />
         <Pay />
         <Transaction />
         <ViewPermissions />
