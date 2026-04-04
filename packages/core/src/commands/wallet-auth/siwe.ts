@@ -6,7 +6,6 @@ import {
   http,
   recoverMessageAddress,
 } from 'viem';
-import { getCode } from 'viem/actions';
 import { worldchain } from 'viem/chains';
 import type {
   MiniAppWalletAuthSuccessPayload,
@@ -269,9 +268,7 @@ export const verifySiweMessageV2 = async (
     );
   }
 
-  const expectedAddress = (
-    siweMessageData.address ?? address
-  ).toLowerCase();
+  const expectedAddress = (siweMessageData.address ?? address).toLowerCase();
 
   // Try ECDSA recovery first — pure crypto, no RPC needed.
   // If the recovered address matches, we know it's a valid EOA signature.
