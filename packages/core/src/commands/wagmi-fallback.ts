@@ -344,6 +344,66 @@ function isChainMismatchError(error: unknown): boolean {
   return message.includes('does not match the target chain');
 }
 
+type NormalizedTx = {
+  to: `0x${string}`;
+  data?: `0x${string}`;
+  value?: bigint;
+};
+
+const HEX_ADDRESS_REGEX = /^0x[0-9a-fA-F]{40}$/;
+const HEX_STRING_REGEX = /^0x[0-9a-fA-F]*$/;
+
+function isHexAddress(value: unknown): value is `0x${string}` {
+  return typeof value === 'string' && HEX_ADDRESS_REGEX.test(value);
+}
+
+function isHexString(value: unknown): value is `0x${string}` {
+  return typeof value === 'string' && HEX_STRING_REGEX.test(value);
+}
+
+/**
+ * Validate and normalize the entire batch up front so malformed input in any
+ * position fails before we broadcast the first transaction. This prevents
+ * partial execution for deterministic client-side errors.
+ * @internal
+ */
+export function validateBatch(
+  transactions: SendTransactionParams['transactions'],
+): NormalizedTx[] {
+  return transactions.map((tx, i) => {
+    if (!isHexAddress(tx.address)) {
+      throw new Error(
+        `Transaction ${i + 1}: invalid address "${tx.address}". Must be a 0x-prefixed 20-byte hex string.`,
+      );
+    }
+    if (tx.data !== undefined && !isHexString(tx.data)) {
+      throw new Error(
+        `Transaction ${i + 1}: invalid data "${tx.data}". Must be a 0x-prefixed hex string.`,
+      );
+    }
+    let value: bigint | undefined;
+    if (tx.value !== undefined && tx.value !== '') {
+      try {
+        value = BigInt(tx.value);
+      } catch {
+        throw new Error(
+          `Transaction ${i + 1}: invalid value "${tx.value}". Must be a decimal or hex string parseable as BigInt.`,
+        );
+      }
+      if (value < 0n) {
+        throw new Error(
+          `Transaction ${i + 1}: value cannot be negative (got "${tx.value}").`,
+        );
+      }
+    }
+    return {
+      to: tx.address as `0x${string}`,
+      ...(tx.data !== undefined ? { data: tx.data as `0x${string}` } : {}),
+      ...(value !== undefined ? { value } : {}),
+    };
+  });
+}
+
 /**
  * Execute transaction(s) via Wagmi sequentially.
  * Each transaction is sent individually and requires wallet confirmation.
@@ -363,6 +423,7 @@ export async function wagmiSendTransaction(
   if (params.transactions.length === 0) {
     throw new Error('At least one transaction is required');
   }
+  const normalizedTxs = validateBatch(params.transactions);
   const config = getWagmiConfig();
   if (!config) {
     console.log('[MiniKit WagmiFallback] sendTransaction:error:no-config');
@@ -403,16 +464,16 @@ export async function wagmiSendTransaction(
   await ensureTargetChain();
 
   const sendWithChainRetry = async (
-    tx: (typeof params.transactions)[number],
+    tx: NormalizedTx,
   ): Promise<`0x${string}`> => {
     const send = () =>
       sendTransaction(config, {
         connector,
         account: address,
         chainId: targetChainId,
-        to: tx.address as `0x${string}`,
-        data: tx.data as `0x${string}` | undefined,
-        value: tx.value ? BigInt(tx.value) : undefined,
+        to: tx.to,
+        data: tx.data,
+        value: tx.value,
       });
     try {
       return await send();
@@ -427,13 +488,13 @@ export async function wagmiSendTransaction(
 
   const submitted: `0x${string}`[] = [];
 
-  for (let i = 0; i < params.transactions.length; i++) {
+  for (let i = 0; i < normalizedTxs.length; i++) {
     try {
-      submitted.push(await sendWithChainRetry(params.transactions[i]));
+      submitted.push(await sendWithChainRetry(normalizedTxs[i]));
     } catch (error) {
       if (submitted.length > 0) {
         throw new PartialExecutionError(
-          `Transaction ${i + 1}/${params.transactions.length} failed after ${submitted.length} tx(s) were already submitted. Resolve manually.`,
+          `Transaction ${i + 1}/${normalizedTxs.length} failed after ${submitted.length} tx(s) were already submitted. Resolve manually.`,
           submitted,
           error,
         );
