@@ -355,6 +355,9 @@ export async function wagmiSendTransaction(
     chainId: params.chainId,
     txCount: params.transactions.length,
   });
+  if (params.transactions.length === 0) {
+    throw new Error('At least one transaction is required');
+  }
   const config = getWagmiConfig();
   if (!config) {
     console.log('[MiniKit WagmiFallback] sendTransaction:error:no-config');
