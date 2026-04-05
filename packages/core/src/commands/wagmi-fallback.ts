@@ -16,11 +16,18 @@ const SIWE_NONCE_REGEX = /^[a-zA-Z0-9]{8,}$/;
 // Store wagmi config on globalThis so it's shared across entry points
 // (minikit-provider.js sets it, index.js reads it).
 const WAGMI_KEY = '__minikit_wagmi_config__' as const;
+const WAGMI_INSTALL_HOOK_KEY = '__minikit_install_wagmi_fallback__' as const;
 
 export function setWagmiConfig(config: WagmiConfig): void {
   (globalThis as any)[WAGMI_KEY] = config;
   registerWagmiFallbacks();
 }
+
+// Expose an install hook so MiniKitProvider can register the wagmi config
+// without statically importing this module. The hook is installed as a
+// side effect whenever this module is loaded (via the connector, the
+// wagmi-fallback-register entry point, or any other path).
+(globalThis as any)[WAGMI_INSTALL_HOOK_KEY] = setWagmiConfig;
 
 export function getWagmiConfig(): WagmiConfig | undefined {
   return (globalThis as any)[WAGMI_KEY];
@@ -39,27 +46,10 @@ export function registerWagmiFallbacks(): void {
   });
 }
 
-// Use variables for dynamic imports so bundlers cannot statically resolve them.
-// wagmi, siwe, and viem are optional peer dependencies — apps that don't install
-// them should not fail at build time.
-const WAGMI_ACTIONS = 'wagmi/actions';
-const SIWE_MODULE = 'siwe';
-const VIEM_MODULE = 'viem';
-
 async function loadWagmiActions(): Promise<any> {
-  // Temporary diagnostics for external fallback debugging.
-  console.log('[MiniKit WagmiFallback] loadWagmiActions:start', {
-    hasWindow: typeof window !== 'undefined',
-    hasWagmiConfig: hasWagmiConfig(),
-  });
   try {
-    const actions = await import(WAGMI_ACTIONS);
-    console.log('[MiniKit WagmiFallback] loadWagmiActions:success');
-    return actions;
+    return await import('wagmi/actions');
   } catch (error) {
-    console.log('[MiniKit WagmiFallback] loadWagmiActions:error', {
-      message: error instanceof Error ? error.message : String(error),
-    });
     const wrappedError = new Error(
       'Wagmi fallback requires the "wagmi" package. Install wagmi or provide a custom fallback.',
     );
@@ -70,7 +60,7 @@ async function loadWagmiActions(): Promise<any> {
 
 async function loadSiwe(): Promise<any> {
   try {
-    return await import(SIWE_MODULE);
+    return await import('siwe');
   } catch (error) {
     const wrappedError = new Error(
       'Wagmi walletAuth fallback requires the "siwe" package. Install siwe or provide a custom fallback.',
@@ -86,14 +76,16 @@ async function loadSiwe(): Promise<any> {
  */
 async function checksumAddress(addr: string): Promise<`0x${string}`> {
   try {
-    const { getAddress } = await import(VIEM_MODULE);
+    const { getAddress } = await import('viem');
     return getAddress(addr) as `0x${string}`;
   } catch {
     return addr as `0x${string}`;
   }
 }
 
-async function ensureConnected(config: WagmiConfig): Promise<`0x${string}`> {
+async function ensureConnected(
+  config: WagmiConfig,
+): Promise<{ address: `0x${string}`; connector: any }> {
   const { connect, getConnections } = await loadWagmiActions();
   const isWorldApp =
     typeof window !== 'undefined' && Boolean((window as any).WorldApp);
@@ -108,7 +100,10 @@ async function ensureConnected(config: WagmiConfig): Promise<`0x${string}`> {
       (isWorldApp || connection.connector?.id !== 'worldApp'),
   );
   if (existingConnection && existingConnection.accounts) {
-    return checksumAddress(existingConnection.accounts[0]);
+    return {
+      address: await checksumAddress(existingConnection.accounts[0]),
+      connector: existingConnection.connector,
+    };
   }
 
   const connectors = config.connectors;
@@ -138,7 +133,10 @@ async function ensureConnected(config: WagmiConfig): Promise<`0x${string}`> {
           ? account
           : (account as { address?: `0x${string}` }).address;
       if (address) {
-        return checksumAddress(address);
+        return {
+          address: await checksumAddress(address),
+          connector: selectedConnector,
+        };
       }
     }
   } catch (error) {
@@ -212,7 +210,7 @@ export async function wagmiWalletAuth(
   const { signMessage } = await loadWagmiActions();
   const { SiweMessage } = await loadSiwe();
 
-  const address = await ensureConnected(config);
+  const { address, connector } = await ensureConnected(config);
 
   if (!SIWE_NONCE_REGEX.test(params.nonce)) {
     throw new Error(
@@ -235,7 +233,11 @@ export async function wagmiWalletAuth(
   });
 
   const message = siweMessage.prepareMessage();
-  const signature = await signMessage(config, { message });
+  const signature = await signMessage(config, {
+    connector,
+    account: address,
+    message,
+  });
 
   return {
     address,
@@ -263,8 +265,9 @@ export async function wagmiSignMessage(
 
   const { signMessage } = await loadWagmiActions();
 
-  const address = await ensureConnected(config);
+  const { address, connector } = await ensureConnected(config);
   const signature = await signMessage(config, {
+    connector,
     account: address,
     message: params.message,
   });
@@ -297,16 +300,17 @@ export async function wagmiSignTypedData(
 
   const { getChainId, signTypedData, switchChain } = await loadWagmiActions();
 
-  const address = await ensureConnected(config);
+  const { address, connector } = await ensureConnected(config);
 
   if (params.chainId !== undefined) {
     const currentChainId = await getChainId(config);
     if (currentChainId !== params.chainId) {
-      await switchChain(config, { chainId: params.chainId });
+      await switchChain(config, { chainId: params.chainId, connector });
     }
   }
 
   const signature = await signTypedData(config, {
+    connector,
     account: address,
     types: params.types as any,
     primaryType: params.primaryType as any,
@@ -370,7 +374,7 @@ export async function wagmiSendTransaction(
   const { getChainId, getWalletClient, sendTransaction, switchChain } =
     await loadWagmiActions();
 
-  await ensureConnected(config);
+  const { address, connector } = await ensureConnected(config);
 
   const targetChainId =
     params.chainId ??
@@ -381,7 +385,7 @@ export async function wagmiSendTransaction(
 
     const currentChainId = await getChainId(config);
     if (currentChainId !== targetChainId) {
-      await switchChain(config, { chainId: targetChainId });
+      await switchChain(config, { chainId: targetChainId, connector });
     }
 
     const walletClient = await getWalletClient(config);
@@ -403,6 +407,8 @@ export async function wagmiSendTransaction(
   ): Promise<`0x${string}`> => {
     const send = () =>
       sendTransaction(config, {
+        connector,
+        account: address,
         chainId: targetChainId,
         to: tx.address as `0x${string}`,
         data: tx.data as `0x${string}` | undefined,

@@ -13,6 +13,7 @@ export default defineConfig({
     'src/siwe-exports.ts',
     'src/address-book.ts',
     'src/minikit-provider.tsx',
+    'src/wagmi-fallback-register.ts',
   ],
   define: { 'process.env.NODE_ENV': '"production"' },
 });
