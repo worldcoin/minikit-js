@@ -16,6 +16,24 @@ import {
   isInWorldApp,
 } from './types';
 
+/**
+ * Thrown by a fallback adapter when it has already caused side effects
+ * (e.g. broadcast a transaction) before failing. The error is propagated
+ * to the caller instead of cascading to the custom fallback, to avoid
+ * duplicate or inconsistent execution.
+ */
+export class PartialExecutionError extends Error {
+  public readonly submitted: readonly string[];
+  public readonly cause: unknown;
+
+  constructor(message: string, submitted: string[], cause: unknown) {
+    super(message);
+    this.name = 'PartialExecutionError';
+    this.submitted = submitted;
+    this.cause = cause;
+  }
+}
+
 export interface ExecuteWithFallbackOptions<TNative, TFallback = TNative> {
   /** Command name for availability checking */
   command: string;
@@ -79,6 +97,11 @@ export async function executeWithFallback<TNative, TFallback = TNative>(
       const data = await wagmiFallback();
       return { data, executedWith: 'wagmi' as CommandVia };
     } catch (error) {
+      // If the adapter already caused on-chain side effects, don't cascade
+      // to the custom fallback — re-running could duplicate submitted txs.
+      if (error instanceof PartialExecutionError) {
+        throw error;
+      }
       console.warn(`Wagmi fallback for ${command} failed:`, error);
       // Fall through to custom fallback
     }

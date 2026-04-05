@@ -4,6 +4,7 @@
  * These functions provide web fallback using Wagmi when not running in World App.
  * Wagmi is dynamically imported to avoid bundling it if not used.
  */
+import { PartialExecutionError } from './fallback';
 import { setFallbackAdapter } from './fallback-adapter-registry';
 
 // We use `any` for the config type because wagmi is an optional peer dependency.
@@ -397,30 +398,43 @@ export async function wagmiSendTransaction(
 
   await ensureTargetChain();
 
-  let lastHash: `0x${string}` = '0x';
-
-  for (const tx of params.transactions) {
-    try {
-      lastHash = await sendTransaction(config, {
+  const sendWithChainRetry = async (
+    tx: (typeof params.transactions)[number],
+  ): Promise<`0x${string}`> => {
+    const send = () =>
+      sendTransaction(config, {
         chainId: targetChainId,
         to: tx.address as `0x${string}`,
         data: tx.data as `0x${string}` | undefined,
         value: tx.value ? BigInt(tx.value) : undefined,
       });
+    try {
+      return await send();
     } catch (error) {
       if (targetChainId !== undefined && isChainMismatchError(error)) {
         await ensureTargetChain();
-        lastHash = await sendTransaction(config, {
-          chainId: targetChainId,
-          to: tx.address as `0x${string}`,
-          data: tx.data as `0x${string}` | undefined,
-          value: tx.value ? BigInt(tx.value) : undefined,
-        });
-      } else {
-        throw error;
+        return await send();
       }
+      throw error;
+    }
+  };
+
+  const submitted: `0x${string}`[] = [];
+
+  for (let i = 0; i < params.transactions.length; i++) {
+    try {
+      submitted.push(await sendWithChainRetry(params.transactions[i]));
+    } catch (error) {
+      if (submitted.length > 0) {
+        throw new PartialExecutionError(
+          `Transaction ${i + 1}/${params.transactions.length} failed after ${submitted.length} tx(s) were already submitted. Resolve manually.`,
+          submitted,
+          error,
+        );
+      }
+      throw error;
     }
   }
 
-  return { transactionHash: lastHash };
+  return { transactionHash: submitted[submitted.length - 1] };
 }
