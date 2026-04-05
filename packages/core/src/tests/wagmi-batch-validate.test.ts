@@ -8,9 +8,7 @@ describe('validateBatch', () => {
     const result = validateBatch([
       { address: VALID_ADDR, data: '0x1234', value: '0x1' },
     ]);
-    expect(result).toEqual([
-      { to: VALID_ADDR, data: '0x1234', value: 1n },
-    ]);
+    expect(result).toEqual([{ to: VALID_ADDR, data: '0x1234', value: 1n }]);
   });
 
   it('normalizes a multi-tx batch', () => {
@@ -46,8 +44,8 @@ describe('validateBatch', () => {
   });
 
   it('rejects negative value', () => {
-    expect(() =>
-      validateBatch([{ address: VALID_ADDR, value: '-1' }]),
-    ).toThrow('cannot be negative');
+    expect(() => validateBatch([{ address: VALID_ADDR, value: '-1' }])).toThrow(
+      'cannot be negative',
+    );
   });
 });

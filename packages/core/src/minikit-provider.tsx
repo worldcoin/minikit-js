@@ -7,9 +7,8 @@ import {
   useEffect,
   useState,
 } from 'react';
+import { WAGMI_INSTALL_HOOK_KEY } from './global-keys';
 import { MiniKit } from './minikit';
-
-const WAGMI_INSTALL_HOOK_KEY = '__minikit_install_wagmi_fallback__' as const;
 
 type MiniKitProps = {
   appId?: string;

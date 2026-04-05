@@ -4,6 +4,8 @@
  * These functions provide web fallback using Wagmi when not running in World App.
  * Wagmi is dynamically imported to avoid bundling it if not used.
  */
+import { WAGMI_CONFIG_KEY, WAGMI_INSTALL_HOOK_KEY } from '../global-keys';
+import { isHexAddress, isHexString } from '../helpers/hex';
 import { PartialExecutionError } from './fallback';
 import { setFallbackAdapter } from './fallback-adapter-registry';
 
@@ -13,13 +15,8 @@ import { setFallbackAdapter } from './fallback-adapter-registry';
 type WagmiConfig = any;
 const SIWE_NONCE_REGEX = /^[a-zA-Z0-9]{8,}$/;
 
-// Store wagmi config on globalThis so it's shared across entry points
-// (minikit-provider.js sets it, index.js reads it).
-const WAGMI_KEY = '__minikit_wagmi_config__' as const;
-const WAGMI_INSTALL_HOOK_KEY = '__minikit_install_wagmi_fallback__' as const;
-
 export function setWagmiConfig(config: WagmiConfig): void {
-  (globalThis as any)[WAGMI_KEY] = config;
+  (globalThis as any)[WAGMI_CONFIG_KEY] = config;
   registerWagmiFallbacks();
 }
 
@@ -30,11 +27,7 @@ export function setWagmiConfig(config: WagmiConfig): void {
 (globalThis as any)[WAGMI_INSTALL_HOOK_KEY] = setWagmiConfig;
 
 export function getWagmiConfig(): WagmiConfig | undefined {
-  return (globalThis as any)[WAGMI_KEY];
-}
-
-export function hasWagmiConfig(): boolean {
-  return (globalThis as any)[WAGMI_KEY] !== undefined;
+  return (globalThis as any)[WAGMI_CONFIG_KEY];
 }
 
 export function registerWagmiFallbacks(): void {
@@ -195,13 +188,8 @@ export interface SignTypedDataResult {
 export async function wagmiWalletAuth(
   params: WalletAuthParams,
 ): Promise<WalletAuthResult> {
-  console.log('[MiniKit WagmiFallback] walletAuth:start', {
-    hasWagmiConfig: hasWagmiConfig(),
-    nonceLength: params.nonce?.length ?? 0,
-  });
   const config = getWagmiConfig();
   if (!config) {
-    console.log('[MiniKit WagmiFallback] walletAuth:error:no-config');
     throw new Error(
       'Wagmi config not available. Pass wagmiConfig to MiniKitProvider.',
     );
@@ -252,12 +240,8 @@ export async function wagmiWalletAuth(
 export async function wagmiSignMessage(
   params: SignMessageParams,
 ): Promise<SignMessageResult> {
-  console.log('[MiniKit WagmiFallback] signMessage:start', {
-    hasWagmiConfig: hasWagmiConfig(),
-  });
   const config = getWagmiConfig();
   if (!config) {
-    console.log('[MiniKit WagmiFallback] signMessage:error:no-config');
     throw new Error(
       'Wagmi config not available. Pass wagmiConfig to MiniKitProvider.',
     );
@@ -286,13 +270,8 @@ export async function wagmiSignMessage(
 export async function wagmiSignTypedData(
   params: SignTypedDataParams,
 ): Promise<SignTypedDataResult> {
-  console.log('[MiniKit WagmiFallback] signTypedData:start', {
-    hasWagmiConfig: hasWagmiConfig(),
-    hasChainId: params.chainId !== undefined,
-  });
   const config = getWagmiConfig();
   if (!config) {
-    console.log('[MiniKit WagmiFallback] signTypedData:error:no-config');
     throw new Error(
       'Wagmi config not available. Pass wagmiConfig to MiniKitProvider.',
     );
@@ -350,17 +329,6 @@ type NormalizedTx = {
   value?: bigint;
 };
 
-const HEX_ADDRESS_REGEX = /^0x[0-9a-fA-F]{40}$/;
-const HEX_STRING_REGEX = /^0x[0-9a-fA-F]*$/;
-
-function isHexAddress(value: unknown): value is `0x${string}` {
-  return typeof value === 'string' && HEX_ADDRESS_REGEX.test(value);
-}
-
-function isHexString(value: unknown): value is `0x${string}` {
-  return typeof value === 'string' && HEX_STRING_REGEX.test(value);
-}
-
 /**
  * Validate and normalize the entire batch up front so malformed input in any
  * position fails before we broadcast the first transaction. This prevents
@@ -415,18 +383,12 @@ export function validateBatch(
 export async function wagmiSendTransaction(
   params: SendTransactionParams,
 ): Promise<SendTransactionResult> {
-  console.log('[MiniKit WagmiFallback] sendTransaction:start', {
-    hasWagmiConfig: hasWagmiConfig(),
-    chainId: params.chainId,
-    txCount: params.transactions.length,
-  });
   if (params.transactions.length === 0) {
     throw new Error('At least one transaction is required');
   }
   const normalizedTxs = validateBatch(params.transactions);
   const config = getWagmiConfig();
   if (!config) {
-    console.log('[MiniKit WagmiFallback] sendTransaction:error:no-config');
     throw new Error(
       'Wagmi config not available. Pass wagmiConfig to MiniKitProvider.',
     );
