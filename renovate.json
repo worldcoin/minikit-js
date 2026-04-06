@@ -1,0 +1,15 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "schedule": ["every month"],
+  "prConcurrentLimit": 10,
+  "reviewers": ["andy-t-wang", "michalstruck"],
+  "assignees": ["andy-t-wang", "michalstruck"],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "minor and patch dependencies",
+      "automerge": false
+    }
+  ]
+}
