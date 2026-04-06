@@ -4,6 +4,9 @@
  * These functions provide web fallback using Wagmi when not running in World App.
  * Wagmi is dynamically imported to avoid bundling it if not used.
  */
+import { WAGMI_CONFIG_KEY, WAGMI_INSTALL_HOOK_KEY } from '../global-keys';
+import { isHexAddress, isHexString } from '../helpers/hex';
+import { PartialExecutionError } from './fallback';
 import { setFallbackAdapter } from './fallback-adapter-registry';
 
 // We use `any` for the config type because wagmi is an optional peer dependency.
@@ -12,21 +15,19 @@ import { setFallbackAdapter } from './fallback-adapter-registry';
 type WagmiConfig = any;
 const SIWE_NONCE_REGEX = /^[a-zA-Z0-9]{8,}$/;
 
-// Store wagmi config on globalThis so it's shared across entry points
-// (minikit-provider.js sets it, index.js reads it).
-const WAGMI_KEY = '__minikit_wagmi_config__' as const;
-
 export function setWagmiConfig(config: WagmiConfig): void {
-  (globalThis as any)[WAGMI_KEY] = config;
+  (globalThis as any)[WAGMI_CONFIG_KEY] = config;
   registerWagmiFallbacks();
 }
 
-export function getWagmiConfig(): WagmiConfig | undefined {
-  return (globalThis as any)[WAGMI_KEY];
-}
+// Expose an install hook so MiniKitProvider can register the wagmi config
+// without statically importing this module. The hook is installed as a
+// side effect whenever this module is loaded (via the connector, the
+// wagmi-fallback-register entry point, or any other path).
+(globalThis as any)[WAGMI_INSTALL_HOOK_KEY] = setWagmiConfig;
 
-export function hasWagmiConfig(): boolean {
-  return (globalThis as any)[WAGMI_KEY] !== undefined;
+export function getWagmiConfig(): WagmiConfig | undefined {
+  return (globalThis as any)[WAGMI_CONFIG_KEY];
 }
 
 export function registerWagmiFallbacks(): void {
@@ -39,19 +40,9 @@ export function registerWagmiFallbacks(): void {
 }
 
 async function loadWagmiActions(): Promise<any> {
-  // Temporary diagnostics for external fallback debugging.
-  console.log('[MiniKit WagmiFallback] loadWagmiActions:start', {
-    hasWindow: typeof window !== 'undefined',
-    hasWagmiConfig: hasWagmiConfig(),
-  });
   try {
-    const actions = await import(/* webpackIgnore: true */ 'wagmi/actions');
-    console.log('[MiniKit WagmiFallback] loadWagmiActions:success');
-    return actions;
+    return await import('wagmi/actions');
   } catch (error) {
-    console.log('[MiniKit WagmiFallback] loadWagmiActions:error', {
-      message: error instanceof Error ? error.message : String(error),
-    });
     const wrappedError = new Error(
       'Wagmi fallback requires the "wagmi" package. Install wagmi or provide a custom fallback.',
     );
@@ -62,7 +53,7 @@ async function loadWagmiActions(): Promise<any> {
 
 async function loadSiwe(): Promise<any> {
   try {
-    return await import(/* webpackIgnore: true */ 'siwe');
+    return await import('siwe');
   } catch (error) {
     const wrappedError = new Error(
       'Wagmi walletAuth fallback requires the "siwe" package. Install siwe or provide a custom fallback.',
@@ -78,14 +69,16 @@ async function loadSiwe(): Promise<any> {
  */
 async function checksumAddress(addr: string): Promise<`0x${string}`> {
   try {
-    const { getAddress } = await import(/* webpackIgnore: true */ 'viem');
+    const { getAddress } = await import('viem');
     return getAddress(addr) as `0x${string}`;
   } catch {
     return addr as `0x${string}`;
   }
 }
 
-async function ensureConnected(config: WagmiConfig): Promise<`0x${string}`> {
+async function ensureConnected(
+  config: WagmiConfig,
+): Promise<{ address: `0x${string}`; connector: any }> {
   const { connect, getConnections } = await loadWagmiActions();
   const isWorldApp =
     typeof window !== 'undefined' && Boolean((window as any).WorldApp);
@@ -100,7 +93,10 @@ async function ensureConnected(config: WagmiConfig): Promise<`0x${string}`> {
       (isWorldApp || connection.connector?.id !== 'worldApp'),
   );
   if (existingConnection && existingConnection.accounts) {
-    return checksumAddress(existingConnection.accounts[0]);
+    return {
+      address: await checksumAddress(existingConnection.accounts[0]),
+      connector: existingConnection.connector,
+    };
   }
 
   const connectors = config.connectors;
@@ -130,7 +126,10 @@ async function ensureConnected(config: WagmiConfig): Promise<`0x${string}`> {
           ? account
           : (account as { address?: `0x${string}` }).address;
       if (address) {
-        return checksumAddress(address);
+        return {
+          address: await checksumAddress(address),
+          connector: selectedConnector,
+        };
       }
     }
   } catch (error) {
@@ -189,13 +188,8 @@ export interface SignTypedDataResult {
 export async function wagmiWalletAuth(
   params: WalletAuthParams,
 ): Promise<WalletAuthResult> {
-  console.log('[MiniKit WagmiFallback] walletAuth:start', {
-    hasWagmiConfig: hasWagmiConfig(),
-    nonceLength: params.nonce?.length ?? 0,
-  });
   const config = getWagmiConfig();
   if (!config) {
-    console.log('[MiniKit WagmiFallback] walletAuth:error:no-config');
     throw new Error(
       'Wagmi config not available. Pass wagmiConfig to MiniKitProvider.',
     );
@@ -204,7 +198,7 @@ export async function wagmiWalletAuth(
   const { signMessage } = await loadWagmiActions();
   const { SiweMessage } = await loadSiwe();
 
-  const address = await ensureConnected(config);
+  const { address, connector } = await ensureConnected(config);
 
   if (!SIWE_NONCE_REGEX.test(params.nonce)) {
     throw new Error(
@@ -227,7 +221,11 @@ export async function wagmiWalletAuth(
   });
 
   const message = siweMessage.prepareMessage();
-  const signature = await signMessage(config, { message });
+  const signature = await signMessage(config, {
+    connector,
+    account: address,
+    message,
+  });
 
   return {
     address,
@@ -242,12 +240,8 @@ export async function wagmiWalletAuth(
 export async function wagmiSignMessage(
   params: SignMessageParams,
 ): Promise<SignMessageResult> {
-  console.log('[MiniKit WagmiFallback] signMessage:start', {
-    hasWagmiConfig: hasWagmiConfig(),
-  });
   const config = getWagmiConfig();
   if (!config) {
-    console.log('[MiniKit WagmiFallback] signMessage:error:no-config');
     throw new Error(
       'Wagmi config not available. Pass wagmiConfig to MiniKitProvider.',
     );
@@ -255,8 +249,9 @@ export async function wagmiSignMessage(
 
   const { signMessage } = await loadWagmiActions();
 
-  const address = await ensureConnected(config);
+  const { address, connector } = await ensureConnected(config);
   const signature = await signMessage(config, {
+    connector,
     account: address,
     message: params.message,
   });
@@ -275,13 +270,8 @@ export async function wagmiSignMessage(
 export async function wagmiSignTypedData(
   params: SignTypedDataParams,
 ): Promise<SignTypedDataResult> {
-  console.log('[MiniKit WagmiFallback] signTypedData:start', {
-    hasWagmiConfig: hasWagmiConfig(),
-    hasChainId: params.chainId !== undefined,
-  });
   const config = getWagmiConfig();
   if (!config) {
-    console.log('[MiniKit WagmiFallback] signTypedData:error:no-config');
     throw new Error(
       'Wagmi config not available. Pass wagmiConfig to MiniKitProvider.',
     );
@@ -289,16 +279,17 @@ export async function wagmiSignTypedData(
 
   const { getChainId, signTypedData, switchChain } = await loadWagmiActions();
 
-  const address = await ensureConnected(config);
+  const { address, connector } = await ensureConnected(config);
 
   if (params.chainId !== undefined) {
     const currentChainId = await getChainId(config);
     if (currentChainId !== params.chainId) {
-      await switchChain(config, { chainId: params.chainId });
+      await switchChain(config, { chainId: params.chainId, connector });
     }
   }
 
   const signature = await signTypedData(config, {
+    connector,
     account: address,
     types: params.types as any,
     primaryType: params.primaryType as any,
@@ -315,11 +306,11 @@ export async function wagmiSignTypedData(
 }
 
 export interface SendTransactionParams {
-  transaction: {
+  transactions: {
     address: string;
     data?: string;
     value?: string;
-  };
+  }[];
   chainId?: number;
 }
 
@@ -332,20 +323,72 @@ function isChainMismatchError(error: unknown): boolean {
   return message.includes('does not match the target chain');
 }
 
+type NormalizedTx = {
+  to: `0x${string}`;
+  data?: `0x${string}`;
+  value?: bigint;
+};
+
 /**
- * Execute transaction via Wagmi
+ * Validate and normalize the entire batch up front so malformed input in any
+ * position fails before we broadcast the first transaction. This prevents
+ * partial execution for deterministic client-side errors.
+ * @internal
+ */
+export function validateBatch(
+  transactions: SendTransactionParams['transactions'],
+): NormalizedTx[] {
+  return transactions.map((tx, i) => {
+    if (!isHexAddress(tx.address)) {
+      throw new Error(
+        `Transaction ${i + 1}: invalid address "${tx.address}". Must be a 0x-prefixed 20-byte hex string.`,
+      );
+    }
+    if (tx.data !== undefined && !isHexString(tx.data)) {
+      throw new Error(
+        `Transaction ${i + 1}: invalid data "${tx.data}". Must be a 0x-prefixed hex string.`,
+      );
+    }
+    let value: bigint | undefined;
+    if (tx.value !== undefined && tx.value !== '') {
+      try {
+        value = BigInt(tx.value);
+      } catch {
+        throw new Error(
+          `Transaction ${i + 1}: invalid value "${tx.value}". Must be a decimal or hex string parseable as BigInt.`,
+        );
+      }
+      if (value < 0n) {
+        throw new Error(
+          `Transaction ${i + 1}: value cannot be negative (got "${tx.value}").`,
+        );
+      }
+    }
+    return {
+      to: tx.address as `0x${string}`,
+      ...(tx.data !== undefined ? { data: tx.data as `0x${string}` } : {}),
+      ...(value !== undefined ? { value } : {}),
+    };
+  });
+}
+
+/**
+ * Execute transaction(s) via Wagmi sequentially.
+ * Each transaction is sent individually and requires wallet confirmation.
+ * Returns the hash of the last transaction.
+ *
+ * Note: Unlike World App, web execution is NOT atomic — if a later transaction
+ * fails, earlier ones are already confirmed and cannot be rolled back.
  */
 export async function wagmiSendTransaction(
   params: SendTransactionParams,
 ): Promise<SendTransactionResult> {
-  console.log('[MiniKit WagmiFallback] sendTransaction:start', {
-    hasWagmiConfig: hasWagmiConfig(),
-    chainId: params.chainId,
-    hasData: Boolean(params.transaction.data),
-  });
+  if (params.transactions.length === 0) {
+    throw new Error('At least one transaction is required');
+  }
+  const normalizedTxs = validateBatch(params.transactions);
   const config = getWagmiConfig();
   if (!config) {
-    console.log('[MiniKit WagmiFallback] sendTransaction:error:no-config');
     throw new Error(
       'Wagmi config not available. Pass wagmiConfig to MiniKitProvider.',
     );
@@ -354,7 +397,7 @@ export async function wagmiSendTransaction(
   const { getChainId, getWalletClient, sendTransaction, switchChain } =
     await loadWagmiActions();
 
-  await ensureConnected(config);
+  const { address, connector } = await ensureConnected(config);
 
   const targetChainId =
     params.chainId ??
@@ -365,10 +408,9 @@ export async function wagmiSendTransaction(
 
     const currentChainId = await getChainId(config);
     if (currentChainId !== targetChainId) {
-      await switchChain(config, { chainId: targetChainId });
+      await switchChain(config, { chainId: targetChainId, connector });
     }
 
-    // Confirm with wallet provider state (not only wagmi store state).
     const walletClient = await getWalletClient(config);
     const providerChainId = walletClient
       ? await walletClient.getChainId()
@@ -383,31 +425,45 @@ export async function wagmiSendTransaction(
 
   await ensureTargetChain();
 
-  let transactionHash: `0x${string}`;
-  try {
-    transactionHash = await sendTransaction(config, {
-      chainId: targetChainId,
-      to: params.transaction.address as `0x${string}`,
-      data: params.transaction.data as `0x${string}` | undefined,
-      value: params.transaction.value
-        ? BigInt(params.transaction.value)
-        : undefined,
-    });
-  } catch (error) {
-    if (targetChainId === undefined || !isChainMismatchError(error)) {
+  const sendWithChainRetry = async (
+    tx: NormalizedTx,
+  ): Promise<`0x${string}`> => {
+    const send = () =>
+      sendTransaction(config, {
+        connector,
+        account: address,
+        chainId: targetChainId,
+        to: tx.to,
+        data: tx.data,
+        value: tx.value,
+      });
+    try {
+      return await send();
+    } catch (error) {
+      if (targetChainId !== undefined && isChainMismatchError(error)) {
+        await ensureTargetChain();
+        return await send();
+      }
       throw error;
     }
+  };
 
-    await ensureTargetChain();
-    transactionHash = await sendTransaction(config, {
-      chainId: targetChainId,
-      to: params.transaction.address as `0x${string}`,
-      data: params.transaction.data as `0x${string}` | undefined,
-      value: params.transaction.value
-        ? BigInt(params.transaction.value)
-        : undefined,
-    });
+  const submitted: `0x${string}`[] = [];
+
+  for (let i = 0; i < normalizedTxs.length; i++) {
+    try {
+      submitted.push(await sendWithChainRetry(normalizedTxs[i]));
+    } catch (error) {
+      if (submitted.length > 0) {
+        throw new PartialExecutionError(
+          `Transaction ${i + 1}/${normalizedTxs.length} failed after ${submitted.length} tx(s) were already submitted. Resolve manually.`,
+          submitted,
+          error,
+        );
+      }
+      throw error;
+    }
   }
 
-  return { transactionHash };
+  return { transactionHash: submitted[submitted.length - 1] };
 }

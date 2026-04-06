@@ -173,7 +173,7 @@ describe('Test SIWE Message Verification', () => {
 
     await expect(
       verifySiweMessage(payload, '814434bded2c412eaa2cc4b266a42027'),
-    ).rejects.toThrow('Signature verification failed');
+    ).rejects.toThrow('Address mismatch');
   });
 
   test('should reject invalid nonces per ERC-4361', async () => {
