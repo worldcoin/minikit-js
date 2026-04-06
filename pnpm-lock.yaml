@@ -32,8 +32,8 @@ importers:
   demo/next-15-template:
     dependencies:
       '@worldcoin/idkit':
-        specifier: 4.0.0-dev.4777311
-        version: 4.0.0-dev.4777311(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        specifier: ^4.0.11
+        version: 4.0.11(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@worldcoin/mini-apps-ui-kit-react':
         specifier: ^1.0.2
         version: 1.0.2(@types/react-dom@19.1.2(@types/react@19.1.1))(@types/react@19.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@4.1.4)
@@ -2489,25 +2489,24 @@ packages:
   '@walletconnect/window-metadata@1.0.1':
     resolution: {integrity: sha512-9koTqyGrM2cqFRW517BPY/iEtUDx2r1+Pwwu5m7sJ7ka79wi3EyqhqcICk/yDmv6jAS1rjKgTKXlEhanYjijcA==}
 
-  '@worldcoin/idkit-core@4.0.1':
-    resolution: {integrity: sha512-ykDuesfSsuERh4T0cShQlrnaBQiHS5qSJtEUiLiehoFln4nIbK93004l2EWjEDK989pbkC6hEy7yA6fPh6tMOQ==}
-    deprecated: This version is deprecated. Please upgrade to >=4.0.6.
-
   '@worldcoin/idkit-core@4.0.15':
     resolution: {integrity: sha512-FlA+cBaioqXx0I2FhKbYhfIgErU70RwupjvYr8cM5GVIxbEkjkA9kwZfmfLa7cYzqWiUVQnMpbOV94eK+7l1aA==}
+
+  '@worldcoin/idkit-core@4.0.16':
+    resolution: {integrity: sha512-slcaXhP+cF/gxWQiV7ncVjXYuyoiIii2xyeweErIeLZpIJWuUpVypSxlW6S5aYHdzi1yCHt0nkIrEKSgIj9HrQ==}
 
   '@worldcoin/idkit-server@1.0.0':
     resolution: {integrity: sha512-ZCyXJFexxLjPtG7lxTntf6oiwF0pzoUIsVFIAAgFyXav5KmUnVlrvVoeGrgpiDFRznH2B4/Iv5xv+SkEHxOdXQ==}
     engines: {node: '>=18'}
 
-  '@worldcoin/idkit@4.0.0-dev.4777311':
-    resolution: {integrity: sha512-ohbB8CIqEXMUpXPwYdKrUbCdkcdeNYSP2KM9bEXYOy6Vz6PJdkK0U9atFd/W7gKINhDytzCsS0N1UA9Bu47oGQ==}
+  '@worldcoin/idkit@4.0.10':
+    resolution: {integrity: sha512-oj2aR65iD82D2B2VZIs2MoX2rdHuApwSSRa12Tu66hKyj5wZfMzcIEgaHXzOU55f9Uk2TO5a1Ns8Ge5QO6EbFQ==}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
 
-  '@worldcoin/idkit@4.0.10':
-    resolution: {integrity: sha512-oj2aR65iD82D2B2VZIs2MoX2rdHuApwSSRa12Tu66hKyj5wZfMzcIEgaHXzOU55f9Uk2TO5a1Ns8Ge5QO6EbFQ==}
+  '@worldcoin/idkit@4.0.11':
+    resolution: {integrity: sha512-oAmjTdCgNX3JVQHz4cZXHRKsDuSlmzcokJPAQ4pL8HWzCYLovT5a/D5MkVW8o95+dpnwgIogvsfjWg/d1LyvWg==}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
@@ -3665,7 +3664,7 @@ packages:
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
-    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+    deprecated: Glob versions prior to v9 are no longer supported
 
   globals@11.12.0:
     resolution: {integrity: sha512-WOBp/EEGUiIsJSp7wcv/y6MO+lV9UoncWqxuFfm8eBwzWNgyfBd6Gz+IeKQ9jCmyhoH99g15M3T+QaVHFjizVA==}
@@ -10119,9 +10118,12 @@ snapshots:
       tslib: 1.14.1
     optional: true
 
-  '@worldcoin/idkit-core@4.0.1': {}
-
   '@worldcoin/idkit-core@4.0.15':
+    dependencies:
+      '@noble/hashes': 1.8.0
+      '@worldcoin/idkit-server': 1.0.0
+
+  '@worldcoin/idkit-core@4.0.16':
     dependencies:
       '@noble/hashes': 1.8.0
       '@worldcoin/idkit-server': 1.0.0
@@ -10131,16 +10133,16 @@ snapshots:
       '@noble/hashes': 1.8.0
       '@noble/secp256k1': 2.3.0
 
-  '@worldcoin/idkit@4.0.0-dev.4777311(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@worldcoin/idkit@4.0.10(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
-      '@worldcoin/idkit-core': 4.0.1
+      '@worldcoin/idkit-core': 4.0.15
       qrcode: 1.5.4
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@worldcoin/idkit@4.0.10(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@worldcoin/idkit@4.0.11(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
-      '@worldcoin/idkit-core': 4.0.15
+      '@worldcoin/idkit-core': 4.0.16
       qrcode: 1.5.4
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
