@@ -99,7 +99,10 @@ export async function executeWithFallback<TNative, TFallback = TNative>(
     } catch (error) {
       // If the adapter already caused on-chain side effects, don't cascade
       // to the custom fallback — re-running could duplicate submitted txs.
-      if (error instanceof PartialExecutionError || (error instanceof Error && error.name === 'PartialExecutionError')) {
+      if (
+        error instanceof PartialExecutionError ||
+        (error instanceof Error && error.name === 'PartialExecutionError')
+      ) {
         throw error;
       }
       console.warn(`Wagmi fallback for ${command} failed:`, error);
