@@ -1,4 +1,7 @@
-import { executeWithFallback } from '../commands/fallback';
+import {
+  executeWithFallback,
+  PartialExecutionError,
+} from '../commands/fallback';
 import * as commandTypes from '../commands/types';
 
 describe('executeWithFallback', () => {
@@ -78,5 +81,31 @@ describe('executeWithFallback', () => {
       executedWith: 'fallback',
       data: 'custom-result',
     });
+  });
+
+  it('does NOT call custom fallback when wagmi throws PartialExecutionError', async () => {
+    const nativeExecutor = jest.fn().mockResolvedValue('native-result');
+    const partialError = new PartialExecutionError(
+      'tx 2 failed',
+      ['0xsubmitted1'],
+      new Error('user rejected'),
+    );
+    const wagmiExecutor = jest.fn().mockRejectedValue(partialError);
+    const customFallback = jest.fn().mockResolvedValue('custom-result');
+
+    jest.spyOn(commandTypes, 'isInWorldApp').mockReturnValue(false);
+    jest.spyOn(commandTypes, 'isCommandAvailable').mockReturnValue(false);
+
+    await expect(
+      executeWithFallback({
+        command: commandTypes.Command.SendTransaction,
+        nativeExecutor,
+        wagmiFallback: wagmiExecutor,
+        customFallback,
+      }),
+    ).rejects.toThrow(PartialExecutionError);
+
+    expect(wagmiExecutor).toHaveBeenCalledTimes(1);
+    expect(customFallback).not.toHaveBeenCalled();
   });
 });

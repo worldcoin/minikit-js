@@ -98,6 +98,16 @@
         "types": "./build/address-book.d.cts",
         "default": "./build/address-book.cjs"
       }
+    },
+    "./wagmi-fallback": {
+      "import": {
+        "types": "./build/wagmi-fallback-register.d.ts",
+        "default": "./build/wagmi-fallback-register.js"
+      },
+      "require": {
+        "types": "./build/wagmi-fallback-register.d.cts",
+        "default": "./build/wagmi-fallback-register.cjs"
+      }
     }
   },
   "files": [

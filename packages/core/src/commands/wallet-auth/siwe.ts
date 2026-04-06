@@ -4,6 +4,7 @@ import {
   getContract,
   hashMessage,
   http,
+  recoverMessageAddress,
 } from 'viem';
 import { worldchain } from 'viem/chains';
 import type {
@@ -257,13 +258,46 @@ export const verifySiweMessageV2 = async (
     throw new Error('Validation failed');
   }
 
+  // Ensure payload address matches the address embedded in the SIWE message
+  if (
+    siweMessageData.address &&
+    siweMessageData.address.toLowerCase() !== (address as string).toLowerCase()
+  ) {
+    throw new Error(
+      'Address mismatch: payload address does not match SIWE message address',
+    );
+  }
+
+  const expectedAddress = (siweMessageData.address ?? address).toLowerCase();
+
+  // Try ECDSA recovery first — pure crypto, no RPC needed.
+  // If the recovered address matches, we know it's a valid EOA signature.
   try {
+    const recoveredAddress = await recoverMessageAddress({
+      message,
+      signature: signature as `0x${string}`,
+    });
+    if (recoveredAddress.toLowerCase() === expectedAddress) {
+      return {
+        isValid: true,
+        siweMessageData: siweMessageData,
+      };
+    }
+  } catch {
+    // ECDSA recovery failed (e.g. invalid signature format for EOA).
+    // Fall through to EIP-1271 contract verification.
+  }
+
+  // ECDSA didn't match — try EIP-1271 for smart contract wallets (Safe).
+  try {
+    const client =
+      userProvider ||
+      createPublicClient({ chain: worldchain, transport: http() });
+
     const walletContract = getContract({
       address: address as `0x${string}`,
       abi: SAFE_CONTRACT_ABI,
-      client:
-        userProvider ||
-        createPublicClient({ chain: worldchain, transport: http() }),
+      client,
     });
     const hashedMessage = hashMessage(message);
     const res = await walletContract.read.isValidSignature([

@@ -7,7 +7,7 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { setWagmiConfig } from './commands/wagmi-fallback';
+import { WAGMI_INSTALL_HOOK_KEY } from './global-keys';
 import { MiniKit } from './minikit';
 
 type MiniKitProps = {
@@ -45,8 +45,15 @@ export const MiniKitProvider = ({
   }, [props?.appId]);
 
   useEffect(() => {
-    if (wagmiConfig) {
-      setWagmiConfig(wagmiConfig);
+    if (!wagmiConfig) return;
+    const install = (globalThis as any)[WAGMI_INSTALL_HOOK_KEY];
+    if (typeof install === 'function') {
+      install(wagmiConfig);
+    } else {
+      console.warn(
+        'MiniKitProvider received wagmiConfig but the wagmi fallback module is not imported. ' +
+          'Add this once in your app: import "@worldcoin/minikit-js/wagmi-fallback"',
+      );
     }
   }, [wagmiConfig]);
 

@@ -20,6 +20,7 @@
  */
 
 import { getAddress } from 'viem';
+import { isHexAddress as isAddressString, isHexString } from './helpers/hex';
 import { MiniKit } from './minikit';
 
 // ---------------------------------------------------------------------------
@@ -71,14 +72,6 @@ export function _clearAddress(): void {
 
 function rpcError(code: number, message: string) {
   return Object.assign(new Error(message), { code });
-}
-
-function isHexString(value: string): boolean {
-  return /^0x[0-9a-fA-F]*$/.test(value);
-}
-
-function isAddressString(value: string): boolean {
-  return /^0x[0-9a-fA-F]{40}$/.test(value);
 }
 
 function decodeHexToUtf8(hex: string): string {
