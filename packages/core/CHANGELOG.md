@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.3
+
+### Patch Changes
+
+- 735c662: improve dapp compatibility siwe eoas, and multicalls
+
 ## 2.0.2
 
 ### Patch Changes
