@@ -3,11 +3,11 @@
 import { MiniKit } from '@worldcoin/minikit-js';
 import { validateCommands } from '@worldcoin/minikit-js/commands';
 import clsx from 'clsx';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const appId = process.env.NEXT_PUBLIC_STAGING_VERIFY_APP_ID;
 
-export const Versions = (): React.JSX.Element => {
+export const Versions = (): JSX.Element => {
   const [username, setUsername] = useState('andy');
   const isValid = () => {
     if (
