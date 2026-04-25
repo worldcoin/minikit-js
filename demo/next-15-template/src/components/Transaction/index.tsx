@@ -3,8 +3,8 @@
 import TestContractABI from '@/abi/TestContract.json';
 import { Button, LiveFeedback } from '@worldcoin/mini-apps-ui-kit-react';
 import { MiniKit } from '@worldcoin/minikit-js';
-import { useUserOperationReceipt } from '@worldcoin/minikit-react';
-import { useState } from 'react';
+import { useWaitForUserOperationReceipt } from '@worldcoin/minikit-react';
+import { useEffect, useState } from 'react';
 import { createPublicClient, encodeFunctionData, http } from 'viem';
 import { worldchain } from 'viem/chains';
 
@@ -26,6 +26,7 @@ export const Transaction = () => {
   const [whichButton, setWhichButton] = useState<'getToken' | 'transferToken'>(
     'getToken',
   );
+  const [userOpHash, setUserOpHash] = useState('');
 
   // Feel free to use your own RPC provider for better performance
   const client = createPublicClient({
@@ -33,7 +34,25 @@ export const Transaction = () => {
     transport: http('https://worldchain-mainnet.g.alchemy.com/public'),
   });
 
-  const { poll, isLoading } = useUserOperationReceipt({ client });
+  const { isLoading, isSuccess, isError } = useWaitForUserOperationReceipt({
+    client,
+    userOpHash,
+  });
+
+  useEffect(() => {
+    if (isSuccess) {
+      console.log('Transaction confirmed!');
+      setButtonState('success');
+      setUserOpHash('');
+      setTimeout(() => setButtonState(undefined), 3000);
+    }
+
+    if (isError) {
+      setButtonState('failed');
+      setUserOpHash('');
+      setTimeout(() => setButtonState(undefined), 3000);
+    }
+  }, [isError, isSuccess]);
 
   // This is a basic transaction call to mint a token
   const onClickGetToken = async () => {
@@ -60,10 +79,11 @@ export const Transaction = () => {
         result.data.userOpHash,
       );
 
-      await poll(result.data.userOpHash);
-      console.log('Transaction confirmed!');
-      setButtonState('success');
-      setTimeout(() => setButtonState(undefined), 3000);
+      if (!result.data.userOpHash) {
+        throw new Error('No userOpHash returned');
+      }
+
+      setUserOpHash(result.data.userOpHash);
     } catch (err) {
       console.error('Error:', err);
       setButtonState('failed');
@@ -99,10 +119,11 @@ export const Transaction = () => {
         result.data.userOpHash,
       );
 
-      await poll(result.data.userOpHash);
-      console.log('Transaction confirmed!');
-      setButtonState('success');
-      setTimeout(() => setButtonState(undefined), 3000);
+      if (!result.data.userOpHash) {
+        throw new Error('No userOpHash returned');
+      }
+
+      setUserOpHash(result.data.userOpHash);
     } catch (err) {
       console.error('Error:', err);
       setButtonState('failed');
