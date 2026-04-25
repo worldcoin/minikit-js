@@ -1,4 +1,4 @@
-import { signRequest } from '@worldcoin/idkit';
+import { signRequest } from '@worldcoin/idkit/signing';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
@@ -15,7 +15,7 @@ export async function POST(req: Request) {
   }
 
   const { action } = await req.json();
-  const sig = signRequest(action, SIGNING_KEY);
+  const sig = signRequest({ action, signingKeyHex: SIGNING_KEY });
 
   return NextResponse.json({
     rp_id: RP_ID,
