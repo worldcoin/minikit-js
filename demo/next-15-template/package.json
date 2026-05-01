@@ -24,7 +24,7 @@
     "react": "^19.0.3",
     "react-dom": "^19.0.3",
     "tailwind-merge": "^3.2.0",
-    "viem": "2.45.3"
+    "viem": "2.48.4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
