@@ -23,7 +23,7 @@
     "next-auth": "^5.0.0-beta.25",
     "permit2-sdk": "link:@uniswap/v3-sdk/permit2-sdk",
     "prettier-plugin-sort-imports-desc": "^1.0.0",
-    "react-dom": "^19.0.3",
+    "react-dom": "^19.2.5",
     "siwe": "^3.0.0",
     "viem": "2.45.3",
     "wagmi": "^3.4.3",
@@ -32,7 +32,7 @@
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^19.1.1",
-    "@types/react-dom": "^19.0.1",
+    "@types/react-dom": "^19.2.3",
     "eslint": "^8",
     "eslint-config-next": "15.2.3",
     "postcss": "^8",
