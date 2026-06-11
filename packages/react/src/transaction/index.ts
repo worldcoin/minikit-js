@@ -10,7 +10,7 @@ export async function fetchTransactionHash(
 ): Promise<TransactionStatus> {
   try {
     const response = await fetch(
-      `https://developer.worldcoin.org/api/v2/minikit/transaction/${transactionId}?app_id=${appConfig.app_id}&type=transaction`,
+      `https://staging-developer.worldcoin.org/api/v2/minikit/transaction/${transactionId}?app_id=${appConfig.app_id}&type=transaction`,
       {
         method: 'GET',
       },
