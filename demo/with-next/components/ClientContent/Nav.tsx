@@ -7,7 +7,7 @@ export const Nav = () => {
 
   return (
     <header className="flex justify-between gap-x-2">
-      <h1 className="text-2xl font-bold">MiniKit V1</h1>
+      <h1 className="text-2xl font-bold">MiniKit V2</h1>
 
       {/* <button
         onClick={user?.name ? () => signOut() : () => signIn('google')}
