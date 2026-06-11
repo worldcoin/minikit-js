@@ -6,14 +6,15 @@ This template is a way for you to quickly get started with authentication and ex
 
 ## Getting Started
 
-1. cp .env.sample .env.local
+1. `cp .env.sample .env.local`
 2. Follow the instructions in the .env.local file
-3. Run `npm run dev`
-4. Run `ngrok http 3000`
-5. Set `AUTH_SECRET` in the `.env.local` file to a secure random value, for example with `openssl rand -base64 32`.
-6. [For Testing] If you're using a proxy like ngrok, update `AUTH_URL` in the `.env.local` file to your ngrok URL.
-7. Continue to developer.worldcoin.org and make sure your app is connected to the right ngrok url
-8. [Optional] For Verify and Send Transaction to work you need to do some more setup in the dev portal. The steps are outlined in the respective component files.
+3. Run `npm install`
+4. Run `npm run dev`
+5. Run `ngrok http 3000`
+6. Set `AUTH_SECRET` in the `.env.local` file to a secure random value, for example with `openssl rand -base64 32`.
+7. [For Testing] If you're using a proxy like ngrok, update `AUTH_URL` in the `.env.local` file to your ngrok URL.
+8. Continue to developer.worldcoin.org and make sure your app is connected to the right ngrok url
+9. [Optional] For Verify and Send Transaction to work you need to do some more setup in the dev portal. The steps are outlined in the respective component files.
 
 ## Authentication
 
