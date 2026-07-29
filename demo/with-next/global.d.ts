@@ -16,6 +16,8 @@ interface Window {
   WorldApp?: {
     world_app_version: number;
     device_os: 'ios' | 'android';
+    client_name?: 'world_app' | 'world_id_app';
+    client_version?: string;
 
     supported_commands: Array<{
       name: import('@worldcoin/minikit-js').Command;
