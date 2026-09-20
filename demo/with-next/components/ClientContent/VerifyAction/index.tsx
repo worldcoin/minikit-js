@@ -1,7 +1,8 @@
 'use client';
 import {
+  CredentialRequest,
   IDKitRequestWidget,
-  deviceLegacy,
+  type CredentialType,
   type IDKitResult,
   type RpContext,
 } from '@worldcoin/idkit';
@@ -9,8 +10,17 @@ import { useMemo, useState } from 'react';
 import { verifyProof } from './verify-cloud-proof';
 import { VerifyOnchainProof } from './verify-onchain';
 
+type IDKitEnvironment = 'production' | 'staging' | 'sandbox';
+
 export const VerifyAction = () => {
-  const isProduction = process.env.NEXT_PUBLIC_ENVIRONMENT === 'production';
+  const [environment, setEnvironment] = useState<IDKitEnvironment>(
+    process.env.NEXT_PUBLIC_ENVIRONMENT === 'production'
+      ? 'production'
+      : 'staging',
+  );
+  const [credential, setCredential] =
+    useState<CredentialType>('proof_of_human');
+  const [requireUserPresence, setRequireUserPresence] = useState(false);
 
   const [sentVerifyPayload, setSentVerifyPayload] = useState<Record<
     string,
@@ -25,6 +35,7 @@ export const VerifyAction = () => {
   const [rpContext, setRpContext] = useState<RpContext | null>(null);
   const [widgetSignal, setWidgetSignal] = useState('test');
 
+  const isProduction = environment === 'production';
   const appId = (
     isProduction
       ? process.env.NEXT_PUBLIC_PROD_VERIFY_APP_ID
@@ -35,11 +46,10 @@ export const VerifyAction = () => {
       ? process.env.NEXT_PUBLIC_PROD_VERIFY_ACTION
       : process.env.NEXT_PUBLIC_STAGING_VERIFY_ACTION
   ) as string;
-  const environment = isProduction ? 'production' : 'staging';
 
-  const preset = useMemo(
-    () => deviceLegacy({ signal: widgetSignal }),
-    [widgetSignal],
+  const constraints = useMemo(
+    () => CredentialRequest(credential, { signal: widgetSignal }),
+    [credential, widgetSignal],
   );
 
   const startVerify = async () => {
@@ -48,6 +58,13 @@ export const VerifyAction = () => {
     setDevPortalVerifyResponse(null);
 
     try {
+      if (!appId || !action) {
+        setStatusMessage(
+          `Missing ${isProduction ? 'production' : 'staging'} app ID or action configuration`,
+        );
+        return;
+      }
+
       const res = await fetch('/api/rp-signature', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -68,14 +85,18 @@ export const VerifyAction = () => {
         expires_at: rpSig.expires_at,
         signature: rpSig.sig,
       };
+      const signal = `test-${Date.now()}`;
 
       setSentVerifyPayload({
         app_id: appId,
         action,
         rp_context: rpCtx,
-        allow_legacy_proofs: true,
+        allow_legacy_proofs: false,
+        require_user_presence: requireUserPresence,
+        environment,
+        constraints: CredentialRequest(credential, { signal }),
       });
-      setWidgetSignal(`test-${Date.now()}`);
+      setWidgetSignal(signal);
       setRpContext(rpCtx);
       setStatusMessage('Opening IDKit widget...');
       setWidgetOpen(true);
@@ -96,6 +117,56 @@ export const VerifyAction = () => {
 
       <div className="grid gap-y-12">
         <div className="grid gap-y-2">
+          <div className="grid gap-y-2 border border-gray-400 p-3">
+            <p className="font-bold">IDKit v4 test options</p>
+            <label className="grid gap-y-1 text-sm">
+              Environment
+              <select
+                className="border border-gray-400 rounded p-2"
+                value={environment}
+                disabled={widgetOpen}
+                onChange={(event) =>
+                  setEnvironment(event.target.value as IDKitEnvironment)
+                }
+              >
+                <option value="production">Production</option>
+                <option value="staging">Staging</option>
+                <option value="sandbox">Sandbox</option>
+              </select>
+            </label>
+            <label className="grid gap-y-1 text-sm">
+              Credential
+              <select
+                className="border border-gray-400 rounded p-2"
+                value={credential}
+                disabled={widgetOpen}
+                onChange={(event) =>
+                  setCredential(event.target.value as CredentialType)
+                }
+              >
+                <option value="proof_of_human">Proof of Human</option>
+                <option value="selfie">Selfie</option>
+                <option value="passport">Passport</option>
+                <option value="mnc">Mobile Network Credential</option>
+              </select>
+            </label>
+            <label className="flex items-center gap-x-2 text-sm">
+              <input
+                type="checkbox"
+                checked={requireUserPresence}
+                disabled={widgetOpen}
+                onChange={(event) =>
+                  setRequireUserPresence(event.target.checked)
+                }
+              />
+              Require user presence
+            </label>
+            {environment === 'sandbox' && (
+              <p className="text-sm text-gray-600">
+                Sandbox uses the staging app ID and action configuration.
+              </p>
+            )}
+          </div>
           <div>
             <p>Sent payload:</p>
 
@@ -110,10 +181,9 @@ export const VerifyAction = () => {
               <button
                 className="bg-black text-white rounded-lg p-4 w-full disabled:opacity-20"
                 onClick={startVerify}
+                disabled={widgetOpen}
               >
-                {isProduction
-                  ? 'Send production verify'
-                  : 'Send staging verify'}
+                Send {environment} verify
               </button>
             </div>
           </div>
@@ -144,13 +214,18 @@ export const VerifyAction = () => {
           app_id={appId}
           action={action}
           rp_context={rpContext}
-          allow_legacy_proofs={true}
-          preset={preset}
+          allow_legacy_proofs={false}
+          require_user_presence={requireUserPresence}
+          constraints={constraints}
           onSuccess={() => {
             setStatusMessage('Verification complete');
           }}
           handleVerify={async (result: IDKitResult) => {
-            const verifyResponse = await verifyProof(result, appId);
+            const verifyResponse = await verifyProof(
+              result,
+              rpContext.rp_id,
+              environment,
+            );
             setDevPortalVerifyResponse(verifyResponse);
             if (verifyResponse?.success) {
               setStatusMessage(
