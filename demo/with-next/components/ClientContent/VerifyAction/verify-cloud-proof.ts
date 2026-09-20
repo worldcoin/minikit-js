@@ -14,20 +14,25 @@ export interface VerifyResponse {
  */
 export const verifyProof = async (
   params: IDKitResult,
-  app_id: string,
+  rpId: string,
+  environment: 'production' | 'staging' | 'sandbox',
 ): Promise<VerifyResponse | null> => {
-  if (!/^app_[a-zA-Z0-9_]+$/.test(app_id)) {
-    throw new Error('Invalid app_id format');
+  if (!/^rp_[a-zA-Z0-9_]+$/.test(rpId)) {
+    throw new Error('Invalid RP ID format');
   }
 
-  const isStaging = process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging';
-  const baseUrl = isStaging
-    ? process.env.NEXT_SERVER_DEV_PORTAL_URL
-    : 'https://developer.worldcoin.org';
+  const baseUrl =
+    environment === 'production'
+      ? 'https://developer.worldcoin.org'
+      : process.env.NEXT_SERVER_DEV_PORTAL_URL;
+
+  if (!baseUrl) {
+    throw new Error('NEXT_SERVER_DEV_PORTAL_URL is not configured');
+  }
 
   try {
     const response = await fetch(
-      `${baseUrl}/api/v4/verify/${encodeURIComponent(app_id)}`,
+      `${baseUrl}/api/v4/verify/${encodeURIComponent(rpId)}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

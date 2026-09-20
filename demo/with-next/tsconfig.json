@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "types": ["node", "next"],
+    "types": ["node"],
     "moduleResolution": "bundler",
     "module": "ESNext",
     "typeRoots": ["node_modules/@types"],
