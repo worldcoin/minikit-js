@@ -168,11 +168,6 @@ export const VerifyAction = () => {
               />
               Require user presence
             </label>
-            <p className="text-sm text-gray-600">
-              Each test uses a fresh signed action, so the same World ID can run
-              it repeatedly. Do not use this pattern for a one-per-action
-              production flow.
-            </p>
             {environment === 'sandbox' && (
               <p className="text-sm text-gray-600">
                 Sandbox uses the staging app ID and action configuration.
