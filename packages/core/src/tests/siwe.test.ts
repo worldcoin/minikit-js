@@ -2,6 +2,7 @@ import { MiniAppWalletAuthSuccessPayload } from 'commands/wallet-auth';
 import { JsonRpcProvider } from 'ethers';
 import { SiweMessage } from 'siwe';
 import { createPublicClient, http } from 'viem';
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { worldchain } from 'viem/chains';
 import {
   parseSiweMessage,
@@ -194,5 +195,54 @@ describe('Test SIWE Message Verification', () => {
     ).rejects.toThrow(
       'Invalid nonce: must be alphanumeric only (per ERC-4361)',
     );
+  });
+
+  test.each([undefined, null, '', 12345678])(
+    'rejects invalid expected nonce %s',
+    async (nonce) => {
+      await expect(
+        verifySiweMessage(
+          {
+            status: 'success',
+            message: signedMessagePayload,
+            signature,
+            address: '0x619525ED4E862B62cFEDACCc4dA5a9864D6f4A97',
+            version: 2,
+          },
+          nonce as string,
+        ),
+      ).rejects.toThrow('Invalid nonce');
+    },
+  );
+
+  test('rejects an expected nonce that differs from the signed message', async () => {
+    await expect(
+      verifySiweMessage(
+        {
+          status: 'success',
+          message: signedMessagePayload,
+          signature,
+          address: '0x619525ED4E862B62cFEDACCc4dA5a9864D6f4A97',
+          version: 2,
+        },
+        '87654321',
+      ),
+    ).rejects.toThrow('Nonce mismatch');
+  });
+
+  test('accepts a matching nonce with a locally signed message', async () => {
+    const account = privateKeyToAccount(generatePrivateKey());
+    const message = signatureSiweMessage().replace(
+      '0xd809de3086ea4f53ed3979cead25e1ff72b564a3',
+      account.address,
+    );
+    const signature = await account.signMessage({ message });
+
+    await expect(
+      verifySiweMessage(
+        { message, signature, address: account.address },
+        '814434bded2c412eaa2cc4b266a42027',
+      ),
+    ).resolves.toMatchObject({ isValid: true });
   });
 });

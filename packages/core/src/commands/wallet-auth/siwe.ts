@@ -215,7 +215,7 @@ const validateMessage = (
     }
   }
 
-  if (nonce && siweMessageData.nonce !== nonce) {
+  if (siweMessageData.nonce !== nonce) {
     throw new Error(
       `Nonce mismatch. Got: ${siweMessageData.nonce}, Expected: ${nonce}`,
     );
@@ -248,7 +248,7 @@ export const verifySiweMessageV2 = async (
   }
 
   const NONCE_REGEX = /^[a-zA-Z0-9]+$/;
-  if (!NONCE_REGEX.test(nonce)) {
+  if (typeof nonce !== 'string' || !NONCE_REGEX.test(nonce)) {
     throw new Error('Invalid nonce: must be alphanumeric only (per ERC-4361)');
   }
 
