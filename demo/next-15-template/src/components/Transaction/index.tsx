@@ -8,6 +8,11 @@ import { useEffect, useState } from 'react';
 import { createPublicClient, encodeFunctionData, http } from 'viem';
 import { worldchain } from 'viem/chains';
 
+const client = createPublicClient({
+  chain: worldchain,
+  transport: http('https://worldchain-mainnet.g.alchemy.com/public'),
+});
+
 /**
  * This component is used to get a token from a contract
  * For this to work you need to add the contract address to contract entrypoints
@@ -27,12 +32,6 @@ export const Transaction = () => {
     'getToken',
   );
   const [userOpHash, setUserOpHash] = useState('');
-
-  // Feel free to use your own RPC provider for better performance
-  const client = createPublicClient({
-    chain: worldchain,
-    transport: http('https://worldchain-mainnet.g.alchemy.com/public'),
-  });
 
   const { isLoading, isSuccess, isError } = useWaitForUserOperationReceipt({
     client,
