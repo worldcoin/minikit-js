@@ -12,6 +12,8 @@ function makeWorldApp(
   return {
     world_app_version: 4001000,
     device_os: 'ios',
+    client_name: 'world_app',
+    client_version: '4.0.1',
     is_optional_analytics: true,
     supported_commands: [
       { name: 'verify' as any, supported_versions: [1] },
@@ -77,6 +79,8 @@ describe('MiniKit.install – initFromWorldApp mapping', () => {
 
     expect(MiniKit.deviceProperties.worldAppVersion).toBe(4001000);
     expect(MiniKit.deviceProperties.deviceOS).toBe('ios');
+    expect(MiniKit.deviceProperties.clientName).toBe('world_app');
+    expect(MiniKit.deviceProperties.clientVersion).toBe('4.0.1');
     expect(MiniKit.deviceProperties.safeAreaInsets).toEqual({
       top: 47,
       right: 0,
@@ -113,6 +117,33 @@ describe('MiniKit.install – initFromWorldApp mapping', () => {
     expect(MiniKit.user.preferredCurrency).toBeUndefined();
     expect(MiniKit.user.pendingNotifications).toBeUndefined();
     expect(MiniKit.location).toBeNull();
+  });
+
+  it('leaves client identity undefined on legacy hosts that omit it', () => {
+    (global as any).window.WorldApp = makeWorldApp({
+      client_name: undefined,
+      client_version: undefined,
+    });
+
+    const result = MiniKit.install('app_test');
+    expect(result.success).toBe(true);
+
+    expect(MiniKit.deviceProperties.clientName).toBeUndefined();
+    expect(MiniKit.deviceProperties.clientVersion).toBeUndefined();
+    // world_app_version stays available as the fallback signal.
+    expect(MiniKit.deviceProperties.worldAppVersion).toBe(4001000);
+  });
+
+  it('maps World ID app client identity', () => {
+    (global as any).window.WorldApp = makeWorldApp({
+      client_name: 'world_id_app',
+      client_version: '1.4.0',
+    });
+
+    MiniKit.install('app_test');
+
+    expect(MiniKit.deviceProperties.clientName).toBe('world_id_app');
+    expect(MiniKit.deviceProperties.clientVersion).toBe('1.4.0');
   });
 
   it('re-install clears stale user state from previous install', () => {

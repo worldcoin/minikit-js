@@ -572,6 +572,9 @@ export class MiniKit {
     this._deviceProperties.safeAreaInsets = worldApp.safe_area_insets;
     this._deviceProperties.deviceOS = worldApp.device_os;
     this._deviceProperties.worldAppVersion = worldApp.world_app_version;
+    // Optional on older hosts; left undefined when the host does not emit them.
+    this._deviceProperties.clientName = worldApp.client_name;
+    this._deviceProperties.clientVersion = worldApp.client_version;
 
     // Set launch location
     this._location = mapWorldAppLaunchLocation(worldApp.location);
