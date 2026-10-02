@@ -15,7 +15,7 @@ type SendHapticFeedbackParams =
     }
   | {
       hapticsType: 'impact';
-      style: 'light' | 'medium' | 'heavy';
+      style: 'light' | 'medium' | 'heavy' | 'soft' | 'rigid';
     };
 
 /** @deprecated Use {@link MiniKitSendHapticFeedbackOptions} instead */
