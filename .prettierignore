@@ -5,6 +5,7 @@ pnpm-lock.yaml
 node_modules/**
 .vscode/**
 **/.next/**
+**/next-env.d.ts
 **/.turbo/**
 packages/core/package.json 
 .github/**
