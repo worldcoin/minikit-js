@@ -34,6 +34,7 @@ export const VerifyAction = () => {
   const [widgetOpen, setWidgetOpen] = useState(false);
   const [rpContext, setRpContext] = useState<RpContext | null>(null);
   const [widgetSignal, setWidgetSignal] = useState('test');
+  const [widgetAction, setWidgetAction] = useState<string | null>(null);
 
   const isProduction = environment === 'production';
   const appId = (
@@ -65,10 +66,15 @@ export const VerifyAction = () => {
         return;
       }
 
+      // v4 nullifiers are one-time use for each RP and action. This is a
+      // repeatable demo test, so each attempt intentionally gets its own
+      // action instead of weakening a real one-per-action flow.
+      const requestAction = `${action}-test-${crypto.randomUUID()}`;
+
       const res = await fetch('/api/rp-signature', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({ action: requestAction }),
       });
 
       if (!res.ok) {
@@ -89,7 +95,7 @@ export const VerifyAction = () => {
 
       setSentVerifyPayload({
         app_id: appId,
-        action,
+        action: requestAction,
         rp_context: rpCtx,
         allow_legacy_proofs: false,
         require_user_presence: requireUserPresence,
@@ -97,6 +103,7 @@ export const VerifyAction = () => {
         constraints: CredentialRequest(credential, { signal }),
       });
       setWidgetSignal(signal);
+      setWidgetAction(requestAction);
       setRpContext(rpCtx);
       setStatusMessage('Opening IDKit widget...');
       setWidgetOpen(true);
@@ -207,12 +214,12 @@ export const VerifyAction = () => {
         </div>
       </div>
 
-      {rpContext && (
+      {rpContext && widgetAction && (
         <IDKitRequestWidget
           open={widgetOpen}
           onOpenChange={setWidgetOpen}
           app_id={appId}
-          action={action}
+          action={widgetAction}
           rp_context={rpContext}
           allow_legacy_proofs={false}
           require_user_presence={requireUserPresence}
