@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.4
+
+### Patch Changes
+
+- 5b2b03b: Reject missing or invalid expected SIWE nonces before verifying wallet signatures.
+
 ## 2.0.3
 
 ### Patch Changes
