@@ -130,6 +130,8 @@ export enum SendTransactionErrorCodes {
   DailyTxLimitReached = 'daily_tx_limit_reached',
   PermittedAmountExceedsSlippage = 'permitted_amount_exceeds_slippage',
   PermittedAmountNotFound = 'permitted_amount_not_found',
+  UserInsufficientFundsForPaymaster = 'user_insufficient_funds_for_paymaster',
+  PaymasterApprovalRequired = 'paymaster_approval_required',
 }
 
 export const SendTransactionErrorMessage: Record<
@@ -160,6 +162,10 @@ export const SendTransactionErrorMessage: Record<
     'Permitted amount exceeds slippage. You must spend at least 90% of the permitted amount.',
   [SendTransactionErrorCodes.PermittedAmountNotFound]:
     'Permitted amount not found in permit2 payload.',
+  [SendTransactionErrorCodes.UserInsufficientFundsForPaymaster]:
+    'User has insufficient funds to cover the paymaster fee.',
+  [SendTransactionErrorCodes.PaymasterApprovalRequired]:
+    'The wallet has not approved the paymaster to charge the network fee. Please try again later.',
 };
 
 /** @deprecated sendTransaction v1 success payload */
