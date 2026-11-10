@@ -31,6 +31,10 @@ export type DeviceProperties = {
   };
   deviceOS?: string;
   worldAppVersion?: number;
+  // Explicit host identity. Prefer these over worldAppVersion when present;
+  // they are absent on older hosts that only emit world_app_version.
+  clientName?: 'world_app' | 'world_id_app';
+  clientVersion?: string;
 };
 
 export type UserNameService = {

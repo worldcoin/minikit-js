@@ -17,6 +17,12 @@ interface Window {
   WorldApp?: {
     world_app_version: number;
     device_os: 'ios' | 'android';
+    // Explicit client identity so mini apps / MiniKit can branch on which app is
+    // hosting them instead of overloading world_app_version. Optional for
+    // backward-compat: older hosts omit these, callers must fall back to
+    // world_app_version. See UGROWTH-1032.
+    client_name?: 'world_app' | 'world_id_app';
+    client_version?: string;
     is_optional_analytics: boolean;
     supported_commands: Array<{
       name: import('./commands/types').Command;
